@@ -166,6 +166,33 @@
     .scoreboard-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
     .scoreboard-heading h3 { margin: 0; color: var(--signal); font: 1.4rem var(--data); }
     .scoreboard-heading p { margin: 3px 0 10px; color: var(--muted); }
+    .nba-data-page { display: grid; gap: 12px; }
+    .nba-data-back { width: fit-content; font-weight: 700; }
+    .nba-data-content { min-width: 0; overflow-x: auto; }
+    .nba-data-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .nba-data-table th, .nba-data-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    .nba-data-table th { color: var(--muted); font-size: .76rem; letter-spacing: .06em; text-transform: uppercase; }
+    .nba-data-table td:not(:first-child) { font-family: var(--data); }
+    .nba-data-team { display: flex; align-items: center; gap: 9px; font-family: var(--body) !important; font-weight: 700; }
+    .nba-data-team img, .nba-leader-player img { width: 28px; height: 28px; object-fit: contain; }
+    .nba-leaders-table { width: max-content; min-width: 100%; font-size: .78rem; }
+    .nba-leaders-table th { position: sticky; top: 0; z-index: 1; padding: 0; background: var(--screen); }
+    .nba-leaders-table th button { display: block; width: 100%; padding: 6px 7px; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 700; cursor: pointer; }
+    .nba-leaders-table th button:hover { color: var(--signal); }
+    .nba-leaders-table th[aria-sort="ascending"], .nba-leaders-table th[aria-sort="descending"],
+    .nba-leaders-table td.sorted-column { background: color-mix(in srgb, var(--signal) 13%, var(--panel)); }
+    .nba-leaders-table th[aria-sort="descending"] button::after { content: "⌄"; margin-left: 4px; }
+    .nba-leaders-table th[aria-sort="ascending"] button::after { content: "⌃"; margin-left: 4px; }
+    .nba-leaders-table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--muted) 6%, transparent); }
+    .nba-leaders-table tbody tr:hover { background: var(--panel-hover); }
+    .nba-leaders-table td { padding: 5px 7px; text-align: right; }
+    .nba-leaders-table td.nba-leader-name-cell { text-align: left; font-family: var(--body) !important; }
+    .nba-leaders-table .nba-leader-player { display: flex; align-items: center; gap: 5px; font-size: .78rem; font-weight: 500; }
+    .nba-leaders-table .nba-leader-player img { width: 18px; height: 18px; object-fit: contain; }
+    .nba-leaders-table .nba-leader-player small { color: var(--muted); font-size: .72rem; }
+    .nba-leader-player small { color: var(--muted); font-size: .72rem; }
+    .nba-data-state { margin: 0; padding: 14px; color: var(--muted); background: var(--panel); }
+    .nba-data-state.error { color: #ffaaa0; }
     .score-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-bottom: 10px; }
     .score-controls .field { flex: 0 1 190px; }
     .score-controls button { min-width: 42px; }
@@ -637,12 +664,8 @@
     .game-tab-panel > h3 { margin: 0 0 10px; font-size: .78rem; }
     .game-tab-panel .game-card { cursor: default; }
     .game-highlights { display: grid; justify-items: start; gap: 8px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--header-surface); }
+    .game-highlights-actions { display: flex; flex-wrap: wrap; gap: 7px; }
     .game-highlights p { margin: 0; color: var(--muted); font-size: .8rem; }
-    .game-highlights a { display: inline-flex; min-height: 36px; align-items: center; padding: 7px 11px; border: 1px solid var(--signal); border-radius: 6px; background: var(--signal); color: var(--signal-ink); font-size: .8rem; font-weight: 700; text-decoration: none; }
-    .game-highlights a:hover { filter: brightness(1.08); }
-    .game-highlights-form { display: grid; width: min(100%, 560px); grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; }
-    .game-highlights-form .field { min-width: 0; }
-    .game-highlights-form .field input { width: 100%; }
     .game-highlights-status { min-height: 1.4em; }
     .game-highlights-status.error { color: #e58b84; }
     .game-highlights-results { display: grid; width: 100%; gap: 10px; }
@@ -654,7 +677,6 @@
     .game-highlight-result img { width: 100%; aspect-ratio: 16 / 9; border-radius: 4px; object-fit: cover; background: #000; }
     .game-highlight-result strong { font-size: .76rem; line-height: 1.35; }
     .game-highlight-result small { color: var(--muted); font-size: .68rem; }
-    @media (max-width: 480px) { .game-highlights-form { grid-template-columns: 1fr; } }
     .boxscore-team { margin-top: 12px; }
     .boxscore-team h4 { font-size: .8rem; }
     .boxscore-scroll, .plays-scroll { overflow: auto; }
@@ -667,6 +689,18 @@
     .channel-planner .entry-form { margin: 12px 0; padding: 0; border: 0; box-shadow: none; }
     .clock-tools { display: flex; align-items: center; gap: 18px; }
     .appearance-controls { display: flex; align-items: center; gap: 12px; }
+    .youtube-key-settings { position: relative; color: var(--muted); font-size: .68rem; }
+    .youtube-key-settings summary { padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; list-style: none; white-space: nowrap; }
+    .youtube-key-settings summary::-webkit-details-marker { display: none; }
+    .youtube-key-settings summary::before { content: "▶"; margin-right: 6px; font-size: .6rem; }
+    .youtube-key-settings[open] summary::before { content: "▼"; }
+    .youtube-key-panel { position: absolute; z-index: 20; top: calc(100% + 7px); right: 0; display: grid; width: min(340px, calc(100vw - 28px)); gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: 0 8px 24px rgb(0 0 0 / 22%); }
+    .youtube-key-panel p { margin: 0; color: var(--muted); font-size: .7rem; }
+    .youtube-key-panel .field input { width: 100%; }
+    .youtube-key-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .youtube-key-actions button { min-height: 31px; padding: 5px 8px; font-size: .7rem; }
+    .youtube-key-status { min-height: 1.2em; }
+    .youtube-key-status.error { color: #e58b84; }
     .accent-control { display: grid; justify-items: center; gap: 2px; color: var(--muted); font-size: .6rem; line-height: 1.1; }
     .accent-control input[type="color"] { width: 30px; min-height: 30px; height: 30px; padding: 2px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); cursor: pointer; }
     .accent-control input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
@@ -800,6 +834,21 @@
               <input id="accent-color" type="color" value="#7396ff" aria-label="Choose accent color">
               <span>ACCENT</span>
             </label>
+          <details id="youtube-key-settings" class="youtube-key-settings">
+            <summary>YouTube</summary>
+            <form class="youtube-key-panel">
+              <label class="field" for="youtube-api-key">YouTube Data API key
+                <input id="youtube-api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste API key">
+              </label>
+              <p>This browser-only setting isn’t synced. The key is visible to site visitors in browser requests; restrict it to YouTube Data API v3 and your site’s referrer. To keep it secret, the app needs a server-side proxy.</p>
+              <div class="youtube-key-actions">
+                <button type="submit">Save key</button>
+                <button class="secondary" type="button" data-youtube-key-action="remove">Remove key</button>
+                <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer">Get an API key</a>
+              </div>
+              <p class="youtube-key-status" role="status" aria-live="polite"></p>
+            </form>
+          </details>
           <div class="theme-control">
             <span>Dark</span>
             <button id="theme-switch" class="theme-switch" type="button" role="switch" aria-checked="true" aria-label="Dark mode"></button>
@@ -832,7 +881,7 @@
   <script>
     "use strict";
     const channels = [
-      { id: "sports", number: "02", name: "Sports", description: "Follow your teams, save the games you’re looking forward to, and keep the final scores close.", labels: ["Following", "Coming up", "Final score"], hints: ["Team or game", "Match day, notes"], links: ["ESPN", "Sofascore"] },
+      { id: "sports", number: "02", name: "Sports", description: "Follow your teams, save the games you’re looking forward to, and keep the final scores close.", labels: ["Following", "Coming up", "Final score"], hints: ["Team or game", "Match day, notes"], links: ["Standings", "League Leaders"] },
       { id: "betting", number: "03", name: "Betting", description: "Record paper picks and review performance as results are settled.", labels: ["Open bets", "To review", "Settled"], hints: ["Pick or event", "Optional notes"], links: ["Action Network", "OddsShark"] },
       { id: "hiphop", number: "04", name: "Hip-Hop", description: "Your current rotation, the releases on deck, and the tracks you keep coming back to.", labels: ["On repeat", "In the queue", "Played out"], hints: ["Artist, album, or song", "Favorite track, notes"], links: ["Genius", "HotNewHipHop"] },
       { id: "kpop", number: "05", name: "K-Pop", description: "Keep up with your current rotation, upcoming comebacks, and favorite releases.", labels: ["On repeat", "Coming soon", "Played out"], hints: ["Group, album, or song", "Comeback date, notes"], links: ["Soompi", "allkpop"] },
@@ -903,11 +952,16 @@
     const accentPicker = document.getElementById("accent-color");
     const presetPicker = document.getElementById("color-preset");
     const themeSwitch = document.getElementById("theme-switch");
+    const youtubeKeySettings = document.getElementById("youtube-key-settings");
+    const youtubeKeyForm = youtubeKeySettings.querySelector("form");
+    const youtubeKeyInput = document.getElementById("youtube-api-key");
+    const youtubeKeyStatus = youtubeKeySettings.querySelector(".youtube-key-status");
     let selectedNbaDate = localDateValue(new Date());
     let selectedNbaGameId = null;
     let selectedNbaGameState = null;
     const youtubeApiKeyStorageKey = "seven-channels.youtube-api-key.v1";
     let youtubeSearchController;
+    let searchSelectedGameHighlights = null;
     let betGamesRequestId = 0;
     let betGamesController;
     let betImportRows = [];
@@ -920,6 +974,8 @@
     let playerProfileController;
     let nbaRequestId = 0;
     let nbaController;
+    let nbaDataRequestId = 0;
+    let nbaDataController;
     let gameCenterRequestId = 0;
     let gameCenterController;
     let musicBrainzSearchId = 0;
@@ -1094,6 +1150,40 @@
     }
 
     applyAppearance();
+    youtubeKeyInput.value = localStorage.getItem(youtubeApiKeyStorageKey) || "";
+    youtubeKeyForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const apiKey = youtubeKeyInput.value.trim();
+      if (!apiKey) {
+        youtubeKeyStatus.textContent = "Enter an API key before saving.";
+        youtubeKeyStatus.classList.add("error");
+        return;
+      }
+      try {
+        localStorage.setItem(youtubeApiKeyStorageKey, apiKey);
+        youtubeKeyStatus.classList.remove("error");
+        youtubeKeyStatus.textContent = "API key saved in this browser.";
+        searchSelectedGameHighlights?.();
+      } catch (error) {
+        console.error("Could not save YouTube API key.", error);
+        youtubeKeyStatus.classList.add("error");
+        youtubeKeyStatus.textContent = "Could not save the key in this browser. Check storage settings.";
+      }
+    });
+    youtubeKeySettings.querySelector('[data-youtube-key-action="remove"]').addEventListener("click", () => {
+      try {
+        localStorage.removeItem(youtubeApiKeyStorageKey);
+        youtubeKeyInput.value = "";
+        youtubeKeyStatus.classList.remove("error");
+        youtubeKeyStatus.textContent = "API key removed from this browser.";
+        youtubeSearchController?.abort();
+        youtubeKeySettings.open = false;
+      } catch (error) {
+        console.error("Could not remove YouTube API key.", error);
+        youtubeKeyStatus.classList.add("error");
+        youtubeKeyStatus.textContent = "Could not remove the key from this browser.";
+      }
+    });
     mainPicker.addEventListener("input", () => {
       appearance.main = mainPicker.value;
       if (appearance.theme === "dark") appearance.mainDark = appearance.main;
@@ -1155,7 +1245,10 @@
 
       function selectPanel(panelId) {
         const panel = panels.find((item) => item.id === panelId) || panels[0];
-        if (selectedNbaTabId === "highlights" && panel.id !== "highlights") youtubeSearchController?.abort();
+        if (selectedNbaTabId === "highlights" && panel.id !== "highlights") {
+          youtubeSearchController?.abort();
+          searchSelectedGameHighlights = null;
+        }
         selectedNbaTabId = panel.id;
         for (const tab of tabs.querySelectorAll('[role="tab"]')) {
           const selected = tab.id === `tab-${panel.id}`;
@@ -1210,35 +1303,26 @@
         : gameDate.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
       const card = element("div", "game-highlights");
       const description = element("p", "", `Search YouTube for ${awayName} vs ${homeName}${dateLabel ? ` on ${dateLabel}` : ""}.`);
-      const form = document.createElement("form");
-      form.className = "game-highlights-form";
-      const keyField = element("label", "field");
-      keyField.append(document.createTextNode("YouTube Data API key"));
-      const keyInput = document.createElement("input");
-      keyInput.type = "password";
-      keyInput.autocomplete = "off";
-      keyInput.spellcheck = false;
-      keyInput.placeholder = "Paste your API key";
-      keyInput.required = true;
-      keyInput.value = localStorage.getItem(youtubeApiKeyStorageKey) || "";
-      keyInput.setAttribute("aria-label", "YouTube Data API key");
-      keyField.append(keyInput);
-      const searchButton = element("button", "", keyInput.value ? "Find videos" : "Save key & search");
-      searchButton.type = "submit";
-      form.append(keyField, searchButton);
-      const setupLink = element("a", "", "How to get an API key");
-      setupLink.href = "https://console.cloud.google.com/apis/credentials";
-      setupLink.target = "_blank";
-      setupLink.rel = "noopener noreferrer";
-      const keyNote = element("p", "", "The key is saved only in this browser and is not synced. Restrict it in Google Cloud to YouTube Data API v3 and your site’s HTTP referrer; browser keys are visible to visitors. YouTube search may not have a full-game video for every matchup.");
-      const status = element("p", "game-highlights-status", keyInput.value
-        ? "Enter your key and search to find videos for this game."
-        : "Add a restricted API key to search and play embeddable YouTube videos here.");
+      const actions = element("div", "game-highlights-actions");
+      const manageKey = element("button", "secondary", "YouTube key settings");
+      manageKey.type = "button";
+      manageKey.addEventListener("click", () => {
+        youtubeKeySettings.open = true;
+        youtubeKeyInput.focus();
+        youtubeKeySettings.scrollIntoView({ block: "nearest" });
+      });
+      const searchButton = element("button", "", "Search again");
+      searchButton.type = "button";
+      searchButton.hidden = !localStorage.getItem(youtubeApiKeyStorageKey);
+      actions.append(manageKey, searchButton);
+      const status = element("p", "game-highlights-status", localStorage.getItem(youtubeApiKeyStorageKey)
+        ? "Searching YouTube for this game…"
+        : "Add your YouTube API key in the YouTube settings at the top of the page.");
       status.setAttribute("role", "status");
       status.setAttribute("aria-live", "polite");
       const results = element("div", "game-highlights-results");
       results.hidden = true;
-      card.append(description, form, setupLink, keyNote, status, results);
+      card.append(description, actions, status, results);
 
       function showVideo(video) {
         results.replaceChildren();
@@ -1270,14 +1354,13 @@
         results.append(player, list);
       }
 
-      form.addEventListener("submit", async (submitEvent) => {
-        submitEvent.preventDefault();
-        const apiKey = keyInput.value.trim();
-        if (!apiKey) return;
+      async function searchVideos() {
+        const apiKey = localStorage.getItem(youtubeApiKeyStorageKey)?.trim();
+        if (!apiKey || !panel.isConnected) return;
+        searchButton.hidden = false;
         youtubeSearchController?.abort();
         youtubeSearchController = new AbortController();
         const controller = youtubeSearchController;
-        localStorage.setItem(youtubeApiKeyStorageKey, apiKey);
         status.classList.remove("error");
         status.textContent = "Searching YouTube for embeddable game videos…";
         searchButton.disabled = true;
@@ -1332,11 +1415,12 @@
         } finally {
           if (youtubeSearchController === controller) searchButton.disabled = false;
         }
-      });
-
-      if (keyInput.value) {
+      }
+      searchButton.addEventListener("click", searchVideos);
+      searchSelectedGameHighlights = searchVideos;
+      if (localStorage.getItem(youtubeApiKeyStorageKey)) {
         queueMicrotask(() => {
-          if (panel.isConnected) form.requestSubmit();
+          if (panel.isConnected) searchVideos();
         });
       }
       panel.append(card);
@@ -2379,6 +2463,317 @@
       return section;
     }
 
+    function nbaSeasonApiYear() {
+      const now = new Date();
+      return now.getMonth() >= 9 ? now.getFullYear() + 1 : now.getFullYear();
+    }
+
+    function createNbaDataState(content, message, state = "loading", retry = null) {
+      const container = element("div", `nba-data-state${state === "error" ? " error" : ""}`, message);
+      container.setAttribute("role", state === "error" ? "alert" : "status");
+      if (retry) {
+        const button = element("button", "secondary", "Try again");
+        button.type = "button";
+        button.addEventListener("click", retry);
+        container.append(document.createElement("br"), button);
+      }
+      content.replaceChildren(container);
+    }
+
+    function createNbaDataPage(page) {
+      const isStandings = page === "sports-standings";
+      const section = element("section", "scoreboard nba-data-page");
+      const heading = element("div", "scoreboard-heading");
+      heading.append(element("h3", "", isStandings ? "NBA STANDINGS" : "NBA LEAGUE LEADERS"));
+      const status = element("p", "score-status", "Loading NBA data…");
+      status.setAttribute("role", "status");
+      status.setAttribute("aria-live", "polite");
+      const back = element("a", "nba-data-back", "← Back to NBA Scores");
+      back.href = "#sports";
+      const content = element("div", "nba-data-content");
+      content.setAttribute("aria-busy", "true");
+      section.append(heading, back, status, content);
+      if (isStandings) loadNbaStandings(content, status);
+      else loadNbaLeaders(content, status);
+      return section;
+    }
+
+    async function loadNbaStandings(content, status) {
+      const requestId = ++nbaDataRequestId;
+      nbaDataController?.abort();
+      nbaDataController = new AbortController();
+      const { signal } = nbaDataController;
+      content.setAttribute("aria-busy", "true");
+      status.classList.remove("error");
+      status.textContent = "Loading NBA standings…";
+      createNbaDataState(content, "Loading conference standings…");
+      try {
+        const response = await fetch("https://site.api.espn.com/apis/v2/sports/basketball/nba/standings", { signal });
+        if (!response.ok) throw new Error(`NBA standings request failed (${response.status}).`);
+        const data = await response.json();
+        if (!Array.isArray(data.children)) throw new TypeError("NBA standings response was incomplete.");
+        const conferences = data.children.filter((conference) =>
+          Array.isArray(conference.standings?.entries) && conference.standings.entries.length
+        );
+        if (!conferences.length) throw new TypeError("NBA standings response contained no teams.");
+        const fragment = document.createDocumentFragment();
+        for (const conference of conferences) {
+          const group = element("section", "nba-standings-group");
+          group.append(element("h4", "", conference.name));
+          const table = element("table", "nba-data-table");
+          const head = document.createElement("thead");
+          const headerRow = document.createElement("tr");
+          for (const label of ["Team", "W", "L", "PCT", "GB"]) {
+            const cell = element("th", "", label);
+            cell.scope = "col";
+            headerRow.append(cell);
+          }
+          head.append(headerRow);
+          const body = document.createElement("tbody");
+          const orderedEntries = [...conference.standings.entries].sort((left, right) => {
+            const statValue = (entry, name) => Number(entry.stats?.find((stat) => stat.name === name)?.value) || 0;
+            return statValue(right, "winPercent") - statValue(left, "winPercent") ||
+              statValue(right, "wins") - statValue(left, "wins") ||
+              statValue(right, "pointDifferential") - statValue(left, "pointDifferential") ||
+              (left.team?.displayName || "").localeCompare(right.team?.displayName || "");
+          });
+          for (const [index, entry] of orderedEntries.entries()) {
+            const stats = new Map((entry.stats || []).map((stat) => [stat.name, stat.displayValue]));
+            const row = document.createElement("tr");
+            const teamCell = document.createElement("td");
+            const team = element("span", "nba-data-team");
+            const logo = document.createElement("img");
+            const logoUrl = entry.team?.logos?.[0]?.href;
+            if (logoUrl) {
+              logo.src = logoUrl;
+              logo.alt = "";
+              logo.loading = "lazy";
+              logo.addEventListener("error", () => logo.remove(), { once: true });
+              team.append(logo);
+            }
+            team.append(element("span", "", entry.team?.displayName || entry.team?.name || "Unknown team"));
+            teamCell.append(team);
+            const cells = [
+              teamCell,
+              element("td", "", stats.get("wins") || "—"),
+              element("td", "", stats.get("losses") || "—"),
+              element("td", "", stats.get("winPercent") || "—"),
+              element("td", "", stats.get("gamesBehind") || "—")
+            ];
+            for (const cell of cells) row.append(cell);
+            body.append(row);
+          }
+          table.append(head, body);
+          group.append(table);
+          fragment.append(group);
+        }
+        if (requestId !== nbaDataRequestId) return;
+        content.replaceChildren(fragment);
+        status.textContent = `${conferences.length} conferences · Updated just now`;
+        content.setAttribute("aria-busy", "false");
+      } catch (error) {
+        if (error.name === "AbortError" || requestId !== nbaDataRequestId) return;
+        console.error("Could not load NBA standings.", error);
+        status.classList.add("error");
+        status.textContent = "Couldn’t load NBA standings.";
+        createNbaDataState(content, "Check your connection and try again.", "error", () => loadNbaStandings(content, status));
+        content.setAttribute("aria-busy", "false");
+      }
+    }
+
+    async function loadNbaLeaders(content, status) {
+      const season = nbaSeasonApiYear();
+      const requestId = ++nbaDataRequestId;
+      nbaDataController?.abort();
+      nbaDataController = new AbortController();
+      const { signal } = nbaDataController;
+      content.setAttribute("aria-busy", "true");
+      status.classList.remove("error");
+      status.textContent = "Loading NBA league leaders…";
+      createNbaDataState(content, "Loading player stats…");
+      try {
+        const headers = { Accept: "application/json" };
+        const [leaderResponse, teamResponse] = await Promise.all([
+          fetch(
+            `https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/seasons/${season}/types/2/leaders?limit=100&lang=en&region=us`,
+            { signal, headers }
+          ),
+          fetch("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams?limit=100", { signal, headers })
+        ]);
+        if (!leaderResponse.ok) throw new Error(`NBA leaders request failed (${leaderResponse.status}).`);
+        if (!teamResponse.ok) throw new Error(`NBA teams request failed (${teamResponse.status}).`);
+        const [leaderData, teamData] = await Promise.all([leaderResponse.json(), teamResponse.json()]);
+        const category = leaderData.categories?.find((item) => item.name === "doubleDouble");
+        const leaders = category?.leaders;
+        const teams = teamData.sports?.[0]?.leagues?.[0]?.teams;
+        if (!Array.isArray(leaders) || !leaders.length) throw new TypeError("NBA double-double leaders were unavailable.");
+        if (!Array.isArray(teams)) throw new TypeError("NBA team response was incomplete.");
+        const teamById = new Map(teams.map(({ team }) => [String(team.id), team]));
+        let nextIndex = 0;
+        const players = new Array(leaders.length);
+        const loadPlayer = async (leader) => {
+          const toUrl = (reference) => {
+            if (typeof reference !== "string") throw new TypeError("NBA leader response was missing a data reference.");
+            const url = new URL(reference.replace(/^http:/, "https:"));
+            url.searchParams.set("lang", "en");
+            url.searchParams.set("region", "us");
+            return url;
+          };
+          const [athleteResponse, statsResponse] = await Promise.all([
+            fetch(toUrl(leader.athlete?.$ref), { signal, headers }),
+            fetch(toUrl(leader.statistics?.$ref), { signal, headers })
+          ]);
+          if (!athleteResponse.ok) throw new Error(`NBA player request failed (${athleteResponse.status}).`);
+          if (!statsResponse.ok) throw new Error(`NBA player statistics request failed (${statsResponse.status}).`);
+          const [athlete, statsData] = await Promise.all([athleteResponse.json(), statsResponse.json()]);
+          const stats = new Map(
+            (statsData.splits?.categories || []).flatMap((group) => group.stats || [])
+              .map((stat) => [stat.name, stat])
+          );
+          const teamId = leader.team?.$ref?.match(/\/teams\/(\d+)/)?.[1];
+          return {
+            name: athlete.displayName || athlete.fullName || "Unknown player",
+            position: athlete.position?.abbreviation || "—",
+            team: teamById.get(teamId),
+            stats
+          };
+        };
+        const workers = Array.from({ length: Math.min(10, leaders.length) }, async () => {
+          while (nextIndex < leaders.length) {
+            const index = nextIndex++;
+            players[index] = await loadPlayer(leaders[index]);
+          }
+        });
+        await Promise.all(workers);
+        if (requestId !== nbaDataRequestId) return;
+        renderNbaLeaderTable(content, status, players, season);
+      } catch (error) {
+        if (error.name === "AbortError" || requestId !== nbaDataRequestId) return;
+        console.error("Could not load NBA league leaders.", error);
+        status.classList.add("error");
+        status.textContent = "Couldn’t load NBA league leaders.";
+        createNbaDataState(content, "Check your connection and try again.", "error", () => loadNbaLeaders(content, status));
+        content.setAttribute("aria-busy", "false");
+      }
+    }
+
+    function renderNbaLeaderTable(content, status, players, season) {
+      const columns = [
+        { id: "rank", label: "RK", value: (player) => player.stats.get("doubleDouble")?.value ?? 0 },
+        { id: "name", label: "NAME", value: (player) => player.name },
+        { id: "position", label: "POS", value: (player) => player.position },
+        { id: "gp", label: "GP", stat: "gamesPlayed" },
+        { id: "min", label: "MIN", stat: "avgMinutes" },
+        { id: "pts", label: "PTS", stat: "avgPoints" },
+        { id: "fgm", label: "FGM", stat: "avgFieldGoalsMade" },
+        { id: "fga", label: "FGA", stat: "avgFieldGoalsAttempted" },
+        { id: "fgPct", label: "FG%", stat: "fieldGoalPct" },
+        { id: "threePm", label: "3PM", stat: "avgThreePointFieldGoalsMade" },
+        { id: "threePa", label: "3PA", stat: "avgThreePointFieldGoalsAttempted" },
+        { id: "threePct", label: "3P%", stat: "threePointFieldGoalPct" },
+        { id: "ftm", label: "FTM", stat: "avgFreeThrowsMade" },
+        { id: "fta", label: "FTA", stat: "avgFreeThrowsAttempted" },
+        { id: "ftPct", label: "FT%", stat: "freeThrowPct" },
+        { id: "reb", label: "REB", stat: "avgRebounds" },
+        { id: "ast", label: "AST", stat: "avgAssists" },
+        { id: "stl", label: "STL", stat: "avgSteals" },
+        { id: "blk", label: "BLK", stat: "avgBlocks" },
+        { id: "to", label: "TO", stat: "avgTurnovers" },
+        { id: "dd2", label: "DD2", stat: "doubleDouble" },
+        { id: "td3", label: "TD3", stat: "tripleDouble" }
+      ];
+      let sortColumn = "dd2";
+      let sortDirection = "descending";
+      const table = element("table", "nba-data-table nba-leaders-table");
+      const head = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      const body = document.createElement("tbody");
+      const numericValue = (player, column) => {
+        if (column.stat) return Number(player.stats.get(column.stat)?.value) || 0;
+        const value = column.value(player);
+        return typeof value === "number" ? value : String(value).toLocaleLowerCase();
+      };
+      const renderRows = () => {
+        const column = columns.find((item) => item.id === sortColumn);
+        const direction = sortDirection === "descending" ? -1 : 1;
+        const sorted = [...players].sort((a, b) => {
+          const left = numericValue(a, column);
+          const right = numericValue(b, column);
+          if (typeof left === "number" && typeof right === "number") return (left - right) * direction;
+          return String(left).localeCompare(String(right)) * direction;
+        });
+        for (const cell of headerRow.children) {
+          const id = cell.dataset.column;
+          cell.setAttribute("aria-sort", id === sortColumn ? sortDirection : "none");
+        }
+        body.replaceChildren();
+        let lastValue;
+        let rank = 0;
+        sorted.forEach((player, index) => {
+          const currentValue = numericValue(player, column);
+          if (index === 0 || currentValue !== lastValue) rank = index + 1;
+          lastValue = currentValue;
+          const row = document.createElement("tr");
+          for (const item of columns) {
+            const cell = element("td");
+            cell.dataset.column = item.id;
+            if (item.id === sortColumn) cell.classList.add("sorted-column");
+            if (item.id === "rank") {
+              cell.textContent = String(typeof currentValue === "number" ? rank : index + 1);
+            } else if (item.id === "name") {
+              cell.className = "nba-leader-name-cell";
+              const identity = element("span", "nba-leader-player");
+              const teamLogo = player.team?.logos?.[0]?.href;
+              if (teamLogo) {
+                const image = document.createElement("img");
+                image.src = teamLogo;
+                image.alt = "";
+                image.loading = "lazy";
+                image.addEventListener("error", () => image.remove(), { once: true });
+                identity.append(image);
+              }
+              identity.append(
+                element("span", "", player.name),
+                element("small", "", player.team?.abbreviation || "")
+              );
+              cell.append(identity);
+            } else if (item.id === "position") {
+              cell.textContent = player.position;
+            } else {
+              cell.textContent = player.stats.get(item.stat)?.displayValue || "0";
+            }
+            row.append(cell);
+          }
+          body.append(row);
+        });
+      };
+      for (const column of columns) {
+        const cell = document.createElement("th");
+        cell.scope = "col";
+        cell.dataset.column = column.id;
+        const button = element("button", "", column.label);
+        button.type = "button";
+        button.setAttribute("aria-label", `Sort by ${column.label}`);
+        button.addEventListener("click", () => {
+          if (sortColumn === column.id) {
+            sortDirection = sortDirection === "descending" ? "ascending" : "descending";
+          } else {
+            sortColumn = column.id;
+            sortDirection = column.id === "name" || column.id === "position" ? "ascending" : "descending";
+          }
+          renderRows();
+        });
+        cell.append(button);
+        headerRow.append(cell);
+      }
+      head.append(headerRow);
+      table.append(head, body);
+      renderRows();
+      content.replaceChildren(table);
+      status.textContent = `${season - 1}–${String(season).slice(-2)} season · Double-doubles · ${players.length} players`;
+      content.setAttribute("aria-busy", "false");
+    }
+
     function createNbaListState(message, state = "loading", retry = null) {
       const container = element("div", `game-list-state${state === "error" ? " error" : ""}`);
       container.setAttribute("role", state === "error" ? "alert" : "status");
@@ -2977,7 +3372,13 @@
 
     function currentRoute() {
       const route = location.hash.slice(1);
+      if (route === "sports-standings" || route === "sports-leaders") return "sports";
       return route === "guide" || channels.some((channel) => channel.id === route) ? route : "guide";
+    }
+
+    function currentSportsPage() {
+      const route = location.hash.slice(1);
+      return route === "sports-standings" || route === "sports-leaders" ? route : "sports-scores";
     }
 
     function renderDial(route) {
@@ -4390,15 +4791,15 @@
       }
     }
 
-    function renderChannel(channel) {
+    function renderChannel(channel, page = null) {
       const heading = element("div", "channel-heading");
       heading.append(element("span", "number", `CH ${channel.number}`), element("h2", "", channel.name));
       const description = element("p", "lede", channel.description);
       const resources = element("div", "resources");
       resources.setAttribute("aria-label", `${channel.name} links`);
       const resourceUrls = {
-        ESPN: "https://www.espn.com/",
-        Sofascore: "https://www.sofascore.com/",
+        Standings: "https://www.espn.com/nba/standings",
+        "League Leaders": "https://www.espn.com/nba/stats",
         "Action Network": "https://www.actionnetwork.com/odds",
         OddsShark: "https://www.oddsshark.com/",
         Genius: "https://genius.com/",
@@ -4414,10 +4815,19 @@
       };
       for (const name of channel.links) {
         const link = element("a", "", name);
-        link.href = resourceUrls[name];
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
+        const sportsPage = name === "Standings" ? "sports-standings" : "sports-leaders";
+        const isInternalSportsLink = channel.id === "sports" && ["Standings", "League Leaders"].includes(name);
+        link.href = isInternalSportsLink ? `#${sportsPage}` : resourceUrls[name];
+        if (!isInternalSportsLink) {
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+        }
         resources.append(link);
+      }
+
+      if (channel.id === "sports" && page !== "sports-scores") {
+        view.replaceChildren(heading, description, resources, createNbaDataPage(page));
+        return;
       }
 
       const isBetting = channel.id === "betting";
@@ -4711,7 +5121,7 @@
         });
         form.append(cancelEdit);
       }
-      const scoreboard = channel.id === "sports" ? createNbaScoreboard() : null;
+      const scoreboard = channel.id === "sports" && page === "sports-scores" ? createNbaScoreboard() : null;
       const kpopLookup = channel.id === "kpop" ? createKpopLookup() : null;
       const betImporter = isBetting ? createBetImporter() : null;
 
@@ -4861,6 +5271,11 @@
 
     function render() {
       const route = currentRoute();
+      const rawRoute = location.hash.slice(1);
+      if (rawRoute !== "sports-standings" && rawRoute !== "sports-leaders") {
+        nbaDataRequestId++;
+        nbaDataController?.abort();
+      }
       if (route !== "kpop") {
         musicBrainzSearchId++;
         musicBrainzReleaseId++;
@@ -4870,7 +5285,7 @@
       if (route !== "betting") editingBetId = null;
       renderDial(route);
       const channel = channels.find((item) => item.id === route);
-      if (channel) renderChannel(channel);
+      if (channel) renderChannel(channel, route === "sports" ? currentSportsPage() : null);
       else renderGuide();
     }
 
@@ -4889,7 +5304,7 @@
     updateClock();
     window.setInterval(updateClock, 1000);
     window.setInterval(() => {
-      if (currentRoute() !== "sports" || document.visibilityState !== "visible") return;
+      if (currentRoute() !== "sports" || currentSportsPage() !== "sports-scores" || document.visibilityState !== "visible") return;
       const scoreboard = view.querySelector(".scoreboard");
       if (!scoreboard || scoreboard.dataset.loading === "true") return;
       loadNbaGames(scoreboard, selectedNbaDate, { automatic: true });
