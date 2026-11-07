@@ -725,6 +725,9 @@
     .artist-results { display: grid; gap: 6px; margin: 10px 0; padding: 0; list-style: none; }
     .artist-choice { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); text-align: left; }
     .artist-choice:hover { border-color: var(--signal); background: var(--surface-hover); }
+    .artist-identity { display: flex; min-width: 0; flex: 1; align-items: center; gap: 10px; }
+    .artist-photo { position: relative; display: grid; width: 52px; height: 52px; flex: 0 0 52px; place-items: center; overflow: hidden; border-radius: 6px; background: var(--panel); color: var(--muted); font: .72rem var(--data); }
+    .artist-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
     .artist-choice strong, .artist-choice small { display: block; }
     .artist-choice strong { font-size: .84rem; }
     .artist-choice small, .artist-meta { color: var(--muted); font-size: .72rem; }
@@ -734,14 +737,98 @@
     .discography-head h4 { margin: 0; font-size: .95rem; }
     .discography-head select { width: auto; min-width: 120px; min-height: 32px; padding-block: 4px; font-size: .75rem; }
     .release-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-    .release-row { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 4px; border-bottom: 1px solid var(--line); }
+    .release-row { display: grid; grid-template-columns: 42px 58px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 4px; border-bottom: 1px solid var(--line); }
+    .release-cover { display: block; width: 42px; height: 42px; border-radius: 4px; background: var(--panel); object-fit: cover; }
     .release-year { color: var(--muted); font: .74rem var(--data); }
     .release-title { min-width: 0; }
     .release-title a { font-size: .82rem; font-weight: 600; text-decoration: none; }
     .release-title a:hover { color: var(--signal); text-decoration: underline; }
     .release-title small { display: block; color: var(--muted); font-size: .7rem; }
     .release-type { padding: 3px 7px; border-radius: 99px; background: var(--panel); color: var(--muted); font-size: .66rem; white-space: nowrap; }
+    .discography-content { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, .8fr); align-items: start; gap: 18px; margin-top: 12px; }
+    .release-list { min-width: 0; }
+    .release-select { padding: 0; border: 0; background: none; color: inherit; font-size: .82rem; font-weight: 600; text-align: left; cursor: pointer; }
+    .release-select:hover, .release-select[aria-pressed="true"] { color: var(--signal); text-decoration: underline; }
+    .release-detail { min-width: 0; max-height: 72vh; overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .release-detail-empty { margin: 0; padding: 24px 16px; color: var(--muted); font-size: .82rem; text-align: center; }
+    .release-detail-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 12px; border-bottom: 1px solid var(--line); background: var(--panel); }
+    .release-detail-cover { width: 72px; height: 72px; flex: 0 0 72px; border-radius: 5px; background: var(--screen); object-fit: cover; }
+    .release-detail-copy { min-width: 0; flex: 1; }
+    .release-detail-header h5 { margin: 0; font-size: .92rem; }
+    .release-detail-header small { display: block; margin-top: 3px; color: var(--muted); font-size: .7rem; }
+    .release-detail-link { flex: 0 0 auto; color: var(--muted); font-size: .68rem; }
+    .track-list { margin: 0; padding: 4px 12px 10px; list-style: none; }
+    .track-row { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+    .track-row:last-child { border-bottom: 0; }
+    .track-number, .track-length { color: var(--muted); font: .7rem var(--data); }
+    .track-copy { min-width: 0; }
+    .track-copy strong { display: block; font-size: .78rem; }
+    .track-title-link { font-size: inherit; font-weight: inherit; text-decoration: none; }
+    .track-title-link:hover { color: var(--signal); text-decoration: underline; }
+    .track-producer { display: block; margin-top: 2px; color: var(--muted); font-size: .68rem; overflow-wrap: anywhere; }
+    .track-producer.loading { font-style: italic; }
+    .track-credit-source { color: inherit; }
+    .track-credit-source:hover { color: var(--signal); }
+    @media (max-width: 900px) {
+      .discography-content { grid-template-columns: minmax(0, 1fr); }
+      .release-detail { grid-row: 1; max-height: 60vh; }
+    }
     .discography-more { margin-top: 10px; }
+    .game-release-calendar { margin-block: 18px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 2px 6px rgb(21 31 52 / 3%); }
+    .game-calendar-header, .game-calendar-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .game-calendar-header { margin-bottom: 12px; }
+    .game-calendar-header h3 { margin: 0; font-size: 1rem; }
+    .game-calendar-header p, .game-calendar-status, .game-calendar-updated { margin: 4px 0 0; color: var(--muted); font-size: .76rem; }
+    .game-calendar-search { margin: 12px 0; padding: 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); }
+    .game-calendar-search label { display: block; margin-bottom: 5px; font-size: .78rem; font-weight: 700; }
+    .game-calendar-search input { width: 100%; min-height: 38px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 5px; background: var(--screen); color: var(--ink); }
+    .game-calendar-search-status { margin: 6px 0 0; color: var(--muted); font-size: .72rem; }
+    .game-calendar-search-results { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+    .game-calendar-search-result { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); }
+    .game-calendar-search-result button, .game-calendar-favorite { min-height: 30px; padding: 4px 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink); cursor: pointer; }
+    .game-calendar-search-result button:hover, .game-calendar-favorite:hover { border-color: var(--signal); }
+    .game-calendar-search-result .game-calendar-search-select { border: 0; background: transparent; text-align: left; }
+    .game-calendar-search-select strong, .game-calendar-search-select small { display: block; }
+    .game-calendar-search-select strong { font-size: .78rem; }
+    .game-calendar-search-select small { margin-top: 2px; color: var(--muted); font-size: .69rem; }
+    .game-calendar-favorite[aria-pressed="true"] { border-color: var(--signal); color: var(--signal); }
+    .game-calendar-nav { justify-content: flex-end; }
+    .game-calendar-nav button { min-height: 34px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); cursor: pointer; }
+    .game-calendar-nav button:hover { background: var(--panel-hover); }
+    .game-calendar-month-picker { display: flex; align-items: center; gap: 4px; }
+    .game-calendar-month-picker select { min-height: 34px; padding: 4px 7px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); font-size: .9rem; font-weight: 700; cursor: pointer; }
+    .game-calendar-month-picker select:hover { background: var(--panel-hover); }
+    .game-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+    .game-calendar-weekday { padding: 5px 2px; color: var(--muted); font: .7rem var(--data); text-align: center; }
+    .game-calendar-day { min-height: 64px; padding: 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--panel); color: var(--ink); text-align: left; cursor: pointer; }
+    .game-calendar-day:disabled { border-color: transparent; background: transparent; cursor: default; }
+    .game-calendar-day[aria-pressed="true"] { border-color: var(--signal); box-shadow: inset 0 0 0 1px var(--signal); }
+    .game-calendar-day.has-favorite { border-bottom-color: var(--signal); }
+    .game-calendar-day-number { display: block; font: .78rem var(--data); }
+    .game-calendar-day-count { display: block; margin-top: 5px; color: var(--signal); font-size: .66rem; }
+    .game-calendar-releases { margin-top: 14px; }
+    .game-calendar-releases h4 { margin: 0 0 7px; font-size: .9rem; }
+    .game-calendar-release-list { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+    .game-calendar-release { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+    .game-calendar-release.is-favorite { border-color: var(--signal); }
+    .game-calendar-cover { display: block; width: 48px; height: 64px; border-radius: 3px; background: var(--screen); object-fit: cover; }
+    .game-calendar-release-copy { min-width: 0; }
+    .game-calendar-title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .game-calendar-favorite-label { color: var(--signal); font: .64rem var(--data); }
+    .game-calendar-release a { font-size: .82rem; font-weight: 700; text-decoration: none; }
+    .game-calendar-release a:hover { color: var(--signal); text-decoration: underline; }
+    .game-calendar-release small { display: block; margin-top: 2px; color: var(--muted); font-size: .7rem; }
+    .game-calendar-source { display: inline-block; margin-top: 12px; font-size: .74rem; }
+    .game-calendar-source:hover { color: var(--signal); }
+    @media (max-width: 560px) {
+      .game-release-calendar { padding: 11px; }
+      .game-calendar-grid { gap: 2px; }
+      .game-calendar-day { min-height: 54px; padding: 4px; }
+      .game-calendar-day-count { font-size: .58rem; }
+      .game-calendar-release { grid-template-columns: 40px minmax(0, 1fr) auto; gap: 7px; padding: 6px; }
+      .game-calendar-cover { width: 40px; height: 54px; }
+      .game-calendar-search-result { grid-template-columns: minmax(0, 1fr) auto; }
+    }
 
     @media (max-width: 850px) {
       .sports-dashboard { grid-template-columns: 220px minmax(0, 1fr); }
@@ -883,15 +970,15 @@
     const channels = [
       { id: "sports", number: "02", name: "Sports", description: "Follow your teams, save the games you’re looking forward to, and keep the final scores close.", labels: ["Following", "Coming up", "Final score"], hints: ["Team or game", "Match day, notes"], links: ["Standings", "League Leaders"] },
       { id: "betting", number: "03", name: "Betting", description: "Record paper picks and review performance as results are settled.", labels: ["Open bets", "To review", "Settled"], hints: ["Pick or event", "Optional notes"], links: ["Action Network", "OddsShark"] },
-      { id: "hiphop", number: "04", name: "Hip-Hop", description: "Your current rotation, the releases on deck, and the tracks you keep coming back to.", labels: ["On repeat", "In the queue", "Played out"], hints: ["Artist, album, or song", "Favorite track, notes"], links: ["Genius", "HotNewHipHop"] },
-      { id: "kpop", number: "05", name: "K-Pop", description: "Keep up with your current rotation, upcoming comebacks, and favorite releases.", labels: ["On repeat", "Coming soon", "Played out"], hints: ["Group, album, or song", "Comeback date, notes"], links: ["Soompi", "allkpop"] },
-      { id: "movies", number: "06", name: "Movies", description: "One place for what you’re watching, what you want to see, and your reviews.", labels: ["Watching", "Watchlist", "Seen"], hints: ["Movie title", "Where to watch, thoughts"], links: ["Letterboxd", "JustWatch"] },
-      { id: "anime", number: "07", name: "Anime", description: "Keep your series queue in tune, from the next episode to the final credits.", labels: ["Watching", "Plan to watch", "Finished"], hints: ["Series title", "Season, episode, notes"], links: ["MyAnimeList", "AniList"] },
-      { id: "games", number: "08", name: "Video Games", description: "Track what you’re playing now, what’s in the backlog, and what you’ve finished.", labels: ["Playing", "Backlog", "Finished"], hints: ["Game title", "Platform, notes"], links: ["Backloggd", "OpenCritic"] }
+      { id: "kpop", number: "04", name: "K-Pop", description: "Keep up with your current rotation, upcoming comebacks, and favorite releases.", labels: ["On repeat", "Coming soon", "Played out"], hints: ["Group, album, or song", "Comeback date, notes"], links: ["Soompi", "allkpop"] },
+      { id: "movies", number: "05", name: "Movies", description: "One place for what you’re watching, what you want to see, and your reviews.", labels: ["Watching", "Watchlist", "Seen"], hints: ["Movie title", "Where to watch, thoughts"], links: ["Letterboxd", "JustWatch"] },
+      { id: "anime", number: "06", name: "Anime", description: "Keep your series queue in tune, from the next episode to the final credits.", labels: ["Watching", "Plan to watch", "Finished"], hints: ["Series title", "Season, episode, notes"], links: ["MyAnimeList", "AniList"] },
+      { id: "games", number: "07", name: "Video Games", description: "Track what you’re playing now, what’s in the backlog, and what you’ve finished.", labels: ["Playing", "Backlog", "Finished"], hints: ["Game title", "Platform, notes"], links: ["Backloggd", "OpenCritic"] }
     ];
     const storageKey = "seven-channels.entries.v1";
     const nbaFollowStorageKey = "seven-channels.nba-followed-teams.v1";
     const appearanceStorageKey = "seven-channels.appearance.v1";
+    const gameFavoriteStorageKey = "seven-channels.game-release-favorites.v1";
     const deletedEntriesStorageKey = "seven-channels.deleted-entry-ids.v1";
     const syncOwnerStorageKey = "seven-channels.sync-owner.v1";
     const syncBackupPrefix = "seven-channels.account-backup.v1.";
@@ -918,7 +1005,6 @@
     const initialEntries = [
       { id: "demo-sports", channel: "sports", title: "Sunday afternoon game", note: "Save a spot for your team", status: "next", created: "Sample" },
       { id: "demo-bet", channel: "betting", title: "Weekend picks", note: "Review after the games", status: "now", created: "Sample" },
-      { id: "demo-hiphop", channel: "hiphop", title: "Late-night rotation", note: "Add the tracks on repeat", status: "now", created: "Sample" },
       { id: "demo-kpop", channel: "kpop", title: "Comeback countdown", note: "Keep an eye on release day", status: "next", created: "Sample" },
       { id: "demo-movie", channel: "movies", title: "Friday movie night", note: "Pick something from the watchlist", status: "next", created: "Sample" },
       { id: "demo-anime", channel: "anime", title: "The next episode", note: "Pick up where you left off", status: "now", created: "Sample" },
@@ -980,10 +1066,18 @@
     let gameCenterController;
     let musicBrainzSearchId = 0;
     let musicBrainzReleaseId = 0;
+    let musicBrainzAlbumRequestId = 0;
     let musicBrainzSearchController;
     let musicBrainzReleaseController;
+    let musicBrainzAlbumController;
     let musicBrainzLastRequestAt = 0;
     let selectedKpopArtist = null;
+    let selectedKpopAlbum = null;
+    let selectedKpopAlbumDetails = null;
+    let selectedKpopAlbumTracks = [];
+    let selectedKpopAlbumProducers = new Map();
+    let selectedKpopGeniusCredits = new Map();
+    let kpopProducerLookupPending = false;
     let kpopReleaseGroups = [];
     let kpopReleaseOffset = 0;
     let kpopReleaseCount = 0;
@@ -4639,9 +4733,17 @@
         musicBrainzSearchController = new AbortController();
         musicBrainzReleaseId++;
         musicBrainzReleaseController?.abort();
+        musicBrainzAlbumRequestId++;
+        musicBrainzAlbumController?.abort();
         matches.replaceChildren();
         discography.replaceChildren();
         selectedKpopArtist = null;
+        selectedKpopAlbum = null;
+        selectedKpopAlbumDetails = null;
+        selectedKpopAlbumTracks = [];
+        selectedKpopAlbumProducers = new Map();
+        selectedKpopGeniusCredits = new Map();
+        kpopProducerLookupPending = false;
         status.classList.remove("error");
         status.textContent = "Searching MusicBrainz…";
         search.disabled = true;
@@ -4664,15 +4766,22 @@
             const item = document.createElement("li");
             const button = element("button", "artist-choice");
             button.type = "button";
-            const identity = element("span");
-            identity.append(element("strong", "", artist.name));
+            const identity = element("span", "artist-identity");
+            const photo = element("span", "artist-photo");
+            photo.setAttribute("aria-hidden", "true");
+            const initials = artist.name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+            photo.textContent = initials || "?";
             const details = [artist.type, artist.area?.name || artist.begin_area?.name, artist.disambiguation]
               .filter(Boolean).join(" · ");
-            if (details) identity.append(element("small", "", details));
+            const text = element("span");
+            text.append(element("strong", "", artist.name));
+            if (details) text.append(element("small", "", details));
+            identity.append(photo, text);
             button.append(identity, element("span", "artist-match", "VIEW →"));
             button.addEventListener("click", () => loadKpopDiscography(artist, section));
             item.append(button);
             matches.append(item);
+            loadKpopArtistPhoto(artist, photo, musicBrainzSearchController.signal);
           }
         } catch (error) {
           if (error.name === "AbortError" || requestId !== musicBrainzSearchId) return;
@@ -4687,6 +4796,38 @@
       return section;
     }
 
+    async function loadKpopArtistPhoto(artist, photo, signal) {
+      try {
+        const url = new URL("https://en.wikipedia.org/w/api.php");
+        url.search = new URLSearchParams({
+          action: "query",
+          titles: artist.name,
+          prop: "pageimages",
+          format: "json",
+          pithumbsize: "120",
+          redirects: "1",
+          origin: "*"
+        });
+        const response = await fetch(url, { signal });
+        if (!response.ok) throw new Error(`Wikipedia image lookup failed (${response.status}).`);
+        const data = await response.json();
+        const thumbnail = Object.values(data.query?.pages || {}).find((page) => page.thumbnail?.source)?.thumbnail?.source;
+        if (!thumbnail || signal.aborted) return;
+        const imageUrl = new URL(thumbnail);
+        if (imageUrl.protocol !== "https:" || !imageUrl.hostname.endsWith(".wikimedia.org")) {
+          throw new TypeError("Wikipedia returned an unexpected image URL.");
+        }
+        const image = document.createElement("img");
+        image.src = imageUrl.href;
+        image.alt = "";
+        image.loading = "lazy";
+        image.addEventListener("error", () => image.remove(), { once: true });
+        photo.append(image);
+      } catch (error) {
+        if (error.name !== "AbortError") console.warn(`Could not load a photo for ${artist.name}.`, error);
+      }
+    }
+
     async function loadKpopDiscography(artist, section, offset = 0) {
       const requestId = ++musicBrainzReleaseId;
       musicBrainzReleaseController?.abort();
@@ -4694,6 +4835,14 @@
       const status = section.querySelector(".musicbrainz-status");
       const results = section.querySelector(".discography");
       if (offset === 0) {
+        musicBrainzAlbumRequestId++;
+        musicBrainzAlbumController?.abort();
+        selectedKpopAlbum = null;
+        selectedKpopAlbumDetails = null;
+        selectedKpopAlbumTracks = [];
+        selectedKpopAlbumProducers = new Map();
+        selectedKpopGeniusCredits = new Map();
+        kpopProducerLookupPending = false;
         selectedKpopArtist = artist;
         kpopReleaseGroups = [];
         kpopReleaseOffset = 0;
@@ -4761,18 +4910,31 @@
       if (!releases.length) {
         container.append(element("p", "musicbrainz-note", "No releases of this type were found."));
       } else {
+        const content = element("div", "discography-content");
         const list = element("ul", "release-list");
         for (const release of releases) {
           const item = document.createElement("li");
           item.className = "release-row";
           const date = release["first-release-date"] || "Date unknown";
+          const cover = document.createElement("img");
+          cover.className = "release-cover";
+          cover.alt = `${release.title || "Release"} cover`;
+          cover.loading = "lazy";
+          cover.decoding = "async";
+          if (typeof release.id === "string" && release.id) {
+            cover.src = `https://coverartarchive.org/release-group/${encodeURIComponent(release.id)}/front-250`;
+          } else {
+            cover.hidden = true;
+          }
+          cover.addEventListener("error", () => { cover.hidden = true; }, { once: true });
+          item.append(cover);
           item.append(element("span", "release-year", date.slice(0, 4)));
           const releaseCopy = element("span", "release-title");
-          const link = element("a", "", release.title || "Untitled release");
-          link.href = `https://musicbrainz.org/release-group/${encodeURIComponent(release.id)}`;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          releaseCopy.append(link);
+          const select = element("button", "release-select", release.title || "Untitled release");
+          select.type = "button";
+          select.setAttribute("aria-pressed", String(selectedKpopAlbum?.id === release.id));
+          select.addEventListener("click", () => loadKpopAlbumDetails(release, section));
+          releaseCopy.append(select);
           const secondaryTypes = release["secondary-types"] || [];
           const releaseDetails = [release["primary-type"], ...secondaryTypes, date]
             .filter(Boolean).join(" · ");
@@ -4781,13 +4943,644 @@
           item.append(element("span", "release-type", release["primary-type"] || "Release"));
           list.append(item);
         }
-        container.append(list);
+        const detail = element("aside", "release-detail");
+        detail.setAttribute("aria-label", "Album details");
+        renderKpopAlbumDetails(detail);
+        content.append(list, detail);
+        container.append(content);
       }
       if (kpopReleaseOffset < kpopReleaseCount) {
         const more = element("button", "secondary discography-more", `Load more (${kpopReleaseOffset} of ${kpopReleaseCount})`);
         more.type = "button";
         more.addEventListener("click", () => loadKpopDiscography(selectedKpopArtist, section, kpopReleaseOffset));
         container.append(more);
+      }
+    }
+
+    function formatKpopTrackLength(length) {
+      if (!Number.isFinite(length) || length < 0) return "—";
+      const seconds = Math.floor(length / 1000);
+      return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+    }
+
+    async function loadKpopAlbumDetails(releaseGroup, section) {
+      const requestId = ++musicBrainzAlbumRequestId;
+      musicBrainzAlbumController?.abort();
+      musicBrainzAlbumController = new AbortController();
+      selectedKpopAlbum = releaseGroup;
+      selectedKpopAlbumDetails = null;
+      selectedKpopAlbumTracks = [];
+      selectedKpopAlbumProducers = new Map();
+      selectedKpopGeniusCredits = new Map();
+      kpopProducerLookupPending = true;
+      renderKpopDiscography(section);
+      const detail = section.querySelector(".release-detail");
+      renderKpopAlbumDetails(detail, "Loading tracklist…");
+      if (window.matchMedia("(max-width: 900px)").matches) detail.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      try {
+        const query = new URLSearchParams({
+          "release-group": releaseGroup.id,
+          inc: "recordings+artist-credits",
+          fmt: "json",
+          limit: "10"
+        });
+        const data = await musicBrainzFetch(
+          `https://musicbrainz.org/ws/2/release/?${query}`,
+          musicBrainzAlbumController.signal
+        );
+        if (requestId !== musicBrainzAlbumRequestId) return;
+        if (!Array.isArray(data.releases)) throw new TypeError("MusicBrainz album response was incomplete.");
+        const versions = [...data.releases].sort((a, b) =>
+          Number(b.status === "Official") - Number(a.status === "Official") ||
+          (b.media || []).reduce((count, medium) => count + (medium.tracks?.length || 0), 0) -
+            (a.media || []).reduce((count, medium) => count + (medium.tracks?.length || 0), 0) ||
+          String(a.date || "").localeCompare(String(b.date || ""))
+        );
+        const album = versions[0];
+        if (!album) {
+          renderKpopAlbumDetails(detail, "No tracklist is available for this release.");
+          return;
+        }
+        selectedKpopAlbumDetails = album;
+        selectedKpopAlbumTracks = (album.media || []).flatMap((medium) =>
+          (medium.tracks || []).map((track) => ({ ...track, mediumTitle: medium.title }))
+        );
+        if (!selectedKpopAlbumTracks.length) {
+          renderKpopAlbumDetails(detail, "No tracklist is available for this release.");
+          return;
+        }
+        renderKpopAlbumDetails(detail);
+        loadKpopAlbumProducers(section, requestId, selectedKpopAlbumTracks, musicBrainzAlbumController.signal);
+      } catch (error) {
+        if (error.name === "AbortError" || requestId !== musicBrainzAlbumRequestId) return;
+        console.error("Could not load the MusicBrainz album tracklist.", error);
+        renderKpopAlbumDetails(detail, error.message || "Couldn’t load the tracklist. Check your connection and try again.", true);
+      }
+    }
+
+    function renderKpopAlbumDetails(detail, message = "", isError = false) {
+      if (!detail) return;
+      detail.replaceChildren();
+      if (!selectedKpopAlbum) {
+        detail.append(element("p", "release-detail-empty", "Select an album to see its tracklist and credits."));
+        return;
+      }
+      const header = element("header", "release-detail-header");
+      const albumHeading = element("div");
+      albumHeading.className = "release-detail-copy";
+      albumHeading.append(element("h5", "", selectedKpopAlbum.title || "Untitled release"));
+      const metadata = [
+        selectedKpopAlbum["primary-type"],
+        selectedKpopAlbumDetails?.date || selectedKpopAlbum["first-release-date"]
+      ].filter(Boolean).join(" · ");
+      if (metadata) albumHeading.append(element("small", "", metadata));
+      const releaseLink = element("a", "release-detail-link", "MusicBrainz ↗");
+      releaseLink.href = `https://musicbrainz.org/release-group/${encodeURIComponent(selectedKpopAlbum.id)}`;
+      releaseLink.target = "_blank";
+      releaseLink.rel = "noopener noreferrer";
+      const cover = document.createElement("img");
+      cover.className = "release-detail-cover";
+      cover.alt = "";
+      cover.loading = "lazy";
+      cover.src = `https://coverartarchive.org/release-group/${encodeURIComponent(selectedKpopAlbum.id)}/front-250`;
+      cover.addEventListener("error", () => { cover.hidden = true; }, { once: true });
+      header.append(cover, albumHeading, releaseLink);
+      detail.append(header);
+      if (message) {
+        const status = element("p", "player-profile-status", message);
+        if (isError) status.classList.add("error");
+        detail.append(status);
+        return;
+      }
+      if (!selectedKpopAlbumDetails) {
+        detail.append(element("p", "player-profile-status", "Loading tracklist…"));
+        return;
+      }
+      if (!selectedKpopAlbumTracks.length) {
+        detail.append(element("p", "player-profile-status", "No tracklist is available for this release."));
+        return;
+      }
+      const list = element("ol", "track-list");
+      selectedKpopAlbumTracks.forEach((track, index) => {
+        const item = document.createElement("li");
+        item.className = "track-row";
+        const number = track.number || String(index + 1);
+        item.append(element("span", "track-number", number));
+        const copy = element("span", "track-copy");
+        const recordingId = track.recording?.id;
+        const geniusCredits = selectedKpopGeniusCredits.get(recordingId);
+        const title = element("strong", "", track.title || "Untitled track");
+        title.dataset.recordingId = recordingId || "";
+        if (geniusCredits?.url) {
+          const geniusLink = element("a", "track-title-link", track.title || "Untitled track");
+          geniusLink.href = geniusCredits.url;
+          geniusLink.target = "_blank";
+          geniusLink.rel = "noopener noreferrer";
+          title.replaceChildren(geniusLink);
+        }
+        copy.append(title);
+        const musicBrainzProducers = selectedKpopAlbumProducers.get(recordingId);
+        let producerText = "Producer credits not listed";
+        if (geniusCredits?.producers.length) {
+          producerText = `Produced by ${geniusCredits.producers.join(", ")}`;
+        } else if (musicBrainzProducers === null) {
+          producerText = "Producer credits unavailable";
+        } else if (musicBrainzProducers?.length) {
+          producerText = `Produced by ${musicBrainzProducers.join(", ")}`;
+        }
+        const loading = Boolean(recordingId && !message && kpopProducerLookupPending && !geniusCredits);
+        if (loading) producerText = "Checking producer credits…";
+        const producer = element("small", `track-producer${loading ? " loading" : ""}`, producerText);
+        producer.dataset.recordingId = recordingId || "";
+        if (geniusCredits?.url) {
+          const geniusLink = element("a", "track-credit-source", "Genius");
+          geniusLink.href = geniusCredits.url;
+          geniusLink.target = "_blank";
+          geniusLink.rel = "noopener noreferrer";
+          producer.append(" · ", geniusLink);
+        }
+        copy.append(producer);
+        item.append(copy, element("span", "track-length", formatKpopTrackLength(track.length ?? track.recording?.length)));
+        list.append(item);
+      });
+      detail.append(list);
+      detail.append(element("p", "musicbrainz-note", "Producer credits from Genius; MusicBrainz is used as a fallback. Credits may be incomplete."));
+    }
+
+    function normalizeKpopTrackTitle(value) {
+      return String(value || "").normalize("NFKD").replace(/\p{Diacritic}/gu, "")
+        .toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+    }
+
+    async function loadGeniusTrackCredits(track, artist, signal) {
+      const title = normalizeKpopTrackTitle(track.title);
+      const artistName = normalizeKpopTrackTitle(artist.name);
+      let match = null;
+      for (const queryText of [`${artist.name} ${track.title}`, `${track.title} ${artist.name}`]) {
+        const query = encodeURIComponent(queryText);
+        const response = await fetch(`https://genius.com/api/search/multi?q=${query}`, { signal });
+        if (!response.ok) throw new Error(`Genius search failed (${response.status}).`);
+        const data = await response.json();
+        const results = (data.response?.sections || []).flatMap((section) => section.hits || [])
+          .map((hit) => hit.result)
+          .filter((result) => result?._type === "song" && typeof result.title === "string" && typeof result.url === "string");
+        match = results.find((result) =>
+          normalizeKpopTrackTitle(result.title) === title &&
+          normalizeKpopTrackTitle(result.primary_artist?.name).includes(artistName)
+        );
+        if (match) break;
+      }
+      if (!match) return null;
+      const songUrl = new URL(match.url);
+      if (songUrl.protocol !== "https:" || songUrl.hostname !== "genius.com") {
+        throw new TypeError("Genius returned an unexpected song URL.");
+      }
+      const pageResponse = await fetch(songUrl.href, { signal });
+      if (!pageResponse.ok) throw new Error(`Genius song page failed (${pageResponse.status}).`);
+      const html = await pageResponse.text();
+      const documentPage = new DOMParser().parseFromString(html, "text/html");
+      const producerLabels = [...documentPage.querySelectorAll("span, div")]
+        .filter((node) => node.childElementCount === 0 && /^producers?$/i.test(node.textContent.trim()));
+      const producerLists = producerLabels.map((label) => {
+        const contributor = label.nextElementSibling;
+        if (!contributor) return [];
+        return [...new Set([...contributor.querySelectorAll("a")]
+          .map((link) => link.textContent.trim()).filter(Boolean))];
+      }).filter((names) => names.length);
+      const producers = producerLists.sort((a, b) => b.length - a.length)[0] || [];
+      return { producers, url: songUrl.href };
+    }
+
+    function setKpopProducerCredit(node, text, geniusUrl = "") {
+      node.replaceChildren(document.createTextNode(text));
+      if (geniusUrl) {
+        const link = element("a", "track-credit-source", "Genius");
+        link.href = geniusUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        node.append(" · ", link);
+      }
+      node.classList.remove("loading");
+    }
+
+    function refreshKpopAlbumProducerRows(section) {
+      section.querySelectorAll(".track-producer").forEach((producer) => {
+        const recordingId = producer.dataset.recordingId;
+        const geniusCredits = selectedKpopGeniusCredits.get(recordingId);
+        const musicBrainzProducers = selectedKpopAlbumProducers.get(recordingId);
+        if (geniusCredits?.url) {
+          const title = section.querySelector(`.track-copy strong[data-recording-id="${CSS.escape(recordingId)}"]`);
+          if (title && !title.querySelector(".track-title-link")) {
+            const link = element("a", "track-title-link", title.textContent);
+            link.href = geniusCredits.url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            title.replaceChildren(link);
+          }
+        }
+        if (geniusCredits?.producers.length) {
+          setKpopProducerCredit(producer, `Produced by ${geniusCredits.producers.join(", ")}`, geniusCredits.url);
+        } else if (musicBrainzProducers === null) {
+          setKpopProducerCredit(producer, "Producer credits unavailable");
+        } else if (musicBrainzProducers?.length) {
+          setKpopProducerCredit(producer, `Produced by ${musicBrainzProducers.join(", ")}`);
+        } else if (!kpopProducerLookupPending) {
+          setKpopProducerCredit(producer, "Producer credits not listed");
+        }
+      });
+    }
+
+    async function loadKpopAlbumProducers(section, requestId, tracks, signal) {
+      const uniqueTracks = [...new Map(tracks
+        .filter((track) => track.recording?.id)
+        .map((track) => [track.recording.id, track])).values()];
+      for (const track of uniqueTracks) {
+        const recordingId = track.recording.id;
+        if (signal.aborted || requestId !== musicBrainzAlbumRequestId) return;
+        try {
+          const geniusCredits = await loadGeniusTrackCredits(track, selectedKpopArtist, signal);
+          if (requestId !== musicBrainzAlbumRequestId) return;
+          selectedKpopGeniusCredits.set(recordingId, geniusCredits || { producers: [], url: "" });
+        } catch (error) {
+          if (error.name === "AbortError" || requestId !== musicBrainzAlbumRequestId) return;
+          console.warn(`Could not load Genius producer credits for "${track.title}".`, error);
+          selectedKpopGeniusCredits.set(recordingId, { producers: [], url: "" });
+        }
+        refreshKpopAlbumProducerRows(section);
+      }
+      const recordingIds = uniqueTracks
+        .filter((track) => !selectedKpopGeniusCredits.get(track.recording.id)?.producers.length)
+        .map((track) => track.recording.id);
+      for (const recordingId of recordingIds) {
+        if (signal.aborted || requestId !== musicBrainzAlbumRequestId) return;
+        try {
+          const query = new URLSearchParams({ inc: "artist-credits+artist-rels", fmt: "json" });
+          const data = await musicBrainzFetch(
+            `https://musicbrainz.org/ws/2/recording/${encodeURIComponent(recordingId)}?${query}`,
+            signal
+          );
+          if (requestId !== musicBrainzAlbumRequestId) return;
+          const producers = [...new Set((data.relations || [])
+            .filter((relation) => /producer/i.test(relation.type || "") && relation.artist?.name)
+            .map((relation) => relation.artist.name))];
+          selectedKpopAlbumProducers.set(recordingId, producers);
+        } catch (error) {
+          if (error.name === "AbortError" || requestId !== musicBrainzAlbumRequestId) return;
+          console.warn(`Could not load MusicBrainz producer credits for recording ${recordingId}.`, error);
+          selectedKpopAlbumProducers.set(recordingId, null);
+        }
+        refreshKpopAlbumProducerRows(section);
+      }
+      if (requestId === musicBrainzAlbumRequestId) {
+        kpopProducerLookupPending = false;
+        refreshKpopAlbumProducerRows(section);
+      }
+    }
+
+    function createGameReleaseCalendar() {
+      const section = element("section", "game-release-calendar");
+      section.setAttribute("aria-label", "2026 video game release calendar");
+      const header = element("div", "game-calendar-header");
+      const title = element("div");
+      title.append(
+        element("h3", "", "2026 VIDEO GAME RELEASE CALENDAR"),
+        element("p", "", "Confirmed release dates from Game Informer, organized by month.")
+      );
+      const nav = element("div", "game-calendar-nav");
+      const previous = element("button", "", "Previous month");
+      previous.type = "button";
+      previous.setAttribute("aria-label", "Show previous month");
+      const monthTitle = element("div", "game-calendar-month-picker");
+      monthTitle.setAttribute("aria-live", "polite");
+      const monthSelect = document.createElement("select");
+      monthSelect.setAttribute("aria-label", "Select calendar month");
+      const yearSelect = document.createElement("select");
+      yearSelect.setAttribute("aria-label", "Select calendar year");
+      monthTitle.append(monthSelect, yearSelect);
+      const next = element("button", "", "Next month");
+      next.type = "button";
+      next.setAttribute("aria-label", "Show next month");
+      nav.append(previous, monthTitle, next);
+      header.append(title, nav);
+      const search = element("div", "game-calendar-search");
+      const searchLabel = element("label", "", "Find a game release date");
+      searchLabel.htmlFor = "game-release-search";
+      const searchInput = document.createElement("input");
+      searchInput.id = "game-release-search";
+      searchInput.type = "search";
+      searchInput.placeholder = "Search game titles…";
+      searchInput.autocomplete = "off";
+      const searchStatus = element("p", "game-calendar-search-status", "Search titles and favorite games to keep them at the top of the calendar.");
+      searchStatus.setAttribute("role", "status");
+      searchStatus.setAttribute("aria-live", "polite");
+      const searchResults = element("ul", "game-calendar-search-results");
+      searchResults.hidden = true;
+      search.append(searchLabel, searchInput, searchStatus, searchResults);
+      const grid = element("div", "game-calendar-grid");
+      grid.setAttribute("role", "grid");
+      grid.setAttribute("aria-label", "Release dates");
+      const releases = element("section", "game-calendar-releases");
+      releases.setAttribute("aria-live", "polite");
+      const status = element("p", "game-calendar-status", "Loading release dates…");
+      status.setAttribute("role", "status");
+      const updated = element("p", "game-calendar-updated");
+      const source = element("a", "game-calendar-source", "Source: Game Informer 2026 release schedule ↗");
+      source.href = "https://gameinformer.com/2026";
+      source.target = "_blank";
+      source.rel = "noopener noreferrer";
+      section.append(header, search, grid, releases, status, updated, source);
+
+      loadGameReleaseCalendar({ grid, monthTitle, monthSelect, yearSelect, previous, next, releases, status, updated, searchInput, searchStatus, searchResults });
+      return section;
+    }
+
+    async function loadGameReleaseCalendar(calendar) {
+      try {
+        const response = await fetch(new URL("data/game-releases.json", location.href), { cache: "no-cache" });
+        if (!response.ok) throw new Error(`Release data request failed with status ${response.status}.`);
+        const data = await response.json();
+        if (!Array.isArray(data.releases) || !data.releases.length) throw new Error("Release data contained no games.");
+        const releasesByDate = new Map();
+        for (const release of data.releases) {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(release.date) || !release.title || !release.url) continue;
+          if (!release.url.startsWith("https://gameinformer.com/")) continue;
+          const dayReleases = releasesByDate.get(release.date) || [];
+          dayReleases.push(release);
+          releasesByDate.set(release.date, dayReleases);
+        }
+        if (!releasesByDate.size) throw new Error("Release data did not contain any valid game entries.");
+        const calendarYears = [...new Set([...releasesByDate.keys()].map((date) => Number(date.slice(0, 4))))].sort((a, b) => a - b);
+        const firstCalendarMonth = new Date(calendarYears[0], 0, 1);
+        const lastCalendarMonth = new Date(calendarYears[calendarYears.length - 1], 11, 1);
+        for (let month = 0; month < 12; month++) {
+          const option = element("option", "", new Intl.DateTimeFormat(undefined, { month: "long" }).format(new Date(2026, month, 1)));
+          option.value = String(month);
+          calendar.monthSelect.append(option);
+        }
+        for (let year = calendarYears[0]; year <= calendarYears[calendarYears.length - 1]; year++) {
+          const option = element("option", "", String(year));
+          option.value = String(year);
+          calendar.yearSelect.append(option);
+        }
+        for (const dayReleases of releasesByDate.values()) {
+          dayReleases.sort((a, b) => a.title.localeCompare(b.title));
+        }
+        let favoriteUrls;
+        try {
+          const savedFavorites = localStorage.getItem(gameFavoriteStorageKey);
+          const parsedFavorites = savedFavorites === null ? [] : JSON.parse(savedFavorites);
+          if (!Array.isArray(parsedFavorites) || parsedFavorites.some((url) => typeof url !== "string")) {
+            throw new TypeError("Saved game favorites are invalid.");
+          }
+          favoriteUrls = new Set(parsedFavorites);
+        } catch (error) {
+          console.error("Could not load saved game favorites.", error);
+          showNotice("Game favorites could not be loaded. You can still search the release calendar.");
+          favoriteUrls = new Set();
+        }
+
+        const today = new Date();
+        const todayLocal = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const currentMonthHasReleases = [...releasesByDate.keys()].some((date) => {
+          const releaseDate = new Date(`${date}T12:00:00`);
+          return releaseDate.getFullYear() === visibleMonth.getFullYear() && releaseDate.getMonth() === visibleMonth.getMonth();
+        });
+        if (!currentMonthHasReleases) {
+          const firstUpcoming = [...releasesByDate.keys()].find((date) => date >= todayLocal);
+          if (firstUpcoming) {
+            const firstDate = new Date(`${firstUpcoming}T12:00:00`);
+            visibleMonth = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+          } else {
+            const releaseDates = [...releasesByDate.keys()].sort();
+            const latestDate = new Date(`${releaseDates[releaseDates.length - 1]}T12:00:00`);
+            visibleMonth = new Date(latestDate.getFullYear(), latestDate.getMonth(), 1);
+          }
+        }
+        let selectedDate = "";
+
+        function firstReleaseDateInMonth(month) {
+          const monthPrefix = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}-`;
+          const firstRelease = [...releasesByDate.keys()]
+            .filter((date) => date.startsWith(monthPrefix))
+            .sort()[0];
+          return firstRelease || `${monthPrefix}01`;
+        }
+
+        function toggleFavorite(release) {
+          const wasFavorite = favoriteUrls.has(release.url);
+          if (wasFavorite) favoriteUrls.delete(release.url);
+          else favoriteUrls.add(release.url);
+          try {
+            localStorage.setItem(gameFavoriteStorageKey, JSON.stringify([...favoriteUrls]));
+          } catch (error) {
+            if (wasFavorite) favoriteUrls.add(release.url);
+            else favoriteUrls.delete(release.url);
+            console.error("Could not save game favorites.", error);
+            showNotice("Your game favorite could not be saved. Check your browser storage settings.");
+            return;
+          }
+          notice.hidden = true;
+          renderSearchResults();
+          renderMonth();
+          renderSelectedReleases();
+        }
+
+        function createFavoriteButton(release) {
+          const favorite = favoriteUrls.has(release.url);
+          const button = element("button", "game-calendar-favorite", favorite ? "★" : "☆");
+          button.type = "button";
+          button.setAttribute("aria-pressed", String(favorite));
+          button.setAttribute("aria-label", `${favorite ? "Remove" : "Add"} ${release.title} ${favorite ? "from" : "to"} favorites`);
+          button.title = favorite ? "Remove from favorites" : "Add to favorites";
+          button.addEventListener("click", () => toggleFavorite(release));
+          return button;
+        }
+
+        function renderSearchResults() {
+          const query = calendar.searchInput.value.trim().toLocaleLowerCase();
+          calendar.searchResults.replaceChildren();
+          calendar.searchResults.hidden = query.length < 2;
+          if (query.length < 2) {
+            calendar.searchStatus.textContent = `Search titles and favorite games to keep them at the top of the calendar. ${favoriteUrls.size} favorite${favoriteUrls.size === 1 ? "" : "s"}.`;
+            return;
+          }
+          const matches = data.releases
+            .filter((release) => release.title.toLocaleLowerCase().includes(query))
+            .sort((a, b) => Number(favoriteUrls.has(b.url)) - Number(favoriteUrls.has(a.url))
+              || a.date.localeCompare(b.date)
+              || a.title.localeCompare(b.title));
+          if (!matches.length) {
+            calendar.searchStatus.textContent = `No games found for “${calendar.searchInput.value.trim()}”.`;
+            return;
+          }
+          const visibleMatches = matches.slice(0, 10);
+          for (const release of visibleMatches) {
+            const result = element("li", "game-calendar-search-result");
+            const select = element("button", "game-calendar-search-select");
+            select.type = "button";
+            select.append(
+              element("strong", "", release.title),
+              element("small", "", `${new Intl.DateTimeFormat(undefined, {
+                month: "long", day: "numeric", year: "numeric"
+              }).format(new Date(`${release.date}T12:00:00`))}${favoriteUrls.has(release.url) ? " · Favorite" : ""}`)
+            );
+            select.addEventListener("click", () => {
+              const releaseDate = new Date(`${release.date}T12:00:00`);
+              visibleMonth = new Date(releaseDate.getFullYear(), releaseDate.getMonth(), 1);
+              selectedDate = release.date;
+              renderMonth();
+              renderSelectedReleases();
+              calendar.releases.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            });
+            result.append(select, createFavoriteButton(release));
+            calendar.searchResults.append(result);
+          }
+          calendar.searchStatus.textContent = `${matches.length} release date${matches.length === 1 ? "" : "s"} found${matches.length > visibleMatches.length ? ` · showing first ${visibleMatches.length}` : ""}. Favorite a game to prioritize it in the calendar.`;
+        }
+
+        function renderSelectedReleases() {
+          calendar.releases.replaceChildren();
+          const dayReleases = [...(releasesByDate.get(selectedDate) || [])]
+            .sort((a, b) => Number(favoriteUrls.has(b.url)) - Number(favoriteUrls.has(a.url))
+              || a.title.localeCompare(b.title));
+          const heading = element("h4", "", new Intl.DateTimeFormat(undefined, {
+            weekday: "long", month: "long", day: "numeric", year: "numeric"
+          }).format(new Date(`${selectedDate}T12:00:00`)));
+          calendar.releases.append(heading);
+          if (!dayReleases.length) {
+            calendar.releases.append(element("p", "game-calendar-status", "No releases listed for this date."));
+            return;
+          }
+          const list = element("ul", "game-calendar-release-list");
+          for (const release of dayReleases) {
+            const isFavorite = favoriteUrls.has(release.url);
+            const item = element("li", `game-calendar-release${isFavorite ? " is-favorite" : ""}`);
+            if (release.cover?.startsWith("https://static.gameinformer.com/")) {
+              const coverLink = element("a");
+              coverLink.href = release.url;
+              coverLink.target = "_blank";
+              coverLink.rel = "noopener noreferrer";
+              coverLink.setAttribute("aria-label", `Open ${release.title} on Game Informer`);
+              const cover = element("img", "game-calendar-cover");
+              cover.src = release.cover;
+              cover.alt = "";
+              cover.loading = "lazy";
+              cover.addEventListener("error", () => coverLink.remove(), { once: true });
+              coverLink.append(cover);
+              item.append(coverLink);
+            } else {
+              item.append(element("span"));
+            }
+            const copy = element("div", "game-calendar-release-copy");
+            const link = element("a", "", release.title);
+            link.href = release.url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            const platformNames = Array.isArray(release.platforms) ? release.platforms.join(", ") : "";
+            const titleRow = element("div", "game-calendar-title-row");
+            titleRow.append(link);
+            if (isFavorite) titleRow.append(element("span", "game-calendar-favorite-label", "★ FAVORITE"));
+            copy.append(titleRow);
+            if (platformNames) copy.append(element("small", "", platformNames));
+            item.append(copy, createFavoriteButton(release));
+            list.append(item);
+          }
+          calendar.releases.append(list);
+        }
+
+        function renderMonth() {
+          calendar.monthSelect.value = String(visibleMonth.getMonth());
+          calendar.yearSelect.value = String(visibleMonth.getFullYear());
+          calendar.grid.replaceChildren();
+          for (const weekday of ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]) {
+            const label = element("span", "game-calendar-weekday", weekday);
+            label.setAttribute("role", "columnheader");
+            calendar.grid.append(label);
+          }
+          const firstWeekday = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1).getDay();
+          const daysInMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0).getDate();
+          for (let index = 0; index < firstWeekday; index++) {
+            const blank = element("span");
+            blank.setAttribute("role", "gridcell");
+            calendar.grid.append(blank);
+          }
+          for (let day = 1; day <= daysInMonth; day++) {
+            const date = `${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            const dayReleases = releasesByDate.get(date) || [];
+            const favoriteCount = dayReleases.filter((release) => favoriteUrls.has(release.url)).length;
+            const button = element("button", "game-calendar-day");
+            button.type = "button";
+            button.setAttribute("role", "gridcell");
+            button.setAttribute("aria-pressed", String(date === selectedDate));
+            const releaseCountLabel = `${dayReleases.length} release${dayReleases.length === 1 ? "" : "s"}`;
+            button.setAttribute("aria-label", `${new Intl.DateTimeFormat(undefined, {
+              month: "long", day: "numeric", year: "numeric"
+            }).format(new Date(`${date}T12:00:00`))}${dayReleases.length ? `, ${releaseCountLabel}` : ""}${favoriteCount ? `, ${favoriteCount} favorites` : ""}`);
+            if (favoriteCount) button.classList.add("has-favorite");
+            button.append(element("span", "game-calendar-day-number", String(day)));
+            if (dayReleases.length) {
+              const dayCount = element("span", "game-calendar-day-count", `${dayReleases.length} release${dayReleases.length === 1 ? "" : "s"}`);
+              if (favoriteCount) dayCount.textContent += ` · ★${favoriteCount}`;
+              button.append(dayCount);
+            }
+            button.addEventListener("click", () => {
+              selectedDate = date;
+              renderMonth();
+              renderSelectedReleases();
+            });
+            calendar.grid.append(button);
+          }
+          calendar.previous.disabled = visibleMonth <= firstCalendarMonth;
+          calendar.next.disabled = visibleMonth >= lastCalendarMonth;
+        }
+
+        const initialDate = [...releasesByDate.keys()]
+          .filter((date) => date.startsWith(`${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, "0")}-`) && date >= todayLocal)
+          .sort()[0]
+          || [...releasesByDate.keys()].find((date) => date.startsWith(`${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, "0")}-`))
+          || `${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, "0")}-01`;
+        selectedDate = initialDate;
+        calendar.previous.addEventListener("click", () => {
+          visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1);
+          selectedDate = firstReleaseDateInMonth(visibleMonth);
+          renderMonth();
+          renderSelectedReleases();
+        });
+        calendar.next.addEventListener("click", () => {
+          visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1);
+          selectedDate = firstReleaseDateInMonth(visibleMonth);
+          renderMonth();
+          renderSelectedReleases();
+        });
+        calendar.monthSelect.addEventListener("change", () => {
+          visibleMonth = new Date(visibleMonth.getFullYear(), Number(calendar.monthSelect.value), 1);
+          selectedDate = firstReleaseDateInMonth(visibleMonth);
+          renderMonth();
+          renderSelectedReleases();
+        });
+        calendar.yearSelect.addEventListener("change", () => {
+          visibleMonth = new Date(Number(calendar.yearSelect.value), visibleMonth.getMonth(), 1);
+          selectedDate = firstReleaseDateInMonth(visibleMonth);
+          renderMonth();
+          renderSelectedReleases();
+        });
+        calendar.searchInput.addEventListener("input", renderSearchResults);
+        renderSearchResults();
+        renderMonth();
+        renderSelectedReleases();
+        calendar.status.textContent = `${data.releases.length} release entries loaded from Game Informer.`;
+        const fetchedAt = new Date(data.fetchedAt);
+        calendar.updated.textContent = Number.isNaN(fetchedAt.getTime())
+          ? ""
+          : `Data refreshed ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(fetchedAt)}.`;
+      } catch (error) {
+        console.error("Could not load the Game Informer release calendar.", error);
+        calendar.monthSelect.disabled = true;
+        calendar.yearSelect.disabled = true;
+        calendar.grid.replaceChildren();
+        calendar.releases.replaceChildren();
+        calendar.status.textContent = "Release dates could not be loaded. Please try again later.";
       }
     }
 
@@ -4830,6 +5623,7 @@
         return;
       }
 
+      const gameCalendar = channel.id === "games" ? createGameReleaseCalendar() : null;
       const isBetting = channel.id === "betting";
       const editingBet = isBetting ? entries.find((entry) => entry.id === editingBetId && entry.channel === "betting") : null;
       const form = element("form", `entry-form${isBetting ? " bet-entry-form" : ""}`);
@@ -5266,7 +6060,7 @@
       const planner = element("section", "channel-planner");
       planner.setAttribute("aria-label", `${channel.name} saved entries`);
       planner.append(element("h3", "", isBetting ? "Your picks" : "Your list"), form, lists);
-      view.replaceChildren(heading, description, resources, ...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(scoreboard ? [scoreboard] : []), ...(kpopLookup ? [kpopLookup] : []), planner);
+      view.replaceChildren(heading, description, resources, ...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(scoreboard ? [scoreboard] : []), ...(gameCalendar ? [gameCalendar] : []), ...(kpopLookup ? [kpopLookup] : []), planner);
     }
 
     function render() {
@@ -5279,8 +6073,10 @@
       if (route !== "kpop") {
         musicBrainzSearchId++;
         musicBrainzReleaseId++;
+        musicBrainzAlbumRequestId++;
         musicBrainzSearchController?.abort();
         musicBrainzReleaseController?.abort();
+        musicBrainzAlbumController?.abort();
       }
       if (route !== "betting") editingBetId = null;
       renderDial(route);

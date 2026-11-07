@@ -3,6 +3,8 @@ name: Publish Seven Channels
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: "15 5 * * *"
   workflow_dispatch:
 
 permissions:
@@ -23,6 +25,12 @@ jobs:
     steps:
       - name: Check out site
         uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Refresh game release data
+        run: python scripts/update_game_releases.py
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload site files
