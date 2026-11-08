@@ -723,6 +723,19 @@
     .musicbrainz-status { min-height: 1.4em; margin: 10px 0; color: var(--muted); font-size: .8rem; }
     .musicbrainz-status.error { color: #e58b84; }
     .artist-results { display: grid; gap: 6px; margin: 10px 0; padding: 0; list-style: none; }
+    .artist-result { display: flex; align-items: stretch; gap: 6px; }
+    .artist-result .artist-choice { flex: 1; min-width: 0; }
+    .kpop-favorite-toggle { flex: 0 0 auto; min-height: 0; padding: 4px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--muted); font-size: 1rem; line-height: 1; }
+    .kpop-favorite-toggle:hover { border-color: var(--signal); color: var(--signal); filter: none; }
+    .kpop-favorite-toggle[aria-pressed="true"] { border-color: var(--signal); background: var(--selected-surface); color: var(--signal); }
+    .discography-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .discography-actions .kpop-favorite-toggle { min-height: 32px; font-size: .75rem; }
+    .kpop-favorites { margin: 0 0 14px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--header-surface); }
+    .kpop-favorites-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-bottom: 10px; }
+    .kpop-favorites-head h4 { margin: 0; font-size: .85rem; }
+    .kpop-favorites-head p, .kpop-favorites-empty { margin: 0; color: var(--muted); font-size: .74rem; }
+    .kpop-favorite-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .kpop-favorite-list .artist-choice[aria-current="true"] { border-color: var(--signal); background: var(--selected-surface); }
     .artist-choice { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); text-align: left; }
     .artist-choice:hover { border-color: var(--signal); background: var(--surface-hover); }
     .artist-identity { display: flex; min-width: 0; flex: 1; align-items: center; gap: 10px; }
@@ -1011,6 +1024,7 @@
     const nbaFollowStorageKey = "seven-channels.nba-followed-teams.v1";
     const appearanceStorageKey = "seven-channels.appearance.v1";
     const gameFavoriteStorageKey = "seven-channels.game-release-favorites.v1";
+    const kpopFavoriteStorageKey = "seven-channels.kpop-favorite-artists.v1";
     const deletedEntriesStorageKey = "seven-channels.deleted-entry-ids.v1";
     const syncOwnerStorageKey = "seven-channels.sync-owner.v1";
     const syncBackupPrefix = "seven-channels.account-backup.v1.";
@@ -1066,6 +1080,7 @@
     const playerProfileTitle = document.getElementById("player-dialog-title");
     const playerProfileContent = document.getElementById("player-profile-content");
     let followedNbaTeams = loadFollowedNbaTeams();
+    let favoriteKpopArtists = loadFavoriteKpopArtists();
     const mainPicker = document.getElementById("main-color");
     const accentPicker = document.getElementById("accent-color");
     const presetPicker = document.getElementById("color-preset");
@@ -1205,6 +1220,61 @@
       const focused = document.activeElement;
       parent.append(...sorted);
       if (focused && parent.contains(focused)) focused.focus({ preventScroll: true });
+    }
+
+    function cleanKpopArtist(artist) {
+      if (!artist || typeof artist.id !== "string" || !/^[\da-f-]{36}$/i.test(artist.id) ||
+        typeof artist.name !== "string" || !artist.name.trim()) return null;
+      const text = (value, max) => typeof value === "string" ? value.trim().slice(0, max) : "";
+      const cleaned = { id: artist.id, name: text(artist.name, 120) };
+      const type = text(artist.type, 30);
+      const area = text(artist.area?.name ?? artist.area, 60) || text(artist.begin_area?.name, 60);
+      const disambiguation = text(artist.disambiguation, 120);
+      if (type) cleaned.type = type;
+      if (area) cleaned.area = area;
+      if (disambiguation) cleaned.disambiguation = disambiguation;
+      return cleaned;
+    }
+
+    function cleanKpopArtistList(list) {
+      if (!Array.isArray(list)) return [];
+      const seen = new Set();
+      return list.map(cleanKpopArtist).filter((artist) => {
+        if (!artist || seen.has(artist.id)) return false;
+        seen.add(artist.id);
+        return true;
+      });
+    }
+
+    function loadFavoriteKpopArtists() {
+      try {
+        const saved = localStorage.getItem(kpopFavoriteStorageKey);
+        if (saved === null) return [];
+        const parsed = JSON.parse(saved);
+        if (!Array.isArray(parsed)) throw new TypeError("Favorite K-pop groups are not a list.");
+        return cleanKpopArtistList(parsed);
+      } catch (error) {
+        console.error("Could not load favorite K-pop groups.", error);
+        showNotice("Your favorite K-pop groups could not be read. You can still favorite groups for this visit.");
+        return [];
+      }
+    }
+
+    function saveFavoriteKpopArtists() {
+      try {
+        localStorage.setItem(kpopFavoriteStorageKey, JSON.stringify(favoriteKpopArtists));
+        notice.hidden = true;
+        scheduleCloudSync();
+        return true;
+      } catch (error) {
+        console.error("Could not save favorite K-pop groups.", error);
+        showNotice("Your favorite K-pop groups could not be saved. Check your browser storage settings.");
+        return false;
+      }
+    }
+
+    function isFavoriteKpopArtist(artist) {
+      return favoriteKpopArtists.some((favorite) => favorite.id === artist?.id);
     }
 
     function loadAppearance() {
@@ -3172,6 +3242,7 @@
         entries,
         appearance,
         followedNbaTeams,
+        favoriteKpopArtists,
         deletedEntryIds
       };
       try {
@@ -3227,6 +3298,9 @@
         entries: [...combined.values()],
         appearance: remoteState?.appearance || localState?.appearance || { ...defaultAppearance },
         followedNbaTeams: remoteState?.followedNbaTeams || localState?.followedNbaTeams || [],
+        favoriteKpopArtists: Array.isArray(remoteState?.favoriteKpopArtists)
+          ? remoteState.favoriteKpopArtists
+          : localState?.favoriteKpopArtists || [],
         deletedEntryIds: [...tombstones]
       };
     }
@@ -3236,6 +3310,7 @@
         entries,
         appearance,
         followedNbaTeams,
+        favoriteKpopArtists,
         deletedEntryIds
       };
     }
@@ -3248,11 +3323,13 @@
       followedNbaTeams = state.followedNbaTeams.filter((team) =>
         team && typeof team.id === "string" && typeof team.name === "string" && typeof team.abbreviation === "string"
       );
+      favoriteKpopArtists = cleanKpopArtistList(state.favoriteKpopArtists);
       Object.assign(appearance, loadAppearanceFromValue(state.appearance));
       try {
         localStorage.setItem(storageKey, JSON.stringify(entries));
         localStorage.setItem(deletedEntriesStorageKey, JSON.stringify(deletedEntryIds));
         localStorage.setItem(nbaFollowStorageKey, JSON.stringify(followedNbaTeams));
+        localStorage.setItem(kpopFavoriteStorageKey, JSON.stringify(favoriteKpopArtists));
         localStorage.setItem(appearanceStorageKey, JSON.stringify(appearance));
       } catch (error) {
         console.error("Could not cache the synced account data.", error);
@@ -3340,7 +3417,7 @@
       try {
         const owner = localStorage.getItem(syncOwnerStorageKey);
         const localState = owner && owner !== user.id
-          ? readAccountBackup(user.id) || { entries: initialEntries, appearance: { ...defaultAppearance }, followedNbaTeams: [], deletedEntryIds: [] }
+          ? readAccountBackup(user.id) || { entries: initialEntries, appearance: { ...defaultAppearance }, followedNbaTeams: [], favoriteKpopArtists: [], deletedEntryIds: [] }
           : currentAccountState();
         const remoteState = await loadCloudState(user.id);
         const merged = mergeAccountState(localState, remoteState);
@@ -4791,13 +4868,33 @@
       search.type = "submit";
       form.append(field, search);
 
+      const favorites = element("section", "kpop-favorites");
+      favorites.setAttribute("aria-labelledby", "kpop-favorites-title");
       const status = element("p", "musicbrainz-status", "Search for a K-pop group to find its official artist record.");
       status.setAttribute("role", "status");
       status.setAttribute("aria-live", "polite");
       const matches = element("ul", "artist-results");
       const discography = element("div", "discography");
-      const note = element("p", "musicbrainz-note", "Discography data provided by MusicBrainz. Select the matching artist to view its release groups.");
-      section.append(header, form, status, matches, discography, note);
+      const note = element("p", "musicbrainz-note", "Discography data provided by MusicBrainz. Select the matching artist to view its release groups. Star a group to save it to your favorites.");
+      section.append(header, favorites, form, status, matches, discography, note);
+      renderKpopFavorites(section);
+      section.addEventListener("click", (event) => {
+        const toggle = event.target.closest(".kpop-favorite-toggle");
+        if (!toggle) return;
+        const artist = cleanKpopArtist(JSON.parse(toggle.dataset.artist || "null"));
+        if (!artist) return;
+        const previous = favoriteKpopArtists;
+        favoriteKpopArtists = isFavoriteKpopArtist(artist)
+          ? favoriteKpopArtists.filter((favorite) => favorite.id !== artist.id)
+          : [...favoriteKpopArtists, artist];
+        if (!saveFavoriteKpopArtists()) favoriteKpopArtists = previous;
+        renderKpopFavorites(section);
+        updateKpopFavoriteToggles(section);
+        const focusTarget = section.querySelector(`.artist-results .kpop-favorite-toggle[data-artist-id="${CSS.escape(artist.id)}"]`) ||
+          section.querySelector(`.discography .kpop-favorite-toggle[data-artist-id="${CSS.escape(artist.id)}"]`);
+        if (toggle.isConnected) toggle.focus();
+        else focusTarget?.focus();
+      });
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -4816,6 +4913,7 @@
         matches.replaceChildren();
         discography.replaceChildren();
         selectedKpopArtist = null;
+        renderKpopFavorites(section);
         selectedKpopAlbum = null;
         selectedKpopAlbumDetails = null;
         selectedKpopAlbumTracks = [];
@@ -4857,7 +4955,8 @@
             identity.append(photo, text);
             button.append(identity, element("span", "artist-match", "VIEW →"));
             button.addEventListener("click", () => loadKpopDiscography(artist, section));
-            item.append(button);
+            item.className = "artist-result";
+            item.append(button, createKpopFavoriteToggle(artist));
             matches.append(item);
             loadKpopArtistPhoto(artist, photo, musicBrainzSearchController.signal);
           }
@@ -4874,7 +4973,104 @@
       return section;
     }
 
-    async function loadKpopArtistPhoto(artist, photo, signal) {
+    function createKpopFavoriteToggle(artist, withLabel = false) {
+      const cleaned = cleanKpopArtist(artist);
+      const button = element("button", "kpop-favorite-toggle");
+      button.type = "button";
+      if (!cleaned) {
+        button.hidden = true;
+        return button;
+      }
+      button.dataset.artistId = cleaned.id;
+      button.dataset.artist = JSON.stringify(cleaned);
+      button.dataset.withLabel = String(withLabel);
+      updateKpopFavoriteToggle(button);
+      return button;
+    }
+
+    function updateKpopFavoriteToggle(button) {
+      const artist = JSON.parse(button.dataset.artist || "null");
+      if (!artist) return;
+      const favorite = isFavoriteKpopArtist(artist);
+      const withLabel = button.dataset.withLabel === "true";
+      button.setAttribute("aria-pressed", String(favorite));
+      button.textContent = withLabel ? (favorite ? "★ Favorite" : "☆ Favorite") : (favorite ? "★" : "☆");
+      button.setAttribute("aria-label", `${favorite ? "Remove" : "Add"} ${artist.name} ${favorite ? "from" : "to"} favorite groups`);
+      button.title = favorite ? "Remove from favorites" : "Add to favorites";
+    }
+
+    function updateKpopFavoriteToggles(section) {
+      section.querySelectorAll(".artist-results .kpop-favorite-toggle, .discography .kpop-favorite-toggle")
+        .forEach(updateKpopFavoriteToggle);
+    }
+
+    function kpopArtistDetails(artist) {
+      return [artist.type, artist.area?.name || artist.begin_area?.name || artist.area, artist.disambiguation]
+        .filter((value) => typeof value === "string" && value).join(" · ");
+    }
+
+    function renderKpopFavorites(section) {
+      const container = section.querySelector(".kpop-favorites");
+      if (!container) return;
+      container.replaceChildren();
+      const head = element("div", "kpop-favorites-head");
+      const title = element("h4", "", `FAVORITE GROUPS (${favoriteKpopArtists.length})`);
+      title.id = "kpop-favorites-title";
+      head.append(title, element("p", "", "Select a group to open its discography."));
+      container.append(head);
+      if (!favoriteKpopArtists.length) {
+        container.append(element("p", "kpop-favorites-empty", "No favorites yet. Search for a group below and select ☆ to save it here."));
+        return;
+      }
+      const list = element("ul", "kpop-favorite-list");
+      const sorted = [...favoriteKpopArtists].sort((a, b) => a.name.localeCompare(b.name));
+      for (const artist of sorted) {
+        const item = element("li", "artist-result");
+        const button = element("button", "artist-choice");
+        button.type = "button";
+        if (selectedKpopArtist?.id === artist.id) button.setAttribute("aria-current", "true");
+        const identity = element("span", "artist-identity");
+        const photo = element("span", "artist-photo");
+        photo.setAttribute("aria-hidden", "true");
+        photo.textContent = artist.name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "?";
+        const text = element("span");
+        text.append(element("strong", "", artist.name));
+        const details = kpopArtistDetails(artist);
+        if (details) text.append(element("small", "", details));
+        identity.append(photo, text);
+        button.append(identity);
+        button.setAttribute("aria-label", `Open ${artist.name} discography`);
+        button.addEventListener("click", () => loadKpopDiscography(artist, section));
+        const remove = element("button", "kpop-favorite-remove kpop-favorite-toggle", "★");
+        remove.type = "button";
+        remove.setAttribute("aria-pressed", "true");
+        remove.setAttribute("aria-label", `Remove ${artist.name} from favorite groups`);
+        remove.title = "Remove from favorites";
+        remove.dataset.artistId = artist.id;
+        remove.dataset.artist = JSON.stringify(artist);
+        item.append(button, remove);
+        list.append(item);
+        loadKpopArtistPhoto(artist, photo, new AbortController().signal, true);
+      }
+      container.append(list);
+    }
+
+    const kpopArtistPhotoCache = new Map();
+
+    async function loadKpopArtistPhoto(artist, photo, signal, useCache = false) {
+      const showPhoto = (src) => {
+        const image = document.createElement("img");
+        image.src = src;
+        image.alt = "";
+        image.loading = "lazy";
+        image.addEventListener("error", () => image.remove(), { once: true });
+        photo.append(image);
+      };
+      if (useCache && kpopArtistPhotoCache.has(artist.id)) {
+        const cached = kpopArtistPhotoCache.get(artist.id);
+        if (cached) showPhoto(cached);
+        return;
+      }
       try {
         const url = new URL("https://en.wikipedia.org/w/api.php");
         url.search = new URLSearchParams({
@@ -4890,17 +5086,17 @@
         if (!response.ok) throw new Error(`Wikipedia image lookup failed (${response.status}).`);
         const data = await response.json();
         const thumbnail = Object.values(data.query?.pages || {}).find((page) => page.thumbnail?.source)?.thumbnail?.source;
-        if (!thumbnail || signal.aborted) return;
+        if (!thumbnail) {
+          kpopArtistPhotoCache.set(artist.id, "");
+          return;
+        }
         const imageUrl = new URL(thumbnail);
         if (imageUrl.protocol !== "https:" || !imageUrl.hostname.endsWith(".wikimedia.org")) {
           throw new TypeError("Wikipedia returned an unexpected image URL.");
         }
-        const image = document.createElement("img");
-        image.src = imageUrl.href;
-        image.alt = "";
-        image.loading = "lazy";
-        image.addEventListener("error", () => image.remove(), { once: true });
-        photo.append(image);
+        kpopArtistPhotoCache.set(artist.id, imageUrl.href);
+        if (signal.aborted || !photo.isConnected) return;
+        showPhoto(imageUrl.href);
       } catch (error) {
         if (error.name !== "AbortError") console.warn(`Could not load a photo for ${artist.name}.`, error);
       }
@@ -4922,6 +5118,7 @@
         selectedKpopGeniusCredits = new Map();
         kpopProducerLookupPending = false;
         selectedKpopArtist = artist;
+        renderKpopFavorites(section);
         kpopReleaseGroups = [];
         kpopReleaseOffset = 0;
         kpopReleaseCount = 0;
@@ -4975,7 +5172,9 @@
         kpopReleaseType = typeFilter.value;
         renderKpopDiscography(section);
       });
-      header.append(artistHeading, typeFilter);
+      const headerActions = element("div", "discography-actions");
+      headerActions.append(createKpopFavoriteToggle(selectedKpopArtist, true), typeFilter);
+      header.append(artistHeading, headerActions);
       container.append(header);
 
       const releases = [...kpopReleaseGroups]
