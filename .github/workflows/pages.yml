@@ -31,6 +31,27 @@ jobs:
           python-version: "3.x"
       - name: Refresh game release data
         run: python scripts/update_game_releases.py
+      - name: Refresh K-pop calendar preview
+        continue-on-error: true
+        run: python scripts/update_kpop_releases.py
+      - name: Refresh K-pop news and videos
+        continue-on-error: true
+        run: python scripts/update_kpop_sidebar.py
+      - name: Restore last Politics snapshot
+        uses: actions/cache/restore@v4
+        with:
+          path: data/politics.json
+          key: politics-snapshot-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: politics-snapshot-
+      - name: Refresh Politics data
+        env:
+          CONGRESS_GOV_API_KEY: ${{ secrets.CONGRESS_GOV_API_KEY }}
+        run: python scripts/update_politics.py
+      - name: Cache Politics snapshot
+        uses: actions/cache/save@v4
+        with:
+          path: data/politics.json
+          key: politics-snapshot-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload site files

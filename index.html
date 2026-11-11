@@ -7,7 +7,7 @@
   <title>Seven Channels — Your personal guide</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
@@ -19,9 +19,11 @@
       --muted: #c3ccf7;
       --signal: #ffe15a;
       --signal-ink: #101b61;
-      --display: Impact, "Arial Black", sans-serif;
-      --body: "Arial Narrow", Arial, sans-serif;
-      --data: "Courier New", monospace;
+      --font-heading: "Unbounded", "Arial Black", sans-serif;
+      --font-body: "Manrope", "Segoe UI", Arial, sans-serif;
+      --display: var(--font-heading);
+      --body: var(--font-body);
+      --data: var(--font-body);
     }
 
     * { box-sizing: border-box; }
@@ -33,7 +35,7 @@
       font: 17px/1.45 var(--body);
     }
     a { color: inherit; }
-    button, input, select { font: inherit; }
+    button, input, select, textarea { font: inherit; }
     button, a, select { -webkit-tap-highlight-color: transparent; }
     :focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; }
     .wrap { width: min(1180px, 100%); margin-inline: auto; padding-inline: 18px; }
@@ -224,15 +226,6 @@
     .game-card:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; }
     .featured { display: grid; gap: 7px; padding-top: 8px; border-top: 1px solid var(--line); }
     .featured-title { margin: 0; color: var(--signal); font: .85rem var(--data); letter-spacing: .06em; }
-    .featured-players { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-    .featured-player { display: flex; min-width: 0; align-items: center; gap: 8px; }
-    .featured-player img, .featured-fallback { flex: 0 0 38px; width: 38px; height: 38px; border-radius: 50%; }
-    .featured-player img { object-fit: cover; background: var(--screen); }
-    .featured-fallback { display: grid; place-items: center; border: 1px solid var(--line); background: var(--screen); color: var(--signal); font: .72rem var(--data); }
-    .featured-copy { display: grid; min-width: 0; gap: 2px; }
-    .featured-copy strong, .featured-copy small { overflow-wrap: anywhere; }
-    .featured-copy strong { font-size: .92rem; }
-    .featured-copy small { color: var(--muted); font-size: .78rem; }
     .game-dialog {
       width: min(1050px, calc(100vw - 28px));
       max-width: none;
@@ -339,7 +332,6 @@
       .game-center-head { padding: 12px; }
       .game-center-content { padding: 12px; }
       .game-tabs { top: -12px; margin: -12px -12px 12px; padding-inline: 12px; }
-      .featured-players { grid-template-columns: 1fr; }
       .player-profile-content { padding: 14px; }
       .player-profile-hero { grid-template-columns: 72px minmax(0, 1fr); gap: 12px; }
       .player-profile-photo, .player-profile-photo-fallback { width: 72px; height: 72px; }
@@ -428,9 +420,6 @@
       --surface-hover: #202938;
       --header-surface: #141a23;
       --selected-surface: #222f46;
-      --display: "IBM Plex Sans", Arial, sans-serif;
-      --body: "IBM Plex Sans", Arial, sans-serif;
-      --data: "IBM Plex Mono", monospace;
     }
 
     :root[data-theme="light"] {
@@ -673,15 +662,24 @@
     .game-linescores th:first-child { text-align: left; }
     .featured { margin: 10px 0 2px; padding-top: 10px; border-top: 1px solid var(--line); }
     .featured-title { margin: 0 0 8px; color: var(--muted); font-size: .67rem; letter-spacing: .06em; }
-    .featured-players { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-    .featured-player { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .featured-player img, .featured-fallback { width: 32px; height: 32px; flex: 0 0 32px; border-radius: 50%; object-fit: cover; }
-    .featured-fallback { display: grid; place-items: center; background: var(--panel); color: var(--muted); font: .62rem var(--data); }
-    .featured-copy { min-width: 0; }
-    .featured-copy strong, .featured-copy small { overflow: hidden; display: block; text-overflow: ellipsis; white-space: nowrap; }
-    .featured-copy strong { font-size: .76rem; }
-    .featured-copy small { color: var(--muted); font-size: .68rem; }
-    .game-tabs { position: static; top: auto; display: flex; flex-wrap: nowrap; gap: 3px; overflow-x: auto; margin: 10px -14px 0; padding: 8px 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); }
+    .featured-players { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 8px; }
+    .featured-player { display: grid; grid-template-columns: 108px minmax(0, 1fr); min-width: 0; min-height: 116px; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+    .featured-player:hover, .featured-player:focus-within { border-color: var(--signal); background: var(--surface-hover); }
+    .featured-player:hover { transform: translateY(-2px); }
+    .featured-player-media { display: flex; min-width: 0; align-items: stretch; background: linear-gradient(110deg, color-mix(in srgb, var(--team-color, var(--signal)) 40%, var(--panel)), var(--panel)); }
+    .featured-player .player-portrait, .featured-player .player-portrait-static { position: relative; display: grid; flex: 1 1 100%; width: 100%; height: 100%; min-height: 116px; min-width: 0; padding: 0; border: 0; border-radius: 0; background: transparent; place-items: end center; }
+    .featured-player .player-portrait:hover { filter: none; }
+    .featured-player .player-portrait:focus-visible { outline-offset: -3px; }
+    .featured-player .player-portrait img, .featured-player .player-portrait-static img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center bottom; }
+    .featured-player .player-portrait-fallback { align-self: center; color: var(--muted); font: 600 .8rem var(--font-body); }
+    .featured-copy { display: grid; align-content: center; gap: 5px; min-width: 0; padding: 12px; }
+    .featured-copy strong, .featured-copy small { display: block; overflow-wrap: anywhere; }
+    .featured-copy strong { font: 700 .88rem/1.3 var(--font-body); }
+    .featured-copy small { color: color-mix(in srgb, var(--ink) 80%, var(--panel)); font: 500 .72rem/1.4 var(--font-body); }
+    .featured-season-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(55px, 1fr)); gap: 3px 8px; color: var(--muted); font: 500 .68rem/1.4 var(--font-body); font-variant-numeric: tabular-nums; }
+    .featured-season-stats span { white-space: nowrap; }
+    @media (prefers-reduced-motion: reduce) { .featured-player { transition: none; } .featured-player:hover { transform: none; } }
+    .game-tabs { position: static; top: auto; display: flex; flex-wrap: nowrap; gap: 3px; overflow-x: auto; margin: 10px -14px 0; padding: 8px 14px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); }
     .game-tabs button { flex: 0 0 auto; min-height: 34px; padding: 6px 10px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; color: var(--muted); font-size: .76rem; }
     .game-tabs button[aria-selected="true"] { border-bottom-color: var(--signal); background: transparent; color: var(--signal); }
     .game-tab-content { padding-top: 10px; }
@@ -854,7 +852,7 @@
     .game-calendar-nav button { min-height: 34px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); cursor: pointer; }
     .game-calendar-nav button:hover { background: var(--panel-hover); }
     .game-calendar-month-picker { display: flex; align-items: center; gap: 4px; }
-    .game-calendar-month-picker select { min-height: 34px; padding: 4px 7px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); font-size: .9rem; font-weight: 700; cursor: pointer; }
+    .game-calendar-month-picker select { flex: none; width: auto; min-height: 34px; padding: 4px 2em 4px 7px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); font-size: .9rem; font-weight: 700; cursor: pointer; }
     .game-calendar-month-picker select:hover { background: var(--panel-hover); }
     .game-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
     .game-calendar-weekday { padding: 5px 2px; color: var(--muted); font: .7rem var(--data); text-align: center; }
@@ -878,6 +876,133 @@
     .game-calendar-release small { display: block; margin-top: 2px; color: var(--muted); font-size: .7rem; }
     .game-calendar-source { display: inline-block; margin-top: 12px; font-size: .74rem; }
     .game-calendar-source:hover { color: var(--signal); }
+    .kpop-dashboard { display: grid; grid-template-columns: minmax(190px, 1fr) minmax(0, 2.3fr) minmax(190px, 1fr); align-items: start; gap: 14px; margin-block: 18px; }
+    .kpop-dashboard > * { min-width: 0; }
+    .kpop-dashboard-left { display: grid; gap: 16px; min-width: 0; }
+    .kpop-dashboard .game-release-calendar, .kpop-dashboard .musicbrainz { margin-block: 0 14px; }
+    .kpop-sidebar { display: grid; gap: 0; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .kpop-sidebar section + section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .kpop-sidebar h3 { margin: 0 0 10px; font-size: .82rem; }
+    .kpop-sidebar p, .kpop-sidebar small { color: var(--muted); font-size: .72rem; }
+    .kpop-sidebar p { margin: 6px 0; }
+    .kpop-sidebar ul { display: grid; gap: 8px; margin: 8px 0; padding: 0; list-style: none; }
+    .kpop-sidebar li { min-width: 0; overflow-wrap: anywhere; font-size: .78rem; }
+    .kpop-sidebar li small { display: block; margin-top: 3px; }
+    .reddit-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 290px); gap: 18px; align-items: start; }
+    .reddit-layout > * { min-width: 0; }
+    .reddit-widget { min-width: 0; padding: 18px; border: 1px solid var(--glass-edge); border-radius: 14px; background: var(--surface); }
+    .reddit-widget h3 { margin: 0 0 10px; font-size: .82rem; }
+    .reddit-widget .reddit-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; }
+    .reddit-widget input[type="text"] { min-width: 0; width: 100%; }
+    .reddit-widget button { min-height: 34px; padding: 5px 9px; font-size: .75rem; }
+    .reddit-widget label { font-size: .73rem; }
+    .reddit-widget .reddit-save { display: flex; align-items: center; gap: 6px; margin: 9px 0; color: color-mix(in srgb, var(--ink) 80%, var(--surface)); }
+    .reddit-widget .reddit-save input { width: auto; min-height: 0; margin: 0; }
+    .reddit-widget .reddit-status { margin: 8px 0; color: color-mix(in srgb, var(--ink) 80%, var(--surface)); font-size: .75rem; overflow-wrap: anywhere; }
+    .reddit-widget .reddit-more { display: block; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font-size: .8rem; font-weight: 700; text-decoration: none; overflow-wrap: anywhere; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+    .reddit-widget .reddit-more:hover, .reddit-widget .reddit-more:focus-visible { transform: translateY(-2px); border-color: var(--signal); background: var(--surface-hover); }
+    @media (max-width: 850px) { .reddit-layout { grid-template-columns: minmax(0, 1fr); } }
+    @media (prefers-reduced-motion: reduce) { .reddit-widget *, .reddit-widget *::before { animation: none !important; transition: none !important; } }
+    .kpop-sidebar a { color: inherit; text-decoration-color: var(--line); text-underline-offset: 3px; }
+    .kpop-sidebar a:hover { color: var(--signal); }
+    .kpop-follow-form { display: grid; gap: 6px; }
+    .kpop-follow-form input { width: 100%; min-width: 0; min-height: 36px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 5px; background: var(--screen); color: var(--ink); }
+    .kpop-sidebar button { min-height: 30px; padding: 5px 8px; font-size: .72rem; }
+    .kpop-followed-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .kpop-follow-result { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 5px; }
+    @media (max-width: 900px) {
+      .kpop-dashboard { grid-template-columns: minmax(0, 1fr); }
+      .kpop-dashboard-main { grid-row: 1; }
+    }
+    /* K-pop discovery surfaces use the shared glass and appearance tokens. */
+    main.wrap:has(.kpop-dashboard) { width: min(1500px, 100%); }
+    .kpop-dashboard { grid-template-columns: minmax(200px, 260px) minmax(0, 1fr) minmax(220px, 290px); gap: 16px; }
+    .kpop-sidebar, .kpop-dashboard .game-release-calendar, .kpop-dashboard .musicbrainz {
+      border: 1px solid var(--glass-edge); border-radius: var(--glass-radius);
+      background: var(--glass-sheen), var(--glass-base); box-shadow: var(--glass-inset), var(--glass-shadow);
+    }
+    .kpop-sidebar { padding: 18px; }
+    .kpop-sidebar h3 { font-size: .73rem; letter-spacing: .1em; }
+    .kpop-sidebar section + section { border-color: var(--glass-edge); margin-top: 20px; padding-top: 20px; }
+    .kpop-sidebar p, .kpop-sidebar small { color: color-mix(in srgb, var(--ink) 80%, var(--surface)); line-height: 1.5; }
+    .kpop-dashboard :is(p:not(.error), small, figcaption, .game-calendar-weekday) { color: color-mix(in srgb, var(--ink) 80%, var(--surface)); }
+    .kpop-dashboard .game-release-calendar { padding: clamp(16px, 2vw, 24px); }
+    .kpop-calendar .game-calendar-header h3 { font-size: 1.2rem; letter-spacing: -.025em; }
+    .kpop-calendar .game-calendar-grid { gap: 6px; }
+    .kpop-calendar[aria-busy="true"] .game-calendar-grid:empty { min-height: 220px; border-radius: 10px; background: linear-gradient(100deg, var(--surface), var(--surface-hover), var(--surface)); background-size: 200% 100%; animation: kpop-shimmer 1.5s ease-in-out infinite; }
+    .kpop-calendar .game-calendar-day {
+      position: relative; min-width: 0; min-height: 70px; border-radius: 10px;
+      background: color-mix(in srgb, var(--surface) 85%, var(--signal));
+      transition: transform .18s ease, background-color .18s ease, border-color .18s ease;
+    }
+    .kpop-calendar .game-calendar-day:hover { transform: translateY(-2px); background: var(--surface-hover); border-color: var(--signal); }
+    .kpop-calendar .game-calendar-day[aria-current="date"] .game-calendar-day-number { text-decoration: underline; text-decoration-color: var(--signal); text-underline-offset: 4px; text-decoration-thickness: 2px; }
+    .kpop-calendar .game-calendar-day[aria-pressed="true"] { background: var(--selected-surface); border-color: var(--signal); box-shadow: inset 0 0 0 1px var(--signal); }
+    .kpop-calendar .game-calendar-day-count { display: inline-block; padding: 2px 5px; border-radius: 99px; background: var(--selected-surface); color: var(--ink); font-weight: 700; }
+    .kpop-calendar .game-calendar-day-count::before { content: "● "; color: var(--signal); }
+    .kpop-calendar .game-calendar-releases h4 { margin: 20px 0 10px; font-size: 1rem; }
+    .kpop-calendar .game-calendar-release { padding: 12px; border-radius: 12px; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+    .kpop-calendar .game-calendar-release:hover, .kpop-discovery-card:hover { transform: translateY(-2px); border-color: var(--signal); box-shadow: var(--glass-shadow); }
+    .kpop-calendar .kpop-release-image, .kpop-calendar .kpop-release-image img, .kpop-calendar .kpop-release-image-placeholder { width: 90px; }
+    .kpop-calendar .kpop-release-image img, .kpop-calendar .kpop-release-image-placeholder { height: 90px; border-radius: 10px; }
+    .kpop-calendar .kpop-album-open { font-size: .94rem; font-weight: 700; }
+    .kpop-calendar .game-calendar-release-copy { display: grid; align-content: start; gap: 7px; }
+    .kpop-calendar .kpop-discography-button { justify-self: start; }
+    .kpop-discovery-card, .kpop-quick-link {
+      display: block; overflow: hidden; border: 1px solid var(--glass-edge); border-radius: 10px;
+      background: var(--surface); text-decoration: none !important;
+      transition: transform .18s ease, border-color .18s ease, background-color .18s ease, box-shadow .18s ease;
+    }
+    .kpop-discovery-card:hover, .kpop-quick-link:hover { background: var(--surface-hover); }
+    .kpop-card-body { display: grid; gap: 4px; padding: 10px; }
+    .kpop-card-body strong { line-height: 1.35; }
+    .kpop-card-media { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--selected-surface); }
+    .kpop-card-media:not(:has(img))::before { content: "♫"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink); opacity: .35; font-size: 1.8rem; }
+    .kpop-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .2s ease; }
+    .kpop-news-compact { display: grid; grid-template-columns: 72px minmax(0, 1fr); align-items: center; }
+    .kpop-news-compact .kpop-card-media { height: 100%; min-height: 72px; aspect-ratio: auto; }
+    .kpop-news-compact .kpop-card-body { padding: 8px; }
+    .kpop-discovery-card:hover img { transform: scale(1.035); }
+    .kpop-play { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink); font-size: 1.5rem; text-shadow: 0 1px 5px var(--screen); }
+    .kpop-avatar { position: relative; display: grid; flex: none; place-items: center; width: 40px; height: 40px; overflow: hidden; border: 1px solid var(--glass-edge); border-radius: 50%; background: var(--selected-surface); color: var(--ink); font-weight: 700; font-size: .72rem; }
+    .kpop-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .kpop-identity { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .kpop-upcoming-card { display: flex; align-items: center; gap: 8px; padding-left: 9px; }
+    .kpop-upcoming-card .kpop-card-body { min-width: 0; }
+    .kpop-quick-link { padding: 9px; }
+    .kpop-quick-link span { display: inline-grid; place-items: center; width: 28px; height: 28px; margin-right: 8px; border-radius: 8px; background: var(--selected-surface); color: var(--ink); }
+    .kpop-featured { display: grid; grid-template-columns: minmax(0, 1fr) 120px; gap: 16px; align-items: center; margin-bottom: 14px; padding: 20px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: linear-gradient(120deg, color-mix(in srgb, var(--signal) 18%, var(--glass-base)), var(--glass-base)); box-shadow: var(--glass-shadow); }
+    .kpop-featured[hidden] { display: none; }
+    .kpop-featured h3 { margin: 6px 0; font-size: 1.15rem; line-height: 1.2; }
+    .kpop-featured p { color: var(--muted); font-size: .78rem; }
+    .kpop-featured .kpop-card-media { aspect-ratio: 1; border-radius: 10px; }
+    .kpop-kicker { color: var(--ink); font-size: .7rem; font-weight: 700; letter-spacing: .1em; }
+    .kpop-skeleton { min-height: 74px; border-radius: 10px; background: linear-gradient(100deg, var(--surface), var(--surface-hover), var(--surface)); background-size: 200% 100%; animation: kpop-shimmer 1.5s ease-in-out infinite; }
+    @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+      .kpop-discovery-card.glass-lit, .kpop-quick-link.glass-lit {
+        background-image: radial-gradient(circle at var(--pointer-x, 50%) var(--pointer-y, 50%), color-mix(in srgb, var(--signal) 15%, transparent), transparent 70%);
+      }
+    }
+    @keyframes kpop-shimmer { to { background-position: -200% 0; } }
+    @keyframes kpop-content-in { from { opacity: .7; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+    .kpop-calendar .game-calendar-release-list { animation: kpop-content-in .2s ease-out; }
+    @media (max-width: 1100px) and (min-width: 701px) {
+      .kpop-dashboard { grid-template-columns: minmax(190px, 240px) minmax(0, 1fr); }
+      .kpop-dashboard-main { grid-column: 2; grid-row: 1 / span 2; }
+    }
+    @media (max-width: 700px) {
+      .kpop-dashboard { grid-template-columns: minmax(0, 1fr); }
+      .kpop-dashboard-main { grid-row: 1; }
+      .kpop-calendar .game-calendar-day { min-height: 55px; padding: 4px; }
+      .kpop-calendar .game-calendar-day-count { font-size: .58rem; }
+      .kpop-calendar .kpop-release-image, .kpop-calendar .kpop-release-image img, .kpop-calendar .kpop-release-image-placeholder { width: 62px; }
+      .kpop-calendar .kpop-release-image img, .kpop-calendar .kpop-release-image-placeholder { height: 62px; }
+      .kpop-featured { grid-template-columns: minmax(0, 1fr) 80px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .kpop-dashboard *, .kpop-dashboard *::before, .kpop-dashboard *::after { animation: none !important; transition: none !important; }
+      .kpop-calendar .game-calendar-day:hover, .kpop-calendar .game-calendar-release:hover, .kpop-discovery-card:hover { transform: none; }
+    }
     .kpop-calendar .game-calendar-release { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
     .kpop-release-images { display: flex; gap: 7px; }
     .kpop-release-image { display: grid; justify-items: center; gap: 3px; width: 72px; margin: 0; }
@@ -959,7 +1084,6 @@
     }
     @media (max-width: 420px) {
       .game-list { grid-template-columns: 1fr; }
-      .featured-players { grid-template-columns: 1fr; }
       .game-detail-area { padding: 11px; }
       .game-tabs { margin-inline: -11px; padding-inline: 11px; }
     }
@@ -1214,6 +1338,103 @@
       }
       :is(.game-card, .artist-choice):hover { transform: none; }
     }
+    .logo {
+      font-family: var(--font-heading); font-size: clamp(1.05rem, 2vw, 1.4rem);
+      font-weight: 700; line-height: 1.2; letter-spacing: -.03em;
+    }
+    .channel-heading h2 {
+      font-family: var(--font-heading); font-size: clamp(1.375rem, 2.5vw, 1.75rem);
+      font-weight: 700; line-height: 1.2; letter-spacing: -.03em; overflow-wrap: anywhere;
+    }
+    .channel-cell .name {
+      font-family: var(--font-heading); font-size: .9rem; font-weight: 600;
+      line-height: 1.3; letter-spacing: -.02em;
+    }
+    :is(.scoreboard-heading h3, .bet-dashboard-heading h3, .bet-importer h3,
+      .channel-planner > h3, .musicbrainz-heading h3, .game-calendar-header h3,
+      .game-center-head h2, .player-profile-header h2, .player-profile-hero h3) {
+      font-family: var(--font-heading); font-size: clamp(.9375rem, 1.4vw, 1.125rem);
+      font-weight: 600; line-height: 1.35; letter-spacing: -.02em; overflow-wrap: anywhere;
+    }
+    .kpop-calendar .game-calendar-header h3 { font-size: clamp(.9375rem, 1.4vw, 1.125rem); }
+    .kpop-featured h3 {
+      font-family: var(--font-heading); font-size: clamp(1rem, 1.6vw, 1.25rem);
+      font-weight: 600; line-height: 1.35; letter-spacing: -.02em; overflow-wrap: anywhere;
+    }
+    main.wrap:has(.sports-hub) { width: min(1600px, 100%); }
+    .sports-hub { display: grid; grid-template-columns: minmax(210px, 260px) minmax(0, 1fr) minmax(230px, 300px); gap: 16px; align-items: start; }
+    .sports-hub > *, .sports-hub-main > * { min-width: 0; }
+    .sports-hub-main, .sports-hub-side { display: grid; gap: 14px; align-content: start; }
+    .sports-hub-side { position: sticky; top: 12px; }
+    .sports-hub .scoreboard { margin: 0; }
+    .sports-hub .sports-score-tabs { margin: 0 0 12px; }
+    .sports-widget, .sports-featured { min-width: 0; padding: 15px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-sheen), var(--glass-base); box-shadow: var(--glass-inset), var(--glass-shadow); }
+    .sports-widget h3 { margin: 0 0 10px; font: 700 .8rem/1.35 var(--font-body); }
+    .sports-widget p, .sports-widget small { color: var(--muted); font-size: .73rem; line-height: 1.45; }
+    .sports-widget p { margin: 7px 0; }
+    .sports-widget ul { display: grid; gap: 7px; padding: 0; margin: 8px 0; list-style: none; }
+    .sports-widget li { min-width: 0; overflow-wrap: anywhere; font-size: .75rem; }
+    .sports-widget a { color: inherit; }
+    .sports-widget select { width: 100%; min-width: 0; font-size: .75rem; }
+    .sports-widget button { font-size: .72rem; }
+    .sports-widget-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .sports-widget-row > span { min-width: 0; flex: 1; }
+    .sports-widget-row img { width: 28px; height: 28px; flex: none; object-fit: contain; }
+    .sports-widget-row small { display: block; }
+    .sports-widget-list-link { width: 100%; padding: 7px; background: var(--panel); color: var(--ink); text-align: left; }
+    .sports-widget-list-link:hover { background: var(--surface-hover); }
+    .sports-featured { width: 100%; display: block; text-align: left; color: var(--ink); background: linear-gradient(120deg, color-mix(in srgb, var(--signal) 16%, var(--surface)), var(--surface)); transition: transform .18s ease, border-color .18s ease; }
+    .sports-featured:hover { transform: translateY(-2px); border-color: var(--signal); filter: none; }
+    .sports-featured[hidden] { display: none; }
+    .sports-featured-label { display: block; font: 600 .78rem/1.4 var(--font-heading); }
+    .sports-featured-matchup { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; margin-top: 12px; text-align: center; }
+    .sports-featured-team { display: grid; justify-items: center; gap: 5px; min-width: 0; overflow-wrap: anywhere; }
+    .sports-featured-team img { width: 62px; height: 62px; object-fit: contain; }
+    .sports-featured-team strong { font: 700 .9rem/1.25 var(--font-body); }
+    .sports-featured-team small, .sports-featured-status { color: var(--muted); font-size: .72rem; }
+    .sports-featured-score { font: 700 1.3rem/1 var(--font-body); font-variant-numeric: tabular-nums; }
+    .sports-news-link { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 8px; text-decoration: none; }
+    .sports-news-link img { width: 58px; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 6px; background: var(--panel); }
+    .sports-news-link strong { display: block; line-height: 1.35; }
+    .sports-news-link:hover strong { text-decoration: underline; }
+    .sports-news-link:not(:has(img)) { grid-template-columns: minmax(0, 1fr); }
+    .sports-news-link:not(.sports-news-feature) strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+    .sports-news-feature { grid-template-columns: minmax(0, 1fr); }
+    .sports-news-feature img { width: 100%; aspect-ratio: 16 / 9; }
+    .sports-loading { min-height: 80px; border-radius: 8px; background: linear-gradient(100deg, var(--panel), var(--surface-hover), var(--panel)); background-size: 200% 100%; animation: sports-loading 1.5s ease-in-out infinite; }
+    @keyframes sports-loading { to { background-position: -200% 0; } }
+    .sports-analysis { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .sports-analysis h3 { margin: 0 0 8px; font: 600 .9rem/1.35 var(--font-heading); }
+    .sports-analysis p { margin: 5px 0; color: var(--muted); font-size: .75rem; }
+    .sports-analysis-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .sports-analysis-team { min-width: 0; padding: 9px; border-radius: 8px; background: var(--panel); overflow-wrap: anywhere; }
+    .sports-analysis-team strong { font-size: .78rem; }
+    @media (max-width: 1250px) { .sports-hub { grid-template-columns: minmax(0, 1fr) minmax(230px, 290px); } .sports-hub-main { grid-column: 1; grid-row: 1 / span 2; } .sports-hub-side { position: static; } }
+    @media (max-width: 800px) { .sports-hub { grid-template-columns: minmax(0, 1fr); } .sports-hub-main { grid-column: auto; grid-row: 1; } .sports-hub .sports-dashboard { grid-template-columns: minmax(0, 1fr); } .sports-hub .game-list { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(220px, 80%); overflow-x: auto; padding-bottom: 5px; } .sports-hub .game-detail-area { grid-row: auto; } }
+    @media (prefers-reduced-motion: reduce) { .sports-featured { transition: none; } .sports-featured:hover { transform: none; } .sports-loading { animation: none; } }
+    :is(.clock, .game-hero-points, .game-linescores, .nba-data-table, .boxscore-table,
+      .player-stats-table, .game-calendar-day-number, .game-calendar-day-count) {
+      font-variant-numeric: tabular-nums;
+    }
+    main.wrap:has(.politics-dashboard) { width: min(1500px, 100%); }
+    .politics-dashboard { display: grid; gap: 16px; }
+    .politics-top { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+    .politics-panel { min-width: 0; padding: 18px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-base); box-shadow: var(--glass-shadow); }
+    .politics-panel h3 { margin: 0 0 12px; font: 600 1rem/1.35 var(--font-heading); }
+    .politics-panel p, .politics-meta { color: var(--muted); line-height: 1.5; }
+    .politics-scores { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 14px; align-items: start; }
+    .politics-list { display: grid; gap: 8px; max-height: 720px; overflow-y: auto; }
+    .politics-vote { width: 100%; padding: 12px; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; color: var(--ink); }
+    .politics-vote strong, .politics-vote small { display: block; overflow-wrap: anywhere; }
+    .politics-vote small { color: var(--muted); margin-top: 5px; }
+    .politics-vote[aria-pressed="true"], .politics-vote:hover { border-color: var(--signal); }
+    .politics-members { max-height: 420px; overflow: auto; }
+    .politics-members table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    .politics-members th, .politics-members td { border-bottom: 1px solid var(--line); padding: 6px; text-align: left; }
+    .politics-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .politics-controls input, .politics-controls select { min-width: 0; }
+    .politics-status { font-size: .75rem; color: var(--muted); }
+    @media (max-width: 760px) { .politics-top, .politics-scores { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -1324,10 +1545,12 @@
       { id: "kpop", number: "04", name: "K-Pop", description: "Keep up with your current rotation, upcoming comebacks, and favorite releases.", labels: ["On repeat", "Coming soon", "Played out"], hints: ["Group, album, or song", "Comeback date, notes"], links: ["Soompi", "allkpop"] },
       { id: "movies", number: "05", name: "Movies", description: "One place for what you’re watching, what you want to see, and your reviews.", labels: ["Watching", "Watchlist", "Seen"], hints: ["Movie title", "Where to watch, thoughts"], links: ["Letterboxd", "JustWatch"] },
       { id: "anime", number: "06", name: "Anime", description: "Keep your series queue in tune, from the next episode to the final credits.", labels: ["Watching", "Plan to watch", "Finished"], hints: ["Series title", "Season, episode, notes"], links: ["MyAnimeList", "AniList"] },
-      { id: "games", number: "07", name: "Video Games", description: "Track what you’re playing now, what’s in the backlog, and what you’ve finished.", labels: ["Playing", "Backlog", "Finished"], hints: ["Game title", "Platform, notes"], links: ["Backloggd", "OpenCritic"] }
+      { id: "games", number: "07", name: "Video Games", description: "Track what you’re playing now, what’s in the backlog, and what you’ve finished.", labels: ["Playing", "Backlog", "Finished"], hints: ["Game title", "Platform, notes"], links: ["Backloggd", "OpenCritic"] },
+      { id: "politics", number: "08", name: "Politics", description: "Official U.S. federal votes, legislation, and congressional schedules.", labels: ["Following", "Watchlist", "Archived"], hints: ["Title", "Notes"], links: [] }
     ];
     const storageKey = "seven-channels.entries.v1";
     const nbaFollowStorageKey = "seven-channels.nba-followed-teams.v1";
+    const kpopFollowStorageKey = "seven-channels.kpop-followed-artists.v1";
     const appearanceStorageKey = "seven-channels.appearance.v1";
     const betUnitSizeStorageKey = "seven-channels.bet-unit-size.v1";
     const gameFavoriteStorageKey = "seven-channels.game-release-favorites.v1";
@@ -1387,6 +1610,8 @@
     const playerProfileTitle = document.getElementById("player-dialog-title");
     const playerProfileContent = document.getElementById("player-profile-content");
     let followedNbaTeams = loadFollowedNbaTeams();
+    let kpopArtistFollows = loadKpopArtistFollows();
+    let kpopSidebarController;
     const mainPicker = document.getElementById("main-color");
     const accentPicker = document.getElementById("accent-color");
     const presetPicker = document.getElementById("color-preset");
@@ -1424,6 +1649,7 @@
     let nbaDataController;
     let gameCenterRequestId = 0;
     let gameCenterController;
+    const featuredPlayerStatsCache = new Map();
     let musicBrainzSearchId = 0;
     let musicBrainzReleaseId = 0;
     let musicBrainzAlbumRequestId = 0;
@@ -1469,6 +1695,62 @@
       }
     }
 
+    function validKpopFollows(value) {
+      return Array.isArray(value) && value.every((artist) =>
+        artist && ["group", "artist_solo"].includes(artist.taxonomy) &&
+        Number.isSafeInteger(artist.id) && artist.id > 0 &&
+        typeof artist.name === "string" && artist.name.trim().length > 0 && artist.name.length <= 200 &&
+        typeof artist.followed === "boolean" && typeof artist.updatedAt === "string" &&
+        Number.isFinite(Date.parse(artist.updatedAt))
+      );
+    }
+
+    function loadKpopArtistFollows() {
+      try {
+        const saved = localStorage.getItem(kpopFollowStorageKey);
+        const follows = saved === null ? [] : JSON.parse(saved);
+        if (!validKpopFollows(follows)) throw new TypeError("Saved K-pop artist follows are invalid.");
+        return follows;
+      } catch (error) {
+        console.error("Could not load followed K-pop artists.", error);
+        showNotice("Your K-pop favorites could not be read. Check your browser storage settings.");
+        return [];
+      }
+    }
+
+    function mergeKpopArtistFollows(local, remote) {
+      const merged = new Map();
+      for (const artist of [...(remote || []), ...(local || [])]) {
+        const key = `${artist.taxonomy}:${artist.id}`;
+        const previous = merged.get(key);
+        const time = Date.parse(artist.updatedAt);
+        const previousTime = previous ? Date.parse(previous.updatedAt) : -Infinity;
+        if (!previous || time > previousTime ||
+          (time === previousTime && ((!artist.followed && previous.followed) ||
+            (artist.followed === previous.followed && artist.name > previous.name)))) merged.set(key, artist);
+      }
+      return [...merged.values()].sort((a, b) => `${a.taxonomy}:${a.id}`.localeCompare(`${b.taxonomy}:${b.id}`));
+    }
+
+    function setKpopFollow(artist, followed) {
+      const previous = kpopArtistFollows.find((item) => item.taxonomy === artist.taxonomy && item.id === artist.id);
+      const updatedAt = new Date(Math.max(Date.now(), previous ? Date.parse(previous.updatedAt) + 1 : 0)).toISOString();
+      const next = mergeKpopArtistFollows(
+        [{ ...artist, followed, updatedAt }],
+        kpopArtistFollows.filter((item) => item.taxonomy !== artist.taxonomy || item.id !== artist.id)
+      );
+      try {
+        localStorage.setItem(kpopFollowStorageKey, JSON.stringify(next));
+        kpopArtistFollows = next;
+        scheduleCloudSync();
+        return true;
+      } catch (error) {
+        console.error("Could not save followed K-pop artists.", error);
+        showNotice("Your K-pop favorites could not be saved. Check your browser storage settings.");
+        return false;
+      }
+    }
+
     function saveFollowedNbaTeams() {
       try {
         localStorage.setItem(nbaFollowStorageKey, JSON.stringify(followedNbaTeams));
@@ -1500,6 +1782,7 @@
           renderFollowedTeamChips(container);
           const scoreboard = container.closest(".scoreboard");
           if (scoreboard) updateNbaFollowControls(scoreboard);
+          document.dispatchEvent(new Event("sports-follows"));
         });
         chip.append(remove);
         container.append(chip);
@@ -1715,8 +1998,7 @@
         : 300;
       const panels = [
         { id: "stats", label: "Stats", render: () => renderTeamStats(boxscore, competitors) },
-        { id: "players", label: "Players", render: () => nfl ? renderNflPlayerStats(boxscore, false) : renderGamePlayers(boxscore) },
-        { id: "boxscore", label: "Box Score", render: () => nfl ? renderNflPlayerStats(boxscore, true) : renderBoxScore(boxscore, competitors) },
+        { id: "boxscore", label: "Box Score", render: () => nfl ? renderNflPlayerStats(boxscore) : renderBoxScore(boxscore, competitors) },
         { id: "play-by-play", label: "Play-by-Play", render: () => renderPlayByPlay(plays) },
         { id: "game-flow", label: "Game Flow", render: () => renderGameFlow(scoringPlays, competitors, nfl ? 900 : 720, overtimeSeconds) },
         { id: "highlights", label: "Highlights", render: () => renderGameHighlights(event, sport) }
@@ -2001,13 +2283,12 @@
       return cell;
     }
 
-    function renderNflPlayerStats(boxscore, fullBoxScore) {
-      const panel = tabPanel(fullBoxScore ? "boxscore" : "players", fullBoxScore ? "BOX SCORE" : "OFFENSIVE PLAYERS");
+    function renderNflPlayerStats(boxscore) {
+      const panel = tabPanel("boxscore", "BOX SCORE");
       const teams = Array.isArray(boxscore.players) ? boxscore.players : [];
       let tableCount = 0;
       for (const team of teams) {
         const groups = (team.statistics || []).filter((group) =>
-          (fullBoxScore || ["passing", "rushing", "receiving"].includes(group.name)) &&
           Array.isArray(group.athletes) && group.athletes.length && Array.isArray(group.labels)
         );
         if (!groups.length) continue;
@@ -2290,56 +2571,56 @@
       }
     }
 
-    function renderGamePlayers(boxscore) {
-      const panel = tabPanel("players", "TOP SCORERS");
-      const teams = Array.isArray(boxscore.players) ? boxscore.players : [];
-      const leaders = [];
-      for (const team of teams) {
-        const group = team.statistics?.[0];
-        if (!group) continue;
-        const pointsIndex = (group.labels || []).findIndex((label) => ["PTS", "POINTS"].includes(String(label).toUpperCase()));
-        const reboundsIndex = (group.labels || []).findIndex((label) => ["REB", "REBOUNDS"].includes(String(label).toUpperCase()));
-        const assistsIndex = (group.labels || []).findIndex((label) => ["AST", "ASSISTS"].includes(String(label).toUpperCase()));
-        for (const player of group.athletes || []) {
-          if (player.didNotPlay || pointsIndex < 0) continue;
-          const points = Number(player.stats?.[pointsIndex]);
-          if (!Number.isFinite(points)) continue;
-          leaders.push({
-            name: player.athlete?.displayName || "Player",
-            athlete: player.athlete,
-            team: team.team?.abbreviation || team.team?.displayName || "Team",
-            points: player.stats?.[pointsIndex] || "0",
-            rebounds: reboundsIndex >= 0 ? player.stats?.[reboundsIndex] || "—" : "—",
-            assists: assistsIndex >= 0 ? player.stats?.[assistsIndex] || "—" : "—",
-            sortPoints: points
-          });
+    async function loadFeaturedPlayerStats(container, athleteId, teamId, seasonYear, signal) {
+      if (!athleteId || !seasonYear) {
+        container.textContent = "Season stats unavailable.";
+        return;
+      }
+      const cacheKey = `${athleteId}:${seasonYear}`;
+      try {
+        let cached = featuredPlayerStatsCache.get(cacheKey);
+        if (!cached || Date.now() - cached.time >= 300000) {
+          const response = await fetch(
+            `https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/${encodeURIComponent(athleteId)}/stats?region=us&lang=en&contentorigin=espn`,
+            { signal }
+          );
+          if (!response.ok) throw new Error(`Player stats request failed (${response.status}).`);
+          const data = await response.json();
+          const averages = data.categories?.find((category) => category.name === "averages");
+          if (!Array.isArray(averages?.labels) || !Array.isArray(averages?.statistics)) {
+            throw new TypeError("Player season averages were incomplete.");
+          }
+          cached = { time: Date.now(), averages };
+          if (featuredPlayerStatsCache.size >= 100) featuredPlayerStatsCache.delete(featuredPlayerStatsCache.keys().next().value);
+          featuredPlayerStatsCache.set(cacheKey, cached);
         }
+        const { averages } = cached;
+        const rows = averages.statistics.filter((row) => String(row.season?.year) === String(seasonYear) && Array.isArray(row.stats));
+        const row = rows.find((item) => String(item.teamId) === "0") ||
+          rows.find((item) => String(item.teamId) === String(teamId)) ||
+          (rows.length === 1 ? rows[0] : null);
+        if (!row) {
+          container.textContent = "Season stats unavailable.";
+          return;
+        }
+        const grid = element("span", "featured-season-stats");
+        for (const [label, source] of [
+          ["RPG", "REB"], ["APG", "AST"], ["BPG", "BLK"],
+          ["SPG", "STL"], ["FG%", "FG%"], ["3PT%", "3P%"]
+        ]) {
+          const index = averages.labels.findIndex((item) => String(item).toUpperCase() === source);
+          const value = index < 0 ? null : row.stats[index];
+          grid.append(element("span", "", `${label} ${value == null || value === "" ? "—" : value}`));
+        }
+        container.replaceChildren(element("small", "", `${seasonYear} season averages`), grid);
+      } catch (error) {
+        if (error.name === "AbortError") return;
+        console.error("Could not load featured player season stats.", error);
+        container.textContent = "Season stats unavailable.";
       }
-      if (!leaders.length) {
-        panel.append(element("p", "flow-note", "Player stats will be available when the game begins."));
-        return panel;
-      }
-      const table = element("table", "plays-table");
-      const head = document.createElement("thead");
-      const headRow = document.createElement("tr");
-      ["PLAYER", "TEAM", "PTS", "REB", "AST"].forEach((label) => headRow.append(element("th", "", label)));
-      head.append(headRow);
-      const body = document.createElement("tbody");
-      leaders.sort((a, b) => b.sortPoints - a.sortPoints).slice(0, 8).forEach((player) => {
-        const row = document.createElement("tr");
-        row.append(playerNameCell(player.athlete, player.name, player.team));
-        [player.team, player.points, player.rebounds, player.assists]
-          .forEach((value) => row.append(element("td", "", value)));
-        body.append(row);
-      });
-      table.append(head, body);
-      const scroll = element("div", "plays-scroll");
-      scroll.append(table);
-      panel.append(scroll);
-      return panel;
     }
 
-    function renderFeaturedPlayers(competitors, gameState) {
+    function renderFeaturedPlayers(competitors, gameState, seasonYear, signal) {
       const section = element("section", "featured");
       section.append(element("h4", "featured-title", "FEATURED PLAYERS"));
       const players = element("div", "featured-players");
@@ -2351,7 +2632,13 @@
           leader.name === "rating" && leader.leaders?.[0]?.athlete
         )?.leaders?.[0];
         const athlete = playerInfo?.athlete;
-        card.append(createPlayerPortrait(athlete, athlete?.position?.abbreviation || team.team?.abbreviation || "NBA"));
+        const media = element("div", "featured-player-media");
+        const teamColor = team.team?.color;
+        if (typeof teamColor === "string" && /^[\da-f]{6}$/i.test(teamColor)) {
+          media.style.setProperty("--team-color", `#${teamColor}`);
+        }
+        media.append(createPlayerPortrait(athlete, athlete?.position?.abbreviation || team.team?.abbreviation || "NBA"));
+        card.append(media);
         const copy = element("span", "featured-copy");
         copy.append(element("strong", "", athlete?.displayName || athlete?.fullName || "Player details unavailable"));
         if (playerInfo?.displayValue && playerInfo?.displayName) {
@@ -2362,6 +2649,11 @@
         } else {
           copy.append(element("small", "", team.team?.displayName || team.team?.name || "Team"));
         }
+        const seasonStats = element("span", "featured-season-summary");
+        seasonStats.setAttribute("aria-live", "polite");
+        seasonStats.append(element("small", "", "Loading season stats…"));
+        copy.append(seasonStats);
+        loadFeaturedPlayerStats(seasonStats, athlete?.id, team.team?.id, seasonYear, signal);
         card.append(copy);
         players.append(card);
       }
@@ -2802,7 +3094,7 @@
         table.append(head, body);
         hero.append(table);
       }
-      if (competitors.length) hero.append(renderFeaturedPlayers(competitors, competition?.status?.type?.state));
+      if (competitors.length) hero.append(renderFeaturedPlayers(competitors, competition?.status?.type?.state, event.season?.year, gameCenterController.signal));
       return hero;
     }
 
@@ -2828,7 +3120,8 @@
         if (requestId !== gameCenterRequestId) return;
         if (!summary || typeof summary !== "object") throw new TypeError("Game center response was incomplete.");
         const { tabs, content } = renderGameTabs(event, summary);
-        detailArea.replaceChildren(renderGameHero(event), renderGameBetTracker(event, summary), tabs, content);
+        detailArea.replaceChildren(renderGameHero(event), renderGameBetTracker(event, summary), tabs, content, createSportsMatchupAnalysis(event, summary));
+        document.dispatchEvent(new CustomEvent("sports-summary", { detail: { sport: "nba", event, summary } }));
         if (automatic) {
           const refreshedScroll = detailArea.querySelector(".plays-scroll, .boxscore-scroll");
           if (refreshedScroll) refreshedScroll.scrollTop = scrollTop;
@@ -3021,7 +3314,7 @@
       const heading = element("div", "scoreboard-heading");
       const title = element("h3", "", "NBA SCORES");
       title.id = "scoreboard-title";
-      heading.append(title, element("p", "", "Every NBA game for the selected day · Auto-refreshes every 30 seconds while Sports is visible."));
+      heading.append(title, element("p", "", "Every NBA game for the selected day · Live games refresh more frequently."));
       const controls = element("div", "score-controls");
       const dateField = element("div", "field");
       const dateLabel = element("label", "", "Game day");
@@ -3099,9 +3392,443 @@
         saveFollowedNbaTeams();
         renderFollowedTeamChips(followed);
         updateNbaFollowControls(section);
+        document.dispatchEvent(new Event("sports-follows"));
       });
       loadNbaGames(section, selectedNbaDate);
       return section;
+    }
+
+    function createSportsMatchupAnalysis(event, summary) {
+      const section = element("section", "sports-analysis");
+      section.append(element("h3", "", "Matchup analysis"));
+      const grid = element("div", "sports-analysis-grid");
+      const teams = event.competitions?.[0]?.competitors || [];
+      for (const competitor of teams) {
+        const card = element("div", "sports-analysis-team");
+        card.append(element("strong", "", competitor.team?.displayName || "Team"));
+        const record = competitor.records?.find((item) => item.type === "total")?.summary;
+        if (record) card.append(element("p", "", `Record: ${record}`));
+        const box = summary.boxscore?.teams?.find((item) => String(item.team?.id) === String(competitor.team?.id));
+        const stats = (box?.statistics || []).filter((item) => item.label && item.displayValue != null).slice(0, 8);
+        for (const stat of stats) card.append(element("p", "", `${stat.label}: ${stat.displayValue}`));
+        grid.append(card);
+      }
+      if (teams.length) {
+        section.append(grid);
+        if (summary.boxscore?.teams?.some((team) => team.statistics?.length)) {
+          const pregame = event.competitions?.[0]?.status?.type?.state === "pre";
+          section.append(element("p", "", pregame ? "Pregame team statistics as reported by ESPN." : "Team statistics as reported for this game by ESPN."));
+        }
+      } else {
+        section.append(element("p", "", "Matchup information is unavailable."));
+      }
+      if (typeof summary.seasonseries?.summary === "string" && summary.seasonseries.summary) {
+        section.append(element("p", "", `Season series: ${summary.seasonseries.summary}`));
+      }
+      return section;
+    }
+
+    let sportsHubController = null;
+    const sportsWidgetCache = new Map();
+
+    function createSportsHub(scoreboard, planner) {
+      const controller = new AbortController();
+      sportsHubController = controller;
+      const { signal } = controller;
+      const hub = element("div", "sports-hub");
+      const left = element("aside", "sports-hub-side");
+      left.setAttribute("aria-label", "Teams, standings and injuries");
+      const right = element("aside", "sports-hub-side");
+      right.setAttribute("aria-label", "Sports news and game insights");
+      const main = element("div", "sports-hub-main");
+      const featured = element("button", "sports-featured");
+      featured.type = "button";
+      featured.hidden = true;
+      const teams = element("section", "sports-widget");
+      const standings = element("section", "sports-widget");
+      const injuries = element("section", "sports-widget");
+      const news = element("section", "sports-widget");
+      const leaders = element("section", "sports-widget");
+      const upcoming = element("section", "sports-widget");
+      const teamBody = element("div");
+      const standingBody = element("div");
+      const injuryBody = element("div");
+      const newsBody = element("div");
+      const leadersBody = element("div");
+      const upcomingBody = element("div");
+      teams.append(element("h3", "", "My teams"), teamBody);
+      standings.append(element("h3", "", "League standings"), standingBody);
+      injuries.append(element("h3", "", "Injury report"), injuryBody);
+      news.append(element("h3", "", "Sports news"), newsBody);
+      leaders.append(element("h3", "", "Game leaders"), leadersBody);
+      upcoming.append(element("h3", "", "Upcoming games"), upcomingBody);
+      left.append(teams, standings, injuries);
+      right.append(news, leaders, upcoming, createRedditWidget("sports"));
+      main.append(featured, scoreboard, planner);
+      hub.append(left, main, right);
+      let activeSport = "nba";
+      const schedules = new Map();
+      const selections = new Map();
+      const summaries = new Map();
+      let selectedId = null;
+      let selectedSummary = null;
+      let category = "points";
+      let widgetRequestId = 0;
+
+      function teamLogo(team) {
+        const src = team?.logo || team?.logos?.[0]?.href;
+        if (!src) return null;
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "";
+        img.loading = "lazy";
+        img.addEventListener("error", () => img.remove(), { once: true });
+        return img;
+      }
+
+      function gameTeams(event) {
+        return [...(event.competitions?.[0]?.competitors || [])]
+          .sort((a, b) => a.homeAway === "away" ? -1 : b.homeAway === "away" ? 1 : 0);
+      }
+
+      function selectGame(event) {
+        const panel = scoreboard.querySelector(activeSport === "nba" ? ".nba-scoreboard" : ".nfl-scoreboard");
+        const card = [...panel.querySelectorAll(".game-card[data-game-id]")].find((item) => item.dataset.gameId === String(event.id));
+        card?.querySelector(".game-select")?.click();
+        panel.querySelector(".game-detail-area")?.scrollIntoView({ behavior: "auto", block: "start" });
+      }
+
+      function renderTeams() {
+        teamBody.replaceChildren();
+        if (activeSport !== "nba") {
+          teamBody.append(element("p", "", "Team following is currently available for the NBA."));
+          return;
+        }
+        if (!followedNbaTeams.length) {
+          teamBody.append(element("p", "", "Follow NBA teams using the controls on game cards."));
+          return;
+        }
+        const list = element("ul");
+        for (const team of followedNbaTeams) {
+          const item = element("li", "sports-widget-row");
+          const event = (schedules.get("nba")?.events || []).find((game) => gameTeams(game).some((entry) => String(entry.team?.id) === team.id));
+          const competitor = gameTeams(event || {}).find((entry) => String(entry.team?.id) === team.id);
+          const logo = teamLogo(competitor?.team);
+          if (logo) item.append(logo);
+          const info = element("span");
+          info.append(element("strong", "", team.name));
+          const record = competitor?.records?.find((entry) => entry.type === "total")?.summary;
+          if (record) info.append(element("small", "", `Record: ${record}`));
+          if (event) {
+            const state = event.competitions?.[0]?.status?.type?.shortDetail || "Scheduled";
+            info.append(element("small", "", `${event.shortName || "Game"} · ${state}`));
+          } else info.append(element("small", "", "No game on the selected day."));
+          const remove = element("button", "secondary", "Remove");
+          remove.type = "button";
+          remove.setAttribute("aria-label", `Unfollow ${team.name}`);
+          remove.addEventListener("click", () => {
+            followedNbaTeams = followedNbaTeams.filter((item) => item.id !== team.id);
+            saveFollowedNbaTeams();
+            const nba = scoreboard.querySelector(".nba-scoreboard");
+            renderFollowedTeamChips(nba.querySelector(".followed-teams"));
+            updateNbaFollowControls(nba);
+            document.dispatchEvent(new Event("sports-follows"));
+          });
+          item.append(info, remove);
+          list.append(item);
+        }
+        teamBody.append(list);
+      }
+
+      function renderSchedule() {
+        const schedule = schedules.get(activeSport);
+        const events = (schedule?.events || []).filter((event) => gameTeams(event).length >= 2);
+        const follows = (event) => activeSport === "nba" && gameTeams(event).some(isFollowingNbaTeam);
+        const stateRank = (event) => ({ in: 0, pre: 1, post: 2 }[event.competitions?.[0]?.status?.type?.state] ?? 3);
+        const sorted = [...events].sort((a, b) =>
+          Number(follows(b)) - Number(follows(a)) || stateRank(a) - stateRank(b) ||
+          ((stateRank(a) === 2 ? -1 : 1) * ((Date.parse(a.date) || 0) - (Date.parse(b.date) || 0))));
+        const game = sorted[0];
+        featured.hidden = !game;
+        featured.onclick = game ? () => selectGame(game) : null;
+        if (game) {
+          const comp = game.competitions[0];
+          const start = new Date(game.date);
+          const status = comp.status?.type?.state === "pre" && !Number.isNaN(start.getTime())
+            ? start.toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+            : comp.status?.type?.shortDetail || "Game status unavailable";
+          const matchup = element("span", "sports-featured-matchup");
+          const competitors = gameTeams(game);
+          competitors.forEach((team, index) => {
+            const item = element("span", "sports-featured-team");
+            const logo = teamLogo(team.team);
+            if (logo) item.append(logo);
+            item.append(element("strong", "", team.team?.displayName || "Team"));
+            const record = team.records?.find((entry) => entry.type === "total")?.summary;
+            if (record) item.append(element("small", "", record));
+            if (comp.status?.type?.state !== "pre" && team.score != null) item.append(element("span", "sports-featured-score", String(team.score)));
+            matchup.append(item);
+            if (index === 0) matchup.append(element("span", "sports-featured-status", "AT"));
+          });
+          featured.replaceChildren(element("span", "sports-featured-label", "Featured matchup"), element("span", "sports-featured-status", `${activeSport.toUpperCase()} · ${status}`), matchup);
+        }
+        upcomingBody.replaceChildren();
+        const upcomingGames = events.filter((event) => event.competitions?.[0]?.status?.type?.state === "pre" && Date.parse(event.date) >= Date.now())
+          .sort((a, b) => Date.parse(a.date) - Date.parse(b.date)).slice(0, 5);
+        if (!upcomingGames.length) upcomingBody.append(element("p", "", "No upcoming games on the selected day."));
+        else {
+          const list = element("ul");
+          for (const event of upcomingGames) {
+            const item = element("li");
+            const button = element("button", "secondary sports-widget-list-link");
+            button.type = "button";
+            const gameRow = element("span", "sports-widget-row");
+            const matchTeams = gameTeams(event);
+            for (const team of matchTeams) {
+              const logo = teamLogo(team.team);
+              if (logo) gameRow.append(logo);
+            }
+            const names = matchTeams.map((team) => team.team?.abbreviation || team.team?.displayName || "Team").join(" at ");
+            gameRow.append(element("strong", "", `${follows(event) ? "★ " : ""}${names}`));
+            button.append(gameRow);
+            const date = new Date(event.date).toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" });
+            button.append(element("small", "", `${activeSport.toUpperCase()} · ${date}${event.competitions?.[0]?.venue?.fullName ? ` · ${event.competitions[0].venue.fullName}` : ""}`));
+            button.addEventListener("click", () => selectGame(event));
+            item.append(button);
+            list.append(item);
+          }
+          upcomingBody.append(list);
+        }
+        renderTeams();
+        renderLeaders();
+      }
+
+      function renderLeaders() {
+        leadersBody.replaceChildren();
+        const categories = activeSport === "nba"
+          ? [["points", "Points"], ["rebounds", "Rebounds"], ["assists", "Assists"]]
+          : [["passingYards", "Passing yards"], ["rushingYards", "Rushing yards"], ["receivingYards", "Receiving yards"]];
+        if (!categories.some(([value]) => value === category)) category = categories[0][0];
+        const label = element("label", "", "Category");
+        const select = document.createElement("select");
+        select.setAttribute("aria-label", "Game leader category");
+        for (const [value, text] of categories) {
+          const option = element("option", "", text);
+          option.value = value;
+          option.selected = value === category;
+          select.append(option);
+        }
+        select.addEventListener("change", () => { category = select.value; renderLeaders(); });
+        label.append(select);
+        leadersBody.append(label, element("p", "", "Leaders reported for games on the selected day; ties may be omitted."));
+        const entries = [];
+        for (const event of schedules.get(activeSport)?.events || []) {
+          for (const team of gameTeams(event)) {
+            const group = team.leaders?.find((entry) => entry.name === category);
+            for (const leader of group?.leaders || []) {
+              if (Number.isFinite(leader.value) && leader.athlete?.displayName) entries.push({ leader, team });
+            }
+          }
+        }
+        entries.sort((a, b) => b.leader.value - a.leader.value);
+        if (!entries.length) leadersBody.append(element("p", "", "No game leaders are available for this category."));
+        else {
+          const list = element("ul");
+          entries.slice(0, 5).forEach(({ leader, team }, index) => {
+            const row = element("li", "sports-widget-row");
+            row.append(element("strong", "", String(index + 1)));
+            const portrait = teamLogo({ logo: leader.athlete.headshot });
+            const logo = portrait || teamLogo(team.team);
+            if (logo) row.append(logo);
+            const info = element("span");
+            info.append(element("strong", "", leader.athlete.displayName), element("small", "", team.team?.abbreviation || ""));
+            row.append(info, element("strong", "", leader.displayValue || String(leader.value)));
+            list.append(row);
+          });
+          leadersBody.append(list);
+        }
+      }
+
+      function renderInjuries() {
+        injuryBody.replaceChildren();
+        const reports = selectedSummary?.injuries;
+        if (!Array.isArray(reports) || !reports.some((group) => group.injuries?.length)) {
+          injuryBody.append(element("p", "", "No injury updates available for the selected game."));
+          return;
+        }
+        const list = element("ul");
+        const extra = element("ul");
+        for (const group of reports) {
+          for (const injury of group.injuries || []) {
+            const name = injury.athlete?.displayName;
+            if (!name || !injury.status) continue;
+            const row = element("li");
+            const updated = new Date(injury.date);
+            const timestamp = injury.date && !Number.isNaN(updated.getTime())
+              ? ` · Updated ${updated.toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : "";
+            row.append(element("strong", "", name), element("small", "", `${group.team?.abbreviation || group.team?.displayName || "Team"} · ${injury.status}${timestamp}`));
+            (list.children.length < 4 ? list : extra).append(row);
+          }
+        }
+        if (!list.children.length) injuryBody.append(element("p", "", "No injury updates available for the selected game."));
+        else {
+          injuryBody.append(list);
+          if (extra.children.length) {
+            const details = document.createElement("details");
+            details.append(element("summary", "", `Show ${extra.children.length} more`), extra);
+            injuryBody.append(details);
+          }
+        }
+      }
+
+      async function fetchWidget(url) {
+        const cached = sportsWidgetCache.get(url);
+        if (cached && cached.expires > Date.now()) return cached.data;
+        const response = await fetch(url, { signal });
+        if (!response.ok) throw new Error(`Sports data request failed (${response.status}).`);
+        const data = await response.json();
+        sportsWidgetCache.set(url, { data, expires: Date.now() + 10 * 60 * 1000 });
+        return data;
+      }
+
+      async function loadWidgets() {
+        const requestId = ++widgetRequestId;
+        const sport = activeSport;
+        const path = sport === "nba" ? "basketball/nba" : "football/nfl";
+        const standingsLoading = element("div", "sports-loading");
+        standingsLoading.setAttribute("role", "status");
+        standingsLoading.setAttribute("aria-label", "Loading standings");
+        const newsLoading = element("div", "sports-loading");
+        newsLoading.setAttribute("role", "status");
+        newsLoading.setAttribute("aria-label", "Loading sports news");
+        standingBody.replaceChildren(standingsLoading);
+        newsBody.replaceChildren(newsLoading);
+        const standingsTask = fetchWidget(`https://site.api.espn.com/apis/v2/sports/${path}/standings`).then((data) => {
+          if (requestId !== widgetRequestId || signal.aborted) return;
+          const groups = (data.children || []).filter((group) => Array.isArray(group.standings?.entries) && group.standings.entries.length);
+          if (!groups.length) throw new TypeError("Standings response contained no teams.");
+          const label = element("label", "", "Conference");
+          const select = document.createElement("select");
+          select.setAttribute("aria-label", "Standings conference");
+          groups.forEach((group, index) => { const option = element("option", "", group.name); option.value = String(index); select.append(option); });
+          const list = element("ul");
+          function draw() {
+            list.replaceChildren();
+            const entries = [...groups[Number(select.value)].standings.entries];
+            entries.sort((a, b) => (Number(b.stats?.find((s) => s.name === "winPercent")?.value) || 0) - (Number(a.stats?.find((s) => s.name === "winPercent")?.value) || 0));
+            entries.slice(0, 6).forEach((entry, index) => {
+              const row = element("li", "sports-widget-row");
+              row.append(element("strong", "", String(index + 1)));
+              const logo = teamLogo(entry.team);
+              if (logo) row.append(logo);
+              const followed = sport === "nba" && followedNbaTeams.some((team) => team.id === String(entry.team?.id));
+              row.append(element("span", "", `${followed ? "★ " : ""}${entry.team?.abbreviation || entry.team?.displayName || "Team"}`));
+              const wins = entry.stats?.find((stat) => stat.name === "wins")?.displayValue;
+              const losses = entry.stats?.find((stat) => stat.name === "losses")?.displayValue;
+              row.append(element("strong", "", wins != null && losses != null ? `${wins}-${losses}` : "—"));
+              list.append(row);
+            });
+          }
+          select.addEventListener("change", draw);
+          label.append(select);
+          standingBody.replaceChildren(label, list);
+          const link = element("a", "", `Full ${sport.toUpperCase()} standings`);
+          link.href = sport === "nba" ? "#sports-standings" : "https://www.espn.com/nfl/standings";
+          if (sport === "nfl") { link.target = "_blank"; link.rel = "noopener noreferrer"; }
+          standingBody.append(link);
+          draw();
+        }).catch((error) => {
+          if (signal.aborted || requestId !== widgetRequestId) return;
+          console.error("Could not load sports standings.", error);
+          standingBody.replaceChildren(element("p", "", "Standings are unavailable."));
+        });
+        const newsTask = fetchWidget(`https://site.api.espn.com/apis/site/v2/sports/${path}/news?limit=6`).then((data) => {
+          if (requestId !== widgetRequestId || signal.aborted) return;
+          if (!Array.isArray(data.articles)) throw new TypeError("Sports news response was incomplete.");
+          const list = element("ul");
+          const seen = new Set();
+          for (const article of data.articles) {
+            const href = article.links?.web?.href;
+            let url;
+            try { url = new URL(href); } catch { continue; }
+            if (!["http:", "https:"].includes(url.protocol) || !(url.hostname === "espn.com" || url.hostname.endsWith(".espn.com")) || !article.headline) continue;
+            url.protocol = "https:";
+            if (seen.has(url.href)) continue;
+            seen.add(url.href);
+            const item = element("li");
+            const link = element("a", `sports-news-link${seen.size === 1 ? " sports-news-feature" : ""}`);
+            link.href = url.href;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            const imageUrl = article.images?.[0]?.url;
+            if (imageUrl && /^https:\/\/[^/]+/i.test(imageUrl)) {
+              const img = document.createElement("img");
+              img.src = imageUrl;
+              img.alt = "";
+              img.loading = "lazy";
+              img.addEventListener("error", () => img.remove(), { once: true });
+              link.append(img);
+            }
+            const copy = element("span");
+            copy.append(element("strong", "", article.headline));
+            if (seen.size === 1 && article.description) copy.append(element("small", "", article.description));
+            const published = new Date(article.published);
+            let time = "";
+            if (!Number.isNaN(published.getTime())) {
+              const hours = Math.floor((Date.now() - published.getTime()) / 3600000);
+              time = hours >= 0 && hours < 24
+                ? (hours < 1 ? "just now" : new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(-hours, "hour"))
+                : published.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+            }
+            copy.append(element("small", "", `ESPN${time ? ` · ${time}` : ""}`));
+            link.append(copy);
+            item.append(link);
+            list.append(item);
+            if (seen.size === 6) break;
+          }
+          newsBody.replaceChildren(list.children.length ? list : element("p", "", "No news articles are available."));
+        }).catch((error) => {
+          if (signal.aborted || requestId !== widgetRequestId) return;
+          console.error("Could not load sports news.", error);
+          newsBody.replaceChildren(element("p", "", "Sports news is unavailable."));
+        });
+        await Promise.all([standingsTask, newsTask]);
+      }
+
+      document.addEventListener("sports-league", (event) => {
+        activeSport = event.detail;
+        selectedId = selections.get(activeSport) || null;
+        selectedSummary = summaries.get(activeSport) || null;
+        renderInjuries();
+        renderSchedule();
+        loadWidgets();
+      }, { signal });
+      document.addEventListener("sports-schedule", (event) => {
+        schedules.set(event.detail.sport, event.detail);
+        if (event.detail.sport === activeSport) renderSchedule();
+      }, { signal });
+      document.addEventListener("sports-selection", (event) => {
+        if (event.detail.sport !== activeSport) return;
+        const nextId = event.detail.event ? String(event.detail.event.id) : null;
+        if (selectedId !== nextId) {
+          selectedId = nextId;
+          selectedSummary = null;
+          selections.set(activeSport, nextId);
+          summaries.delete(activeSport);
+          renderInjuries();
+        }
+      }, { signal });
+      document.addEventListener("sports-summary", (event) => {
+        if (event.detail.sport !== activeSport || selectedId !== String(event.detail.event.id)) return;
+        selectedSummary = event.detail.summary;
+        summaries.set(activeSport, selectedSummary);
+        renderInjuries();
+      }, { signal });
+      document.addEventListener("sports-follows", () => { renderSchedule(); loadWidgets(); }, { signal });
+      renderSchedule();
+      renderInjuries();
+      loadWidgets();
+      return hub;
     }
 
     function createSportsScoreboards() {
@@ -3151,6 +3878,7 @@
         nbaTab.tabIndex = showNba ? 0 : -1;
         nflTab.tabIndex = showNba ? -1 : 0;
         if (!showNba && !nflPanel.firstChild) nflPanel.append(createNflScoreboard());
+        if (changed) document.dispatchEvent(new CustomEvent("sports-league", { detail: sport }));
         if (changed) {
           const activePanel = showNba ? nbaPanel : nflPanel;
           activePanel.querySelector(".game-tabs button[aria-selected='true'][id$='-tab-highlights']")?.click();
@@ -3179,7 +3907,7 @@
       const heading = element("div", "scoreboard-heading");
       const title = element("h3", "", "NFL SCORES");
       title.id = "nfl-scoreboard-title";
-      heading.append(title, element("p", "", "Every NFL game for the selected day · Auto-refreshes every 30 seconds while Sports is visible."));
+      heading.append(title, element("p", "", "Every NFL game for the selected day · Live games refresh more frequently."));
       const controls = element("div", "score-controls");
       const dateField = element("div", "field");
       const dateLabel = element("label", "", "Game day");
@@ -3251,6 +3979,8 @@
       section.dataset.loading = "true";
       gamesContainer.setAttribute("aria-busy", "true");
       if (!automatic) {
+        document.dispatchEvent(new CustomEvent("sports-schedule", { detail: { sport: "nfl", events: [], date: dateValue } }));
+        document.dispatchEvent(new CustomEvent("sports-selection", { detail: { sport: "nfl", event: null } }));
         status.classList.remove("error");
         status.textContent = "Loading NFL games…";
         updated.classList.remove("error");
@@ -3274,6 +4004,9 @@
           const competitors = event.competitions?.[0]?.competitors;
           return Array.isArray(competitors) && competitors.length >= 2;
         });
+        section.dataset.refreshInterval = games.some((event) => event.competitions?.[0]?.status?.type?.state === "in") ? "30000" : "300000";
+        section.dataset.lastRefresh = String(Date.now());
+        document.dispatchEvent(new CustomEvent("sports-schedule", { detail: { sport: "nfl", events: games, date: dateValue } }));
         const dayLabel = new Date(`${dateValue}T12:00:00`).toLocaleDateString(undefined, {
           weekday: "long", year: "numeric", month: "long", day: "numeric"
         });
@@ -3299,6 +4032,7 @@
             selectGame.setAttribute("aria-label", `Show game details: ${competitors[0].team?.displayName || "Away"} at ${competitors[1].team?.displayName || "Home"}`);
             selectGame.addEventListener("click", () => {
               selectedNflGameId = String(event.id);
+              document.dispatchEvent(new CustomEvent("sports-selection", { detail: { sport: "nfl", event } }));
               for (const gameCard of gamesContainer.querySelectorAll(".game-card")) {
                 const isSelected = gameCard.dataset.gameId === selectedNflGameId;
                 gameCard.classList.toggle("selected", isSelected);
@@ -3347,6 +4081,7 @@
           gamesContainer.replaceChildren(gameCards);
           const selectedEvent = games.find((event) => String(event.id) === selectedNflGameId) || games[0];
           selectedNflGameId = String(selectedEvent.id);
+          document.dispatchEvent(new CustomEvent("sports-selection", { detail: { sport: "nfl", event: selectedEvent } }));
           for (const card of gamesContainer.querySelectorAll(".game-card")) {
             const isSelected = card.dataset.gameId === selectedNflGameId;
             card.classList.toggle("selected", isSelected);
@@ -3368,7 +4103,7 @@
           detailArea.replaceChildren(element("p", "game-detail-placeholder", "NFL games could not be loaded. Refresh to try again."));
         } else {
           updated.classList.add("error");
-          updated.textContent = "Auto-refresh failed · retrying in 30 seconds";
+          updated.textContent = "Auto-refresh failed · retrying automatically";
         }
       } finally {
         if (requestId === nflRequestId) {
@@ -3442,8 +4177,9 @@
         teamSummary.append(scoreCard);
       }
       const { tabs, content } = renderGameTabs(event, summary, "nfl");
-      detailArea.replaceChildren(heading, detail, ...lines.map((line) => element("p", "game-detail-status", line)), teamSummary, tabs, content);
+      detailArea.replaceChildren(heading, detail, ...lines.map((line) => element("p", "game-detail-status", line)), teamSummary, tabs, content, createSportsMatchupAnalysis(event, summary));
       detailArea.dataset.gameId = String(event.id);
+      document.dispatchEvent(new CustomEvent("sports-summary", { detail: { sport: "nfl", event, summary } }));
     }
 
     function nbaSeasonApiYear() {
@@ -3781,6 +4517,8 @@
       section.dataset.loading = "true";
       gamesContainer.setAttribute("aria-busy", "true");
       if (!automatic) {
+        document.dispatchEvent(new CustomEvent("sports-schedule", { detail: { sport: "nba", events: [], date: dateValue } }));
+        document.dispatchEvent(new CustomEvent("sports-selection", { detail: { sport: "nba", event: null } }));
         status.classList.remove("error");
         status.textContent = "Loading NBA games…";
         updated.classList.remove("error");
@@ -3804,6 +4542,9 @@
         const data = await response.json();
         if (!Array.isArray(data.events)) throw new TypeError("NBA scoreboard response was incomplete.");
         if (requestId !== nbaRequestId) return;
+        section.dataset.refreshInterval = data.events.some((event) => event.competitions?.[0]?.status?.type?.state === "in") ? "30000" : "300000";
+        section.dataset.lastRefresh = String(Date.now());
+        document.dispatchEvent(new CustomEvent("sports-schedule", { detail: { sport: "nba", events: data.events, date: dateValue } }));
 
         if (data.events.length === 0) {
           status.classList.remove("error");
@@ -3848,6 +4589,7 @@
           selectGame.addEventListener("click", () => {
             selectedNbaGameId = String(event.id);
             selectedNbaGameState = competition.status?.type?.state || "";
+            document.dispatchEvent(new CustomEvent("sports-selection", { detail: { sport: "nba", event } }));
             openGameCenter(event, section);
           });
           const header = element("div", "game-card-header");
@@ -3930,6 +4672,7 @@
         gamesContainer.setAttribute("aria-busy", "false");
         const selectedEvent = validEvents.find((event) => String(event.id) === selectedNbaGameId);
         const nextEvent = selectedEvent || validEvents[0];
+        document.dispatchEvent(new CustomEvent("sports-selection", { detail: { sport: "nba", event: nextEvent } }));
         const nextState = nextEvent.competitions?.[0]?.status?.type?.state || "";
         const shouldRefreshDetails = !automatic || !selectedEvent ||
           (selectedEvent && (nextState === "in" || nextState !== selectedNbaGameState));
@@ -3960,7 +4703,7 @@
           detailArea.replaceChildren(element("p", "game-detail-placeholder", "NBA games could not be loaded. Refresh to try again."));
         } else {
           updated.classList.add("error");
-          updated.textContent = "Auto-refresh failed · retrying in 30 seconds";
+          updated.textContent = "Auto-refresh failed · retrying automatically";
         }
       } finally {
         if (requestId === nbaRequestId) {
@@ -4049,6 +4792,7 @@
         entries,
         appearance,
         followedNbaTeams,
+        kpopArtistFollows,
         deletedEntryIds,
         betUnitSize
       };
@@ -4080,6 +4824,7 @@
         Array.isArray(value.followedNbaTeams) &&
         Array.isArray(value.deletedEntryIds) &&
         value.appearance && typeof value.appearance === "object" &&
+        (value.kpopArtistFollows === undefined || validKpopFollows(value.kpopArtistFollows)) &&
         (value.betUnitSize === undefined || validBetUnitSize(value.betUnitSize));
     }
 
@@ -4106,6 +4851,7 @@
         entries: [...combined.values()],
         appearance: remoteState?.appearance || localState?.appearance || { ...defaultAppearance },
         followedNbaTeams: remoteState?.followedNbaTeams || localState?.followedNbaTeams || [],
+        kpopArtistFollows: mergeKpopArtistFollows(localState?.kpopArtistFollows, remoteState?.kpopArtistFollows),
         deletedEntryIds: [...tombstones],
         betUnitSize: mergeBetUnitSize(localState?.betUnitSize, remoteState?.betUnitSize)
       };
@@ -4116,6 +4862,7 @@
         entries,
         appearance,
         followedNbaTeams,
+        kpopArtistFollows,
         deletedEntryIds,
         betUnitSize
       };
@@ -4129,12 +4876,14 @@
       followedNbaTeams = state.followedNbaTeams.filter((team) =>
         team && typeof team.id === "string" && typeof team.name === "string" && typeof team.abbreviation === "string"
       );
+      kpopArtistFollows = state.kpopArtistFollows || [];
       betUnitSize = state.betUnitSize || { value: 5, updatedAt: "" };
       Object.assign(appearance, loadAppearanceFromValue(state.appearance));
       try {
         localStorage.setItem(storageKey, JSON.stringify(entries));
         localStorage.setItem(deletedEntriesStorageKey, JSON.stringify(deletedEntryIds));
         localStorage.setItem(nbaFollowStorageKey, JSON.stringify(followedNbaTeams));
+        localStorage.setItem(kpopFollowStorageKey, JSON.stringify(kpopArtistFollows));
         localStorage.setItem(appearanceStorageKey, JSON.stringify(appearance));
         localStorage.setItem(betUnitSizeStorageKey, JSON.stringify(betUnitSize));
       } catch (error) {
@@ -4247,10 +4996,13 @@
             const remote = payload.new?.data;
             if (!validCloudState(remote)) return;
             const mergedRemote = mergeAccountState(currentAccountState(), remote);
+            const followsNeedSync = JSON.stringify(mergedRemote.kpopArtistFollows) !==
+              JSON.stringify(mergeKpopArtistFollows([], remote.kpopArtistFollows));
             if (JSON.stringify(mergedRemote) !== JSON.stringify(currentAccountState())) {
               applyAccountState(mergedRemote);
               snapshotLocalState(user.id);
             }
+            if (followsNeedSync) scheduleCloudSync();
             setSyncStatus(`Synced · ${syncUser?.email || "signed in"}`);
           })
           .subscribe((state) => {
@@ -4438,7 +5190,7 @@
     function initializeGlassLighting() {
       const capable = window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
       const selector = ".dial a, .resources a, button.secondary, .bet-import-submit, .entry-form > button:not(.secondary), " +
-        ".sync-panel button:not(.secondary), .game-card, .artist-choice, .game-calendar-day:not(:disabled)";
+        ".sync-panel button:not(.secondary), .game-card, .artist-choice, .game-calendar-day:not(:disabled), .kpop-discovery-card, .kpop-quick-link";
       let active = null;
       let frame = 0;
       let x = 50;
@@ -6502,6 +7254,469 @@
       }
     }
 
+    async function fetchKpopCollection(endpoint, params, signal) {
+      const all = [];
+      let total = null;
+      let pages = 1;
+      for (let page = 1; page <= pages; page++) {
+        const query = new URLSearchParams({ ...params, per_page: "100", page: String(page) });
+        const response = await fetch(`https://kpopofficial.com/wp-json/wp/v2/${endpoint}?${query}`, { signal });
+        if (!response.ok) throw new Error(`KPOP OFFICIAL request failed (${response.status}).`);
+        const data = await response.json();
+        const totalHeader = response.headers.get("X-WP-Total");
+        const pagesHeader = response.headers.get("X-WP-TotalPages");
+        if (!Array.isArray(data) || totalHeader === null || !/^\d+$/.test(totalHeader) ||
+          pagesHeader === null || !/^\d+$/.test(pagesHeader) ||
+          (page > 1 && (total !== Number(totalHeader) || pages !== Number(pagesHeader)))) {
+          throw new TypeError("KPOP OFFICIAL data was incomplete or changed while loading.");
+        }
+        total = Number(totalHeader);
+        pages = Number(pagesHeader);
+        if ((total > 0 && pages < 1) || (total === 0 && pages > 1)) throw new TypeError("KPOP OFFICIAL pagination was incomplete.");
+        all.push(...data);
+      }
+      if (all.length !== total) throw new TypeError("KPOP OFFICIAL results were incomplete.");
+      return all;
+    }
+
+    function kpopCountdown(date) {
+      const today = localDateValue(new Date());
+      const days = Math.round((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86400000);
+      return days === 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days} days`;
+    }
+
+    function kpopAvatar(name, signal) {
+      const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+      const avatar = element("span", "kpop-avatar", initials || "?");
+      avatar.setAttribute("aria-hidden", "true");
+      loadKpopArtistPhoto({ name }, avatar, signal);
+      return avatar;
+    }
+
+    function kpopMedia(url, alt = "") {
+      const media = element("div", "kpop-card-media");
+      if (url) {
+        const image = document.createElement("img");
+        image.src = url;
+        image.alt = alt;
+        image.loading = "lazy";
+        image.addEventListener("error", () => image.remove(), { once: true });
+        media.append(image);
+      }
+      return media;
+    }
+
+    function createKpopSidebars() {
+      kpopSidebarController?.abort();
+      const controller = new AbortController();
+      kpopSidebarController = controller;
+      const signal = controller.signal;
+      const featured = element("section", "kpop-featured");
+      featured.hidden = true;
+      featured.setAttribute("aria-label", "Featured upcoming release");
+      const left = element("aside", "kpop-sidebar");
+      left.setAttribute("aria-label", "K-pop favorites and links");
+      const favorites = element("section");
+      favorites.append(element("h3", "", "YOUR FAVORITES"));
+      const favoriteList = element("ul");
+      const favoriteStatus = element("p", "", "Follow artists to see their upcoming releases.");
+      const form = element("form", "kpop-follow-form");
+      const input = document.createElement("input");
+      input.type = "search";
+      input.maxLength = 100;
+      input.required = true;
+      input.placeholder = "Find an artist";
+      input.setAttribute("aria-label", "Find a K-pop artist to follow");
+      const search = element("button", "secondary", "Find artist");
+      search.type = "submit";
+      const searchStatus = element("p");
+      searchStatus.setAttribute("role", "status");
+      const searchResults = element("ul");
+      form.append(input, search);
+      favorites.append(favoriteList, favoriteStatus, form, searchStatus, searchResults);
+
+      const upcoming = element("section");
+      upcoming.append(element("h3", "", "UPCOMING COMEBACKS"));
+      const upcomingStatus = element("p", "", "Follow artists to see releases in the next three calendar months.");
+      upcomingStatus.setAttribute("role", "status");
+      const upcomingList = element("ul");
+      const retryCalendar = element("button", "secondary", "Retry releases");
+      retryCalendar.type = "button";
+      retryCalendar.hidden = true;
+      upcoming.append(upcomingStatus, upcomingList, retryCalendar);
+      const quickLinks = element("section");
+      quickLinks.append(element("h3", "", "QUICK LINKS"));
+      const links = element("ul");
+      for (const [label, href, icon] of [
+        ["Soompi", "https://www.soompi.com/", "N"],
+        ["allkpop", "https://www.allkpop.com/", "K"],
+        ["K-pop playlists on Spotify", "https://open.spotify.com/search/k-pop/playlists", "♫"]
+      ]) {
+        const item = element("li");
+        const link = element("a", "kpop-quick-link");
+        const glyph = element("span", "", icon);
+        glyph.setAttribute("aria-hidden", "true");
+        link.append(glyph, document.createTextNode(label));
+        link.href = href;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        item.append(link);
+        links.append(item);
+      }
+      quickLinks.append(links);
+      left.append(favorites, upcoming, quickLinks);
+
+      const right = element("aside", "kpop-sidebar");
+      right.setAttribute("aria-label", "K-pop news and discovery");
+      const news = element("section");
+      news.append(element("h3", "", "LATEST K-POP NEWS"));
+      const newsContent = element("div");
+      news.append(newsContent);
+      const trending = element("section");
+      trending.append(element("h3", "", "ARTISTS IN THE RELEASE CALENDAR"));
+      const trendingStatus = element("p", "", "Loading calendar activity…");
+      const trendingList = element("ul");
+      const retryTrending = element("button", "secondary", "Retry calendar activity");
+      retryTrending.type = "button";
+      retryTrending.hidden = true;
+      trending.append(trendingStatus, trendingList, retryTrending);
+      const videos = element("section");
+      videos.append(element("h3", "", "NEW MUSIC VIDEOS"));
+      const videosContent = element("div");
+      videos.append(videosContent);
+      right.append(news, trending, videos);
+
+      let calendarData = null;
+      let searchController;
+      signal.addEventListener("abort", () => searchController?.abort(), { once: true });
+
+      function renderFavorites() {
+        favoriteList.replaceChildren();
+        const followed = kpopArtistFollows.filter((artist) => artist.followed).sort((a, b) => a.name.localeCompare(b.name));
+        favoriteStatus.hidden = followed.length > 0;
+        for (const artist of followed) {
+          const item = element("li", "kpop-followed-item");
+          const remove = element("button", "secondary", "Remove");
+          remove.type = "button";
+          remove.setAttribute("aria-label", `Unfollow ${artist.name}`);
+          remove.addEventListener("click", () => {
+            if (!setKpopFollow(artist, false)) return;
+            renderFavorites();
+            renderUpcoming();
+            for (const button of searchResults.querySelectorAll("button")) {
+              if (button.dataset.artistKey === `${artist.taxonomy}:${artist.id}`) {
+                button.disabled = false;
+                button.textContent = "Follow";
+              }
+            }
+          });
+          const identity = element("span", "kpop-identity");
+          identity.append(kpopAvatar(artist.name, signal), element("strong", "", artist.name));
+          item.append(identity, remove);
+          favoriteList.append(item);
+        }
+      }
+
+      function renderUpcoming() {
+        upcomingList.replaceChildren();
+        renderFeatured();
+        const followed = kpopArtistFollows.filter((artist) => artist.followed);
+        if (!followed.length) {
+          upcomingStatus.textContent = "Follow artists to see releases in the next three calendar months.";
+          return;
+        }
+        if (!calendarData) {
+          if (retryCalendar.hidden) upcomingStatus.textContent = "Loading upcoming releases…";
+          return;
+        }
+        const today = localDateValue(new Date());
+        const matches = calendarData.releases.filter((release) => release.date >= today && followed.some((artist) =>
+          release.artists.some((item) => item.taxonomy === artist.taxonomy && item.id === artist.id)
+        )).sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
+        const coverage = `${calendarData.coverage}. Refreshed ${new Date(calendarData.fetchedAt).toLocaleString()}.`;
+        upcomingStatus.textContent = matches.length
+          ? `From KPOP OFFICIAL, ${coverage}`
+          : `No dated releases found for your followed artists, ${coverage}`;
+        for (const release of matches.slice(0, 8)) {
+          const item = element("li");
+          const link = element("a", "kpop-discovery-card kpop-upcoming-card");
+          link.href = release.url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          const date = new Date(`${release.date}T12:00:00`);
+          const body = element("span", "kpop-card-body");
+          body.append(element("strong", "", release.title), element("small", "", `${new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date)} · ${kpopCountdown(release.date)}`));
+          const matchedArtist = followed.find((artist) => release.artists.some((item) => item.taxonomy === artist.taxonomy && item.id === artist.id));
+          if (matchedArtist) link.append(kpopAvatar(matchedArtist.name, signal));
+          link.append(body);
+          item.append(link);
+          upcomingList.append(item);
+        }
+        if (matches.length > 8) upcomingStatus.textContent += ` Showing the first 8 of ${matches.length}.`;
+      }
+
+      function renderFeatured() {
+        featured.hidden = true;
+        featured.replaceChildren();
+        if (!calendarData) return;
+        const followed = kpopArtistFollows.filter((artist) => artist.followed);
+        const candidates = calendarData.releases.filter((release) => release.date >= localDateValue(new Date()))
+          .sort((a, b) => Number(b.artists.some((artist) => followed.some((follow) => follow.id === artist.id && follow.taxonomy === artist.taxonomy))) -
+            Number(a.artists.some((artist) => followed.some((follow) => follow.id === artist.id && follow.taxonomy === artist.taxonomy))) ||
+            a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
+        if (!candidates.length) return;
+        const release = candidates[0];
+        const copy = element("div");
+        copy.append(element("span", "kpop-kicker", "UP NEXT"), element("h3", "", release.title),
+          element("p", "", `${new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(new Date(`${release.date}T12:00:00`))} · ${kpopCountdown(release.date)} · KPOP OFFICIAL`),
+          element("p", "", `Calendar snapshot refreshed ${new Date(calendarData.fetchedAt).toLocaleString()}.`));
+        const link = element("a", "", "View release ↗");
+        link.href = release.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        copy.append(link);
+        const media = kpopMedia("");
+        featured.append(copy, media);
+        featured.hidden = false;
+        fetch(`https://kpopofficial.com/wp-json/wp/v2/album/${encodeURIComponent(release.id)}?_fields=id,content`, { signal })
+          .then((response) => {
+            if (!response.ok) throw new Error(`Featured artwork request failed (${response.status}).`);
+            return response.json();
+          }).then((data) => {
+            if (signal.aborted || !media.isConnected || data.id !== release.id || typeof data.content?.rendered !== "string") return;
+            const template = document.createElement("template");
+            template.innerHTML = data.content.rendered;
+            const headings = [...template.content.querySelectorAll("h2, h3")];
+            const imageUrl = (label) => headings.find((heading) => heading.textContent.trim().toLowerCase() === label)?.parentElement?.querySelector("img")?.getAttribute("src");
+            const source = imageUrl("album details") || imageUrl("teaser poster");
+            if (!source) return;
+            const url = new URL(source);
+            if (url.protocol !== "https:" || url.hostname !== "kpopofficial.com" || !url.pathname.startsWith("/wp-content/uploads/")) throw new TypeError("Unsupported featured image URL.");
+            const image = document.createElement("img");
+            image.src = url.href;
+            image.alt = imageUrl("album details") ? "Album cover" : "Artist or teaser image";
+            image.addEventListener("error", () => image.remove(), { once: true });
+            media.append(image);
+          }).catch((error) => { if (error.name !== "AbortError") console.warn("Could not load featured artwork.", error); });
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const query = input.value.trim();
+        if (!query) { input.focus(); return; }
+        searchController?.abort();
+        const request = new AbortController();
+        searchController = request;
+        search.disabled = true;
+        searchResults.replaceChildren();
+        searchStatus.textContent = "Searching KPOP OFFICIAL…";
+        try {
+          const groups = await Promise.all(["group", "artist_solo"].map(async (taxonomy) => {
+            const terms = await fetchKpopCollection(taxonomy, { search: query, _fields: "id,name" }, request.signal);
+            return terms.map((term) => ({ taxonomy, id: term.id, name: term.name }));
+          }));
+          if (request.signal.aborted || signal.aborted || !left.isConnected) return;
+          const matches = groups.flat().filter((artist) => validKpopFollows([{ ...artist, followed: true, updatedAt: new Date().toISOString() }]))
+            .sort((a, b) => Number(b.name.toLocaleLowerCase() === query.toLocaleLowerCase()) - Number(a.name.toLocaleLowerCase() === query.toLocaleLowerCase()) || a.name.localeCompare(b.name));
+          searchStatus.textContent = matches.length ? `Choose an artist${matches.length > 20 ? " (first 20 shown)" : ""}.` : "No matching artists found.";
+          for (const artist of matches.slice(0, 20)) {
+            const item = element("li", "kpop-follow-result");
+            const button = element("button", "secondary", "Follow");
+            button.type = "button";
+            button.dataset.artistKey = `${artist.taxonomy}:${artist.id}`;
+            button.disabled = kpopArtistFollows.some((follow) => follow.followed && follow.id === artist.id && follow.taxonomy === artist.taxonomy);
+            if (button.disabled) button.textContent = "Following";
+            button.setAttribute("aria-label", `Follow ${artist.name}`);
+            button.addEventListener("click", () => {
+              if (!setKpopFollow(artist, true)) return;
+              button.disabled = true;
+              button.textContent = "Following";
+              renderFavorites();
+              renderUpcoming();
+            });
+            item.append(element("span", "", `${artist.name} · ${artist.taxonomy === "group" ? "Group" : "Solo"}`), button);
+            searchResults.append(item);
+          }
+        } catch (error) {
+          if (error.name === "AbortError" || signal.aborted) return;
+          console.error("Could not search K-pop artists.", error);
+          searchStatus.textContent = "Couldn’t search artists. Check your connection and try again.";
+        } finally {
+          if (searchController === request) search.disabled = false;
+        }
+      });
+
+      async function loadCalendarActivity() {
+        retryCalendar.hidden = true;
+        retryTrending.hidden = true;
+        calendarData = null;
+        renderUpcoming();
+        trendingStatus.textContent = "Loading calendar activity…";
+        trendingList.replaceChildren();
+        try {
+          const response = await fetch(new URL("data/kpop-sidebar.json", location.href), { signal });
+          if (!response.ok) throw new Error(`Sidebar calendar request failed (${response.status}).`);
+          const snapshot = (await response.json()).calendar;
+          if (!snapshot || !Number.isFinite(Date.parse(snapshot.fetchedAt)) ||
+            !Array.isArray(snapshot.dateTerms) || !Array.isArray(snapshot.monthTerms) ||
+            !Array.isArray(snapshot.yearTerms) || !Array.isArray(snapshot.periods) ||
+            !snapshot.periods.length || !Array.isArray(snapshot.names)) {
+            throw new TypeError("Calendar activity data was incomplete.");
+          }
+          const { dateTerms, monthTerms, yearTerms } = snapshot;
+          const dates = new Map(dateTerms.map((term) => [term.id, Number(term.name)]));
+          const months = new Map(monthTerms.map((term) => [Number(term.slug?.slice(0, 2)), term.id]));
+          const years = new Map(yearTerms.map((term) => [Number(term.name), term.id]));
+          if (dates.size !== 31 || months.size !== 12 || !years.size) throw new TypeError("Calendar date information was incomplete.");
+          const periods = snapshot.periods;
+          if (periods.some((period) => !Number.isInteger(period.year) || !Number.isInteger(period.month) ||
+            !months.has(period.month) || !years.has(period.year) || !Array.isArray(period.releases))) {
+            throw new TypeError("Calendar activity periods were incomplete.");
+          }
+          if (signal.aborted || !left.isConnected) return;
+          const decoder = document.createElement("textarea");
+          const releases = [];
+          const counts = new Map();
+          let omitted = 0;
+          for (const [index, period] of periods.entries()) {
+            const year = period.year;
+            const month = period.month;
+            for (const item of period.releases) {
+              const ids = item["calendar-date"];
+              const day = Array.isArray(ids) && ids.length === 1 ? dates.get(ids[0]) : null;
+              let url;
+              try { url = new URL(item.link); } catch (error) { console.warn("Invalid K-pop release URL.", error); }
+              if (!Number.isInteger(day) || day < 1 || day > new Date(year, month, 0).getDate() ||
+                !Array.isArray(item["calendar-month"]) || item["calendar-month"].length !== 1 || item["calendar-month"][0] !== months.get(month) ||
+                !Array.isArray(item["calendar-year"]) || item["calendar-year"].length !== 1 || item["calendar-year"][0] !== years.get(year) ||
+                !Number.isSafeInteger(item.id) || item.id <= 0 ||
+                typeof item.title?.rendered !== "string" || !item.title.rendered.trim() ||
+                !url || url.protocol !== "https:" || url.hostname !== "kpopofficial.com") {
+                omitted++;
+                continue;
+              }
+              const artists = ["group", "artist_solo"].flatMap((taxonomy) => (Array.isArray(item[taxonomy]) ? item[taxonomy] : [])
+                .filter((id, index, ids) => Number.isSafeInteger(id) && id > 0 && ids.indexOf(id) === index)
+                .map((id) => ({ taxonomy, id })));
+              decoder.innerHTML = item.title.rendered;
+              releases.push({ id: item.id, title: decoder.value, url: url.href, date: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`, artists });
+              if (index === 0) for (const artist of artists) {
+                const key = `${artist.taxonomy}:${artist.id}`;
+                const count = counts.get(key) || { ...artist, count: 0 };
+                count.count++;
+                counts.set(key, count);
+              }
+            }
+          }
+          const first = periods[0];
+          const last = periods[periods.length - 1];
+          const formatMonth = (period) => new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" })
+            .format(new Date(period.year, period.month - 1, 1));
+          calendarData = {
+            releases, fetchedAt: snapshot.fetchedAt,
+            coverage: first === last ? formatMonth(first) : `${formatMonth(first)}–${formatMonth(last)}`
+          };
+          renderUpcoming();
+          const ranked = [...counts.values()].sort((a, b) => b.count - a.count || a.id - b.id).slice(0, 5);
+          const names = ranked.map((artist) => {
+            const term = snapshot.names.find((item) => item.taxonomy === artist.taxonomy && item.id === artist.id);
+            if (!term || typeof term.name !== "string" || !term.name.trim()) throw new TypeError("Artist name was incomplete.");
+            return { ...artist, name: term.name };
+          });
+          if (signal.aborted || !right.isConnected) return;
+          trendingStatus.textContent = names.length
+            ? `Ranked by dated releases in ${formatMonth(first)}, not popularity. Refreshed ${new Date(snapshot.fetchedAt).toLocaleString()}.`
+            : `No artists with dated releases are listed for ${formatMonth(first)}.`;
+          if (omitted) {
+            console.warn(`${omitted} sidebar releases had ambiguous or invalid calendar data.`);
+            trendingStatus.textContent += ` ${omitted} release${omitted === 1 ? "" : "s"} could not be displayed.`;
+          }
+          for (const artist of names) {
+            const item = element("li", "kpop-identity");
+            const text = element("span");
+            text.append(element("strong", "", artist.name), element("small", "", `${artist.count} listed release${artist.count === 1 ? "" : "s"}`));
+            item.append(kpopAvatar(artist.name, signal), text);
+            trendingList.append(item);
+          }
+        } catch (error) {
+          if (error.name === "AbortError" || signal.aborted) return;
+          console.error("Could not load K-pop calendar activity.", error);
+          if (!calendarData) upcomingStatus.textContent = "Couldn’t load upcoming releases. Try again.";
+          trendingStatus.textContent = "Couldn’t load calendar activity. Try again.";
+          retryCalendar.hidden = false;
+          retryTrending.hidden = false;
+        }
+      }
+      retryCalendar.addEventListener("click", loadCalendarActivity);
+      retryTrending.addEventListener("click", loadCalendarActivity);
+
+      async function loadSidebarFeeds() {
+        newsContent.replaceChildren(element("p", "", "Loading news…"), element("div", "kpop-skeleton"));
+        videosContent.replaceChildren(element("p", "", "Loading videos…"), element("div", "kpop-skeleton"));
+        try {
+          const response = await fetch(new URL("data/kpop-sidebar.json", location.href), { signal });
+          if (!response.ok) throw new Error(`Sidebar data request failed (${response.status}).`);
+          const data = await response.json();
+          if (signal.aborted || !right.isConnected) return;
+          for (const [container, feed, source, hosts] of [
+            [newsContent, data.news, "Soompi music", ["soompi.com", "www.soompi.com"]],
+            [videosContent, data.videos, "1theK on YouTube", ["www.youtube.com"]]
+          ]) {
+            if (!feed || !Array.isArray(feed.items) || !Number.isFinite(Date.parse(feed.fetchedAt))) {
+              container.replaceChildren(element("p", "", `${source} is unavailable. Try again later.`));
+              continue;
+            }
+            container.replaceChildren(element("p", "", `${source} · refreshed ${new Date(feed.fetchedAt).toLocaleString()}`));
+            const list = element("ul");
+            for (const [index, entry] of feed.items.entries()) {
+              let url;
+              try { url = new URL(entry.url); } catch (error) { console.warn("Invalid sidebar link.", error); continue; }
+              if (url.protocol !== "https:" || !hosts.includes(url.hostname) || typeof entry.title !== "string" || !entry.title.trim()) continue;
+              const item = element("li");
+              const link = element("a", `kpop-discovery-card${source === "Soompi music" && index > 0 ? " kpop-news-compact" : ""}`);
+              link.href = url.href;
+              link.target = "_blank";
+              link.rel = "noopener noreferrer";
+              let image = "";
+              if (source === "1theK on YouTube" && /^[A-Za-z0-9_-]{11}$/.test(url.searchParams.get("v") || "")) {
+                image = `https://i.ytimg.com/vi/${url.searchParams.get("v")}/mqdefault.jpg`;
+              } else if (typeof entry.image === "string") {
+                try {
+                  const imageUrl = new URL(entry.image);
+                  if (imageUrl.protocol === "https:" && imageUrl.hostname.endsWith(".soompi.io")) image = imageUrl.href;
+                } catch (error) { console.warn("Invalid news image URL.", error); }
+              }
+              const media = kpopMedia(image);
+              if (source === "1theK on YouTube") {
+                const play = element("span", "kpop-play", "▶");
+                play.setAttribute("aria-hidden", "true");
+                media.append(play);
+              }
+              link.append(media);
+              const body = element("span", "kpop-card-body");
+              body.append(element("strong", "", entry.title));
+              const date = Number.isFinite(Date.parse(entry.published)) ? ` · ${new Date(entry.published).toLocaleDateString()}` : "";
+              body.append(element("small", "", `${source}${date}`));
+              link.append(body);
+              item.append(link);
+              list.append(item);
+            }
+            if (list.childElementCount) container.append(list);
+            else container.append(element("p", "", "No items are available."));
+          }
+        } catch (error) {
+          if (error.name === "AbortError" || signal.aborted) return;
+          console.error("Could not load K-pop news and videos.", error);
+          newsContent.replaceChildren(element("p", "", "News is unavailable. Try again later."));
+          videosContent.replaceChildren(element("p", "", "Videos are unavailable. Try again later."));
+        }
+      }
+      renderFavorites();
+      loadCalendarActivity();
+      loadSidebarFeeds();
+      return { left, right, featured };
+    }
+
     function createKpopReleaseCalendar() {
       kpopCalendarController?.abort();
       const controller = new AbortController();
@@ -6557,7 +7772,11 @@
       let imageController;
       let drawerState = null;
       const imageCache = new Map();
+      const monthCache = new Map();
+      let activityVersion = 0;
       let initialized = false;
+      section.addEventListener("click", () => { activityVersion++; });
+      section.addEventListener("change", () => { activityVersion++; });
       controller.signal.addEventListener("abort", () => {
         monthController?.abort();
         imageController?.abort();
@@ -7124,7 +8343,18 @@
           const row = element("li", "game-calendar-release");
           const images = element("div", "kpop-release-images");
           const copy = element("div", "game-calendar-release-copy");
+          const artistName = element("span", "kpop-kicker");
+          if (item.artist) {
+            copy.append(artistName);
+            loadArtistName(item.artist, signal).then((name) => {
+              if (!signal.aborted && artistName.isConnected) artistName.textContent = name;
+            }).catch((error) => {
+              if (error.name !== "AbortError") console.warn("Could not load release artist.", error);
+            });
+          }
           copy.append(albumButton(item.title, (button) => openListedRelease(item, button)));
+          const type = /\b(mini album|full album|single album|digital single|single|album|ep)\b/i.exec(item.title);
+          copy.append(element("small", "", `${formatDate(selectedDate)}${type ? ` · ${type[0]}` : ""}`));
           if (item.artist) {
             const discography = element("button", "secondary kpop-discography-button", "View artist discography");
             discography.type = "button";
@@ -7166,7 +8396,9 @@
           const button = element("button", "game-calendar-day");
           button.type = "button";
           button.setAttribute("aria-pressed", String(date === selectedDate));
+          if (date === localDateValue(new Date())) button.setAttribute("aria-current", "date");
           button.setAttribute("aria-label", `${formatDate(date)}, ${count} release${count === 1 ? "" : "s"}`);
+          if (count) button.title = (releasesByDate.get(date) || []).map((item) => item.title).join("\n");
           button.append(element("span", "game-calendar-day-number", String(day)));
           if (count) button.append(element("span", "game-calendar-day-count", `${count} release${count === 1 ? "" : "s"}`));
           button.addEventListener("click", () => {
@@ -7187,52 +8419,68 @@
         next.disabled = visibleMonth.getFullYear() === maxYear && visibleMonth.getMonth() === 11;
       }
 
-      async function loadMonth() {
+      async function loadMonth(snapshot = null, background = false) {
         const requestId = ++monthRequestId;
         monthController?.abort();
-        imageController?.abort();
+        if (!background) imageController?.abort();
         monthController = new AbortController();
+        const activityAtStart = activityVersion;
+        const previewStatus = background ? status.textContent.replace(" · checking for updates…", "") : "";
         retry.hidden = true;
         status.classList.remove("error");
-        status.textContent = "Loading K-pop releases…";
-        releasesByDate = new Map();
-        grid.replaceChildren();
-        releases.replaceChildren();
-        setLoading(true);
+        if (!background) {
+          status.textContent = "Loading K-pop releases…";
+          releasesByDate = new Map();
+          grid.replaceChildren();
+          releases.replaceChildren();
+          setLoading(true);
+        }
         const year = visibleMonth.getFullYear();
         const month = visibleMonth.getMonth() + 1;
+        const cacheKey = `${year}-${month}`;
         try {
           const monthId = months.get(month);
           const yearId = years.get(year);
           if (!monthId || !yearId) throw new Error("This month is not available in the source calendar.");
-          const all = [];
-          let pageCount = 1;
-          let totalCount = null;
-          for (let page = 1; page <= pageCount; page++) {
-            const params = new URLSearchParams({
-              "calendar-month": String(monthId), "calendar-year": String(yearId),
-              per_page: "100", page: String(page),
-              _fields: "id,title,link,calendar-date,calendar-month,calendar-year,group,artist_solo"
-            });
-            const response = await fetch(`${apiBase}album?${params}`, { signal: monthController.signal });
-            if (!response.ok) throw new Error(`Release request failed (${response.status}).`);
-            const data = await response.json();
-            const pages = response.headers.get("X-WP-TotalPages");
-            const total = response.headers.get("X-WP-Total");
-            if (!Array.isArray(data) || pages === null || !/^\d+$/.test(pages) ||
-              total === null || !/^\d+$/.test(total) ||
-              (Number(total) > 0 && Number(pages) < 1) ||
-              (Number(total) === 0 && Number(pages) > 1) ||
-              (page > 1 && (Number(pages) !== pageCount || Number(total) !== totalCount))) {
-              throw new TypeError("Release data was incomplete or changed while loading.");
+          const cached = monthCache.get(cacheKey);
+          let all;
+          if (snapshot) {
+            all = snapshot.releases;
+          } else if (cached && Date.now() - cached.fetchedAt < 5 * 60 * 1000) {
+            all = cached.releases;
+          } else {
+            all = [];
+            let pageCount = 1;
+            let totalCount = null;
+            for (let page = 1; page <= pageCount; page++) {
+              const params = new URLSearchParams({
+                "calendar-month": String(monthId), "calendar-year": String(yearId),
+                per_page: "100", page: String(page),
+                _fields: "id,title,link,calendar-date,calendar-month,calendar-year,group,artist_solo"
+              });
+              const response = await fetch(`${apiBase}album?${params}`, { signal: monthController.signal });
+              if (!response.ok) throw new Error(`Release request failed (${response.status}).`);
+              const data = await response.json();
+              const pages = response.headers.get("X-WP-TotalPages");
+              const total = response.headers.get("X-WP-Total");
+              if (!Array.isArray(data) || pages === null || !/^\d+$/.test(pages) ||
+                total === null || !/^\d+$/.test(total) ||
+                (Number(total) > 0 && Number(pages) < 1) ||
+                (Number(total) === 0 && Number(pages) > 1) ||
+                (page > 1 && (Number(pages) !== pageCount || Number(total) !== totalCount))) {
+                throw new TypeError("Release data was incomplete or changed while loading.");
+              }
+              pageCount = Number(pages);
+              totalCount = Number(total);
+              all.push(...data);
             }
-            pageCount = Number(pages);
-            totalCount = Number(total);
-            all.push(...data);
+            if (all.length !== totalCount) throw new TypeError("Release data did not include every result.");
+            if (requestId !== monthRequestId || !section.isConnected) return;
+            monthCache.set(cacheKey, { releases: all, fetchedAt: Date.now() });
           }
-          if (all.length !== totalCount) throw new TypeError("Release data did not include every result.");
           if (requestId !== monthRequestId || !section.isConnected) return;
           let omitted = 0;
+          const loadedReleases = new Map();
           const decoder = document.createElement("textarea");
           for (const item of all) {
             const dayIds = item["calendar-date"];
@@ -7254,31 +8502,47 @@
             }
             decoder.innerHTML = item.title.rendered;
             const date = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-            const items = releasesByDate.get(date) || [];
+            const items = loadedReleases.get(date) || [];
             const groupId = Array.isArray(item.group) ? item.group.find(Number.isSafeInteger) : undefined;
             const soloId = Array.isArray(item.artist_solo) ? item.artist_solo.find(Number.isSafeInteger) : undefined;
             const artist = groupId ? { taxonomy: "group", id: groupId } : soloId ? { taxonomy: "artist_solo", id: soloId } : null;
             items.push({ id: item.id, title: decoder.value, url: url.href, artist });
-            releasesByDate.set(date, items);
+            loadedReleases.set(date, items);
           }
-          for (const items of releasesByDate.values()) items.sort((a, b) => a.title.localeCompare(b.title));
+          for (const items of loadedReleases.values()) items.sort((a, b) => a.title.localeCompare(b.title));
           const shown = all.length - omitted;
-          status.textContent = `${shown} listed release${shown === 1 ? "" : "s"}${omitted ? ` · ${omitted} could not be displayed because their date or details were unclear` : ""}.`;
+          const summary = `${shown} listed release${shown === 1 ? "" : "s"}${omitted ? ` · ${omitted} could not be displayed because their date or details were unclear` : ""}.`;
           if (omitted) console.warn(`${omitted} K-pop releases had ambiguous or invalid calendar data.`);
+          if (background && activityVersion !== activityAtStart &&
+            JSON.stringify([...loadedReleases]) !== JSON.stringify([...releasesByDate])) {
+            status.textContent = `${previewStatus}. Updated releases are available.`;
+            retry.textContent = "Show updates";
+            retry.hidden = false;
+            return;
+          }
+          status.textContent = snapshot
+            ? `${summary} Preview refreshed ${new Date(snapshot.fetchedAt).toLocaleString()} · checking for updates…`
+            : summary;
+          if (background && JSON.stringify([...loadedReleases]) === JSON.stringify([...releasesByDate])) return;
+          releasesByDate = loadedReleases;
           renderGrid();
           renderSelected();
         } catch (error) {
           if (error.name === "AbortError" || requestId !== monthRequestId) return;
           console.error("Could not load K-pop releases.", error);
           status.classList.add("error");
-          status.textContent = "Couldn’t load K-pop releases. Check your connection and try again.";
+          status.textContent = background
+            ? `${previewStatus}. Live updates couldn’t be loaded. Check your connection and try again.`
+            : "Couldn’t load K-pop releases. Check your connection and try again.";
+          retry.textContent = "Try again";
           retry.hidden = false;
         } finally {
-          if (requestId === monthRequestId && section.isConnected) {
+          if (!background && requestId === monthRequestId && section.isConnected) {
             setLoading(false);
             updateNavigation();
           }
         }
+        if (snapshot && requestId === monthRequestId && section.isConnected) loadMonth(null, true);
       }
 
       function changeMonth(year, month) {
@@ -7305,14 +8569,35 @@
         status.textContent = "Loading K-pop release calendar…";
         setLoading(true);
         try {
-          const [dateTerms, monthTerms, yearTerms] = await Promise.all([
-            fetchTerms("calendar-date"), fetchTerms("calendar-month"), fetchTerms("calendar-year")
-          ]);
+          function setTerms(dateTerms, monthTerms, yearTerms) {
+            dates = new Map(dateTerms.map((term) => [term.id, Number(term.name)]).filter(([, day]) => Number.isInteger(day) && day >= 1 && day <= 31));
+            months = new Map(monthTerms.map((term) => [Number(term.slug?.slice(0, 2)), term.id]).filter(([month]) => Number.isInteger(month) && month >= 1 && month <= 12));
+            years = new Map(yearTerms.map((term) => [Number(term.name), term.id]).filter(([year]) => Number.isInteger(year) && year >= 1900 && year <= 9999).sort((a, b) => a[0] - b[0]));
+            if (dates.size !== 31 || months.size !== 12 || !years.size) throw new TypeError("Calendar date information was incomplete.");
+          }
+          let snapshot = null;
+          try {
+            const response = await fetch(new URL("data/kpop-calendar.json", location.href), { signal: controller.signal });
+            if (!response.ok) throw new Error(`Calendar preview request failed (${response.status}).`);
+            const candidate = await response.json();
+            const age = Date.now() - Date.parse(candidate.fetchedAt);
+            if (!Number.isFinite(age) || age < 0 || age > 48 * 60 * 60 * 1000 ||
+              candidate.year !== visibleMonth.getFullYear() || candidate.month !== visibleMonth.getMonth() + 1 ||
+              !Array.isArray(candidate.releases) || candidate.releases.some((item) => !item || typeof item !== "object")) {
+              throw new TypeError("Calendar preview is unavailable or out of date.");
+            }
+            setTerms(candidate.dateTerms, candidate.monthTerms, candidate.yearTerms);
+            if (!months.get(candidate.month) || !years.get(candidate.year)) throw new TypeError("Calendar preview taxonomy is incomplete.");
+            snapshot = candidate;
+          } catch (error) {
+            if (error.name === "AbortError") return;
+            console.warn("K-pop calendar preview unavailable; loading live data.", error);
+            const terms = await Promise.all([
+              fetchTerms("calendar-date"), fetchTerms("calendar-month"), fetchTerms("calendar-year")
+            ]);
+            setTerms(...terms);
+          }
           if (!section.isConnected) return;
-          dates = new Map(dateTerms.map((term) => [term.id, Number(term.name)]).filter(([, day]) => Number.isInteger(day) && day >= 1 && day <= 31));
-          months = new Map(monthTerms.map((term) => [Number(term.slug?.slice(0, 2)), term.id]).filter(([month]) => Number.isInteger(month) && month >= 1 && month <= 12));
-          years = new Map(yearTerms.map((term) => [Number(term.name), term.id]).filter(([year]) => Number.isInteger(year) && year >= 1900 && year <= 9999).sort((a, b) => a[0] - b[0]));
-          if (dates.size !== 31 || months.size !== 12 || !years.size) throw new TypeError("Calendar date information was incomplete.");
           monthSelect.replaceChildren();
           for (let month = 1; month <= 12; month++) {
             const option = element("option", "", new Intl.DateTimeFormat(undefined, { month: "long" }).format(new Date(2026, month - 1, 1)));
@@ -7331,7 +8616,7 @@
           }
           initialized = true;
           updateNavigation();
-          loadMonth();
+          loadMonth(snapshot);
         } catch (error) {
           if (error.name === "AbortError") return;
           console.error("Could not initialize the K-pop release calendar.", error);
@@ -7404,7 +8689,7 @@
 
     async function loadGameReleaseCalendar(calendar) {
       try {
-        const response = await fetch(new URL("data/game-releases.json", location.href), { cache: "no-cache" });
+        const response = await fetch(new URL("data/game-releases.json", location.href));
         if (!response.ok) throw new Error(`Release data request failed with status ${response.status}.`);
         const data = await response.json();
         if (!Array.isArray(data.releases) || !data.releases.length) throw new Error("Release data contained no games.");
@@ -8122,10 +9407,334 @@
       }
     }
 
+    const redditDefaults = { kpop: "kpop", sports: "nba", anime: "anime", movies: "movies", games: "gaming" };
+    const redditSubredditPattern = /^[A-Za-z0-9_]{3,21}$/;
+    function createRedditWidget(channelId) {
+      const section = element("section", "reddit-widget");
+      section.setAttribute("aria-label", "Reddit shortcut");
+      section.append(element("h3", "", "REDDIT"));
+      const storageKey = `seven-channels.reddit-subreddit.v1.${channelId}`;
+      const form = element("form", "reddit-form");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.maxLength = 21;
+      input.required = true;
+      input.placeholder = "Subreddit";
+      input.setAttribute("aria-label", "Subreddit name");
+      let saved = null;
+      let storageError = false;
+      try { saved = localStorage.getItem(storageKey); } catch { storageError = true; }
+      let subreddit = redditSubredditPattern.test(saved || "") ? saved : redditDefaults[channelId];
+      input.value = subreddit;
+      const go = element("button", "secondary", "Set");
+      go.type = "submit";
+      form.append(input, go);
+      const saveLabel = element("label", "reddit-save");
+      const save = document.createElement("input");
+      save.type = "checkbox";
+      save.checked = saved === subreddit;
+      saveLabel.append(save, document.createTextNode(" Remember on this device"));
+      const storageStatus = element("p", "reddit-status", storageError ? "Subreddit preferences are unavailable in this browser." : "");
+      storageStatus.setAttribute("role", "status");
+      const more = element("a", "reddit-more");
+      more.target = "_blank";
+      more.rel = "noopener noreferrer";
+      section.append(form, saveLabel, storageStatus, more);
+
+      function savePreference() {
+        try {
+          if (save.checked) localStorage.setItem(storageKey, subreddit);
+          else localStorage.removeItem(storageKey);
+          storageStatus.textContent = "";
+        } catch {
+          storageStatus.textContent = "Could not save your subreddit preference in this browser.";
+        }
+      }
+
+      function updateShortcut() {
+        more.href = `https://www.reddit.com/r/${encodeURIComponent(subreddit)}/`;
+        more.textContent = `Visit r/${subreddit} ↗`;
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const next = input.value.trim().replace(/^r\//i, "");
+        input.setCustomValidity(redditSubredditPattern.test(next) ? "" : "Enter a subreddit name with 3–21 letters, numbers, or underscores.");
+        if (!form.reportValidity()) return;
+        input.value = next;
+        subreddit = next;
+        if (save.checked) savePreference();
+        updateShortcut();
+      });
+      input.addEventListener("input", () => input.setCustomValidity(""));
+      save.addEventListener("change", savePreference);
+      updateShortcut();
+      return section;
+    }
+
+    function withRedditSidebar(channelId, content) {
+      const layout = element("div", "reddit-layout");
+      const main = element("div");
+      main.append(...content);
+      const aside = element("aside");
+      aside.setAttribute("aria-label", "Reddit community");
+      aside.append(createRedditWidget(channelId));
+      layout.append(main, aside);
+      return layout;
+    }
+
+    function createPoliticsDashboard() {
+      const dashboard = element("div", "politics-dashboard");
+      const loading = element("p", "politics-status", "Loading official congressional data…");
+      loading.setAttribute("role", "status");
+      dashboard.append(loading);
+      const favoritesKey = "seven-channels.politics-bill-favorites.v1";
+      let favorites = [];
+      let favoritesReadable = true;
+      try {
+        const saved = JSON.parse(localStorage.getItem(favoritesKey) || "[]");
+        if (!Array.isArray(saved) || !saved.every((bill) => bill && typeof bill.id === "string" && typeof bill.title === "string")) throw new TypeError("Invalid saved bills");
+        favorites = saved;
+      } catch (error) {
+        favoritesReadable = false;
+        console.error("Could not read saved bills.", error);
+        showNotice("Saved bill watchlist could not be read.");
+      }
+      const panel = (title) => {
+        const section = element("section", "politics-panel");
+        section.append(element("h3", "", title));
+        return section;
+      };
+      const link = (label, url) => {
+        const a = element("a", "", label);
+        try {
+          const parsed = new URL(url);
+          if (parsed.protocol !== "https:" || !["www.congress.gov", "www.senate.gov", "clerk.house.gov", "www.house.gov", "congress.gov"].includes(parsed.hostname)) throw new TypeError("Untrusted source URL");
+          a.href = parsed.href;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+        } catch (error) {
+          console.error("Invalid politics source link.", error);
+          return element("span", "", `${label} unavailable`);
+        }
+        return a;
+      };
+      const timestamp = (name, data) => {
+        if (!data?.fetchedAt) return `${name}: unavailable; no published snapshot.`;
+        const date = new Date(data.fetchedAt);
+        if (Number.isNaN(date.getTime())) return `${name}: invalid refresh timestamp.`;
+        const stale = Date.now() - date.getTime() > 48 * 60 * 60 * 1000;
+        return `${name}: updated ${date.toLocaleString()}${stale ? " · stale" : ""}`;
+      };
+      Promise.all([
+        fetch("data/politics.json").then((response) => {
+          if (!response.ok) throw new Error(`Congressional snapshot unavailable (${response.status}).`);
+          return response.json();
+        }),
+        fetch("data/politics-stories.json").then((response) => {
+          if (!response.ok) throw new Error(`Editorial list unavailable (${response.status}).`);
+          return response.json();
+        }).catch((error) => { console.error("Could not load editorial stories.", error); return null; })
+      ]).then(([data, stories]) => {
+        const top = element("div", "politics-top");
+        const today = panel("Today in Politics");
+        const agenda = panel("This Week");
+        const validStories = Array.isArray(stories) ? stories.filter((s) => s && s.title && s.date && s.source && s.url && s.what && s.affected && s.next) : [];
+        if (validStories.length) {
+          const story = validStories[0];
+          today.append(element("strong", "", story.title));
+          for (const [label, value] of [["What happened", story.what], ["Who it affects", story.affected], ["What comes next", story.next]]) {
+            today.append(element("p", "", `${label}: ${value}`));
+          }
+          try {
+            const url = new URL(story.url);
+            if (url.protocol !== "https:" || url.username || url.password) throw new TypeError("Invalid story URL");
+            const sourceLink = element("a", "", "Source");
+            sourceLink.href = url.href; sourceLink.target = "_blank"; sourceLink.rel = "noopener noreferrer";
+            today.append(element("span", "politics-meta", `${story.source} · ${story.date} · `), sourceLink);
+          } catch (error) {
+            console.error("Invalid editorial story source.", error);
+            today.append(element("span", "politics-meta", `${story.source} · ${story.date} · Source link unavailable`));
+          }
+        } else {
+          today.append(element("p", "", stories === null ? "Editorial stories could not be loaded." : "No sourced editorial lead has been published."));
+        }
+        const allVotes = [...(data.house?.items || []), ...(data.senate?.items || [])].sort((a, b) => b.date.localeCompare(a.date));
+        const ticker = element("div", "politics-list");
+        for (const vote of allVotes.slice(0, 3)) {
+          const item = element("p", "", `${vote.chamber} · ${vote.date} · ${vote.question} — ${vote.result} · `);
+          item.append(link("Official record", vote.url));
+          ticker.append(item);
+        }
+        today.append(ticker);
+        const startDate = new Date();
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 6);
+        const events = (data.hearings?.items || []).filter((item) => item.date >= localDateValue(startDate) && item.date <= localDateValue(endDate)).sort((a, b) => a.date.localeCompare(b.date));
+        agenda.append(element("p", "politics-status", timestamp("Senate hearings", data.hearings)));
+        agenda.append(element("p", "politics-status", "Upcoming Senate hearings in the next seven days."));
+        if (!events.length) agenda.append(element("p", "", data.hearings ? "No Senate hearings in this period in the published feed." : "Hearing data is unavailable."));
+        if (events.length) {
+          const item = element("p", "", `Upcoming Senate hearing · ${events[0].date} · ${events[0].title} · `);
+          item.append(link("U.S. Senate", events[0].url));
+          ticker.append(item);
+        }
+        for (const event of events.slice(0, 8)) {
+          const item = element("p", "", `${event.date} · ${event.title} · ${event.detail} · `);
+          item.append(link(event.source, event.url));
+          agenda.append(item);
+        }
+        agenda.append(link("House legislative activity", "https://www.house.gov/legislative-activity"), document.createTextNode(" · "), link("Senate floor schedule", "https://www.senate.gov/legislative/calendars.htm"));
+        top.append(today, agenda);
+
+        const scoreboard = panel("Congress Scoreboard");
+        scoreboard.append(element("p", "politics-status", `${timestamp("House Clerk", data.house)} · ${timestamp("Senate", data.senate)}`));
+        const filter = document.createElement("select");
+        filter.setAttribute("aria-label", "Filter votes by chamber");
+        for (const chamber of ["All chambers", "House", "Senate"]) filter.append(new Option(chamber, chamber));
+        const scores = element("div", "politics-scores");
+        const list = element("div", "politics-list");
+        const detail = element("div");
+        detail.setAttribute("aria-live", "polite");
+        detail.append(element("p", "", "Select a vote for its full breakdown."));
+        scores.append(list, detail);
+        function showVote(vote, selected) {
+          list.querySelectorAll("button").forEach((button) => button.setAttribute("aria-pressed", String(button === selected)));
+          detail.replaceChildren(element("h4", "", vote.question), element("p", "", `${vote.chamber} · ${vote.date} · ${vote.category} · ${vote.result}`));
+          if (vote.description) detail.append(element("p", "", vote.description));
+          detail.append(element("p", "", Object.entries(vote.tally || {}).filter(([, value]) => value !== "").map(([name, value]) => `${name}: ${value}`).join(" · ")));
+          detail.append(link("Official vote record", vote.url));
+          if (vote.billUrl) detail.append(document.createTextNode(" · "), link("Related bill", vote.billUrl));
+          const grouped = new Map();
+          for (const member of vote.members || []) {
+            const party = member.party || "Unspecified";
+            if (!grouped.has(party)) grouped.set(party, new Map());
+            const counts = grouped.get(party);
+            counts.set(member.vote, (counts.get(member.vote) || 0) + 1);
+          }
+          detail.append(element("h4", "", "Party breakdown"));
+          for (const [party, counts] of grouped) detail.append(element("p", "", `${party}: ${[...counts].map(([value, count]) => `${value} ${count}`).join(" · ")}`));
+          const scroll = element("div", "politics-members");
+          scroll.tabIndex = 0;
+          const table = document.createElement("table");
+          const header = document.createElement("tr");
+          ["Member", "Party", "State", "Vote"].forEach((name) => header.append(element("th", "", name)));
+          table.append(header);
+          for (const member of vote.members || []) {
+            const row = document.createElement("tr");
+            [member.name, member.party, member.state, member.vote].forEach((value) => row.append(element("td", "", value || "—")));
+            table.append(row);
+          }
+          scroll.append(table);
+          detail.append(element("h4", "", "Member votes"), scroll);
+        }
+        const renderVotes = () => {
+          const votes = allVotes.filter((vote) => filter.value === "All chambers" || vote.chamber === filter.value);
+          list.replaceChildren();
+          detail.replaceChildren(element("p", "", "Select a vote for its full breakdown."));
+          if (!votes.length) list.append(element("p", "", "No published votes are available for this chamber."));
+          for (const vote of votes) {
+            const button = element("button", "politics-vote");
+            button.type = "button";
+            button.setAttribute("aria-pressed", "false");
+            button.append(element("strong", "", vote.question), element("small", "", `${vote.chamber} · ${vote.date} · ${vote.category} · ${vote.result}`), element("small", "", Object.entries(vote.tally || {}).filter(([, value]) => value !== "").map(([name, value]) => `${name}: ${value}`).join(" · ")));
+            button.addEventListener("click", () => showVote(vote, button));
+            list.append(button);
+          }
+        };
+        filter.addEventListener("change", renderVotes);
+        renderVotes();
+        scoreboard.append(filter, scores);
+
+        const bills = panel("Bill Watch");
+        bills.append(element("p", "politics-status", `${timestamp("Congress.gov", data.bills)} · Searches the latest published snapshot, not the full catalog.`));
+        const controls = element("div", "politics-controls");
+        const input = document.createElement("input");
+        input.type = "search"; input.placeholder = "Bill number, title, or topic"; input.setAttribute("aria-label", "Search published bills");
+        const watched = document.createElement("select");
+        watched.setAttribute("aria-label", "Bill list");
+        watched.append(new Option("All published bills", "all"), new Option("Saved bills", "saved"));
+        controls.append(input, watched);
+        const billList = element("div", "politics-list");
+        const renderBills = () => {
+          const query = input.value.toLocaleLowerCase().trim();
+          const current = data.bills?.items || [];
+          const source = watched.value === "saved" ? favorites.map((saved) => current.find((bill) => bill.id === saved.id) || saved) : current;
+          const items = source.filter((bill) => !query || `${bill.number} ${bill.title} ${bill.action}`.toLocaleLowerCase().includes(query));
+          billList.replaceChildren();
+          if (!items.length) billList.append(element("p", "", watched.value === "saved" ? "No saved bills match this view." : data.bills ? "No bills match this view." : "Bill data unavailable. Configure the Congress.gov API key."));
+          for (const bill of items) {
+            const card = element("article", "politics-vote");
+            card.append(element("strong", "", `${bill.number} · ${bill.title}`), element("p", "", `${bill.date || "Date unavailable"} · ${bill.action || "Latest action unavailable"}`));
+            if (bill.url) card.append(link("Congress.gov record, summary, actions, and text", bill.url));
+            const isSaved = favorites.some((item) => item.id === bill.id);
+            const save = element("button", "secondary", isSaved ? "Remove from watchlist" : "Save bill");
+            save.type = "button";
+            save.disabled = !favoritesReadable;
+            save.addEventListener("click", () => {
+              const next = isSaved ? favorites.filter((item) => item.id !== bill.id) : [...favorites, bill];
+              try { localStorage.setItem(favoritesKey, JSON.stringify(next)); favorites = next; renderBills(); }
+              catch (error) { console.error("Could not save bill watchlist.", error); showNotice("Could not save bill watchlist on this device."); }
+            });
+            card.append(document.createTextNode(" "), save);
+            billList.append(card);
+          }
+        };
+        input.addEventListener("input", renderBills);
+        watched.addEventListener("change", renderBills);
+        renderBills();
+        bills.append(controls, billList);
+
+        const balance = panel("Balance of Power");
+        for (const [label, source] of [["House", data.houseSeats], ["Senate", data.senateSeats]]) {
+          balance.append(element("p", "politics-status", timestamp(`${label} membership`, source)));
+          const membership = source?.items?.[0];
+          if (membership) {
+            const counts = Object.entries(membership.counts || {}).filter(([party]) => party !== "Vacant").map(([party, count]) => `${party}: ${count}`).join(" · ");
+            const line = element("p", "", `${label}: ${membership.seated} seated · ${counts} · Vacancies: ${membership.vacancies} · `);
+            line.append(link("Official membership", membership.url));
+            balance.append(line);
+          } else balance.append(element("p", "", `${label} membership is unavailable.`));
+        }
+        balance.append(element("p", "", "Enter members voting, assuming all votes not counted as yes are no. This is not a prediction."));
+        const calc = element("div", "politics-controls");
+        const chamber = document.createElement("select"); chamber.setAttribute("aria-label", "Calculator chamber");
+        chamber.append(new Option("House", "House"), new Option("Senate", "Senate"));
+        const present = document.createElement("input"); present.type = "number"; present.min = "1"; present.max = "435"; present.value = "435"; present.setAttribute("aria-label", "Members present and voting");
+        const yes = document.createElement("input"); yes.type = "number"; yes.min = "0"; yes.max = "435"; yes.value = "0"; yes.setAttribute("aria-label", "Assumed yes votes");
+        calc.append(chamber, present, yes);
+        const result = element("p", "", "");
+        const calculate = () => {
+          const max = chamber.value === "House" ? 435 : 100;
+          present.max = String(max); yes.max = String(max);
+          const n = Number(present.value), y = Number(yes.value);
+          if (!Number.isInteger(n) || !Number.isInteger(y) || n < 1 || n > max || y < 0 || y > n) { result.textContent = `Enter 1–${max} voting members and a valid yes count not exceeding that number.`; return; }
+          const ordinary = Math.floor(n / 2) + 1;
+          const veto = Math.ceil(2 * n / 3);
+          const senators = data.senateSeats?.items?.[0]?.seated;
+          const cloture = Number.isInteger(senators) && senators > 0 && senators <= 100 ? Math.ceil(3 * senators / 5) : null;
+          result.textContent = `Assuming ${n} voting members: ordinary majority ${ordinary} (${Math.max(0, ordinary - y)} more yes); veto override ${veto} (${Math.max(0, veto - y)} more yes).` +
+            (chamber.value === "Senate" ? cloture ? ` Ending debate on most legislation generally requires ${cloture} (three-fifths of ${senators} senators sworn), or ${Math.max(0, cloture - y)} more yes. Overrides require both chambers; rules, tie-breaking and exceptions apply.` : " The cloture threshold is unavailable without current Senate membership. Overrides require both chambers; rules, tie-breaking and exceptions apply." : " Overrides require both chambers; other rules and exceptions apply.");
+        };
+        for (const control of [chamber, present, yes]) control.addEventListener("input", calculate);
+        chamber.addEventListener("change", () => { present.value = chamber.value === "House" ? "435" : "100"; yes.value = "0"; calculate(); });
+        calculate(); balance.append(calc, result);
+        dashboard.replaceChildren(top, scoreboard, bills, balance);
+      }).catch((error) => {
+        console.error("Could not load Politics data.", error);
+        loading.textContent = "Politics data is unavailable. The first snapshot may not have been published yet.";
+      });
+      return dashboard;
+    }
+
     function renderChannel(channel, page = null) {
       const heading = element("div", "channel-heading");
       heading.append(element("span", "number", `CH ${channel.number}`), element("h2", "", channel.name));
       const description = element("p", "lede", channel.description);
+      if (channel.id === "politics") {
+        view.replaceChildren(heading, description, createPoliticsDashboard());
+        return;
+      }
       const resources = element("div", "resources");
       resources.setAttribute("aria-label", `${channel.name} links`);
       const resourceUrls = {
@@ -8157,7 +9766,7 @@
       }
 
       if (channel.id === "sports" && page !== "sports-scores") {
-        view.replaceChildren(heading, description, resources, createNbaDataPage(page));
+        view.replaceChildren(heading, description, resources, withRedditSidebar(channel.id, [createNbaDataPage(page)]));
         return;
       }
 
@@ -8641,10 +10250,26 @@
       const planner = element("section", "channel-planner");
       planner.setAttribute("aria-label", `${channel.name} saved entries`);
       planner.append(element("h3", "", isBetting ? "Your picks" : "Your list"), form, lists);
-      view.replaceChildren(heading, description, resources, ...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(scoreboard ? [scoreboard] : []), ...(gameCalendar ? [gameCalendar] : []), ...(kpopCalendar ? [kpopCalendar] : []), ...(kpopLookup ? [kpopLookup] : []), planner);
+      if (channel.id === "kpop") {
+        const { left, right, featured } = createKpopSidebars();
+        const leftColumn = element("div", "kpop-dashboard-left");
+        leftColumn.append(left, createRedditWidget(channel.id));
+        const middle = element("div", "kpop-dashboard-main");
+        middle.append(featured, kpopCalendar, kpopLookup);
+        const dashboard = element("div", "kpop-dashboard");
+        dashboard.append(leftColumn, middle, right);
+        view.replaceChildren(heading, description, dashboard);
+      } else if (channel.id === "sports" && scoreboard) {
+        view.replaceChildren(heading, description, resources, createSportsHub(scoreboard, planner));
+      } else {
+        const content = [...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(scoreboard ? [scoreboard] : []), ...(gameCalendar ? [gameCalendar] : []), planner];
+        view.replaceChildren(heading, description, resources, ...(redditDefaults[channel.id] ? [withRedditSidebar(channel.id, content)] : content));
+      }
     }
 
     function render() {
+      sportsHubController?.abort();
+      sportsHubController = null;
       const route = currentRoute();
       const rawRoute = location.hash.slice(1);
       if (rawRoute !== "sports-standings" && rawRoute !== "sports-leaders") {
@@ -8653,6 +10278,7 @@
       }
       if (route !== "kpop") {
         kpopCalendarController?.abort();
+        kpopSidebarController?.abort();
         musicBrainzSearchId++;
         musicBrainzReleaseId++;
         musicBrainzAlbumRequestId++;
@@ -8691,6 +10317,7 @@
       const sport = wrapper.dataset.activeSport;
       const scoreboard = wrapper.querySelector(`.${sport}-scoreboard`);
       if (!scoreboard || scoreboard.dataset.loading === "true") return;
+      if (Date.now() - Number(scoreboard.dataset.lastRefresh || 0) < Number(scoreboard.dataset.refreshInterval || 30000)) return;
       if (sport === "nfl") loadNflGames(scoreboard, selectedNflDate, { automatic: true });
       else loadNbaGames(scoreboard, selectedNbaDate, { automatic: true });
     }, 30_000);
