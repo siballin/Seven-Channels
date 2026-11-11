@@ -181,8 +181,59 @@
     .nba-data-table th, .nba-data-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
     .nba-data-table th { color: var(--muted); font-size: .76rem; letter-spacing: .06em; text-transform: uppercase; }
     .nba-data-table td:not(:first-child) { font-family: var(--data); }
+    .nba-data-table th[scope="row"] { color: var(--ink); font-size: inherit; letter-spacing: normal; text-transform: none; }
     .nba-data-team { display: flex; align-items: center; gap: 9px; font-family: var(--body) !important; font-weight: 700; }
     .nba-data-team img, .nba-leader-player img { width: 28px; height: 28px; object-fit: contain; }
+    .nba-standings-scroll { max-width: 100%; overflow-x: auto; }
+    .nba-standings-group th button { display: block; width: 100%; min-height: 36px; padding: 6px 0; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 700; text-align: left; white-space: nowrap; }
+    .nba-standings-group th button:hover { color: var(--signal); filter: none; }
+    .nba-standings-group .nba-conference-heading { color: var(--ink); background: var(--surface-hover); font: 700 .8rem var(--font-body); letter-spacing: normal; text-transform: none; }
+    .nba-standings-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+    .nba-standings-controls label { display: grid; gap: 4px; }
+    .nba-standings-note { color: var(--muted); font-size: .75rem; line-height: 1.5; }
+    .nba-team-hub { display: grid; gap: 16px; min-width: 0; }
+    .nba-team-hub-content, .nba-team-hub-panel { display: grid; gap: 14px; min-width: 0; }
+    .nba-team-hub-hero, .nba-team-hub-card { padding: 18px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-sheen), var(--glass-base); box-shadow: var(--glass-inset), var(--glass-shadow); }
+    .nba-team-hub-hero { display: flex; align-items: center; gap: 20px; background: linear-gradient(110deg, color-mix(in srgb, var(--team-color, var(--signal)) 22%, var(--surface)), var(--surface) 70%); }
+    .nba-team-hub-hero img { width: 100px; height: 100px; object-fit: contain; flex: none; }
+    .nba-team-hub-hero h2, .nba-team-hub-card h3 { font-family: var(--font-heading); }
+    .nba-team-hub-hero p, .nba-team-hub-note, .nba-team-hub-game small, .nba-team-hub-player small, .nba-team-hub-list small { display: block; color: var(--muted); font-size: .8rem; }
+    .nba-team-hub-tabs, .nba-team-hub-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .nba-team-hub-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+    .nba-team-hub-metric { padding: 10px; border: 1px solid var(--glass-edge); border-radius: 8px; background: var(--surface); }
+    .nba-team-hub-metric strong, .nba-team-hub-metric small { display: block; }
+    .nba-team-hub-metric small { color: var(--muted); font-size: .72rem; }
+    .nba-team-hub-tabs button[aria-selected="true"] { border-color: var(--signal); color: var(--signal); background: var(--selected-surface); }
+    .nba-team-hub-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+    .nba-team-hub-list, .nba-team-hub-roster { display: grid; gap: 10px; padding: 0; list-style: none; }
+    .nba-team-hub-game { display: grid; gap: 4px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+    .nba-team-hub-game-title { display: flex; flex-wrap: wrap; gap: 5px; font-weight: 700; }
+    .nba-team-hub-roster { grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); }
+    .nba-team-hub-player { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; }
+    .nba-team-hub-player-link { min-height: 0; padding: 0; background: transparent; color: var(--ink); text-align: left; text-decoration: underline; }
+    .nba-team-hub-stats { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+    .nba-team-hub-stats dd { margin: 0; font-weight: 700; }
+    .nba-team-matchup-team { display: flex; align-items: center; gap: 10px; margin: 12px 0; color: var(--ink); font-weight: 700; }
+    .nba-team-matchup-team img { width: 52px; height: 52px; object-fit: contain; flex: none; }
+    .nba-team-matchup-player { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+    .nba-team-matchup-player .player-portrait, .nba-team-matchup-player .player-portrait-static { width: 48px; height: 48px; flex-basis: 48px; }
+    .nba-team-matchup-player small { display: block; color: var(--muted); font-size: .75rem; }
+    .nba-team-conference-table { width: 100%; margin: 10px 0; border-collapse: collapse; font-size: .78rem; }
+    .nba-team-conference-table th, .nba-team-conference-table td { padding: 5px 3px; border-bottom: 1px solid var(--line); text-align: left; }
+    .nba-team-conference-table th:not([scope="row"]) { color: var(--muted); font-weight: 600; }
+    .nba-team-conference-table th:first-child, .nba-team-conference-table td:first-child, .nba-team-conference-table td:nth-last-child(-n+2), .nba-team-conference-table th:nth-last-child(-n+2) { text-align: right; font-variant-numeric: tabular-nums; }
+    .nba-team-conference-table .nba-team-conference-current { background: var(--selected-surface); }
+    .nba-team-conference-link { display: flex; align-items: center; gap: 6px; color: var(--ink); text-decoration: none; }
+    .nba-team-conference-link:hover { text-decoration: underline; }
+    .nba-team-conference-link img { width: 24px; height: 24px; object-fit: contain; flex: none; }
+    .nba-team-hub-chart { display: block; width: 100%; min-width: 0; overflow: visible; }
+    .nba-team-hub-chart text { fill: var(--muted); font: 10px var(--font-body); }
+    .nba-team-hub-chart polyline { fill: none; stroke-width: 3; vector-effect: non-scaling-stroke; }
+    .nba-chart-scored { stroke: var(--signal); }
+    .nba-chart-allowed { stroke: var(--ink); stroke-dasharray: 5 4; }
+    .nba-team-hub-chart circle.nba-chart-scored { fill: var(--signal); }
+    .nba-team-hub-chart circle.nba-chart-allowed { fill: var(--ink); }
+    @media (max-width: 800px) { .nba-team-hub-overview { grid-template-columns: minmax(0, 1fr); } .nba-team-hub-hero img { width: 72px; height: 72px; } }
     .nba-leaders-table { width: max-content; min-width: 100%; font-size: .78rem; }
     .nba-leaders-table th { position: sticky; top: 0; z-index: 1; padding: 0; background: var(--screen); }
     .nba-leaders-table th button { display: block; width: 100%; padding: 6px 7px; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 700; cursor: pointer; }
@@ -654,6 +705,7 @@
     .game-hero-team { display: grid; justify-items: center; gap: 5px; text-align: center; }
     .game-hero-team img { width: 46px; height: 46px; object-fit: contain; }
     .game-hero-team strong { font-size: .88rem; }
+    .nba-team-hero-link { display: grid; justify-items: center; gap: 5px; color: inherit; font-size: .88rem; font-weight: 700; }
     .game-hero-points { font: 600 clamp(1.7rem, 4vw, 2.4rem)/1 var(--data); }
     .game-hero-divider { color: #9aa3b2; font: .75rem var(--data); }
     .game-venue { margin: 0 0 10px; color: var(--muted); font-size: .75rem; text-align: center; }
@@ -1366,6 +1418,7 @@
     .sports-hub > *, .sports-hub-main > * { min-width: 0; }
     .sports-hub-main, .sports-hub-side { display: grid; gap: 14px; align-content: start; }
     .sports-hub-side { position: sticky; top: 12px; }
+    .sports-hub-side-left { position: static; }
     .sports-hub .scoreboard { margin: 0; }
     .sports-hub .sports-score-tabs { margin: 0 0 12px; }
     .sports-widget, .sports-featured { min-width: 0; padding: 15px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-sheen), var(--glass-base); box-shadow: var(--glass-inset), var(--glass-shadow); }
@@ -1381,6 +1434,10 @@
     .sports-widget-row > span { min-width: 0; flex: 1; }
     .sports-widget-row img { width: 28px; height: 28px; flex: none; object-fit: contain; }
     .sports-widget-row small { display: block; }
+    .sports-widget .injury-player-link { min-height: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 700; text-align: left; text-decoration: underline; text-underline-offset: 2px; }
+    .sports-widget .injury-player-link:hover { color: var(--signal); filter: none; }
+    .sports-widget .injury-row .player-portrait { min-height: 32px; }
+    .sports-widget .injury-row .player-portrait img, .sports-widget .injury-row .player-portrait-static img { width: 100%; height: 100%; object-fit: cover; }
     .sports-widget-list-link { width: 100%; padding: 7px; background: var(--panel); color: var(--ink); text-align: left; }
     .sports-widget-list-link:hover { background: var(--surface-hover); }
     .sports-featured { width: 100%; display: block; text-align: left; color: var(--ink); background: linear-gradient(120deg, color-mix(in srgb, var(--signal) 16%, var(--surface)), var(--surface)); transition: transform .18s ease, border-color .18s ease; }
@@ -1411,6 +1468,39 @@
     .sports-analysis-team strong { font-size: .78rem; }
     @media (max-width: 1250px) { .sports-hub { grid-template-columns: minmax(0, 1fr) minmax(230px, 290px); } .sports-hub-main { grid-column: 1; grid-row: 1 / span 2; } .sports-hub-side { position: static; } }
     @media (max-width: 800px) { .sports-hub { grid-template-columns: minmax(0, 1fr); } .sports-hub-main { grid-column: auto; grid-row: 1; } .sports-hub .sports-dashboard { grid-template-columns: minmax(0, 1fr); } .sports-hub .game-list { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(220px, 80%); overflow-x: auto; padding-bottom: 5px; } .sports-hub .game-detail-area { grid-row: auto; } }
+    .sports-hub-main, .sports-hub-side-column, .sports-hub .sports-scoreboards, .sports-hub .sports-score-panels,
+    .sports-hub .sports-score-panel:not([hidden]), .sports-hub .scoreboard, .sports-hub .sports-dashboard { display: contents; }
+    .sports-hub .sports-score-tabs { grid-column: 1 / -1; grid-row: 1; margin: 0; }
+    .sports-hub .sports-ticker { grid-column: 1 / -1; grid-row: 2; min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-base); box-shadow: var(--glass-shadow); }
+    .sports-hub > .resources { grid-column: 1 / -1; grid-row: 3; margin: 0; }
+    .sports-hub .sports-featured { grid-column: 2; grid-row: 4; }
+    .sports-hub .game-detail-area { grid-column: 2; grid-row: 5; }
+    .sports-hub .channel-planner { grid-column: 2; grid-row: 6; }
+    .sports-hub .sports-hub-side-left { grid-column: 1; grid-row: 4 / span 3; }
+    .sports-hub .sports-hub-side-right { grid-column: 3; grid-row: 4 / span 3; }
+    .sports-hub .game-list { display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(220px, 260px); gap: 8px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x proximity; padding: 2px 2px 10px; }
+    .sports-hub .game-list > * { scroll-snap-align: start; }
+    .sports-hub .game-select { grid-template-columns: minmax(0, 1fr); }
+    .sports-hub .game-team { min-width: 0; }
+    .sports-hub .nba-scoreboard .game-team { cursor: pointer; }
+    .sports-hub .nba-scoreboard .team-identity { flex: 1 1 0; color: inherit; text-decoration: none; }
+    .sports-hub .nba-scoreboard .team-identity:hover strong { text-decoration: underline; }
+    @media (max-width: 1250px) {
+      .sports-hub .sports-featured { grid-column: 1; }
+      .sports-hub .game-detail-area, .sports-hub .channel-planner { grid-column: 1; }
+      .sports-hub-side-column { display: grid; grid-column: 2; grid-row: 4 / span 3; gap: 14px; align-content: start; }
+      .sports-hub .sports-hub-side-left, .sports-hub .sports-hub-side-right { grid-column: auto; grid-row: auto; }
+    }
+    @media (max-width: 800px) {
+      .sports-hub .sports-featured { grid-column: 1; grid-row: 4; }
+      .sports-hub .game-detail-area { grid-column: 1; grid-row: 5; }
+      .sports-hub-side-column { display: contents; }
+      .sports-hub .sports-hub-side-left { grid-column: 1; grid-row: 6; }
+      .sports-hub .sports-hub-side-right { grid-column: 1; grid-row: 7; }
+      .sports-hub .channel-planner { grid-column: 1; grid-row: 8; }
+      .sports-hub .game-list { grid-auto-columns: minmax(220px, 80%); }
+    }
+    .sports-hub .game-list:has(> .game-list-state) { grid-auto-columns: 100%; }
     @media (prefers-reduced-motion: reduce) { .sports-featured { transition: none; } .sports-featured:hover { transform: none; } .sports-loading { animation: none; } }
     :is(.clock, .game-hero-points, .game-linescores, .nba-data-table, .boxscore-table,
       .player-stats-table, .game-calendar-day-number, .game-calendar-day-count) {
@@ -1537,10 +1627,11 @@
     </div>
   </dialog>
   <footer><div class="wrap">A personal guide, tuned by you. Your entries stay in this browser unless you sign in to sync them.</div></footer>
+  <script src="nba-team-hub.js"></script>
   <script>
     "use strict";
     const channels = [
-      { id: "sports", number: "02", name: "Sports", description: "Follow your teams, save the games you’re looking forward to, and keep the final scores close.", labels: ["Following", "Coming up", "Final score"], hints: ["Team or game", "Match day, notes"], links: ["Standings", "League Leaders"] },
+      { id: "sports", number: "02", name: "Sports", description: "Follow your teams, save the games you’re looking forward to, and keep the final scores close.", labels: ["Following", "Coming up", "Final score"], hints: ["Team or game", "Match day, notes"], links: ["League Leaders"] },
       { id: "betting", number: "03", name: "Betting", description: "Record paper picks and review performance as results are settled.", labels: ["Open bets", "To review", "Settled"], hints: ["Pick or event", "Optional notes"], links: ["Action Network", "OddsShark"] },
       { id: "kpop", number: "04", name: "K-Pop", description: "Keep up with your current rotation, upcoming comebacks, and favorite releases.", labels: ["On repeat", "Coming soon", "Played out"], hints: ["Group, album, or song", "Comeback date, notes"], links: ["Soompi", "allkpop"] },
       { id: "movies", number: "05", name: "Movies", description: "One place for what you’re watching, what you want to see, and your reviews.", labels: ["Watching", "Watchlist", "Seen"], hints: ["Movie title", "Where to watch, thoughts"], links: ["Letterboxd", "JustWatch"] },
@@ -1997,7 +2088,7 @@
         ? (Number(summary.header?.season?.type) === 3 || new Date(event.date).getFullYear() < 2017 ? 900 : 600)
         : 300;
       const panels = [
-        { id: "stats", label: "Stats", render: () => renderTeamStats(boxscore, competitors) },
+        { id: "stats", label: "Stats", render: () => renderTeamStats(boxscore, competitors, sport) },
         { id: "boxscore", label: "Box Score", render: () => nfl ? renderNflPlayerStats(boxscore) : renderBoxScore(boxscore, competitors) },
         { id: "play-by-play", label: "Play-by-Play", render: () => renderPlayByPlay(plays) },
         { id: "game-flow", label: "Game Flow", render: () => renderGameFlow(scoringPlays, competitors, nfl ? 900 : 720, overtimeSeconds) },
@@ -2201,7 +2292,7 @@
       return panel;
     }
 
-    function renderTeamStats(boxscore, competitors) {
+    function renderTeamStats(boxscore, competitors, sport = "nba") {
       const panel = tabPanel("stats", "TEAM COMPARISON");
       const teams = Array.isArray(boxscore.teams) ? boxscore.teams : [];
       if (teams.length < 2) {
@@ -2225,11 +2316,18 @@
       const table = element("table", "plays-table team-stats-table");
       const head = document.createElement("thead");
       const headRow = document.createElement("tr");
-      headRow.append(
-        element("th", "", away?.team?.abbreviation || teams[0].team?.abbreviation || "AWAY"),
-        element("th", "", "TEAM STAT"),
-        element("th", "", home?.team?.abbreviation || teams[1].team?.abbreviation || "HOME")
-      );
+      const awayHeading = element("th");
+      const homeHeading = element("th");
+      const awayTeam = away?.team || teams[0].team;
+      const homeTeam = home?.team || teams[1].team;
+      if (sport === "nba") {
+        awayHeading.append(nbaTeamLink(awayTeam, awayTeam?.abbreviation || "AWAY"));
+        homeHeading.append(nbaTeamLink(homeTeam, homeTeam?.abbreviation || "HOME"));
+      } else {
+        awayHeading.textContent = awayTeam?.abbreviation || "AWAY";
+        homeHeading.textContent = homeTeam?.abbreviation || "HOME";
+      }
+      headRow.append(awayHeading, element("th", "", "TEAM STAT"), homeHeading);
       head.append(headRow);
       const body = document.createElement("tbody");
       for (const stat of rows) {
@@ -2689,7 +2787,7 @@
             logo.height = 32;
             identity.append(logo);
           }
-          identity.append(element("strong", "", team.team?.displayName || "Team"));
+          identity.append(nbaTeamLink(team.team, team.team?.displayName || "Team"));
           card.append(identity);
           const stats = element("div", "facts");
           for (const stat of (team.statistics || []).filter((item) => item.label && item.displayValue)) {
@@ -2717,7 +2815,7 @@
           logo.height = 27;
           heading.append(logo);
         }
-        heading.append(document.createTextNode(team.team?.displayName || "Team"));
+        heading.append(nbaTeamLink(team.team, team.team?.displayName || "Team"));
         section.append(heading);
         const scroll = element("div", "boxscore-scroll");
         const table = element("table", "boxscore-table");
@@ -3052,16 +3150,17 @@
       const score = element("div", "game-hero-score");
       for (const team of [away, home]) {
         const group = element("div", "game-hero-team");
+        const teamLink = nbaTeamLink(team?.team, team?.team?.displayName || team?.team?.name || "Team", "nba-team-hero-link");
         if (team?.team?.logo) {
           const logo = document.createElement("img");
           logo.src = team.team.logo;
           logo.alt = "";
           logo.loading = "lazy";
-          group.append(logo);
+          teamLink.prepend(logo);
         }
         const scoreValue = competition?.status?.type?.state === "pre" || team?.score == null ? "—" : team.score;
         group.append(
-          element("strong", "", team?.team?.displayName || team?.team?.name || "Team"),
+          teamLink,
           element("span", "game-hero-points", scoreValue)
         );
         score.append(group);
@@ -3346,12 +3445,15 @@
       games.setAttribute("aria-label", "NBA games");
       games.setAttribute("aria-live", "polite");
       games.setAttribute("aria-busy", "true");
+      games.tabIndex = 0;
       games.append(createNbaListState("Loading the NBA schedule…"));
       const detail = element("section", "game-detail-area");
       detail.setAttribute("aria-label", "Selected game details");
       detail.append(element("p", "game-detail-placeholder", "Select a game to see scores, stats, players, and play-by-play."));
-      dashboard.append(games, detail);
-      section.append(heading, controls, status, updated, followed, dashboard);
+      dashboard.append(detail);
+      const ticker = element("div", "sports-ticker");
+      ticker.append(heading, controls, status, updated, followed, games);
+      section.append(ticker, dashboard);
 
       dateInput.addEventListener("change", () => {
         if (!dateInput.value) return;
@@ -3398,14 +3500,14 @@
       return section;
     }
 
-    function createSportsMatchupAnalysis(event, summary) {
+    function createSportsMatchupAnalysis(event, summary, sport = "nba") {
       const section = element("section", "sports-analysis");
       section.append(element("h3", "", "Matchup analysis"));
       const grid = element("div", "sports-analysis-grid");
       const teams = event.competitions?.[0]?.competitors || [];
       for (const competitor of teams) {
         const card = element("div", "sports-analysis-team");
-        card.append(element("strong", "", competitor.team?.displayName || "Team"));
+        card.append(sport === "nba" ? nbaTeamLink(competitor.team, competitor.team?.displayName || "Team") : element("strong", "", competitor.team?.displayName || "Team"));
         const record = competitor.records?.find((item) => item.type === "total")?.summary;
         if (record) card.append(element("p", "", `Record: ${record}`));
         const box = summary.boxscore?.teams?.find((item) => String(item.team?.id) === String(competitor.team?.id));
@@ -3431,14 +3533,14 @@
     let sportsHubController = null;
     const sportsWidgetCache = new Map();
 
-    function createSportsHub(scoreboard, planner) {
+    function createSportsHub(scoreboard, planner, resources) {
       const controller = new AbortController();
       sportsHubController = controller;
       const { signal } = controller;
       const hub = element("div", "sports-hub");
-      const left = element("aside", "sports-hub-side");
+      const left = element("aside", "sports-hub-side sports-hub-side-left");
       left.setAttribute("aria-label", "Teams, standings and injuries");
-      const right = element("aside", "sports-hub-side");
+      const right = element("aside", "sports-hub-side sports-hub-side-right");
       right.setAttribute("aria-label", "Sports news and game insights");
       const main = element("div", "sports-hub-main");
       const featured = element("button", "sports-featured");
@@ -3465,7 +3567,9 @@
       left.append(teams, standings, injuries);
       right.append(news, leaders, upcoming, createRedditWidget("sports"));
       main.append(featured, scoreboard, planner);
-      hub.append(left, main, right);
+      const sideColumn = element("div", "sports-hub-side-column");
+      sideColumn.append(left, right);
+      hub.append(sideColumn, main, resources);
       let activeSport = "nba";
       const schedules = new Map();
       const selections = new Map();
@@ -3516,7 +3620,7 @@
           const logo = teamLogo(competitor?.team);
           if (logo) item.append(logo);
           const info = element("span");
-          info.append(element("strong", "", team.name));
+          info.append(nbaTeamLink(team, team.name));
           const record = competitor?.records?.find((entry) => entry.type === "total")?.summary;
           if (record) info.append(element("small", "", `Record: ${record}`));
           if (event) {
@@ -3662,11 +3766,22 @@
           for (const injury of group.injuries || []) {
             const name = injury.athlete?.displayName;
             if (!name || !injury.status) continue;
-            const row = element("li");
+            const row = element("li", "sports-widget-row injury-row");
             const updated = new Date(injury.date);
             const timestamp = injury.date && !Number.isNaN(updated.getTime())
               ? ` · Updated ${updated.toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : "";
-            row.append(element("strong", "", name), element("small", "", `${group.team?.abbreviation || group.team?.displayName || "Team"} · ${injury.status}${timestamp}`));
+            const athleteId = injury.athlete.id == null ? "" : String(injury.athlete.id);
+            const sport = activeSport;
+            const info = element("span");
+            if (athleteId) {
+              const profile = element("button", "injury-player-link", name);
+              profile.type = "button";
+              profile.setAttribute("aria-label", `View ${name} profile`);
+              profile.addEventListener("click", () => openPlayerProfile(athleteId, sport));
+              info.append(profile);
+            } else info.append(element("strong", "", name));
+            info.append(element("small", "", `${group.team?.abbreviation || group.team?.displayName || "Team"} · ${injury.status}${timestamp}`));
+            row.append(createPlayerPortrait(injury.athlete, group.team?.abbreviation || sport.toUpperCase(), sport), info);
             (list.children.length < 4 ? list : extra).append(row);
           }
         }
@@ -3716,13 +3831,14 @@
             list.replaceChildren();
             const entries = [...groups[Number(select.value)].standings.entries];
             entries.sort((a, b) => (Number(b.stats?.find((s) => s.name === "winPercent")?.value) || 0) - (Number(a.stats?.find((s) => s.name === "winPercent")?.value) || 0));
-            entries.slice(0, 6).forEach((entry, index) => {
+            entries.forEach((entry, index) => {
               const row = element("li", "sports-widget-row");
               row.append(element("strong", "", String(index + 1)));
               const logo = teamLogo(entry.team);
               if (logo) row.append(logo);
               const followed = sport === "nba" && followedNbaTeams.some((team) => team.id === String(entry.team?.id));
-              row.append(element("span", "", `${followed ? "★ " : ""}${entry.team?.abbreviation || entry.team?.displayName || "Team"}`));
+              const label = `${followed ? "★ " : ""}${entry.team?.abbreviation || entry.team?.displayName || "Team"}`;
+              row.append(sport === "nba" ? nbaTeamLink(entry.team, label) : element("span", "", label));
               const wins = entry.stats?.find((stat) => stat.name === "wins")?.displayValue;
               const losses = entry.stats?.find((stat) => stat.name === "losses")?.displayValue;
               row.append(element("strong", "", wins != null && losses != null ? `${wins}-${losses}` : "—"));
@@ -3936,12 +4052,15 @@
       games.setAttribute("aria-label", "NFL games");
       games.setAttribute("aria-live", "polite");
       games.setAttribute("aria-busy", "true");
+      games.tabIndex = 0;
       games.append(createNbaListState("Loading the NFL schedule…"));
       const detail = element("section", "game-detail-area");
       detail.setAttribute("aria-label", "Selected game details");
       detail.append(element("p", "game-detail-placeholder", "Select an NFL game to see its matchup details."));
-      dashboard.append(games, detail);
-      section.append(heading, controls, status, updated, dashboard);
+      dashboard.append(detail);
+      const ticker = element("div", "sports-ticker");
+      ticker.append(heading, controls, status, updated, games);
+      section.append(ticker, dashboard);
 
       dateInput.addEventListener("change", () => {
         if (!dateInput.value) return;
@@ -4177,7 +4296,7 @@
         teamSummary.append(scoreCard);
       }
       const { tabs, content } = renderGameTabs(event, summary, "nfl");
-      detailArea.replaceChildren(heading, detail, ...lines.map((line) => element("p", "game-detail-status", line)), teamSummary, tabs, content, createSportsMatchupAnalysis(event, summary));
+      detailArea.replaceChildren(heading, detail, ...lines.map((line) => element("p", "game-detail-status", line)), teamSummary, tabs, content, createSportsMatchupAnalysis(event, summary, "nfl"));
       detailArea.dataset.gameId = String(event.id);
       document.dispatchEvent(new CustomEvent("sports-summary", { detail: { sport: "nfl", event, summary } }));
     }
@@ -4235,59 +4354,222 @@
           Array.isArray(conference.standings?.entries) && conference.standings.entries.length
         );
         if (!conferences.length) throw new TypeError("NBA standings response contained no teams.");
-        const fragment = document.createDocumentFragment();
-        for (const conference of conferences) {
+        if (requestId !== nbaDataRequestId) return;
+        const standardColumns = [
+          ["W", "wins", "Wins"], ["L", "losses", "Losses"], ["PCT", "winPercent", "Winning percentage"],
+          ["GB", "gamesBehind", "Games behind"], ["HOME", "Home", "Home record"], ["AWAY", "Road", "Away record"],
+          ["DIV", "vs. Div.", "Division record"], ["CONF", "vs. Conf.", "Conference record"],
+          ["L10", "Last Ten Games", "Last ten games"], ["STRK", "streak", "Current streak"],
+          ["PPG", "avgPointsFor", "Points per game"], ["OPP PPG", "avgPointsAgainst", "Opponent points per game"],
+          ["DIFF", "differential", "Average point differential"]
+        ];
+        const advancedColumns = [
+          ["eFG%", "efg", "Effective field goal percentage"], ["TS%", "ts", "True shooting percentage"],
+          ["AST/TO", "assistTurnoverRatio", "Assists per turnover"], ["SC-EFF", "scoringEfficiency", "Points per field goal attempt"],
+          ["PPG", "avgPointsFor", "Points per game"], ["OPP PPG", "avgPointsAgainst", "Opponent points per game"],
+          ["DIFF", "differential", "Average point differential"]
+        ];
+        const controls = element("div", "nba-standings-controls");
+        const label = element("label", "", "Statistics");
+        const select = document.createElement("select");
+        select.setAttribute("aria-label", "Standings statistics");
+        for (const [value, text] of [["standard", "Standard"], ["advanced", "Advanced"]]) {
+          const option = element("option", "", text);
+          option.value = value;
+          select.append(option);
+        }
+        label.append(select);
+        const retry = element("button", "secondary", "Retry unavailable team stats");
+        retry.type = "button";
+        retry.hidden = true;
+        controls.append(label, retry);
+        const note = element("p", "nba-standings-note");
+        const tables = element("div");
+        const advancedStats = new Map();
+        let loadingAdvanced = false;
+        const sortState = {
+          standard: { key: "winPercent", direction: "descending" },
+          advanced: { key: "efg", direction: "descending" }
+        };
+        const entries = conferences.flatMap((conference) => conference.standings.entries);
+        function sortValue(entry, key) {
+          if (key === "team") return entry.team?.displayName || entry.team?.name || "";
+          const advancedValues = advancedStats.get(String(entry.team?.id));
+          if (advancedValues?.has(key)) {
+            const value = advancedValues.get(`${key}:sort`) ?? Number.parseFloat(advancedValues.get(key));
+            return Number.isFinite(value) ? value : null;
+          }
+          const stat = entry.stats?.find((item) => item.name === key);
+          if (typeof stat?.value === "number" && Number.isFinite(stat.value)) {
+            if (key === "streak" && /^L/i.test(stat.displayValue || "")) return -Math.abs(stat.value);
+            return stat.value;
+          }
+          const record = /^(\d+)-(\d+)$/.exec(stat?.displayValue || "");
+          if (record) {
+            const wins = Number(record[1]), losses = Number(record[2]);
+            return wins + losses ? wins / (wins + losses) : null;
+          }
+          return null;
+        }
+
+        function drawStandings() {
+          const advanced = select.value === "advanced";
+          const columns = advanced ? advancedColumns : standardColumns;
+          const sorting = sortState[select.value];
+          const activeButton = tables.contains(document.activeElement) && document.activeElement.matches("button[data-sort-key]")
+            ? document.activeElement.dataset.sortKey : null;
+          const scrollPosition = tables.querySelector(".nba-standings-scroll")?.scrollLeft || 0;
+          note.textContent = advanced
+            ? "Select a column heading to sort within each conference. Regular-season team stats from ESPN. eFG% = (FGM + 0.5 × 3PM) / FGA; TS% = points / (2 × (FGA + 0.44 × FTA)). SC-EFF is ESPN’s scoring efficiency. A dash means unavailable."
+            : "Select a column heading to sort within each conference. GB is relative to each conference; record columns sort by win percentage and streaks by wins or losses. Scroll horizontally to see all columns.";
+          retry.hidden = !advanced || loadingAdvanced || !entries.some((entry) => !advancedStats.has(String(entry.team?.id)));
           const group = element("section", "nba-standings-group");
-          group.append(element("h4", "", conference.name));
           const table = element("table", "nba-data-table");
           const head = document.createElement("thead");
           const headerRow = document.createElement("tr");
-          for (const label of ["Team", "W", "L", "PCT", "GB"]) {
-            const cell = element("th", "", label);
+          for (const [text, key, description] of [["Team", "team", "Team"], ...columns]) {
+            const cell = document.createElement("th");
             cell.scope = "col";
+            if (key === sorting.key) cell.setAttribute("aria-sort", sorting.direction);
+            const arrow = key === sorting.key ? (sorting.direction === "ascending" ? " ▲" : " ▼") : "";
+            const button = element("button", "", `${text}${arrow}`);
+            button.type = "button";
+            button.dataset.sortKey = key;
+            button.setAttribute("aria-label", `Sort by ${description}`);
+            button.addEventListener("click", () => {
+              if (sorting.key === key) sorting.direction = sorting.direction === "ascending" ? "descending" : "ascending";
+              else {
+                sorting.key = key;
+                sorting.direction = ["team", "losses", "gamesBehind", "avgPointsAgainst"].includes(key) ? "ascending" : "descending";
+              }
+              drawStandings();
+            });
+            cell.append(button);
             headerRow.append(cell);
           }
           head.append(headerRow);
-          const body = document.createElement("tbody");
-          const orderedEntries = [...conference.standings.entries].sort((left, right) => {
-            const statValue = (entry, name) => Number(entry.stats?.find((stat) => stat.name === name)?.value) || 0;
-            return statValue(right, "winPercent") - statValue(left, "winPercent") ||
-              statValue(right, "wins") - statValue(left, "wins") ||
-              statValue(right, "pointDifferential") - statValue(left, "pointDifferential") ||
-              (left.team?.displayName || "").localeCompare(right.team?.displayName || "");
-          });
-          for (const [index, entry] of orderedEntries.entries()) {
-            const stats = new Map((entry.stats || []).map((stat) => [stat.name, stat.displayValue]));
-            const row = document.createElement("tr");
-            const teamCell = document.createElement("td");
-            const team = element("span", "nba-data-team");
-            const logo = document.createElement("img");
-            const logoUrl = entry.team?.logos?.[0]?.href;
-            if (logoUrl) {
-              logo.src = logoUrl;
-              logo.alt = "";
-              logo.loading = "lazy";
-              logo.addEventListener("error", () => logo.remove(), { once: true });
-              team.append(logo);
+          table.append(head);
+          for (const conference of conferences) {
+            const body = document.createElement("tbody");
+            const conferenceRow = document.createElement("tr");
+            const conferenceHeading = element("th", "nba-conference-heading", conference.name);
+            conferenceHeading.scope = "rowgroup";
+            conferenceHeading.colSpan = columns.length + 1;
+            conferenceRow.append(conferenceHeading);
+            body.append(conferenceRow);
+            const orderedEntries = [...conference.standings.entries].sort((left, right) => {
+              const a = sortValue(left, sorting.key), b = sortValue(right, sorting.key);
+              if (a == null || b == null) return a == null && b == null ? 0 : a == null ? 1 : -1;
+              const comparison = typeof a === "string" && typeof b === "string" ? a.localeCompare(b) : a - b;
+              return comparison * (sorting.direction === "ascending" ? 1 : -1) ||
+                (left.team?.displayName || "").localeCompare(right.team?.displayName || "");
+            });
+            for (const entry of orderedEntries) {
+              const stats = new Map((entry.stats || []).map((stat) => [stat.name, stat.displayValue]));
+              const advancedValues = advancedStats.get(String(entry.team?.id));
+              const row = document.createElement("tr");
+              const teamCell = document.createElement("th");
+              teamCell.scope = "row";
+              const team = nbaTeamLink(entry.team, entry.team?.displayName || entry.team?.name || "Unknown team", "nba-data-team");
+              team.replaceChildren();
+              const logoUrl = entry.team?.logos?.[0]?.href;
+              if (logoUrl) {
+                const logo = document.createElement("img");
+                logo.src = logoUrl;
+                logo.alt = "";
+                logo.loading = "lazy";
+                logo.addEventListener("error", () => logo.remove(), { once: true });
+                team.append(logo);
+              }
+              team.append(element("span", "", entry.team?.displayName || entry.team?.name || "Unknown team"));
+              teamCell.append(team);
+              row.append(teamCell);
+              for (const [, key] of columns) {
+                const value = advancedValues?.get(key) ?? stats.get(key);
+                row.append(element("td", "", value == null || value === "" ? "—" : String(value)));
+              }
+              body.append(row);
             }
-            team.append(element("span", "", entry.team?.displayName || entry.team?.name || "Unknown team"));
-            teamCell.append(team);
-            const cells = [
-              teamCell,
-              element("td", "", stats.get("wins") || "—"),
-              element("td", "", stats.get("losses") || "—"),
-              element("td", "", stats.get("winPercent") || "—"),
-              element("td", "", stats.get("gamesBehind") || "—")
-            ];
-            for (const cell of cells) row.append(cell);
-            body.append(row);
+            table.append(body);
           }
-          table.append(head, body);
-          group.append(table);
-          fragment.append(group);
+          const scroll = element("div", "nba-standings-scroll");
+          scroll.tabIndex = 0;
+          scroll.setAttribute("role", "region");
+          scroll.setAttribute("aria-label", "NBA standings");
+          scroll.append(table);
+          group.append(scroll);
+          tables.replaceChildren(group);
+          scroll.scrollLeft = scrollPosition;
+          if (activeButton) {
+            [...group.querySelectorAll("button[data-sort-key]")].find((button) => button.dataset.sortKey === activeButton)?.focus({ preventScroll: true });
+          }
         }
-        if (requestId !== nbaDataRequestId) return;
-        content.replaceChildren(fragment);
+
+        async function loadAdvanced() {
+          if (loadingAdvanced) return;
+          loadingAdvanced = true;
+          retry.hidden = true;
+          status.textContent = "Loading advanced team statistics…";
+          const pending = entries.filter((entry) => !advancedStats.has(String(entry.team?.id)));
+          let next = 0;
+          async function worker() {
+            while (next < pending.length && !signal.aborted) {
+              const entry = pending[next++];
+              const id = String(entry.team?.id || "");
+              try {
+                if (!id || !Number.isInteger(data.season?.year)) throw new TypeError("Team or season is missing.");
+                const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/${encodeURIComponent(id)}/statistics?season=${data.season.year}&seasontype=2`, { signal });
+                if (!response.ok) throw new Error(`Team statistics request failed (${response.status}).`);
+                const teamData = await response.json();
+                if (teamData.season?.year !== data.season.year || teamData.season?.type !== 2 || !Array.isArray(teamData.results?.stats?.categories)) throw new TypeError("Team statistics season or data is incomplete.");
+                const raw = new Map(teamData.results.stats.categories.flatMap((category) => category.stats || []).map((stat) => [stat.name, stat]));
+                const number = (name) => {
+                  const value = raw.get(name)?.value;
+                  return typeof value === "number" && Number.isFinite(value) ? value : null;
+                };
+                const fgm = number("fieldGoalsMade"), fga = number("fieldGoalsAttempted"), threes = number("threePointFieldGoalsMade");
+                const points = number("points"), fta = number("freeThrowsAttempted");
+                const values = new Map();
+                if (fgm != null && threes != null && fga > 0) {
+                  const efg = (fgm + 0.5 * threes) / fga * 100;
+                  values.set("efg", `${efg.toFixed(1)}%`);
+                  values.set("efg:sort", efg);
+                }
+                if (points != null && fga != null && fta != null && fga + 0.44 * fta > 0) {
+                  const ts = points / (2 * (fga + 0.44 * fta)) * 100;
+                  values.set("ts", `${ts.toFixed(1)}%`);
+                  values.set("ts:sort", ts);
+                }
+                for (const name of ["assistTurnoverRatio", "scoringEfficiency"]) {
+                  if (raw.get(name)?.displayValue != null) {
+                    values.set(name, raw.get(name).displayValue);
+                    if (number(name) != null) values.set(`${name}:sort`, number(name));
+                  }
+                }
+                advancedStats.set(id, values);
+              } catch (error) {
+                if (signal.aborted) return;
+                console.error(`Could not load advanced stats for ${entry.team?.displayName || id}.`, error);
+              }
+            }
+          }
+          await Promise.all(Array.from({ length: Math.min(6, pending.length) }, () => worker()));
+          if (signal.aborted || requestId !== nbaDataRequestId) return;
+          loadingAdvanced = false;
+          const missing = entries.filter((entry) => !advancedStats.has(String(entry.team?.id))).length;
+          status.textContent = missing && select.value === "advanced"
+            ? `Advanced stats unavailable for ${missing} team${missing === 1 ? "" : "s"}; retry below.`
+            : `${conferences.length} conferences · Updated just now`;
+          drawStandings();
+        }
+        select.addEventListener("change", () => {
+          drawStandings();
+          if (select.value === "advanced") loadAdvanced();
+          else status.textContent = `${conferences.length} conferences · Updated just now`;
+        });
+        retry.addEventListener("click", loadAdvanced);
+        content.replaceChildren(controls, note, tables);
+        drawStandings();
         status.textContent = `${conferences.length} conferences · Updated just now`;
         content.setAttribute("aria-busy", "false");
       } catch (error) {
@@ -4451,10 +4733,7 @@
                 image.addEventListener("error", () => image.remove(), { once: true });
                 identity.append(image);
               }
-              identity.append(
-                element("span", "", player.name),
-                element("small", "", player.team?.abbreviation || "")
-              );
+              identity.append(element("span", "", player.name), nbaTeamLink(player.team, player.team?.abbreviation || ""));
               cell.append(identity);
             } else if (item.id === "position") {
               cell.textContent = player.position;
@@ -4608,12 +4887,14 @@
           stateLabel.setAttribute("aria-label", gameState === "in" ? `Live, ${gameStatus}` : gameStatus);
           header.append(stateLabel);
           selectGame.append(header);
+          card.append(selectGame);
 
           const orderedTeams = [...competitors].sort((a, b) => a.homeAway === "away" ? -1 : b.homeAway === "away" ? 1 : 0);
           for (const team of orderedTeams) {
             const row = element("div", `game-team${team.winner ? " winner" : ""}`);
-            const identity = element("div", "team-identity");
             const teamName = team.team?.displayName || team.team?.name || "Team";
+            const identity = nbaTeamLink(team.team, teamName, "team-identity");
+            identity.replaceChildren();
             if (team.team?.logo) {
               const logo = document.createElement("img");
               logo.src = team.team.logo;
@@ -4636,9 +4917,11 @@
             favoriteMark.setAttribute("aria-hidden", "true");
             scoreline.append(favoriteMark, element("span", "score", score));
             row.append(scoreline);
-            selectGame.append(row);
+            row.addEventListener("click", (event) => {
+              if (!event.target.closest("a")) selectGame.click();
+            });
+            card.append(row);
           }
-          card.append(selectGame);
           const followControls = element("div", "game-follow-controls");
           for (const team of orderedTeams) {
             const teamId = String(team.team?.id || "");
@@ -4671,6 +4954,14 @@
         gamesContainer.replaceChildren(gameCards);
         gamesContainer.setAttribute("aria-busy", "false");
         const selectedEvent = validEvents.find((event) => String(event.id) === selectedNbaGameId);
+        const linkedGame = /^#sports\/nba\/games\/(\d{4}-\d{2}-\d{2})\/(\d+)$/.exec(location.hash);
+        if (linkedGame && linkedGame[1] === dateValue && selectedNbaGameId === linkedGame[2] &&
+          !validEvents.some((event) => String(event.id) === linkedGame[2])) {
+          status.classList.add("error");
+          status.textContent = "The linked game was not found on this date.";
+          detailArea.replaceChildren(element("p", "game-detail-placeholder", "The requested game is unavailable. Select another game or date."));
+          return;
+        }
         const nextEvent = selectedEvent || validEvents[0];
         document.dispatchEvent(new CustomEvent("sports-selection", { detail: { sport: "nba", event: nextEvent } }));
         const nextState = nextEvent.competitions?.[0]?.status?.type?.state || "";
@@ -5249,12 +5540,14 @@
 
     function currentRoute() {
       const route = location.hash.slice(1);
-      if (route === "sports-standings" || route === "sports-leaders") return "sports";
+      if (route === "sports-standings" || route === "sports-leaders" ||
+        /^sports\/nba\/(teams|games)\//.test(route)) return "sports";
       return route === "guide" || channels.some((channel) => channel.id === route) ? route : "guide";
     }
 
     function currentSportsPage() {
       const route = location.hash.slice(1);
+      if (/^sports\/nba\/teams\//.test(route)) return "sports-team";
       return route === "sports-standings" || route === "sports-leaders" ? route : "sports-scores";
     }
 
@@ -9765,6 +10058,12 @@
         resources.append(link);
       }
 
+      if (channel.id === "sports" && page === "sports-team") {
+        const slug = location.hash.slice("#sports/nba/teams/".length);
+        view.replaceChildren(heading, description, createNbaTeamPage(slug));
+        return;
+      }
+
       if (channel.id === "sports" && page !== "sports-scores") {
         view.replaceChildren(heading, description, resources, withRedditSidebar(channel.id, [createNbaDataPage(page)]));
         return;
@@ -10260,7 +10559,7 @@
         dashboard.append(leftColumn, middle, right);
         view.replaceChildren(heading, description, dashboard);
       } else if (channel.id === "sports" && scoreboard) {
-        view.replaceChildren(heading, description, resources, createSportsHub(scoreboard, planner));
+        view.replaceChildren(heading, description, createSportsHub(scoreboard, planner, resources));
       } else {
         const content = [...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(scoreboard ? [scoreboard] : []), ...(gameCalendar ? [gameCalendar] : []), planner];
         view.replaceChildren(heading, description, resources, ...(redditDefaults[channel.id] ? [withRedditSidebar(channel.id, content)] : content));
@@ -10268,10 +10567,16 @@
     }
 
     function render() {
+      nbaHubController?.abort();
       sportsHubController?.abort();
       sportsHubController = null;
       const route = currentRoute();
       const rawRoute = location.hash.slice(1);
+      const gameRoute = /^sports\/nba\/games\/(\d{4}-\d{2}-\d{2})\/(\d+)$/.exec(rawRoute);
+      if (gameRoute) {
+        selectedNbaDate = gameRoute[1];
+        selectedNbaGameId = gameRoute[2];
+      }
       if (rawRoute !== "sports-standings" && rawRoute !== "sports-leaders") {
         nbaDataRequestId++;
         nbaDataController?.abort();

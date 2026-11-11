@@ -34,7 +34,13 @@ On the main Sports page, the featured matchup, selected-day upcoming games, and 
 
 The compact standings and news use ESPN's NBA or NFL feeds, cached in memory for ten minutes. The standings link opens the existing NBA standings page or ESPN's NFL standings. The existing NBA team-follow controls and saved preferences are reused; NFL team following is not currently supported. Live scoreboards refresh every 30 seconds while Sports is visible; otherwise they refresh every five minutes. MLB, NHL, soccer, projected lineups, and statistics not provided by the existing NBA/NFL data are not displayed.
 
+The full NBA standings page shows both conferences in separate groups within one sortable table, with home, away, division, conference, recent-game, streak, and scoring figures. Sorting applies within each conference, record columns sort by win percentage, and games behind is relative to each conference. Its optional advanced view loads ESPN regular-season team statistics on demand and calculates effective field goal percentage and true shooting percentage from season totals; unavailable team data can be retried.
+
 Select a player portrait to open their profile and season statistics. NFL profiles include a category selector and historical regular-season stats, including team splits where available.
+
+NBA standings, scorecards, and game details link to team pages at `#sports/nba/teams/<team-slug>`. The team pages use ESPN standings, roster, regular-season statistics, schedules and news; they include the team's full conference standings, player profile links and links back to a game's scoreboard details. The next-opponent card links to the opponent's team and ESPN's reported scoring leader when available. Team and player responses are cached in memory for five minutes. Team colors are accents only; the site's appearance settings remain in control of the theme.
+
+The team stats view computes eFG%, true shooting percentage, turnover percentage and free throw rate from ESPN's season totals, with formulas shown on the page. Possession-based ratings, pace, opponent rebound percentage, league-wide rankings and averages, and game-window or home/away stat filters are not yet available in the team view. The depth tab groups players by ESPN roster position and does not imply a starter or depth order. Roster injury availability depends on the roster feed and is not a complete official injury report; team comparisons are not predictions.
 
 ## Politics
 
