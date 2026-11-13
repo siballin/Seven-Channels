@@ -5148,6 +5148,72 @@
       };
     }
 
+    // Records that carry their own timestamps or tombstones and can be merged safely.
+    // Appearance and NBA follows have no timestamps, so the local copy is kept as-is.
+    function mergeSyncedRecords(localState, remoteState) {
+      const merged = mergeAccountState(localState, remoteState);
+      return {
+        entries: merged.entries,
+        deletedEntryIds: merged.deletedEntryIds,
+        kpopArtistFollows: merged.kpopArtistFollows,
+        betUnitSize: merged.betUnitSize
+      };
+    }
+
+    function sameEntries(a, b) {
+      if (a.length !== b.length) return false;
+      const byId = new Map(a.map((entry) => [entry.id, JSON.stringify(entry)]));
+      return b.every((entry) => byId.get(entry.id) === JSON.stringify(entry));
+    }
+
+    function sameIdSet(a, b) {
+      const left = new Set(a);
+      const right = new Set(b);
+      return left.size === right.size && [...left].every((id) => right.has(id));
+    }
+
+    function syncedRecordsDiffer(a, b) {
+      return !sameEntries(a.entries || [], b.entries || []) ||
+        !sameIdSet(a.deletedEntryIds || [], b.deletedEntryIds || []) ||
+        JSON.stringify(a.kpopArtistFollows || []) !== JSON.stringify(b.kpopArtistFollows || []) ||
+        JSON.stringify(a.betUnitSize || null) !== JSON.stringify(b.betUnitSize || null);
+    }
+
+    // Applies merged records without touching appearance or NBA follows. Only re-renders when
+    // the entries themselves changed, so an in-progress form isn't wiped by an unrelated merge.
+    function applyMergedRecords(merged) {
+      const entriesChanged = !sameEntries(entries, merged.entries);
+      const tombstonesChanged = !sameIdSet(deletedEntryIds, merged.deletedEntryIds);
+      const followsChanged = JSON.stringify(kpopArtistFollows) !== JSON.stringify(merged.kpopArtistFollows);
+      const unitChanged = JSON.stringify(betUnitSize) !== JSON.stringify(merged.betUnitSize);
+      if (!entriesChanged && !tombstonesChanged && !followsChanged && !unitChanged) return false;
+      if (entriesChanged) entries = merged.entries;
+      if (tombstonesChanged) deletedEntryIds = [...new Set(merged.deletedEntryIds)];
+      if (followsChanged) kpopArtistFollows = merged.kpopArtistFollows;
+      if (unitChanged) betUnitSize = merged.betUnitSize;
+      try {
+        if (entriesChanged) localStorage.setItem(storageKey, JSON.stringify(entries));
+        if (tombstonesChanged) localStorage.setItem(deletedEntriesStorageKey, JSON.stringify(deletedEntryIds));
+        if (followsChanged) localStorage.setItem(kpopFollowStorageKey, JSON.stringify(kpopArtistFollows));
+        if (unitChanged) localStorage.setItem(betUnitSizeStorageKey, JSON.stringify(betUnitSize));
+      } catch (error) {
+        console.error("Could not cache the merged account data.", error);
+      }
+      if (unitChanged) updateBetDollarEquivalents();
+      if (entriesChanged) {
+        entriesSnapshot = JSON.stringify(entries);
+        syncApplyingRemote = true;
+        try {
+          render();
+          renderDial(currentRoute());
+        } finally {
+          syncApplyingRemote = false;
+        }
+      }
+      snapshotLocalState();
+      return true;
+    }
+
     function currentAccountState() {
       return {
         entries,
@@ -5217,6 +5283,12 @@
         syncQueue = syncQueue.then(async () => {
           if (!syncUser || !syncClient) return;
           const userId = syncUser.id;
+          // This device may have missed realtime updates (asleep, offline, channel failure).
+          // Fold the latest cloud copy of the timestamped/tombstoned records into local state
+          // before writing, so a stale device can't resurrect deleted entries or undo newer edits.
+          const remoteBeforeWrite = await loadCloudState(userId);
+          if (!syncUser || syncUser.id !== userId) return;
+          if (remoteBeforeWrite) applyMergedRecords(mergeSyncedRecords(currentAccountState(), remoteBeforeWrite));
           const state = { ...currentAccountState(), updatedAt: new Date().toISOString() };
           const { error } = await syncClient.from("seven_channels_state").upsert(
             { user_id: userId, data: state, updated_at: state.updatedAt },
@@ -5287,13 +5359,18 @@
             const remote = payload.new?.data;
             if (!validCloudState(remote)) return;
             const mergedRemote = mergeAccountState(currentAccountState(), remote);
-            const followsNeedSync = JSON.stringify(mergedRemote.kpopArtistFollows) !==
-              JSON.stringify(mergeKpopArtistFollows([], remote.kpopArtistFollows));
+            // Re-sync when this device holds records the incoming write lacks (e.g. a stale
+            // device wrote back an entry deleted here), so the cloud copy converges.
+            const recordsNeedSync = syncedRecordsDiffer(mergedRemote, {
+              ...remote,
+              kpopArtistFollows: mergeKpopArtistFollows([], remote.kpopArtistFollows),
+              betUnitSize: mergeBetUnitSize(undefined, remote.betUnitSize)
+            });
             if (JSON.stringify(mergedRemote) !== JSON.stringify(currentAccountState())) {
               applyAccountState(mergedRemote);
               snapshotLocalState(user.id);
             }
-            if (followsNeedSync) scheduleCloudSync();
+            if (recordsNeedSync) scheduleCloudSync();
             setSyncStatus(`Synced · ${syncUser?.email || "signed in"}`);
           })
           .subscribe((state) => {
