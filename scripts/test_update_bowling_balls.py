@@ -47,6 +47,7 @@ class BowlingBallTests(unittest.TestCase):
         self.assertEqual(balls.cover_category("Solid Reactive"), "solid")
         self.assertEqual(balls.cover_category("Urethane"), "urethane")
         self.assertEqual(balls.cover_category("Polyester"), "polyester")
+        self.assertEqual(balls.cover_category("R Clear Poly"), "polyester")
 
     def test_brunswick_column_layout(self):
         ball = balls.parse_brunswick_family_page(BRUNSWICK_PAGE, brand="Brunswick", url="https://brunswickbowling.com/products/balls/current/purple-rhino-pro")
@@ -97,7 +98,26 @@ class BowlingBallTests(unittest.TestCase):
         with patch.object(balls, "fetch", side_effect=fake_fetch):
             balls.collect_storm(collector)
         self.assertEqual(fetched[1:], ["https://www.stormbowling.com/storm-level-bowling-ball-2025"])
-        self.assertEqual([ball["url"] for ball in collector.balls.values()], ["https://www.stormbowling.com/storm-level-bowling-ball-2025"])
+        level, unlinked = collector.balls.values()
+        self.assertEqual((level["url"], level["rg"]), ("https://www.stormbowling.com/storm-level-bowling-ball-2025", 2.47))
+        # Entries without a product page keep their release details, link to Storm's catalog and have no specs.
+        self.assertEqual((unlinked["name"], unlinked["url"], unlinked["releaseDate"], unlinked["rg"]),
+                         ("No link", balls.STORM_CATALOG_URL, "2025-01-17", None))
+
+    def test_storm_missing_page_keeps_release(self):
+        from urllib.error import HTTPError
+        feed = [{"name": "Phaze A.I.", "brand": "STORM", "dateAvailable": "2024-10-18", "url": "/gone", "discontinued": "yes"}]
+
+        def fake_fetch(url, budgeted=True):
+            if url == balls.STORM_FEED:
+                return json.dumps(feed)
+            raise HTTPError(url, 404, "Not Found", None, None)
+
+        collector = balls.Collector({})
+        with patch.object(balls, "fetch", side_effect=fake_fetch):
+            balls.collect_storm(collector)
+        ball = next(iter(collector.balls.values()))
+        self.assertEqual((ball["name"], ball["releaseDate"], ball["discontinued"], ball["rg"]), ("Phaze A.I.", "2024-10-18", True, None))
 
     def test_symmetric_balls_hide_small_intermediate_numbers(self):
         ball = balls.build_ball(brand="Test", name="Sym", url="https://x.test/a", numbers={15: (2.5, 0.04, 0.003)})

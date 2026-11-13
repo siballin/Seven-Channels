@@ -19,6 +19,7 @@ import re
 import sys
 import time
 from urllib.parse import urljoin, urlparse
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 OUTPUT_PATH = Path(__file__).resolve().parents[1] / "data" / "bowling-balls.json"
@@ -114,7 +115,7 @@ def cover_category(*values):
         return "pearl"
     if "urethane" in text:
         return "urethane"
-    if "polyester" in text or "plastic" in text:
+    if "polyester" in text or "plastic" in text or re.search(r"\bpoly\b", text):
         return "polyester"
     if "solid" in text:
         return "solid"
@@ -325,15 +326,35 @@ class Collector:
             self.balls[url] = ball
 
 
+STORM_CATALOG_URL = "https://www.stormbowling.com/products/equipment/bowling-balls/"
+
+
+def storm_feed_only_ball(item):
+    """A ball Storm lists in its feed without a working product page: release details only, no specs."""
+    brand = STORM_BRANDS.get(str(item.get("brand", "")).upper(), "Storm")
+    name = str(item.get("name", "")).strip()
+    return build_ball(
+        brand=brand, name=name, url=STORM_CATALOG_URL, image=item.get("image", ""),
+        release_date=parse_date(item.get("dateAvailable", "")), cover_type=cover_category(name),
+        performance=item.get("performanceLine", ""), discontinued=str(item.get("discontinued", "")).lower() == "yes",
+    )
+
+
 def collect_storm(collector):
     feed = json.loads(fetch(STORM_FEED, budgeted=False))
     for item in feed:
-        # The feed mixes absolute and site-relative links.
-        url = urljoin("https://www.stormbowling.com/", str(item.get("url") or "").strip())
-        if not item.get("url") or not url.startswith("https://www.stormbowling.com/"):
+        if not str(item.get("name", "")).strip():
+            continue
+        # The feed mixes absolute and site-relative links, and some entries have none.
+        link = str(item.get("url") or "").strip()
+        url = urljoin("https://www.stormbowling.com/", link) if link else ""
+        version = f"{item.get('dateAvailable', '')}|{item.get('discontinued', '')}"
+        if not url.startswith("https://www.stormbowling.com/") or url.rstrip("/") == "https://www.stormbowling.com":
+            key = f"{STORM_CATALOG_URL}#{slug(str(item.get('name', '')))}"
+            if not collector.cached(key, version):
+                collector.record(key, version, storm_feed_only_ball(item))
             continue
         item = {**item, "url": url}
-        version = f"{item.get('dateAvailable', '')}|{item.get('discontinued', '')}"
         if collector.cached(url, version):
             continue
         try:
@@ -341,6 +362,11 @@ def collect_storm(collector):
         except FetchBudgetExceeded:
             collector.incomplete = True
             return
+        except HTTPError as error:
+            if error.code != 404:
+                print(f"Storm page failed {url}: {error}", file=sys.stderr)
+                continue
+            collector.record(url, version, storm_feed_only_ball(item))
         except Exception as error:  # Keep going; one bad page should not drop the brand.
             print(f"Storm page failed {url}: {error}", file=sys.stderr)
 

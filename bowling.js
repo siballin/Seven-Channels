@@ -1502,8 +1502,11 @@ function createBowlingCatalogCard(ball, inArsenal, state) {
     });
     actions.append(add);
   }
-  actions.append(bowlingExternalLink("Manufacturer page ↗", ball.url, `${ball.brand} ${ball.name} on the manufacturer’s site`));
+  const productPage = !/\/products\/equipment\/bowling-balls\/?$/.test(ball.url);
+  actions.append(bowlingExternalLink(productPage ? "Manufacturer page ↗" : `${ball.brand === "Storm" ? "Storm" : "Storm Products"} ball catalog ↗`, ball.url,
+    productPage ? `${ball.brand} ${ball.name} on the manufacturer’s site` : "Storm’s bowling ball catalog"));
   body.append(heading, meta, specs);
+  if (ball.rg === null) body.append(element("p", "bowling-catalog-meta", "The manufacturer doesn’t list RG or differential for this ball."));
   if (details.textContent) body.append(details);
   body.append(actions);
   card.append(body);
