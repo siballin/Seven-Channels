@@ -421,6 +421,23 @@ function congressVotingSection(member, data) {
   return section;
 }
 
+const congressBillKinds = {
+  hr: ["H.R.", "house-bill"], s: ["S.", "senate-bill"], hres: ["H.Res.", "house-resolution"], sres: ["S.Res.", "senate-resolution"],
+  hjres: ["H.J.Res.", "house-joint-resolution"], sjres: ["S.J.Res.", "senate-joint-resolution"],
+  hconres: ["H.Con.Res.", "house-concurrent-resolution"], sconres: ["S.Con.Res.", "senate-concurrent-resolution"]
+};
+
+function congressBillLabel(bill) {
+  const kind = congressBillKinds[String(bill.type || "").toLowerCase()];
+  return kind ? `${kind[0]} ${bill.number}` : `${String(bill.type || "").toUpperCase()} ${bill.number}`.trim();
+}
+
+function congressBillUrl(bill) {
+  const kind = congressBillKinds[String(bill.type || "").toLowerCase()];
+  if (!kind || !/^\d+$/.test(String(bill.number)) || !Number.isInteger(bill.congress)) return "";
+  return `https://www.congress.gov/bill/${congressOrdinal(bill.congress)}-congress/${kind[1]}/${bill.number}`;
+}
+
 function congressLegislationSection(member) {
   const section = element("section", "politics-panel congress-bills");
   section.append(element("h3", "", "Sponsored legislation"));
@@ -445,7 +462,8 @@ function congressLegislationSection(member) {
   for (const bill of recent) {
     const item = element("li", "");
     const head = element("div", "congress-bill-head");
-    head.append(congressExternal(bill.number, bill.url, `${bill.number} on Congress.gov`));
+    const label = congressBillLabel(bill);
+    head.append(congressExternal(label, congressBillUrl(bill), `${label} on Congress.gov`));
     if (bill.introduced) head.append(element("small", "", `Introduced ${bill.introduced}`));
     item.append(head, element("span", "", bill.title || "Untitled"));
     if (bill.action) item.append(element("small", "", `Latest: ${bill.action}${bill.actionDate ? ` (${bill.actionDate})` : ""}`));
@@ -566,6 +584,11 @@ function createCongressMembersView() {
       return root;
     }
     root.append(congressProfile(member, congressData));
+    // Move focus to the member's name once the profile is on the page, so the change of page is announced.
+    requestAnimationFrame(() => {
+      const heading = document.getElementById("congress-profile-name");
+      if (heading && root.isConnected && document.activeElement !== heading) heading.focus();
+    });
     return root;
   }
   root.append(congressDelegation(congressData), congressDirectory(congressData), congressSourceNote(congressData));

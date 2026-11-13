@@ -16,6 +16,7 @@ Each source refreshes independently; a source that fails keeps its last saved da
 
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
+import html
 import json
 import os
 from pathlib import Path
@@ -28,7 +29,7 @@ import xml.etree.ElementTree as ET
 OUTPUT = Path(__file__).resolve().parents[1] / "data" / "congress-members.json"
 USER_AGENT = "SevenChannelsPolitics/1.0 (+https://siballin.github.io/Seven-Channels/)"
 ROLL_CALLS_PER_CHAMBER = 50
-SPONSORED_PER_MEMBER = 10
+SPONSORED_PER_MEMBER = 5
 DETAIL_MAX_AGE_DAYS = 30
 CONGRESS_API = "https://api.congress.gov/v3"
 SOCIAL_URL = "https://raw.githubusercontent.com/unitedstates/congress-legislators/gh-pages/legislators-social-media.json"
@@ -61,7 +62,13 @@ def text(node, path):
 
 
 def clean(value):
-    return re.sub(r"\s+", " ", value or "").strip()
+    # Senate vote files sometimes double-encode entities (for example "&#38;").
+    return re.sub(r"\s+", " ", html.unescape(value or "")).strip()
+
+
+def shorten(value, limit):
+    value = clean(value)
+    return value if len(value) <= limit else value[:limit - 1].rsplit(" ", 1)[0].rstrip(",;:") + "…"
 
 
 def ordinal(number):
@@ -151,6 +158,8 @@ def normalize_role(role):
         return "Vice Chair"
     if lowered in ("ranking", "ranking member"):
         return "Ranking Member"
+    if lowered in ("cochair", "cochairman", "co-chair", "co-chairman", "cochairwoman", "co-chairwoman"):
+        return "Co-Chair"
     if lowered == "ex officio":
         return "Ex Officio"
     return "" if lowered == "member" else role
@@ -332,9 +341,10 @@ def congress_details(member, key, previous, now):
         if not kind or not number.isdigit() or not isinstance(congress, int):
             continue  # amendments have no bill type
         latest = item.get("latestAction") or {}
-        bills.append({"number": f"{item.get('type')} {number}", "title": clean(item.get("title", "")), "introduced": item.get("introducedDate", ""),
-                      "action": clean(latest.get("text", "")), "actionDate": latest.get("actionDate", ""),
-                      "url": f"https://www.congress.gov/bill/{ordinal(congress)}-congress/{bill_kind(kind)}/{number}"})
+        # The page builds the Congress.gov link from type, number and congress, which keeps the data file small.
+        bills.append({"type": kind, "number": number, "congress": congress, "title": shorten(item.get("title", ""), 200),
+                      "introduced": item.get("introducedDate", ""), "action": shorten(latest.get("text", ""), 140),
+                      "actionDate": latest.get("actionDate", "")})
         if len(bills) >= SPONSORED_PER_MEMBER:
             break
     cosponsored = json.loads(fetch(f"{CONGRESS_API}/member/{member['id']}/cosponsored-legislation?format=json&limit=1", key, delay=0.2))

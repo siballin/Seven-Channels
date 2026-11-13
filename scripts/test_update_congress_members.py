@@ -89,6 +89,9 @@ class CongressMemberTests(unittest.TestCase):
         self.assertEqual(members.ordinal(119), "119th")
         self.assertEqual(members.ordinal(112), "112th")
         self.assertEqual(members.STATE_NAMES["NH"], "New Hampshire")
+        self.assertEqual(members.clean("Medicare &#38; Medicaid  Services"), "Medicare & Medicaid Services")
+        self.assertEqual(members.shorten("one two three four", 12), "one two…")
+        self.assertEqual(members.normalize_role("Cochairman"), "Co-Chair")
 
 
 if __name__ == "__main__":
