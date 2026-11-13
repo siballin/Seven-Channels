@@ -133,6 +133,20 @@ class BowlingBallTests(unittest.TestCase):
         self.assertEqual((ball["coverType"], ball["coverstock"], ball["image"]), ("solid", "Leverage MXC Solid Reactive", "https://cdn-images.bowling.com/lv.jpg"))
         self.assertIsNone(balls.parse_bowling_com_page(page.replace("<dd>Motiv</dd>", "<dd>Storm</dd>"), "https://www.bowling.com/x.htm"))
 
+    def test_balls_sharing_a_link_survive_cached_runs(self):
+        feed = [{"name": "Phaze A.I.", "brand": "STORM", "dateAvailable": "2024-10-18", "url": "", "discontinued": "yes"},
+                {"name": "Road Warrior", "brand": "STORM", "dateAvailable": "2024-11-22", "url": "", "discontinued": "yes"}]
+        fake_fetch = lambda url, budgeted=True: json.dumps(feed)
+        first = balls.Collector({})
+        with patch.object(balls, "fetch", side_effect=fake_fetch):
+            balls.collect_storm(first)
+        previous = {"balls": list(first.balls.values()), "checked": first.checked}
+        second = balls.Collector(previous)
+        with patch.object(balls, "fetch", side_effect=fake_fetch):
+            balls.collect_storm(second)
+        self.assertEqual(sorted(ball["name"] for ball in second.balls.values()), ["Phaze A.I.", "Road Warrior"])
+        self.assertEqual({ball["url"] for ball in second.balls.values()}, {balls.STORM_CATALOG_URL})
+
     def test_symmetric_balls_hide_small_intermediate_numbers(self):
         ball = balls.build_ball(brand="Test", name="Sym", url="https://x.test/a", numbers={15: (2.5, 0.04, 0.003)})
         self.assertEqual((ball["symmetry"], ball["intDiff"]), ("symmetric", None))

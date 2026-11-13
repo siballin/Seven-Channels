@@ -309,12 +309,17 @@ def parse_shopify_product(product, markup, *, brand, site):
     )
 
 
+def source_key(ball):
+    return ball.get("sourceKey") or ball["url"]
+
+
 class Collector:
     """Tracks results for one brand group, reusing cached pages from the previous run."""
 
     def __init__(self, previous):
         self.previous_checked = previous.get("checked", {}) if isinstance(previous, dict) else {}
-        self.previous_balls = {ball["url"]: ball for ball in (previous.get("balls", []) if isinstance(previous, dict) else [])}
+        # Balls are tracked by the page they came from; several Storm feed entries share one catalog link.
+        self.previous_balls = {source_key(ball): ball for ball in (previous.get("balls", []) if isinstance(previous, dict) else [])}
         self.checked = {}
         self.balls = {}
         self.incomplete = False
@@ -330,7 +335,7 @@ class Collector:
     def record(self, url, version, ball):
         self.checked[url] = version
         if ball and ball["name"] and ball["releaseDate"] and ball["releaseDate"] >= MIN_RELEASE_DATE:
-            self.balls[url] = ball
+            self.balls[url] = {**ball, "sourceKey": url}
 
 
 STORM_CATALOG_URL = "https://www.stormbowling.com/products/equipment/bowling-balls/"
@@ -546,8 +551,8 @@ def main():
         found = dict(collector.balls)
         for brand in brands:
             for ball in previous_by_brand.get(brand, []):
-                if ball["url"] not in collector.checked:
-                    found.setdefault(ball["url"], ball)
+                if source_key(ball) not in collector.checked:
+                    found.setdefault(source_key(ball), ball)
         if collector.incomplete:
             checked.update({url: version for url, version in previous_checked.items() if url not in collector.checked})
         checked.update(collector.checked)
