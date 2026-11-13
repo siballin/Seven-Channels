@@ -52,6 +52,20 @@ jobs:
         with:
           path: data/politics.json
           key: politics-snapshot-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Restore last bowling ball snapshot
+        uses: actions/cache/restore@v4
+        with:
+          path: data/bowling-balls.json
+          key: bowling-balls-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: bowling-balls-
+      - name: Refresh bowling ball specs
+        continue-on-error: true
+        run: python scripts/update_bowling_balls.py
+      - name: Cache bowling ball snapshot
+        uses: actions/cache/save@v4
+        with:
+          path: data/bowling-balls.json
+          key: bowling-balls-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload site files
