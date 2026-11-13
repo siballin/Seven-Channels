@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Refresh the bowling ball spec database from manufacturer websites.
 
-Sources (manufacturer sites only):
+Sources (manufacturer sites, plus one retailer for Motiv):
 - Storm, Roto Grip and 900 Global: Storm's ball feed plus each ball's page on stormbowling.com.
 - Brunswick, Radical and DV8: each site's product sitemap and ball pages.
 - Hammer, Ebonite, Track and Columbia 300: each Shopify store's product feed and ball pages.
+- Motiv: Bowling.com's Motiv ball listing and product pages, because Motiv's site refuses
+  automated requests. Bowling.com gives release months only, and lists balls it currently sells.
 
 Pages already processed are cached in the output file, so daily runs only fetch
 new or changed pages. A brand that fails keeps its previous data and is marked stale.
@@ -36,9 +38,11 @@ SHOPIFY_SITES = {
     "Hammer": "https://hammerbowling.com", "Ebonite": "https://ebonite.com",
     "Track": "https://trackbowling.com", "Columbia 300": "https://columbia300.com",
 }
-ALL_BRANDS = [*STORM_BRANDS.values(), *CRAFT_SITES, *SHOPIFY_SITES]
+BOWLING_COM = "https://www.bowling.com"
+MOTIV_LISTING = BOWLING_COM + "/shopping/motiv/bowling-balls/all"
+ALL_BRANDS = [*STORM_BRANDS.values(), *CRAFT_SITES, *SHOPIFY_SITES, "Motiv"]
 # Seconds between page requests per host; Storm's robots.txt asks for 10.
-CRAWL_DELAY = {"www.stormbowling.com": 10.0}
+CRAWL_DELAY = {"www.stormbowling.com": 10.0, "www.bowling.com": 3.0}
 DEFAULT_DELAY = 2.0
 
 _last_request = {}
@@ -202,7 +206,8 @@ def choose_weight(numbers):
 
 
 def build_ball(*, brand, name, url, image="", release_date="", cover_type="", coverstock="", core="",
-               numbers=None, symmetry="", performance="", finish="", discontinued=None):
+               numbers=None, symmetry="", performance="", finish="", discontinued=None,
+               release_precision="day", source=""):
     numbers = numbers or {}
     weight = choose_weight(numbers)
     rg, diff, intermediate = numbers.get(weight, (None, None, None)) if weight else (None, None, None)
@@ -221,6 +226,8 @@ def build_ball(*, brand, name, url, image="", release_date="", cover_type="", co
         "url": url,
         "image": image if image.startswith("https://") else "",
         "releaseDate": release_date,
+        **({"releaseDatePrecision": "month"} if release_precision == "month" else {}),
+        **({"source": source} if source else {}),
         "coverType": category,
         "coverTypeLabel": cover_type or "",
         "coverstock": coverstock,
@@ -417,6 +424,85 @@ def collect_shopify(collector, brand, site):
         page += 1
 
 
+MOTIV_LABELS = ["Color", "Core", "Coverstock", "Finish", "RG", "Differential", "Hook Potential", "Length",
+                "Recommended Lane Condition", "Mass Bias Diff", "SKU", "Product ID", "Brand", "Category",
+                "Ball Performance", "Release Date"]
+_motiv_label_pattern = re.compile(r"(?<![A-Za-z])(" + "|".join(re.escape(label) for label in sorted(MOTIV_LABELS, key=len, reverse=True)) + r")(?![A-Za-z#])")
+
+
+def parse_month_year(value):
+    match = re.match(r"([A-Za-z]+)\.? (\d{4})\b", (value or "").strip())
+    if match and match.group(1).lower() in MONTHS:
+        return f"{int(match.group(2)):04d}-{MONTHS[match.group(1).lower()]:02d}-01"
+    return ""
+
+
+def parse_bowling_com_page(markup, url):
+    """Read a Bowling.com product page's 'Details & Specs' block."""
+    text = page_text(markup)
+    # "Details & Specs" is also a tab label above the description, which mentions RG in prose.
+    start = text.rfind("Details & Specs")
+    if start < 0:
+        return None
+    segment = text[start:start + 2500]
+    fields = {}
+    matches = list(_motiv_label_pattern.finditer(segment))
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(segment)
+        value = segment[match.end():end].strip(" :")
+        fields.setdefault(match.group(1), value[:120])
+    if fields.get("Brand", "").strip().lower() != "motiv":
+        return None
+    weight_numbers = {}
+    rg = re.match(r"(\d*\.\d+) \((\d{2})# ball\)", fields.get("RG", ""))
+    diff = re.match(r"(\d*\.\d+)", fields.get("Differential", ""))
+    mass_bias = re.match(r"(\d*\.\d+)", fields.get("Mass Bias Diff", ""))
+    if rg and diff:
+        weight_numbers[int(rg.group(2))] = (float(rg.group(1)), float(diff.group(1)), float(mass_bias.group(1)) if mass_bias else None)
+    title = meta_content(markup, "og:title") or page_text((re.search(r"<h1[^>]*>(.*?)</h1>", markup, re.S | re.I) or [None, ""])[1])
+    name = re.sub(r"^\s*Motiv\s+", "", re.sub(r"\s*[|–-]\s*Bowling\.com.*$", "", title, flags=re.I), flags=re.I)
+    name = re.sub(r"\s+Bowling Ball\s*$", "", name, flags=re.I).strip()
+    release = parse_date(fields.get("Release Date", ""))
+    precision = "day"
+    if not release:
+        release, precision = parse_month_year(fields.get("Release Date", "")), "month"
+    coverstock = re.sub(r"\s*A few tiny pit holes.*$", "", fields.get("Coverstock", ""), flags=re.I).strip()
+    image = meta_content(markup, "og:image")
+    if image.startswith("//"):
+        image = "https:" + image
+    return build_ball(
+        brand="Motiv", name=name, url=url, image=image, release_date=release, release_precision=precision,
+        cover_type=coverstock, coverstock=coverstock, core=fields.get("Core", ""), numbers=weight_numbers,
+        performance=fields.get("Ball Performance", ""), finish=fields.get("Finish", ""), source="Bowling.com",
+    )
+
+
+def collect_motiv(collector):
+    links, page = [], 1
+    while page <= 10:
+        listing = fetch(MOTIV_LISTING + (f"?page={page}" if page > 1 else ""), budgeted=False)
+        found = [link for link in dict.fromkeys(re.findall(r'href="(/products/motiv-[^"?#]+\.htm)', listing)) if link not in links]
+        if not found:
+            break
+        links.extend(found)
+        if f"?page={page + 1}" not in listing:
+            break
+        page += 1
+    if not links:
+        raise ValueError("No Motiv balls were listed on Bowling.com.")
+    for link in links:
+        url = BOWLING_COM + link
+        if collector.cached(url, "1"):
+            continue
+        try:
+            collector.record(url, "1", parse_bowling_com_page(fetch(url), url))
+        except FetchBudgetExceeded:
+            collector.incomplete = True
+            return
+        except Exception as error:
+            print(f"Motiv (Bowling.com) page failed {url}: {error}", file=sys.stderr)
+
+
 def load_previous():
     try:
         return json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
@@ -434,6 +520,7 @@ def main():
     jobs = [("Storm group", list(STORM_BRANDS.values()), {"www.stormbowling.com"}, collect_storm, ())]
     jobs += [(brand, [brand], {urlparse(site).hostname}, collect_craft, (brand, site)) for brand, site in CRAFT_SITES.items()]
     jobs += [(brand, [brand], {urlparse(site).hostname}, collect_shopify, (brand, site)) for brand, site in SHOPIFY_SITES.items()]
+    jobs += [("Motiv", ["Motiv"], {"www.bowling.com"}, collect_motiv, ())]
     balls, checked, sources = [], {}, []
     for label, brands, hosts, collect, args in jobs:
         collector = Collector(previous)
@@ -475,7 +562,10 @@ def main():
     output = {
         "generatedAt": now,
         "minimumReleaseDate": MIN_RELEASE_DATE,
-        "missingBrands": [{"brand": "Motiv", "reason": "Motiv's website refused automated requests, so Motiv balls are not included."}],
+        "missingBrands": [],
+        "notes": ["Motiv specs come from Bowling.com, a retailer, because Motiv's website refuses automated requests. "
+                  "Bowling.com lists release months rather than exact dates, and only the Motiv balls it sells; "
+                  "balls stay in this database after they leave the store."],
         "sources": sources,
         "balls": sorted(unique.values(), key=lambda item: (item["releaseDate"], item["brand"], item["name"]), reverse=True),
         "checked": dict(sorted(checked.items())),

@@ -1247,6 +1247,7 @@ function bowlingLoadCatalog() {
           generatedAt: typeof data.generatedAt === "string" ? data.generatedAt : "",
           sources: Array.isArray(data.sources) ? data.sources : [],
           missingBrands: Array.isArray(data.missingBrands) ? data.missingBrands : [],
+          notes: Array.isArray(data.notes) ? data.notes.filter((note) => typeof note === "string") : [],
           minimumReleaseDate: bowlingValidDate(data.minimumReleaseDate) ? data.minimumReleaseDate : "2020-01-01",
           balls: data.balls.filter(bowlingValidCatalogBall)
             .map((ball) => ({ ...ball, rg: bowlingSpecNumber(ball.rg), diff: bowlingSpecNumber(ball.diff), intDiff: bowlingSpecNumber(ball.intDiff) }))
@@ -1262,6 +1263,14 @@ function bowlingLoadCatalog() {
       });
   }
   return bowlingCatalogPromise;
+}
+
+// Some sources (Bowling.com for Motiv) give only a release month.
+function bowlingReleaseLabel(ball, style = "short") {
+  if (ball.releaseDatePrecision === "month") {
+    return bowlingFormatDate(ball.releaseDate, { month: style === "long" ? "long" : "short", year: "numeric" });
+  }
+  return bowlingFormatDate(ball.releaseDate, { month: style === "long" ? "long" : "short", day: "numeric", year: "numeric" });
 }
 
 function bowlingFormatSpec(value) {
@@ -1365,6 +1374,7 @@ function bowlingSourceNote(catalog) {
   for (const source of problems) {
     note.append(element("p", "bowling-catalog-warning", `${source.brand}: ${source.message || "Not refreshed."}`));
   }
+  for (const text of catalog.notes) note.append(element("p", "", text));
   for (const missing of catalog.missingBrands) {
     if (missing?.brand) note.append(element("p", "", `${missing.brand} isn’t included: ${missing.reason || "its data is unavailable."}`));
   }
@@ -1474,7 +1484,7 @@ function createBowlingCatalogCard(ball, inArsenal, state) {
   heading.append(element("h4", "", ball.name), element("span", "bowling-badge", ball.brand));
   if (ball.coverType) heading.append(element("span", `bowling-badge bowling-cover-${ball.coverType}`, bowlingCoverLabel(ball.coverType)));
   if (ball.discontinued) heading.append(element("span", "bowling-badge", "Discontinued"));
-  const meta = element("p", "bowling-catalog-meta", `Released ${bowlingFormatDate(ball.releaseDate, { month: "short", day: "numeric", year: "numeric" })}`);
+  const meta = element("p", "bowling-catalog-meta", `Released ${bowlingReleaseLabel(ball)}${ball.source ? ` · Specs from ${ball.source} (retailer)` : ""}`);
   const specs = element("dl", "bowling-catalog-specs");
   const addSpec = (label, value, note) => {
     const item = element("div", "");
@@ -1503,8 +1513,12 @@ function createBowlingCatalogCard(ball, inArsenal, state) {
     actions.append(add);
   }
   const productPage = !/\/products\/equipment\/bowling-balls\/?$/.test(ball.url);
-  actions.append(bowlingExternalLink(productPage ? "Manufacturer page ↗" : `${ball.brand === "Storm" ? "Storm" : "Storm Products"} ball catalog ↗`, ball.url,
-    productPage ? `${ball.brand} ${ball.name} on the manufacturer’s site` : "Storm’s bowling ball catalog"));
+  if (ball.source) {
+    actions.append(bowlingExternalLink(`${ball.source} page ↗`, ball.url, `${ball.brand} ${ball.name} on ${ball.source}`));
+  } else {
+    actions.append(bowlingExternalLink(productPage ? "Manufacturer page ↗" : `${ball.brand === "Storm" ? "Storm" : "Storm Products"} ball catalog ↗`, ball.url,
+      productPage ? `${ball.brand} ${ball.name} on the manufacturer’s site` : "Storm’s bowling ball catalog"));
+  }
   body.append(heading, meta, specs);
   if (ball.rg === null) body.append(element("p", "bowling-catalog-meta", "The manufacturer doesn’t list RG or differential for this ball."));
   if (details.textContent) body.append(details);
@@ -1588,9 +1602,11 @@ function createBowlingReleaseView() {
     panel.append(header, brandField, grid, releases, bowlingSourceNote(catalog));
 
     const filtered = () => catalog.balls.filter((ball) => bowlingCalendarState.brand === "all" || ball.brand === bowlingCalendarState.brand);
+    const monthOnly = (month) => filtered().filter((ball) => ball.releaseDatePrecision === "month" && ball.releaseDate.startsWith(`${month}-`));
     function byDate() {
       const map = new Map();
       for (const ball of filtered()) {
+        if (ball.releaseDatePrecision === "month") continue;
         if (!map.has(ball.releaseDate)) map.set(ball.releaseDate, []);
         map.get(ball.releaseDate).push(ball);
       }
@@ -1603,15 +1619,23 @@ function createBowlingReleaseView() {
     function renderReleases(map) {
       releases.replaceChildren();
       const list = map.get(bowlingCalendarState.day) || [];
+      const undated = monthOnly(bowlingCalendarState.month);
       releases.append(element("h4", "", bowlingFormatDate(bowlingCalendarState.day, { weekday: "long", month: "long", day: "numeric", year: "numeric" })));
-      if (!list.length) {
+      if (list.length) {
+        const items = element("ul", "game-calendar-release-list");
+        list.forEach((ball) => items.append(createBowlingReleaseItem(ball)));
+        releases.append(items);
+      } else {
         const monthCount = [...map.keys()].filter((date) => date.startsWith(`${bowlingCalendarState.month}-`)).length;
-        releases.append(element("p", "game-calendar-status", monthCount ? "No releases listed for this date. Pick a highlighted day." : "No releases listed this month."));
-        return;
+        releases.append(element("p", "game-calendar-status", monthCount ? "No releases listed for this date. Pick a highlighted day."
+          : undated.length ? "No exact release dates listed this month." : "No releases listed this month."));
       }
-      const items = element("ul", "game-calendar-release-list");
-      list.forEach((ball) => items.append(createBowlingReleaseItem(ball)));
-      releases.append(items);
+      if (undated.length) {
+        releases.append(element("h4", "bowling-month-heading", `Also released in ${bowlingFormatDate(`${bowlingCalendarState.month}-01`, { month: "long", year: "numeric" })} (exact day not listed)`));
+        const items = element("ul", "game-calendar-release-list");
+        undated.forEach((ball) => items.append(createBowlingReleaseItem(ball)));
+        releases.append(items);
+      }
     }
     function renderMonth(focusDay) {
       const map = byDate();
@@ -1676,8 +1700,10 @@ function createBowlingReleaseView() {
     wrapper.append(side);
     function renderUpcoming() {
       side.replaceChildren();
-      const upcoming = filtered().filter((ball) => ball.releaseDate >= today).sort((a, b) => a.releaseDate.localeCompare(b.releaseDate)).slice(0, 12);
-      const recent = filtered().filter((ball) => ball.releaseDate < today).slice(0, 8);
+      const thisMonth = bowlingMonthKey(today);
+      const isUpcoming = (ball) => ball.releaseDatePrecision === "month" ? bowlingMonthKey(ball.releaseDate) >= thisMonth : ball.releaseDate >= today;
+      const upcoming = filtered().filter(isUpcoming).sort((a, b) => a.releaseDate.localeCompare(b.releaseDate)).slice(0, 12);
+      const recent = filtered().filter((ball) => !isUpcoming(ball)).slice(0, 8);
       for (const [id, heading, list, empty] of [
         ["bowling-upcoming-title", "Upcoming releases", upcoming, "No upcoming releases announced yet. Manufacturers usually list new balls a few weeks ahead."],
         ["bowling-recent-title", "Recently released", recent, "No recent releases."]
@@ -1692,13 +1718,14 @@ function createBowlingReleaseView() {
         const items = element("ul", "game-calendar-release-list");
         for (const ball of list) {
           const item = createBowlingReleaseItem(ball);
-          const date = element("button", "secondary bowling-release-date", bowlingFormatDate(ball.releaseDate, { month: "short", day: "numeric", year: "numeric" }));
+          const date = element("button", "secondary bowling-release-date", bowlingReleaseLabel(ball));
           date.type = "button";
-          date.setAttribute("aria-label", `Show ${bowlingFormatDate(ball.releaseDate, { month: "long", day: "numeric", year: "numeric" })} on the calendar`);
+          date.setAttribute("aria-label", `Show ${bowlingReleaseLabel(ball, "long")} on the calendar`);
           date.addEventListener("click", () => {
             bowlingCalendarState.month = bowlingMonthKey(ball.releaseDate);
-            bowlingCalendarState.day = ball.releaseDate;
-            renderMonth(ball.releaseDate);
+            bowlingCalendarState.day = ball.releaseDatePrecision === "month" ? "" : ball.releaseDate;
+            renderMonth(ball.releaseDatePrecision === "month" ? undefined : ball.releaseDate);
+            if (ball.releaseDatePrecision === "month") releases.querySelector(".bowling-month-heading")?.scrollIntoView({ block: "nearest" });
           });
           item.append(date);
           items.append(item);

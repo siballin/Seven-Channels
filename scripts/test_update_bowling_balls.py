@@ -119,6 +119,20 @@ class BowlingBallTests(unittest.TestCase):
         ball = next(iter(collector.balls.values()))
         self.assertEqual((ball["name"], ball["releaseDate"], ball["discontinued"], ball["rg"]), ("Phaze A.I.", "2024-10-18", True, None))
 
+    def test_bowling_com_motiv_page(self):
+        page = """<meta property="og:title" content="Motiv Lethal Venom Bowling Ball"><meta property="og:image" content="//cdn-images.bowling.com/lv.jpg">
+        <a>Details &amp; Specs</a><p>A low RG (2.47), low differential (.036) core.</p>
+        <h2>Details &amp; Specs</h2><dl><dt>Color</dt><dd>Black/Red</dd><dt>Core</dt><dd>Gear APG Asymmetric</dd>
+        <dt>Coverstock</dt><dd>Leverage MXC Solid Reactive A few tiny pit holes in the cover stock of the ball are normal</dd>
+        <dt>Finish</dt><dd>3000 Grit LSS</dd><dt>RG</dt><dd>2.47 (15# ball)</dd><dt>Differential</dt><dd>0.036 (15# ball)</dd>
+        <dt>Mass Bias Diff</dt><dd>0.013 (15# ball)</dd><dt>Brand</dt><dd>Motiv</dd><dt>Release Date</dt><dd>February 2025</dd></dl>"""
+        ball = balls.parse_bowling_com_page(page, "https://www.bowling.com/products/motiv-lethal-venom.htm")
+        self.assertEqual((ball["name"], ball["brand"], ball["source"]), ("Lethal Venom", "Motiv", "Bowling.com"))
+        self.assertEqual((ball["releaseDate"], ball["releaseDatePrecision"]), ("2025-02-01", "month"))
+        self.assertEqual((ball["weight"], ball["rg"], ball["diff"], ball["intDiff"], ball["symmetry"]), (15, 2.47, 0.036, 0.013, "asymmetric"))
+        self.assertEqual((ball["coverType"], ball["coverstock"], ball["image"]), ("solid", "Leverage MXC Solid Reactive", "https://cdn-images.bowling.com/lv.jpg"))
+        self.assertIsNone(balls.parse_bowling_com_page(page.replace("<dd>Motiv</dd>", "<dd>Storm</dd>"), "https://www.bowling.com/x.htm"))
+
     def test_symmetric_balls_hide_small_intermediate_numbers(self):
         ball = balls.build_ball(brand="Test", name="Sym", url="https://x.test/a", numbers={15: (2.5, 0.04, 0.003)})
         self.assertEqual((ball["symmetry"], ball["intDiff"]), ("symmetric", None))
