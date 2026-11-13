@@ -52,6 +52,16 @@ To enable Bill Watch, add a repository Actions secret named `CONGRESS_GOV_API_KE
 
 The optional editorial list is `data/politics-stories.json`: an array of objects with `title`, `date`, `source`, `url`, `what`, `affected`, and `next`. Only sourced, dated stories with all three context fields are displayed. The file starts empty; the site does not generate editorial claims.
 
+## Bowling
+
+Bowling (`#bowling`) is a personal league-night log. Each session defaults to today's local date and three games; you can change the date, add or remove games for practice or tournaments, and record an optional bowling center, session type (League, Practice, Tournament), starting ball and notes. Scores must be whole numbers from 0 to 300; leave unfinished games blank. Add any number of adjustments to a game, each with an optional ball switch, a move or release change, and what happened afterward.
+
+The arsenal stores each ball's name, layout, surface and notes as free text (for example `5 × 4.5 × 3.5` or `4000 grit + polish`). Black Venom, Motiv Nebula and C300 Pulse are offered as optional quick-add entries. Retire a ball to move it below active balls in the session form; sessions keep the ball name, layout and surface recorded that night even after the ball is edited or retired.
+
+The dashboard's average, games bowled and high game are calculated across individual scored games, so sessions with different game counts are weighted correctly. The series trend chart and high series only include three-game sessions with all three games scored. History is newest first and can be filtered by session type, by any ball used (starting ball or switch), and by text in notes and adjustments.
+
+Bowling logic lives in `bowling.js`. Sessions and arsenal entries are stored in browser storage and, when signed in, sync as part of the account state. Each session and ball has a stable ID and edit time; edits merge per record (the newest edit wins) and deleted sessions are remembered, so another device's stale copy does not bring them back.
+
 ## Glass appearance
 
 The interface uses the existing theme, background, and accent settings to tint its glass surfaces. Shared `--glass-*` CSS tokens in `index.html` control opacity, blur, border highlights, shadows, radii, and animation timing. Major panels and navigation use standard glass, nested data surfaces use a subtler opaque treatment, and dialogs and custom menus use prominent glass. Browsers without backdrop-filter support receive opaque surfaces instead.
@@ -64,7 +74,7 @@ Set the dollar value of one unit in the betting dashboard (default $5). Stakes a
 
 ## Enable cross-device sync
 
-The app uses Supabase email/password authentication. Each device signs in to the same account. Existing browser entries and K-pop artist follows are merged into that account on first sign-in; subsequent entry, NBA team-follow, K-pop artist-follow, appearance, and betting unit size changes are synced to the account. Local browser storage remains as a cache.
+The app uses Supabase email/password authentication. Each device signs in to the same account. Existing browser entries and K-pop artist follows are merged into that account on first sign-in; subsequent entry, NBA team-follow, K-pop artist-follow, appearance, betting unit size, and Bowling session and arsenal changes are synced to the account. Local browser storage remains as a cache.
 
 1. In the Supabase SQL Editor for the configured project, run [`supabase/schema.sql`](./supabase/schema.sql). The table has row-level security so authenticated users can only read or modify their own row.
 2. In **Authentication → URL Configuration**, set the Site URL to `https://siballin.github.io/Seven-Channels/` and add it to the allowed redirect URLs.

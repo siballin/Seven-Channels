@@ -1,0 +1,1203 @@
+// Bowling channel: league-night log, arsenal, and dashboard.
+// Loaded as a classic script before the main app script; helpers such as
+// element() and showNotice() are resolved from the app at call time.
+const bowlingStorageKey = "seven-channels.bowling.v1";
+const bowlingSessionTypes = [["league", "League"], ["practice", "Practice"], ["tournament", "Tournament"]];
+// Stable IDs let starter balls merge across devices instead of duplicating.
+const bowlingStarterBalls = [
+  ["starter-black-venom", "Black Venom"],
+  ["starter-motiv-nebula", "Motiv Nebula"],
+  ["starter-c300-pulse", "C300 Pulse"]
+];
+const bowlingMaxGames = 12;
+const bowlingLimits = { center: 60, notes: 500, move: 140, result: 140, ballName: 60, layout: 40, surface: 60, ballNotes: 200 };
+const bowlingMoveSuggestions = [
+  "Moved 2 boards right", "Moved 2 boards left", "Moved feet 2 left, eyes 1 left", "Moved feet 2 right, eyes 1 right",
+  "Moved deeper", "More hand", "Less hand", "Slowed speed", "Picked up speed", "Earlier release", "Changed loft"
+];
+const bowlingResultSuggestions = [
+  "Ball read sooner", "Better carry", "Struck more", "Still high", "Still light", "Over-reacted", "No change", "Leaving 10 pins"
+];
+
+let bowlingState = null;
+let bowlingDraft = null;
+let bowlingBallDraft = null;
+let bowlingFilters = { type: "all", ball: "all", query: "" };
+let bowlingStatus = { form: "", formError: false, ball: "", ballError: false };
+let bowlingPendingDelete = null;
+let bowlingRoot = null;
+let bowlingFabHidden = false;
+// Set by the app so local Bowling changes are pushed to the signed-in account.
+let bowlingOnChange = null;
+
+function bowlingId(prefix) {
+  const random = globalThis.crypto?.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+  return `${prefix}-${random}`;
+}
+
+function bowlingToday() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+function bowlingText(value, max) {
+  return typeof value === "string" ? value.trim().slice(0, max) : "";
+}
+
+function bowlingTime(value) {
+  const time = Date.parse(value || "");
+  return Number.isFinite(time) ? time : 0;
+}
+
+function bowlingValidDate(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+}
+
+function bowlingNormalizeBallRef(value) {
+  if (!value || typeof value !== "object" || typeof value.id !== "string" || !value.id) return null;
+  return {
+    id: value.id.slice(0, 80),
+    name: bowlingText(value.name, bowlingLimits.ballName) || "Unnamed ball",
+    layout: bowlingText(value.layout, bowlingLimits.layout),
+    surface: bowlingText(value.surface, bowlingLimits.surface)
+  };
+}
+
+function bowlingNormalizeBall(value) {
+  if (!value || typeof value !== "object" || typeof value.id !== "string" || !value.id) return null;
+  const name = bowlingText(value.name, bowlingLimits.ballName);
+  if (!name) return null;
+  return {
+    id: value.id.slice(0, 80),
+    name,
+    layout: bowlingText(value.layout, bowlingLimits.layout),
+    surface: bowlingText(value.surface, bowlingLimits.surface),
+    notes: bowlingText(value.notes, bowlingLimits.ballNotes),
+    archived: value.archived === true,
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : "",
+    updatedAt: typeof value.updatedAt === "string" ? value.updatedAt : ""
+  };
+}
+
+function bowlingNormalizeScore(value) {
+  return Number.isInteger(value) && value >= 0 && value <= 300 ? value : null;
+}
+
+function bowlingNormalizeSession(value) {
+  if (!value || typeof value !== "object" || typeof value.id !== "string" || !value.id) return null;
+  if (!bowlingValidDate(value.date) || !Array.isArray(value.games) || !value.games.length) return null;
+  const games = value.games.slice(0, bowlingMaxGames).map((game, index) => ({
+    id: typeof game?.id === "string" && game.id ? game.id.slice(0, 80) : `game-${index + 1}`,
+    score: bowlingNormalizeScore(game?.score),
+    adjustments: (Array.isArray(game?.adjustments) ? game.adjustments : []).map((adjustment, adjustmentIndex) => ({
+      id: typeof adjustment?.id === "string" && adjustment.id ? adjustment.id.slice(0, 80) : `adj-${index + 1}-${adjustmentIndex + 1}`,
+      ball: bowlingNormalizeBallRef(adjustment?.ball),
+      move: bowlingText(adjustment?.move, bowlingLimits.move),
+      result: bowlingText(adjustment?.result, bowlingLimits.result)
+    })).filter((adjustment) => adjustment.ball || adjustment.move || adjustment.result)
+  }));
+  return {
+    id: value.id.slice(0, 80),
+    date: value.date,
+    type: bowlingSessionTypes.some(([type]) => type === value.type) ? value.type : "league",
+    center: bowlingText(value.center, bowlingLimits.center),
+    startBall: bowlingNormalizeBallRef(value.startBall),
+    notes: bowlingText(value.notes, bowlingLimits.notes),
+    games,
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : "",
+    updatedAt: typeof value.updatedAt === "string" ? value.updatedAt : ""
+  };
+}
+
+function bowlingSortSessions(a, b) {
+  return b.date.localeCompare(a.date) || bowlingTime(b.createdAt) - bowlingTime(a.createdAt) || a.id.localeCompare(b.id);
+}
+
+// Canonical ordering keeps merged state byte-identical on every device, so sync converges.
+function bowlingNormalizeState(value) {
+  const source = value && typeof value === "object" ? value : {};
+  const tombstones = [...new Set((Array.isArray(source.deletedSessionIds) ? source.deletedSessionIds : [])
+    .filter((id) => typeof id === "string" && id))].sort();
+  const deleted = new Set(tombstones);
+  const sessions = new Map();
+  for (const session of (Array.isArray(source.sessions) ? source.sessions : []).map(bowlingNormalizeSession)) {
+    if (session && !deleted.has(session.id) && !sessions.has(session.id)) sessions.set(session.id, session);
+  }
+  const balls = new Map();
+  for (const ball of (Array.isArray(source.balls) ? source.balls : []).map(bowlingNormalizeBall)) {
+    if (ball && !balls.has(ball.id)) balls.set(ball.id, ball);
+  }
+  return {
+    sessions: [...sessions.values()].sort(bowlingSortSessions),
+    balls: [...balls.values()].sort((a, b) => bowlingTime(a.createdAt) - bowlingTime(b.createdAt) || a.id.localeCompare(b.id)),
+    deletedSessionIds: tombstones
+  };
+}
+
+function bowlingValidState(value) {
+  return Boolean(value && typeof value === "object" &&
+    Array.isArray(value.sessions) && Array.isArray(value.balls) && Array.isArray(value.deletedSessionIds));
+}
+
+function bowlingNewerRecord(candidate, current) {
+  const candidateTime = bowlingTime(candidate.updatedAt);
+  const currentTime = bowlingTime(current.updatedAt);
+  if (candidateTime !== currentTime) return candidateTime > currentTime;
+  // Deterministic tie-break so two devices pick the same version.
+  return JSON.stringify(candidate) > JSON.stringify(current);
+}
+
+// Per-record merge: the newest edit of each session or ball wins and deleted sessions stay deleted.
+function bowlingMergeState(local, remote) {
+  const localState = bowlingNormalizeState(local);
+  const remoteState = bowlingNormalizeState(remote);
+  const tombstones = [...new Set([...localState.deletedSessionIds, ...remoteState.deletedSessionIds])];
+  const pick = (records) => {
+    const combined = new Map();
+    for (const record of records) {
+      const previous = combined.get(record.id);
+      if (!previous || bowlingNewerRecord(record, previous)) combined.set(record.id, record);
+    }
+    return [...combined.values()];
+  };
+  return bowlingNormalizeState({
+    sessions: pick([...remoteState.sessions, ...localState.sessions]),
+    balls: pick([...remoteState.balls, ...localState.balls]),
+    deletedSessionIds: tombstones
+  });
+}
+
+function loadBowlingState() {
+  try {
+    const saved = localStorage.getItem(bowlingStorageKey);
+    if (saved === null) return bowlingNormalizeState({});
+    const parsed = JSON.parse(saved);
+    if (!bowlingValidState(parsed)) throw new TypeError("Saved bowling data has an unexpected format.");
+    return bowlingNormalizeState(parsed);
+  } catch (error) {
+    console.error("Could not load bowling data.", error);
+    if (typeof showNotice === "function") showNotice("Saved bowling data could not be read. New sessions can still be logged.");
+    return bowlingNormalizeState({});
+  }
+}
+
+function bowlingGetState() {
+  if (!bowlingState) bowlingState = loadBowlingState();
+  return bowlingState;
+}
+
+function bowlingPersist() {
+  try {
+    localStorage.setItem(bowlingStorageKey, JSON.stringify(bowlingState));
+    return true;
+  } catch (error) {
+    console.error("Could not save bowling data.", error);
+    if (typeof showNotice === "function") showNotice("Your browser couldn’t save this bowling change. Check your storage settings and try again.");
+    return false;
+  }
+}
+
+// Replaces state from account sync without stamping new edit times.
+function bowlingReplaceState(value) {
+  bowlingState = bowlingNormalizeState(value);
+  bowlingPersist();
+}
+
+function bowlingCommit(mutate) {
+  const next = structuredClone(bowlingGetState());
+  mutate(next, new Date().toISOString());
+  bowlingState = bowlingNormalizeState(next);
+  const saved = bowlingPersist();
+  bowlingOnChange?.();
+  return saved;
+}
+
+function bowlingScores(session) {
+  return session.games.map((game) => game.score).filter((score) => score !== null);
+}
+
+function bowlingSeriesSummary(session) {
+  const scores = bowlingScores(session);
+  const total = scores.reduce((sum, score) => sum + score, 0);
+  return {
+    scores,
+    total,
+    average: scores.length ? total / scores.length : null,
+    complete: session.games.length === 3 && scores.length === 3
+  };
+}
+
+function bowlingOverall(sessions) {
+  const scores = sessions.flatMap(bowlingScores);
+  const series = sessions.map(bowlingSeriesSummary).filter((summary) => summary.complete);
+  return {
+    games: scores.length,
+    average: scores.length ? scores.reduce((sum, score) => sum + score, 0) / scores.length : null,
+    high: scores.length ? Math.max(...scores) : null,
+    highSeries: series.length ? Math.max(...series.map((summary) => summary.total)) : null
+  };
+}
+
+function bowlingFormatAverage(value) {
+  if (value === null) return "—";
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
+
+function bowlingFormatDate(value, options = { weekday: "short", month: "short", day: "numeric", year: "numeric" }) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Intl.DateTimeFormat(undefined, options).format(new Date(year, month - 1, day));
+}
+
+function bowlingTypeLabel(type) {
+  return bowlingSessionTypes.find(([value]) => value === type)?.[1] || "League";
+}
+
+function bowlingBallSnapshot(ball) {
+  return ball ? { id: ball.id, name: ball.name, layout: ball.layout, surface: ball.surface } : null;
+}
+
+function bowlingBallDetails(ref) {
+  return [ref.layout, ref.surface].filter(Boolean).join(" · ");
+}
+
+function bowlingParseScore(text) {
+  const value = String(text ?? "").trim();
+  if (!value) return { valid: true, score: null };
+  if (!/^\d{1,3}$/.test(value)) return { valid: false, score: null };
+  const score = Number(value);
+  return score <= 300 ? { valid: true, score } : { valid: false, score: null };
+}
+
+function bowlingNewDraft() {
+  return {
+    id: null,
+    date: bowlingToday(),
+    center: "",
+    type: "league",
+    startBallId: "",
+    notes: "",
+    games: [1, 2, 3].map(() => ({ id: bowlingId("game"), score: "", adjustments: [] }))
+  };
+}
+
+function bowlingDraftFromSession(session) {
+  return {
+    id: session.id,
+    date: session.date,
+    center: session.center,
+    type: session.type,
+    startBallId: session.startBall?.id || "",
+    notes: session.notes,
+    games: session.games.map((game) => ({
+      id: game.id,
+      score: game.score === null ? "" : String(game.score),
+      adjustments: game.adjustments.map((adjustment) => ({
+        id: adjustment.id,
+        ballId: adjustment.ball?.id || "",
+        move: adjustment.move,
+        result: adjustment.result
+      }))
+    }))
+  };
+}
+
+function bowlingSessionUsesBall(session, ballId) {
+  return session.startBall?.id === ballId ||
+    session.games.some((game) => game.adjustments.some((adjustment) => adjustment.ball?.id === ballId));
+}
+
+// Every ball known from the arsenal or from recorded sessions, active first.
+function bowlingKnownBalls(state) {
+  const known = new Map(state.balls.map((ball) => [ball.id, { ...ball }]));
+  for (const session of state.sessions) {
+    const refs = [session.startBall, ...session.games.flatMap((game) => game.adjustments.map((adjustment) => adjustment.ball))];
+    for (const ref of refs) {
+      if (ref && !known.has(ref.id)) known.set(ref.id, { ...ref, notes: "", archived: true, recordedOnly: true });
+    }
+  }
+  const byName = (a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+  const all = [...known.values()];
+  return [...all.filter((ball) => !ball.archived).sort(byName), ...all.filter((ball) => ball.archived).sort(byName)];
+}
+
+function bowlingSessionMatches(session, filters) {
+  if (filters.type !== "all" && session.type !== filters.type) return false;
+  if (filters.ball !== "all" && !bowlingSessionUsesBall(session, filters.ball)) return false;
+  const query = filters.query.trim().toLocaleLowerCase();
+  if (!query) return true;
+  const haystack = [
+    session.center, session.notes, session.startBall?.name, bowlingTypeLabel(session.type),
+    ...session.games.flatMap((game) => game.adjustments.flatMap((adjustment) => [adjustment.ball?.name, adjustment.move, adjustment.result]))
+  ].filter(Boolean).join(" ").toLocaleLowerCase();
+  return haystack.includes(query);
+}
+
+// Cells for the guide grid on the home page.
+function bowlingGuideCells() {
+  const { sessions } = bowlingGetState();
+  const overall = bowlingOverall(sessions);
+  const latest = sessions[0];
+  const latestSummary = latest ? bowlingSeriesSummary(latest) : null;
+  return [
+    latest
+      ? { title: latestSummary.scores.length ? `${latestSummary.total} series` : "No scores yet", note: `${bowlingTypeLabel(latest.type)} · ${bowlingFormatDate(latest.date, { month: "short", day: "numeric" })}` }
+      : { title: "", note: "" },
+    overall.games ? { title: `${bowlingFormatAverage(overall.average)} average`, note: `${overall.games} game${overall.games === 1 ? "" : "s"} bowled` } : { title: "", note: "" },
+    overall.games ? { title: `${overall.high} high game`, note: overall.highSeries === null ? "" : `${overall.highSeries} best series` } : { title: "", note: "" }
+  ];
+}
+
+function bowlingRefresh(focusId) {
+  if (!bowlingRoot?.isConnected) return;
+  const activeId = focusId || document.activeElement?.id;
+  const previous = bowlingRoot;
+  previous.bowlingObserver?.disconnect();
+  const next = createBowlingChannel();
+  previous.replaceWith(next);
+  if (activeId) document.getElementById(activeId)?.focus({ preventScroll: !focusId });
+}
+
+function bowlingField(labelText, control, hint) {
+  const field = element("div", "field");
+  const label = element("label", "", labelText);
+  label.htmlFor = control.id;
+  field.append(label, control);
+  if (hint) field.append(hint);
+  return field;
+}
+
+function bowlingInput(id, value, { type = "text", maxLength, placeholder, list } = {}) {
+  const input = document.createElement("input");
+  input.id = id;
+  input.type = type;
+  input.value = value || "";
+  if (maxLength) input.maxLength = maxLength;
+  if (placeholder) input.placeholder = placeholder;
+  if (list) input.setAttribute("list", list);
+  return input;
+}
+
+function bowlingBallSelect(id, selectedId, emptyLabel, state, snapshot) {
+  const select = document.createElement("select");
+  select.id = id;
+  const none = element("option", "", emptyLabel);
+  none.value = "";
+  select.append(none);
+  const balls = state.balls.slice();
+  if (selectedId && snapshot?.id === selectedId && !balls.some((ball) => ball.id === selectedId)) {
+    balls.push({ ...snapshot, archived: true });
+  }
+  const byName = (a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+  const active = balls.filter((ball) => !ball.archived).sort(byName);
+  const retired = balls.filter((ball) => ball.archived).sort(byName);
+  const addOption = (parent, ball) => {
+    const option = element("option", "", ball.name);
+    option.value = ball.id;
+    option.selected = ball.id === selectedId;
+    parent.append(option);
+  };
+  active.forEach((ball) => addOption(select, ball));
+  if (retired.length) {
+    const group = document.createElement("optgroup");
+    group.label = "Retired";
+    retired.forEach((ball) => addOption(group, ball));
+    select.append(group);
+  }
+  return select;
+}
+
+function bowlingDatalist(id, values) {
+  const list = document.createElement("datalist");
+  list.id = id;
+  for (const value of values) {
+    const option = document.createElement("option");
+    option.value = value;
+    list.append(option);
+  }
+  return list;
+}
+
+function bowlingDraftTotals() {
+  const parsed = bowlingDraft.games.map((game) => bowlingParseScore(game.score));
+  const scores = parsed.filter((item) => item.valid && item.score !== null).map((item) => item.score);
+  const total = scores.reduce((sum, score) => sum + score, 0);
+  return { total, scores, average: scores.length ? total / scores.length : null, games: bowlingDraft.games.length };
+}
+
+function createBowlingSessionForm(state) {
+  if (!bowlingDraft) bowlingDraft = bowlingNewDraft();
+  const draft = bowlingDraft;
+  const editing = draft.id ? state.sessions.find((session) => session.id === draft.id) : null;
+  if (draft.id && !editing) {
+    bowlingDraft = bowlingNewDraft();
+    return createBowlingSessionForm(state);
+  }
+  const panel = element("section", "bowling-panel bowling-log");
+  panel.id = "bowling-log";
+  panel.setAttribute("aria-labelledby", "bowling-log-title");
+  const title = element("h3", "", editing ? "Edit session" : "Log session");
+  title.id = "bowling-log-title";
+  title.tabIndex = -1;
+  const form = element("form", "bowling-form");
+  form.noValidate = true;
+
+  const meta = element("div", "bowling-form-grid");
+  const date = bowlingInput("bowling-date", draft.date, { type: "date" });
+  date.required = true;
+  date.addEventListener("input", () => { draft.date = date.value; });
+  const type = document.createElement("select");
+  type.id = "bowling-type";
+  for (const [value, label] of bowlingSessionTypes) {
+    const option = element("option", "", label);
+    option.value = value;
+    option.selected = draft.type === value;
+    type.append(option);
+  }
+  type.addEventListener("change", () => { draft.type = type.value; });
+  const center = bowlingInput("bowling-center", draft.center, { maxLength: bowlingLimits.center, placeholder: "Optional", list: "bowling-center-list" });
+  center.autocomplete = "off";
+  center.addEventListener("input", () => { draft.center = center.value; });
+  const centers = [...new Set(state.sessions.map((session) => session.center).filter(Boolean))];
+  const startBall = bowlingBallSelect("bowling-start-ball", draft.startBallId, state.balls.length ? "No ball selected" : "Add balls to your arsenal", state, editing?.startBall);
+  startBall.addEventListener("change", () => { draft.startBallId = startBall.value; });
+  meta.append(
+    bowlingField("Date", date),
+    bowlingField("Session type", type),
+    bowlingField("Bowling center", center),
+    bowlingField("Starting ball", startBall),
+    bowlingDatalist("bowling-center-list", centers)
+  );
+
+  const totals = element("p", "bowling-live-totals");
+  totals.setAttribute("aria-live", "polite");
+  function updateTotals() {
+    const summary = bowlingDraftTotals();
+    totals.replaceChildren();
+    const series = element("strong", "", summary.scores.length ? String(summary.total) : "—");
+    totals.append(element("span", "", "Series "), series, element("span", "", ` · Avg ${bowlingFormatAverage(summary.average)} · ${summary.scores.length} of ${summary.games} game${summary.games === 1 ? "" : "s"} scored`));
+  }
+
+  const games = element("ol", "bowling-games");
+  games.setAttribute("aria-label", "Games");
+  draft.games.forEach((game, gameIndex) => {
+    const item = element("li", "bowling-game");
+    const head = element("div", "bowling-game-head");
+    const scoreId = `bowling-score-${game.id}`;
+    const scoreField = element("div", "field bowling-score-field");
+    const scoreLabel = element("label", "", `Game ${gameIndex + 1}`);
+    scoreLabel.htmlFor = scoreId;
+    const score = bowlingInput(scoreId, game.score, { placeholder: "Score" });
+    score.inputMode = "numeric";
+    score.autocomplete = "off";
+    score.enterKeyHint = "next";
+    score.maxLength = 3;
+    score.dataset.bowlingScore = "true";
+    const error = element("small", "bowling-field-error", "");
+    error.id = `${scoreId}-error`;
+    score.setAttribute("aria-describedby", error.id);
+    const showValidity = () => {
+      const valid = bowlingParseScore(score.value).valid;
+      score.toggleAttribute("aria-invalid", !valid);
+      if (!valid) score.setAttribute("aria-invalid", "true");
+      error.textContent = valid ? "" : "Use a whole number from 0 to 300, or leave blank.";
+    };
+    score.addEventListener("input", () => {
+      game.score = score.value;
+      showValidity();
+      updateTotals();
+    });
+    if (game.score) showValidity();
+    scoreField.append(scoreLabel, score, error);
+    const actions = element("div", "bowling-game-actions");
+    const addAdjustment = element("button", "secondary", "+ Adjustment");
+    addAdjustment.type = "button";
+    addAdjustment.setAttribute("aria-label", `Add adjustment to game ${gameIndex + 1}`);
+    addAdjustment.addEventListener("click", () => {
+      const adjustment = { id: bowlingId("adj"), ballId: "", move: "", result: "" };
+      game.adjustments.push(adjustment);
+      bowlingRefresh(`bowling-adj-${adjustment.id}-ball`);
+    });
+    actions.append(addAdjustment);
+    if (draft.games.length > 1) {
+      const remove = element("button", "secondary bowling-icon-button", "✕");
+      remove.type = "button";
+      remove.setAttribute("aria-label", `Remove game ${gameIndex + 1}`);
+      remove.title = "Remove game";
+      remove.addEventListener("click", () => {
+        draft.games.splice(gameIndex, 1);
+        bowlingRefresh("bowling-add-game");
+      });
+      actions.append(remove);
+    }
+    head.append(scoreField, actions);
+    item.append(head);
+    if (game.adjustments.length) {
+      const list = element("ul", "bowling-adjustment-inputs");
+      game.adjustments.forEach((adjustment, adjustmentIndex) => {
+        const row = element("li", "bowling-adjustment-input");
+        const label = `Game ${gameIndex + 1} adjustment ${adjustmentIndex + 1}`;
+        row.setAttribute("aria-label", label);
+        const snapshot = editing?.games.find((saved) => saved.id === game.id)?.adjustments.find((saved) => saved.id === adjustment.id)?.ball;
+        const ball = bowlingBallSelect(`bowling-adj-${adjustment.id}-ball`, adjustment.ballId, "No ball change", state, snapshot);
+        ball.addEventListener("change", () => { adjustment.ballId = ball.value; });
+        const move = bowlingInput(`bowling-adj-${adjustment.id}-move`, adjustment.move, { maxLength: bowlingLimits.move, placeholder: "e.g. Moved 2 boards right", list: "bowling-move-list" });
+        move.addEventListener("input", () => { adjustment.move = move.value; });
+        const result = bowlingInput(`bowling-adj-${adjustment.id}-result`, adjustment.result, { maxLength: bowlingLimits.result, placeholder: "e.g. Ball read sooner", list: "bowling-result-list" });
+        result.addEventListener("input", () => { adjustment.result = result.value; });
+        const remove = element("button", "secondary bowling-icon-button", "Remove");
+        remove.type = "button";
+        remove.setAttribute("aria-label", `Remove ${label.toLowerCase()}`);
+        remove.addEventListener("click", () => {
+          game.adjustments.splice(adjustmentIndex, 1);
+          bowlingRefresh(`bowling-score-${game.id}`);
+        });
+        row.append(
+          bowlingField("Switch to", ball),
+          bowlingField("Move / release", move),
+          bowlingField("What happened", result),
+          remove
+        );
+        list.append(row);
+      });
+      item.append(list);
+    }
+    games.append(item);
+  });
+
+  const gameControls = element("div", "bowling-game-controls");
+  const addGame = element("button", "secondary", "+ Add game");
+  addGame.type = "button";
+  addGame.id = "bowling-add-game";
+  addGame.disabled = draft.games.length >= bowlingMaxGames;
+  addGame.addEventListener("click", () => {
+    const game = { id: bowlingId("game"), score: "", adjustments: [] };
+    draft.games.push(game);
+    bowlingRefresh(`bowling-score-${game.id}`);
+  });
+  gameControls.append(addGame, totals);
+
+  const notes = document.createElement("textarea");
+  notes.id = "bowling-notes";
+  notes.rows = 2;
+  notes.maxLength = bowlingLimits.notes;
+  notes.placeholder = "Lane conditions, pairs, what to try next week";
+  notes.value = draft.notes;
+  notes.addEventListener("input", () => { draft.notes = notes.value; });
+
+  const footer = element("div", "bowling-form-footer");
+  const save = element("button", "", editing ? "Save changes" : "Save session");
+  save.type = "submit";
+  save.id = "bowling-save";
+  footer.append(save);
+  if (editing) {
+    const cancel = element("button", "secondary", "Cancel edit");
+    cancel.type = "button";
+    cancel.addEventListener("click", () => {
+      bowlingDraft = bowlingNewDraft();
+      bowlingStatus.form = "";
+      bowlingRefresh("bowling-log-title");
+    });
+    footer.append(cancel);
+  } else if (draft.games.some((game) => game.score || game.adjustments.length) || draft.notes || draft.center) {
+    const clear = element("button", "secondary", "Clear");
+    clear.type = "button";
+    clear.addEventListener("click", () => {
+      bowlingDraft = bowlingNewDraft();
+      bowlingStatus.form = "";
+      bowlingRefresh("bowling-date");
+    });
+    footer.append(clear);
+  }
+  const status = element("p", `bowling-status${bowlingStatus.formError ? " error" : ""}`, bowlingStatus.form);
+  status.id = "bowling-form-status";
+  status.tabIndex = -1;
+  status.setAttribute("role", "status");
+  footer.append(status);
+
+  form.append(
+    meta, games, gameControls, bowlingField("Session notes", notes), footer,
+    bowlingDatalist("bowling-move-list", bowlingMoveSuggestions),
+    bowlingDatalist("bowling-result-list", bowlingResultSuggestions)
+  );
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    bowlingSaveDraft(form);
+  });
+  updateTotals();
+  panel.append(title, form);
+  return panel;
+}
+
+function bowlingSetFormStatus(message, isError) {
+  bowlingStatus.form = message;
+  bowlingStatus.formError = isError;
+  const status = document.getElementById("bowling-form-status");
+  if (status) {
+    status.textContent = message;
+    status.classList.toggle("error", isError);
+  }
+}
+
+function bowlingSaveDraft(form) {
+  const draft = bowlingDraft;
+  const state = bowlingGetState();
+  const dateInput = form.querySelector("#bowling-date");
+  if (!bowlingValidDate(draft.date)) {
+    dateInput?.setAttribute("aria-invalid", "true");
+    bowlingSetFormStatus("Choose a valid date.", true);
+    dateInput?.focus();
+    return;
+  }
+  dateInput?.removeAttribute("aria-invalid");
+  const invalidGame = draft.games.find((game) => !bowlingParseScore(game.score).valid);
+  if (invalidGame) {
+    bowlingSetFormStatus("Fix the highlighted score: whole numbers from 0 to 300, or blank for unfinished games.", true);
+    document.getElementById(`bowling-score-${invalidGame.id}`)?.focus();
+    return;
+  }
+  const existing = draft.id ? state.sessions.find((session) => session.id === draft.id) : null;
+  const ballsById = new Map(state.balls.map((ball) => [ball.id, ball]));
+  // Keep the ball details recorded at the time unless a different ball is chosen.
+  const snapshotFor = (ballId, previous) => {
+    if (!ballId) return null;
+    if (previous?.id === ballId) return previous;
+    return bowlingBallSnapshot(ballsById.get(ballId)) || previous || null;
+  };
+  const games = draft.games.map((game) => {
+    const savedGame = existing?.games.find((saved) => saved.id === game.id);
+    return {
+      id: game.id,
+      score: bowlingParseScore(game.score).score,
+      adjustments: game.adjustments.map((adjustment) => {
+        const savedAdjustment = savedGame?.adjustments.find((saved) => saved.id === adjustment.id);
+        return {
+          id: adjustment.id,
+          ball: snapshotFor(adjustment.ballId, savedAdjustment?.ball),
+          move: adjustment.move.trim(),
+          result: adjustment.result.trim()
+        };
+      }).filter((adjustment) => adjustment.ball || adjustment.move || adjustment.result)
+    };
+  });
+  const saved = bowlingCommit((next, now) => {
+    const session = {
+      id: existing?.id || bowlingId("session"),
+      date: draft.date,
+      type: draft.type,
+      center: draft.center.trim(),
+      startBall: snapshotFor(draft.startBallId, existing?.startBall),
+      notes: draft.notes.trim(),
+      games,
+      createdAt: existing?.createdAt || now,
+      updatedAt: now
+    };
+    next.sessions = next.sessions.filter((item) => item.id !== session.id);
+    next.sessions.push(session);
+  });
+  bowlingDraft = bowlingNewDraft();
+  bowlingStatus.form = saved ? (existing ? "Session updated." : "Session saved.") : "Saved for this visit only; browser storage is unavailable.";
+  bowlingStatus.formError = !saved;
+  bowlingRefresh("bowling-form-status");
+}
+
+function createBowlingDashboard(state) {
+  const panel = element("section", "bowling-panel bowling-dashboard");
+  panel.setAttribute("aria-labelledby", "bowling-dashboard-title");
+  const head = element("div", "bowling-panel-head");
+  const title = element("h3", "", "League night dashboard");
+  title.id = "bowling-dashboard-title";
+  const logButton = element("button", "bowling-log-jump", "Log session");
+  logButton.type = "button";
+  logButton.addEventListener("click", bowlingJumpToLog);
+  head.append(title, logButton);
+  const overall = bowlingOverall(state.sessions);
+  const metrics = element("div", "bowling-metrics");
+  for (const [label, value, note] of [
+    ["Average", bowlingFormatAverage(overall.average), "Per scored game"],
+    ["Games bowled", String(overall.games), `${state.sessions.length} session${state.sessions.length === 1 ? "" : "s"}`],
+    ["High game", overall.high === null ? "—" : String(overall.high), ""],
+    ["High series", overall.highSeries === null ? "—" : String(overall.highSeries), "Three-game series"]
+  ]) {
+    const metric = element("div", "bowling-metric");
+    metric.append(element("span", "", label), element("strong", "", value));
+    if (note) metric.append(element("small", "", note));
+    metrics.append(metric);
+  }
+  panel.append(head, metrics, createBowlingTrend(state));
+  return panel;
+}
+
+function createBowlingTrend(state) {
+  const wrapper = element("figure", "bowling-trend");
+  const series = state.sessions
+    .map((session) => ({ session, summary: bowlingSeriesSummary(session) }))
+    .filter((item) => item.summary.complete)
+    .sort((a, b) => a.session.date.localeCompare(b.session.date) || bowlingTime(a.session.createdAt) - bowlingTime(b.session.createdAt));
+  const caption = element("figcaption", "");
+  caption.append(element("strong", "", "Series trend"), element("span", "", series.length
+    ? ` · ${series.length} completed three-game series. Other sessions still count toward your average.`
+    : ""));
+  wrapper.append(caption);
+  if (!series.length) {
+    wrapper.append(element("p", "bowling-empty", "Your trend appears after you log a three-game series with all three scores."));
+    return wrapper;
+  }
+  // A narrower drawing on phones keeps axis labels legible after scaling.
+  const width = matchMedia("(max-width: 560px)").matches ? 360 : 640;
+  const height = 190;
+  const pad = { top: 16, right: 18, bottom: 28, left: 44 };
+  const totals = series.map((item) => item.summary.total);
+  let min = Math.floor((Math.min(...totals) - 20) / 50) * 50;
+  let max = Math.ceil((Math.max(...totals) + 20) / 50) * 50;
+  min = Math.max(0, min);
+  max = Math.min(900, Math.max(max, min + 50));
+  const x = (index) => series.length === 1
+    ? pad.left + (width - pad.left - pad.right) / 2
+    : pad.left + index * (width - pad.left - pad.right) / (series.length - 1);
+  const y = (value) => pad.top + (max - value) * (height - pad.top - pad.bottom) / (max - min);
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("class", "bowling-chart");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", `Series totals over time, ${series.length} series from ${totals[0]} to ${totals[totals.length - 1]}`);
+  const svgNode = (tag, attributes, text) => {
+    const node = document.createElementNS(ns, tag);
+    for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+  const step = (max - min) / 2;
+  for (const value of [min, min + step, max]) {
+    svg.append(
+      svgNode("line", { x1: pad.left, x2: width - pad.right, y1: y(value), y2: y(value), class: "bowling-chart-grid" }),
+      svgNode("text", { x: pad.left - 8, y: y(value) + 4, "text-anchor": "end", class: "bowling-chart-axis" }, String(Math.round(value)))
+    );
+  }
+  if (series.length > 1) {
+    svg.append(svgNode("polyline", {
+      points: series.map((item, index) => `${x(index)},${y(item.summary.total)}`).join(" "),
+      class: "bowling-chart-line"
+    }));
+  }
+  const labelIndexes = new Set([0, series.length - 1]);
+  const tooltip = element("div", "bowling-chart-tooltip");
+  tooltip.hidden = true;
+  series.forEach((item, index) => {
+    const label = `${bowlingFormatDate(item.session.date)}: ${item.summary.total} series (${item.summary.scores.join(", ")})`;
+    const point = svgNode("circle", { cx: x(index), cy: y(item.summary.total), r: 5, class: "bowling-chart-point", tabindex: "0", "aria-label": label });
+    const hit = svgNode("circle", { cx: x(index), cy: y(item.summary.total), r: 14, class: "bowling-chart-hit" });
+    const show = () => {
+      tooltip.textContent = label;
+      tooltip.hidden = false;
+      tooltip.style.left = `${x(index) / width * 100}%`;
+      tooltip.style.top = `${y(item.summary.total) / height * 100}%`;
+    };
+    const hide = () => { tooltip.hidden = true; };
+    for (const node of [hit, point]) {
+      node.addEventListener("pointerenter", show);
+      node.addEventListener("pointerleave", hide);
+    }
+    point.addEventListener("focus", show);
+    point.addEventListener("blur", hide);
+    svg.append(hit, point);
+    if (labelIndexes.has(index)) {
+      svg.append(svgNode("text", {
+        x: x(index), y: height - 8,
+        "text-anchor": series.length === 1 ? "middle" : index === 0 ? "start" : "end",
+        class: "bowling-chart-axis"
+      }, bowlingFormatDate(item.session.date, { month: "short", day: "numeric" })));
+    }
+  });
+  const plot = element("div", "bowling-chart-plot");
+  plot.append(svg, tooltip);
+  const details = element("details", "bowling-chart-data");
+  details.append(element("summary", "", "Show series data"));
+  const table = element("table", "");
+  const headRow = element("tr", "");
+  ["Date", "Games", "Series"].forEach((text) => headRow.append(element("th", "", text)));
+  const thead = element("thead", "");
+  thead.append(headRow);
+  const tbody = element("tbody", "");
+  for (const item of series.slice().reverse()) {
+    const row = element("tr", "");
+    row.append(
+      element("td", "", bowlingFormatDate(item.session.date, { month: "short", day: "numeric", year: "numeric" })),
+      element("td", "", item.summary.scores.join(" · ")),
+      element("td", "", String(item.summary.total))
+    );
+    tbody.append(row);
+  }
+  table.append(thead, tbody);
+  details.append(table);
+  wrapper.append(plot, details);
+  return wrapper;
+}
+
+function bowlingBallLine(prefix, ref, ballsById) {
+  const line = element("p", "bowling-ball-line");
+  line.append(element("span", "bowling-ball-label", prefix), element("strong", "", ref.name));
+  const details = bowlingBallDetails(ref);
+  if (details) line.append(element("span", "bowling-ball-specs", details));
+  const current = ballsById.get(ref.id);
+  if (current?.archived) line.append(element("span", "bowling-badge", "Retired"));
+  return line;
+}
+
+function createBowlingSessionCard(session, ballsById) {
+  const card = element("article", "bowling-session");
+  card.dataset.sessionId = session.id;
+  const summary = bowlingSeriesSummary(session);
+  const head = element("header", "bowling-session-head");
+  const when = element("div", "bowling-session-when");
+  const time = element("time", "", bowlingFormatDate(session.date));
+  time.dateTime = session.date;
+  when.append(time, element("span", `bowling-badge bowling-type-${session.type}`, bowlingTypeLabel(session.type)));
+  if (session.center) when.append(element("span", "bowling-center", session.center));
+  const total = element("div", "bowling-session-total");
+  total.append(
+    element("strong", "", summary.scores.length ? String(summary.total) : "—"),
+    element("span", "", `${summary.complete ? "Series" : "Total"} · avg ${bowlingFormatAverage(summary.average)} · ${summary.scores.length}/${session.games.length} scored`)
+  );
+  head.append(when, total);
+  const scores = element("ol", "bowling-score-chips");
+  scores.setAttribute("aria-label", "Game scores");
+  session.games.forEach((game, index) => {
+    const chip = element("li", game.score === null ? "unscored" : "");
+    chip.append(element("span", "", `G${index + 1}`), element("strong", "", game.score === null ? "—" : String(game.score)));
+    scores.append(chip);
+  });
+  card.append(head, scores);
+  if (session.startBall) card.append(bowlingBallLine("Started with", session.startBall, ballsById));
+  const adjustments = session.games.flatMap((game, index) => game.adjustments.map((adjustment) => ({ adjustment, index })));
+  if (adjustments.length) {
+    const list = element("ul", "bowling-adjustments");
+    list.setAttribute("aria-label", "Adjustments");
+    for (const { adjustment, index } of adjustments) {
+      const item = element("li", "");
+      item.append(element("span", "bowling-adjustment-game", `G${index + 1}`));
+      const body = element("div", "bowling-adjustment-body");
+      if (adjustment.ball) {
+        const ball = element("span", "bowling-adjustment-ball");
+        ball.append(document.createTextNode("Switched to "), element("strong", "", adjustment.ball.name));
+        const details = bowlingBallDetails(adjustment.ball);
+        if (details) ball.append(element("span", "bowling-ball-specs", details));
+        body.append(ball);
+      }
+      if (adjustment.move) body.append(element("span", "bowling-adjustment-move", adjustment.move));
+      if (adjustment.result) body.append(element("span", "bowling-adjustment-result", `→ ${adjustment.result}`));
+      item.append(body);
+      list.append(item);
+    }
+    card.append(list);
+  }
+  if (session.notes) card.append(element("p", "bowling-session-notes", session.notes));
+  const footer = element("div", "item-footer bowling-session-actions");
+  const edit = element("button", "secondary", "Edit");
+  edit.type = "button";
+  edit.setAttribute("aria-label", `Edit session from ${bowlingFormatDate(session.date)}`);
+  edit.addEventListener("click", () => {
+    bowlingDraft = bowlingDraftFromSession(session);
+    bowlingStatus.form = "";
+    bowlingRefresh("bowling-log-title");
+    document.getElementById("bowling-log")?.scrollIntoView({ block: "start", behavior: bowlingScrollBehavior() });
+  });
+  const remove = element("button", "secondary bowling-delete", bowlingPendingDelete === session.id ? "Confirm delete" : "Delete");
+  remove.type = "button";
+  remove.id = `bowling-delete-${session.id}`;
+  remove.setAttribute("aria-label", bowlingPendingDelete === session.id
+    ? `Confirm deleting session from ${bowlingFormatDate(session.date)}`
+    : `Delete session from ${bowlingFormatDate(session.date)}`);
+  remove.addEventListener("click", () => {
+    if (bowlingPendingDelete !== session.id) {
+      bowlingPendingDelete = session.id;
+      bowlingRefresh(remove.id);
+      return;
+    }
+    bowlingPendingDelete = null;
+    bowlingCommit((next) => {
+      next.sessions = next.sessions.filter((item) => item.id !== session.id);
+      next.deletedSessionIds = [...new Set([...next.deletedSessionIds, session.id])];
+    });
+    if (bowlingDraft?.id === session.id) bowlingDraft = bowlingNewDraft();
+    bowlingRefresh("bowling-history-title");
+  });
+  remove.addEventListener("blur", () => {
+    // Deferred so the blur caused by re-rendering this card (button detached) is ignored.
+    setTimeout(() => {
+      if (!remove.isConnected || bowlingPendingDelete !== session.id) return;
+      bowlingPendingDelete = null;
+      remove.textContent = "Delete";
+      remove.setAttribute("aria-label", `Delete session from ${bowlingFormatDate(session.date)}`);
+    }, 0);
+  });
+  footer.append(edit, remove);
+  card.append(footer);
+  return card;
+}
+
+function createBowlingHistory(state) {
+  const panel = element("section", "bowling-panel bowling-history");
+  panel.setAttribute("aria-labelledby", "bowling-history-title");
+  const title = element("h3", "", "History");
+  title.id = "bowling-history-title";
+  title.tabIndex = -1;
+  const known = bowlingKnownBalls(state);
+  if (bowlingFilters.ball !== "all" && !known.some((ball) => ball.id === bowlingFilters.ball)) bowlingFilters.ball = "all";
+  const filters = element("div", "bowling-filters");
+  const type = document.createElement("select");
+  type.id = "bowling-filter-type";
+  for (const [value, label] of [["all", "All session types"], ...bowlingSessionTypes]) {
+    const option = element("option", "", label);
+    option.value = value;
+    option.selected = bowlingFilters.type === value;
+    type.append(option);
+  }
+  const ball = document.createElement("select");
+  ball.id = "bowling-filter-ball";
+  const allBalls = element("option", "", "Any ball used");
+  allBalls.value = "all";
+  ball.append(allBalls);
+  for (const item of known) {
+    const option = element("option", "", item.archived ? `${item.name} (retired)` : item.name);
+    option.value = item.id;
+    option.selected = bowlingFilters.ball === item.id;
+    ball.append(option);
+  }
+  const query = bowlingInput("bowling-filter-query", bowlingFilters.query, { type: "search", placeholder: "e.g. read sooner, boards" });
+  filters.append(
+    bowlingField("Session type", type),
+    bowlingField("Ball (start or switch)", ball),
+    bowlingField("Search notes & adjustments", query)
+  );
+  const count = element("p", "bowling-history-count");
+  count.setAttribute("aria-live", "polite");
+  const list = element("div", "bowling-session-list");
+  const ballsById = new Map(state.balls.map((item) => [item.id, item]));
+  function renderList() {
+    const matches = state.sessions.filter((session) => bowlingSessionMatches(session, bowlingFilters));
+    const filtered = bowlingFilters.type !== "all" || bowlingFilters.ball !== "all" || bowlingFilters.query.trim();
+    list.replaceChildren();
+    count.textContent = filtered
+      ? `Showing ${matches.length} of ${state.sessions.length} session${state.sessions.length === 1 ? "" : "s"}`
+      : state.sessions.length ? `${state.sessions.length} session${state.sessions.length === 1 ? "" : "s"}, newest first` : "";
+    if (!state.sessions.length) {
+      const empty = element("div", "bowling-empty");
+      empty.append(element("strong", "", "No sessions yet."), element("span", "", " Log tonight’s series and your scores, ball changes, and lane moves will show up here."));
+      list.append(empty);
+      return;
+    }
+    if (!matches.length) {
+      const empty = element("div", "bowling-empty");
+      const clear = element("button", "secondary", "Clear filters");
+      clear.type = "button";
+      clear.addEventListener("click", () => {
+        bowlingFilters = { type: "all", ball: "all", query: "" };
+        bowlingRefresh("bowling-filter-type");
+      });
+      empty.append(element("span", "", "No sessions match these filters. "), clear);
+      list.append(empty);
+      return;
+    }
+    matches.forEach((session) => list.append(createBowlingSessionCard(session, ballsById)));
+  }
+  type.addEventListener("change", () => { bowlingFilters.type = type.value; renderList(); });
+  ball.addEventListener("change", () => { bowlingFilters.ball = ball.value; renderList(); });
+  query.addEventListener("input", () => { bowlingFilters.query = query.value; renderList(); });
+  renderList();
+  panel.append(title, ...(state.sessions.length ? [filters] : []), count, list);
+  return panel;
+}
+
+function createBowlingArsenal(state) {
+  const panel = element("section", "bowling-panel bowling-arsenal");
+  panel.setAttribute("aria-labelledby", "bowling-arsenal-title");
+  const title = element("h3", "", "Arsenal");
+  title.id = "bowling-arsenal-title";
+  title.tabIndex = -1;
+  const draft = bowlingBallDraft || { id: null, name: "", layout: "", surface: "", notes: "" };
+  const editing = draft.id ? state.balls.find((ball) => ball.id === draft.id) : null;
+  const form = element("form", "bowling-ball-form");
+  form.noValidate = true;
+  form.setAttribute("aria-label", editing ? `Edit ${editing.name}` : "Add a ball");
+  const name = bowlingInput("bowling-ball-name", draft.name, { maxLength: bowlingLimits.ballName, placeholder: "e.g. Black Venom" });
+  name.required = true;
+  const layout = bowlingInput("bowling-ball-layout", draft.layout, { maxLength: bowlingLimits.layout, placeholder: "e.g. 5 × 4.5 × 3.5" });
+  const surface = bowlingInput("bowling-ball-surface", draft.surface, { maxLength: bowlingLimits.surface, placeholder: "e.g. 4000 grit + polish" });
+  const notes = bowlingInput("bowling-ball-notes", draft.notes, { maxLength: bowlingLimits.ballNotes, placeholder: "Optional" });
+  const keepDraft = () => {
+    bowlingBallDraft = { id: draft.id, name: name.value, layout: layout.value, surface: surface.value, notes: notes.value };
+  };
+  [name, layout, surface, notes].forEach((input) => input.addEventListener("input", keepDraft));
+  const actions = element("div", "bowling-form-footer");
+  const save = element("button", "", editing ? "Save ball" : "Add ball");
+  save.type = "submit";
+  actions.append(save);
+  if (editing) {
+    const cancel = element("button", "secondary", "Cancel");
+    cancel.type = "button";
+    cancel.addEventListener("click", () => {
+      bowlingBallDraft = null;
+      bowlingStatus.ball = "";
+      bowlingRefresh("bowling-ball-name");
+    });
+    actions.append(cancel);
+  }
+  const status = element("p", `bowling-status${bowlingStatus.ballError ? " error" : ""}`, bowlingStatus.ball);
+  status.id = "bowling-ball-status";
+  status.setAttribute("role", "status");
+  actions.append(status);
+  form.append(
+    element("p", "bowling-form-title", editing ? `Editing ${editing.name}` : "Add a ball"),
+    bowlingField("Ball name", name),
+    bowlingField("Layout", layout),
+    bowlingField("Surface", surface),
+    bowlingField("Notes", notes),
+    actions
+  );
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const ballName = name.value.trim();
+    if (!ballName) {
+      name.setAttribute("aria-invalid", "true");
+      bowlingStatus.ball = "Enter a ball name.";
+      bowlingStatus.ballError = true;
+      status.textContent = bowlingStatus.ball;
+      status.classList.add("error");
+      name.focus();
+      return;
+    }
+    bowlingCommit((next, now) => {
+      const previous = editing ? next.balls.find((ball) => ball.id === editing.id) : null;
+      const ball = {
+        id: previous?.id || bowlingId("ball"),
+        name: ballName,
+        layout: layout.value.trim(),
+        surface: surface.value.trim(),
+        notes: notes.value.trim(),
+        archived: previous?.archived || false,
+        createdAt: previous?.createdAt || now,
+        updatedAt: now
+      };
+      next.balls = next.balls.filter((item) => item.id !== ball.id);
+      next.balls.push(ball);
+    });
+    bowlingBallDraft = null;
+    bowlingStatus.ball = editing ? `${ballName} updated. Past sessions keep the details recorded that night.` : `${ballName} added to your arsenal.`;
+    bowlingStatus.ballError = false;
+    bowlingRefresh("bowling-ball-name");
+  });
+
+  const missingStarters = bowlingStarterBalls.filter(([id]) => !state.balls.some((ball) => ball.id === id));
+  const starters = element("div", "bowling-starters");
+  if (missingStarters.length) {
+    starters.append(element("span", "", state.balls.length ? "Quick add:" : "Start with:"));
+    for (const [id, starterName] of missingStarters) {
+      const add = element("button", "secondary", `+ ${starterName}`);
+      add.type = "button";
+      add.addEventListener("click", () => {
+        bowlingCommit((next, now) => {
+          if (next.balls.some((ball) => ball.id === id)) return;
+          next.balls.push({ id, name: starterName, layout: "", surface: "", notes: "", archived: false, createdAt: now, updatedAt: now });
+        });
+        bowlingStatus.ball = `${starterName} added. Add its layout and surface whenever you like.`;
+        bowlingStatus.ballError = false;
+        bowlingRefresh("bowling-arsenal-title");
+      });
+      starters.append(add);
+    }
+  }
+
+  const list = element("ul", "bowling-ball-list");
+  const byName = (a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+  const ordered = [...state.balls.filter((ball) => !ball.archived).sort(byName), ...state.balls.filter((ball) => ball.archived).sort(byName)];
+  for (const ball of ordered) {
+    const item = element("li", `bowling-ball${ball.archived ? " archived" : ""}`);
+    const info = element("div", "bowling-ball-info");
+    const heading = element("strong", "", ball.name);
+    info.append(heading);
+    if (ball.archived) info.append(element("span", "bowling-badge", "Retired"));
+    const specs = [ball.layout && `Layout ${ball.layout}`, ball.surface && `Surface ${ball.surface}`].filter(Boolean).join(" · ");
+    info.append(element("small", "", specs || "No layout or surface recorded"));
+    if (ball.notes) info.append(element("small", "", ball.notes));
+    const used = state.sessions.filter((session) => bowlingSessionUsesBall(session, ball.id)).length;
+    if (used) info.append(element("small", "", `Used in ${used} session${used === 1 ? "" : "s"}`));
+    const buttons = element("div", "item-footer");
+    const edit = element("button", "secondary", "Edit");
+    edit.type = "button";
+    edit.setAttribute("aria-label", `Edit ${ball.name}`);
+    edit.addEventListener("click", () => {
+      bowlingBallDraft = { id: ball.id, name: ball.name, layout: ball.layout, surface: ball.surface, notes: ball.notes };
+      bowlingStatus.ball = "";
+      bowlingRefresh("bowling-ball-name");
+    });
+    const archive = element("button", "secondary", ball.archived ? "Restore" : "Retire");
+    archive.type = "button";
+    archive.id = `bowling-archive-${ball.id}`;
+    archive.setAttribute("aria-label", `${ball.archived ? "Restore" : "Retire"} ${ball.name}`);
+    archive.addEventListener("click", () => {
+      bowlingCommit((next, now) => {
+        const target = next.balls.find((itemBall) => itemBall.id === ball.id);
+        if (target) {
+          target.archived = !ball.archived;
+          target.updatedAt = now;
+        }
+      });
+      bowlingStatus.ball = ball.archived ? `${ball.name} is back in your active arsenal.` : `${ball.name} retired. Past sessions still show it.`;
+      bowlingStatus.ballError = false;
+      bowlingRefresh(archive.id);
+    });
+    buttons.append(edit, archive);
+    item.append(info, buttons);
+    list.append(item);
+  }
+  const children = [title];
+  if (!state.balls.length) children.push(element("p", "bowling-empty", "Your arsenal is empty. Add the balls you carry so you can track starts and switches."));
+  if (missingStarters.length) children.push(starters);
+  if (state.balls.length) children.push(list);
+  children.push(form);
+  panel.append(...children);
+  return panel;
+}
+
+function bowlingScrollBehavior() {
+  return matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+}
+
+function bowlingJumpToLog() {
+  const log = document.getElementById("bowling-log");
+  if (!log) return;
+  log.scrollIntoView({ block: "start", behavior: bowlingScrollBehavior() });
+  document.getElementById("bowling-date")?.focus({ preventScroll: true });
+}
+
+function createBowlingChannel() {
+  const state = bowlingGetState();
+  const root = element("div", "bowling");
+  const layout = element("div", "bowling-layout");
+  const log = createBowlingSessionForm(state);
+  layout.append(log, createBowlingHistory(state), createBowlingArsenal(state));
+  const fab = element("button", `bowling-fab${bowlingFabHidden ? " is-hidden" : ""}`, "Log session");
+  fab.type = "button";
+  fab.tabIndex = bowlingFabHidden ? -1 : 0;
+  fab.toggleAttribute("aria-hidden", bowlingFabHidden);
+  fab.addEventListener("click", bowlingJumpToLog);
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(([entry]) => {
+      bowlingFabHidden = entry.isIntersecting;
+      fab.classList.toggle("is-hidden", entry.isIntersecting);
+      fab.tabIndex = entry.isIntersecting ? -1 : 0;
+      fab.toggleAttribute("aria-hidden", entry.isIntersecting);
+    });
+    observer.observe(log);
+    root.bowlingObserver = observer;
+  }
+  root.append(createBowlingDashboard(state), layout, fab);
+  bowlingRoot = root;
+  return root;
+}
