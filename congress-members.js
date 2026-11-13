@@ -61,6 +61,7 @@ function congressRefresh(focusId) {
   if (!congressRoot?.isConnected) return;
   const activeId = focusId || document.activeElement?.id;
   const previous = congressRoot;
+  previous.querySelector(".congress-directory")?.congressObserver?.disconnect();
   const next = createCongressMembersView();
   previous.replaceWith(next);
   if (activeId) document.getElementById(activeId)?.focus({ preventScroll: !focusId });
@@ -318,13 +319,32 @@ function congressDirectory(data) {
   const count = element("p", "politics-meta congress-count");
   count.setAttribute("aria-live", "polite");
   const list = element("div", "congress-card-grid");
+  // Infinite scroll: a marker after the list loads the next page when it nears the viewport.
+  // The button is only shown where IntersectionObserver isn't available.
+  const sentinel = element("div", "congress-sentinel");
+  sentinel.setAttribute("aria-hidden", "true");
   const more = element("button", "secondary congress-more", "");
   more.type = "button";
-  function render() {
-    const matches = congressSortMembers(data.members.filter((member) => congressMatches(member, congressFilters)));
-    const shown = matches.slice(0, congressLimit);
+  const autoLoad = "IntersectionObserver" in window;
+  let matches = [];
+  let shownCount = 0;
+  function updateCount() {
     const senate = matches.filter((member) => member.chamber === "Senate").length;
-    count.textContent = `${matches.length} member${matches.length === 1 ? "" : "s"} (${senate} senator${senate === 1 ? "" : "s"}, ${matches.length - senate} House)${matches.length > shown.length ? `, showing ${shown.length}` : ""}`;
+    count.textContent = `${matches.length} member${matches.length === 1 ? "" : "s"} (${senate} senator${senate === 1 ? "" : "s"}, ${matches.length - senate} House)`;
+    const remaining = matches.length - shownCount;
+    sentinel.hidden = remaining <= 0;
+    more.hidden = autoLoad || remaining <= 0;
+    more.textContent = `Show ${Math.min(40, remaining)} more`;
+  }
+  function showMore() {
+    const next = matches.slice(shownCount, congressLimit);
+    next.forEach((member) => list.append(congressMemberCard(member)));
+    shownCount += next.length;
+    updateCount();
+  }
+  function render() {
+    matches = congressSortMembers(data.members.filter((member) => congressMatches(member, congressFilters)));
+    shownCount = 0;
     list.replaceChildren();
     if (!matches.length) {
       const empty = element("div", "congress-empty");
@@ -338,9 +358,7 @@ function congressDirectory(data) {
       empty.append(element("span", "", "No members match. "), clear);
       list.append(empty);
     }
-    shown.forEach((member) => list.append(congressMemberCard(member)));
-    more.hidden = matches.length <= shown.length;
-    more.textContent = `Show ${Math.min(40, matches.length - shown.length)} more`;
+    showMore();
   }
   const update = () => {
     congressFilters = { query: query.value, chamber: chamber.value, state: state.value, party: party.value, committee: committee.value };
@@ -349,13 +367,27 @@ function congressDirectory(data) {
   };
   query.addEventListener("input", update);
   [chamber, state, party, committee].forEach((select) => select.addEventListener("change", update));
+  const loadNext = () => {
+    if (shownCount >= matches.length) return;
+    congressLimit = shownCount + 40;
+    showMore();
+    // The observer only reports changes, so keep filling while the marker is still near the viewport.
+    if (autoLoad && sentinel.isConnected && sentinel.getBoundingClientRect().top < innerHeight + 600) requestAnimationFrame(loadNext);
+  };
   more.addEventListener("click", () => {
-    congressLimit += 40;
-    render();
-    list.children[congressLimit - 40]?.focus();
+    const first = shownCount;
+    loadNext();
+    list.children[first]?.focus();
   });
+  if (autoLoad) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) loadNext();
+    }, { rootMargin: "0px 0px 600px 0px" });
+    observer.observe(sentinel);
+    panel.congressObserver = observer;
+  }
   render();
-  panel.append(title, filters, count, list, more);
+  panel.append(title, filters, count, list, sentinel, more);
   return panel;
 }
 
