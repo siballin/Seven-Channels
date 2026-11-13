@@ -62,6 +62,8 @@ def fetch(url, *, budgeted=True):
     if wait > 0:
         time.sleep(wait)
     _last_request[host] = time.monotonic()
+    if os.environ.get("BOWLING_LOG_FETCHES"):
+        print(f"fetch {url}", flush=True)
     request = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "*/*"})
     with urlopen(request, timeout=45) as response:
         return response.read().decode("utf-8", "replace")
@@ -529,6 +531,7 @@ def main():
     balls, checked, sources = [], {}, []
     for label, brands, hosts, collect, args in jobs:
         collector = Collector(previous)
+        job_started = time.monotonic()
         previous_checked = {url: version for url, version in previous.get("checked", {}).items() if urlparse(url).hostname in hosts}
         try:
             collect(collector, *args)
@@ -557,6 +560,7 @@ def main():
             checked.update({url: version for url, version in previous_checked.items() if url not in collector.checked})
         checked.update(collector.checked)
         balls.extend(found.values())
+        print(f"{label}: {len(collector.checked)} pages checked in {time.monotonic() - job_started:.0f}s", flush=True)
         status, message = ("partial", "Some pages will be fetched on the next refresh.") if collector.incomplete else ("ok", "")
         for brand in brands:
             count = sum(1 for ball in found.values() if ball["brand"] == brand)
