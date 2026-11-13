@@ -60,6 +60,16 @@ The arsenal stores each ball's name, layout, surface and notes as free text (for
 
 The dashboard's average, games bowled and high game are calculated across individual scored games, so sessions with different game counts are weighted correctly. The series trend chart and high series only include three-game sessions with all three games scored. History is newest first and can be filtered by session type, by any ball used (starting ball or switch), and by text in notes and adjustments.
 
+### Ball database and release calendar
+
+**Ball database** (`#bowling/balls`) lets you search balls from Storm, Roto Grip, 900 Global, Brunswick, Hammer, Ebonite, Track, Radical, DV8 and Columbia 300 released since January 2020. Filter by brand, cover type (solid, pearl, hybrid, urethane, polyester), symmetric or asymmetric core, and release year. Each ball shows its RG and differential, plus intermediate differential when the core is asymmetric. Specs are for one weight, shown with the numbers: 15 lb where the manufacturer lists it, and 16 lb for Storm, Roto Grip and 900 Global, whose pages list only 16 lb. Add a ball to your arsenal from the database, or use **Find specs** on an arsenal ball to link it. Linked specs are copied to the arsenal entry and sync with it. A ball added from the database starts with its factory finish as its surface.
+
+**Release calendar** (`#bowling/releases`) shows release dates by month with a brand filter, alongside upcoming and recent releases. Manufacturers usually announce balls a few weeks ahead, so the calendar mostly covers recent releases.
+
+`scripts/update_bowling_balls.py` builds `data/bowling-balls.json` from manufacturer websites only: Storm's ball feed and product pages (which cover Roto Grip and 900 Global), the Brunswick, Radical and DV8 product sitemaps and pages, and the Hammer, Ebonite, Track and Columbia 300 store product feeds and pages. The Pages workflow refreshes it daily and keeps the last copy in the GitHub Actions cache. Each run fetches only new or changed pages, waits between requests (10 seconds on Storm's site, as its robots.txt asks), and caps fetching at 40 minutes per run. A brand that can't be refreshed keeps its last data and is labeled on the page. Motiv isn't included because its website refuses automated requests.
+
+Manufacturer listings can be incomplete. Storm's feed covers mostly 2023 and later, so older Storm, Roto Grip and 900 Global balls may be missing, and spare balls without listed specs show dashes. Run `python3 -m unittest discover -s scripts -p 'test_update_bowling_balls.py'` to test the parsers.
+
 Bowling logic lives in `bowling.js`. Sessions and arsenal entries are stored in browser storage and, when signed in, sync as part of the account state. Each session and ball has a stable ID and edit time; edits merge per record (the newest edit wins) and deleted sessions are remembered, so another device's stale copy does not bring them back.
 
 ## Glass appearance

@@ -1219,7 +1219,7 @@
     :is(.entry-form, .list-column, .game-detail-area, .release-detail, .bet-import-composer,
       .bet-import-row, .bet-metric, .game-bet-tracker, .game-calendar-search, .game-calendar-release,
       .game-calendar-search-result, .player-current-stat, .channel-cell, .listing,
-      .bowling-metric, .bowling-session, .bowling-game, .bowling-ball) {
+      .bowling-metric, .bowling-session, .bowling-game, .bowling-ball, .bowling-catalog-ball) {
       border-color: var(--glass-edge);
       border-radius: var(--glass-radius-small);
       background-color: color-mix(in srgb, var(--glass-base) var(--glass-opacity-subtle), var(--screen));
@@ -1632,6 +1632,62 @@
     .bowling-ball-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-top: 12px; border-top: 1px solid var(--glass-edge); }
     .bowling-ball-form .bowling-form-title, .bowling-ball-form .bowling-form-footer { grid-column: 1 / -1; }
     .bowling-form-title { margin: 0; font-weight: 700; font-size: .86rem; }
+    .bowling-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .bowling-tabs a { padding: 7px 13px; border: 1px solid var(--glass-edge); border-radius: 999px; background: var(--surface); color: var(--ink); font-size: .84rem; font-weight: 700; text-decoration: none; }
+    .bowling-tabs a:hover { background: var(--surface-hover); }
+    .bowling-tabs a[aria-current="page"] { border-color: color-mix(in srgb, var(--signal) 45%, var(--glass-edge)); background: color-mix(in srgb, var(--signal) 17%, var(--surface)); color: var(--glass-accent-ink); }
+    .bowling-panel-intro { margin: -6px 0 12px; color: var(--muted); font-size: .84rem; }
+    .bowling-catalog-filters { display: grid; grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+    .bowling-catalog-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 10px; }
+    .bowling-catalog-ball { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; min-width: 0; padding: 12px; border: 1px solid var(--line); }
+    .bowling-catalog-image, .bowling-release-image { width: 72px; height: 72px; border-radius: 50%; background: var(--surface); object-fit: contain; }
+    .bowling-catalog-image.is-empty, .bowling-release-image.is-empty { display: block; border: 1px dashed var(--glass-edge); background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--signal) 25%, transparent), transparent 60%); }
+    .bowling-release-image { width: 48px; height: 48px; }
+    .bowling-catalog-body { display: grid; gap: 6px; min-width: 0; }
+    .bowling-catalog-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+    .bowling-catalog-heading h4 { margin: 0 4px 0 0; font-size: 1rem; overflow-wrap: anywhere; }
+    .bowling-cover-solid, .bowling-cover-pearl, .bowling-cover-hybrid { color: var(--ink); }
+    .bowling-catalog-meta { margin: 0; color: var(--muted); font-size: .76rem; overflow-wrap: anywhere; }
+    .bowling-catalog-specs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0; }
+    .bowling-catalog-specs div { padding: 6px 8px; border: 1px solid var(--glass-edge); border-radius: 8px; background: var(--surface); }
+    .bowling-catalog-specs dt { color: var(--muted); font-size: .66rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+    .bowling-catalog-specs dd { margin: 0; font: 700 .98rem var(--data); font-variant-numeric: tabular-nums; }
+    .bowling-catalog-specs dd small { display: block; color: var(--muted); font-size: .66rem; font-weight: 600; }
+    .bowling-external { font-size: .78rem; font-weight: 700; }
+    .bowling-external:hover { color: var(--signal); }
+    .bowling-in-arsenal { border-color: color-mix(in srgb, var(--signal) 45%, var(--glass-edge)); color: var(--ink); }
+    .bowling-catalog-more { margin-top: 10px; }
+    .bowling-catalog-more[hidden] { display: none; }
+    .bowling-catalog-note { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--glass-edge); color: var(--muted); font-size: .74rem; }
+    .bowling-catalog-note p { margin: 0 0 4px; }
+    .bowling-catalog-warning { color: #a45b0a; }
+    :root[data-theme="dark"] .bowling-catalog-warning { color: #ffca77; }
+    .bowling-ball-catalog { color: var(--ink) !important; }
+    .bowling-find-specs { align-self: center; font-size: .78rem; font-weight: 700; }
+    .bowling-releases { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: 16px; align-items: start; }
+    .bowling-calendar { margin: 0; }
+    .bowling-calendar .game-calendar-header h3 { margin: 0; }
+    .bowling-calendar-brand { max-width: 240px; margin-bottom: 10px; }
+    .bowling-calendar .game-calendar-day.is-today .game-calendar-day-number { color: var(--glass-accent-ink); font-weight: 800; }
+    .bowling-calendar .game-calendar-day:not(:has(.game-calendar-day-count)) { color: var(--muted); }
+    .bowling-release { grid-template-columns: 48px minmax(0, 1fr) auto; }
+    .bowling-release a { font-size: .84rem; font-weight: 700; text-decoration: none; }
+    .bowling-release a:hover { color: var(--signal); text-decoration: underline; }
+    .bowling-release-date { min-height: 30px; padding: 3px 8px; font-size: .72rem; white-space: nowrap; }
+    .bowling-upcoming h3 + .game-calendar-release-list, .bowling-upcoming h3 + .bowling-empty { margin-bottom: 16px; }
+    .bowling-upcoming .bowling-release { grid-template-columns: 40px minmax(0, 1fr); }
+    .bowling-upcoming .bowling-release-image { width: 40px; height: 40px; }
+    .bowling-upcoming .bowling-release-date { grid-column: 2; justify-self: start; }
+    @media (max-width: 960px) {
+      .bowling-catalog-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .bowling-catalog-filters > .field:first-child { grid-column: 1 / -1; }
+      .bowling-releases { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .bowling-catalog-ball { grid-template-columns: 52px minmax(0, 1fr); gap: 10px; }
+      .bowling-catalog-image { width: 52px; height: 52px; }
+      .bowling-calendar-brand { max-width: none; }
+    }
     .bowling-fab { display: none; }
     @media (max-width: 960px) {
       .bowling-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "log" "history" "arsenal"; }
@@ -5695,6 +5751,7 @@
       const route = location.hash.slice(1);
       if (route === "sports-standings" || route === "sports-leaders" ||
         /^sports\/nba\/(teams|games)\//.test(route)) return "sports";
+      if (/^bowling\/(balls|releases)$/.test(route)) return "bowling";
       return route === "guide" || channels.some((channel) => channel.id === route) ? route : "guide";
     }
 

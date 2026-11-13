@@ -68,6 +68,32 @@ function bowlingNormalizeBallRef(value) {
   };
 }
 
+const bowlingCoverTypes = [["solid", "Solid"], ["pearl", "Pearl"], ["hybrid", "Hybrid"], ["urethane", "Urethane"], ["polyester", "Polyester"]];
+
+function bowlingSpecNumber(value) {
+  return Number.isFinite(value) && value > 0 && value < 10 ? value : null;
+}
+
+// Specs copied from the ball database when a ball is added or linked, so they stay with the arsenal entry.
+function bowlingNormalizeCatalogRef(value) {
+  if (!value || typeof value !== "object" || typeof value.id !== "string" || !value.id) return null;
+  return {
+    id: value.id.slice(0, 120),
+    brand: bowlingText(value.brand, 40),
+    name: bowlingText(value.name, 80),
+    coverType: bowlingCoverTypes.some(([type]) => type === value.coverType) ? value.coverType : "",
+    coverstock: bowlingText(value.coverstock, 80),
+    core: bowlingText(value.core, 80),
+    symmetry: ["symmetric", "asymmetric"].includes(value.symmetry) ? value.symmetry : "",
+    weight: Number.isInteger(value.weight) && value.weight >= 6 && value.weight <= 16 ? value.weight : null,
+    rg: bowlingSpecNumber(value.rg),
+    diff: bowlingSpecNumber(value.diff),
+    intDiff: bowlingSpecNumber(value.intDiff),
+    releaseDate: bowlingValidDate(value.releaseDate) ? value.releaseDate : "",
+    url: typeof value.url === "string" && value.url.startsWith("https://") ? value.url.slice(0, 300) : ""
+  };
+}
+
 function bowlingNormalizeBall(value) {
   if (!value || typeof value !== "object" || typeof value.id !== "string" || !value.id) return null;
   const name = bowlingText(value.name, bowlingLimits.ballName);
@@ -79,6 +105,7 @@ function bowlingNormalizeBall(value) {
     surface: bowlingText(value.surface, bowlingLimits.surface),
     notes: bowlingText(value.notes, bowlingLimits.ballNotes),
     archived: value.archived === true,
+    catalog: bowlingNormalizeCatalogRef(value.catalog),
     createdAt: typeof value.createdAt === "string" ? value.createdAt : "",
     updatedAt: typeof value.updatedAt === "string" ? value.updatedAt : ""
   };
@@ -1081,6 +1108,7 @@ function createBowlingArsenal(state) {
         surface: surface.value.trim(),
         notes: notes.value.trim(),
         archived: previous?.archived || false,
+        catalog: previous?.catalog || null,
         createdAt: previous?.createdAt || now,
         updatedAt: now
       };
@@ -1125,9 +1153,20 @@ function createBowlingArsenal(state) {
     const specs = [ball.layout && `Layout ${ball.layout}`, ball.surface && `Surface ${ball.surface}`].filter(Boolean).join(" · ");
     info.append(element("small", "", specs || "No layout or surface recorded"));
     if (ball.notes) info.append(element("small", "", ball.notes));
+    if (ball.catalog) info.append(element("small", "bowling-ball-catalog", bowlingCatalogSummary(ball.catalog)));
     const used = state.sessions.filter((session) => bowlingSessionUsesBall(session, ball.id)).length;
     if (used) info.append(element("small", "", `Used in ${used} session${used === 1 ? "" : "s"}`));
     const buttons = element("div", "item-footer");
+    if (!ball.catalog) {
+      const find = element("a", "bowling-find-specs", "Find specs");
+      find.href = "#bowling/balls";
+      find.setAttribute("aria-label", `Find ${ball.name} in the ball database`);
+      find.addEventListener("click", () => {
+        bowlingCatalogFilters = { ...bowlingCatalogDefaults, query: ball.name };
+        bowlingCatalogLimit = 30;
+      });
+      buttons.append(find);
+    }
     const edit = element("button", "secondary", "Edit");
     edit.type = "button";
     edit.setAttribute("aria-label", `Edit ${ball.name}`);
@@ -1176,7 +1215,524 @@ function bowlingJumpToLog() {
   document.getElementById("bowling-date")?.focus({ preventScroll: true });
 }
 
+// ---------- Ball database and release calendar ----------
+
+const bowlingCatalogUrl = "data/bowling-balls.json";
+const bowlingCatalogDefaults = { query: "", brand: "all", cover: "all", symmetry: "all", year: "all" };
+let bowlingCatalogFilters = { ...bowlingCatalogDefaults };
+let bowlingCatalogLimit = 30;
+let bowlingCatalogPromise = null;
+let bowlingCatalog = null;
+let bowlingCatalogFailed = false;
+let bowlingCatalogStatus = "";
+let bowlingCalendarState = { month: "", day: "", brand: "all" };
+
+function bowlingValidCatalogBall(ball) {
+  return ball && typeof ball === "object" && typeof ball.id === "string" && typeof ball.name === "string" && ball.name &&
+    typeof ball.brand === "string" && bowlingValidDate(ball.releaseDate) &&
+    typeof ball.url === "string" && ball.url.startsWith("https://");
+}
+
+function bowlingLoadCatalog() {
+  if (!bowlingCatalogPromise) {
+    bowlingCatalogFailed = false;
+    bowlingCatalogPromise = fetch(bowlingCatalogUrl)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Ball data request failed (${response.status}).`);
+        return response.json();
+      })
+      .then((data) => {
+        if (!data || !Array.isArray(data.balls)) throw new TypeError("Ball data has an unexpected format.");
+        bowlingCatalog = {
+          generatedAt: typeof data.generatedAt === "string" ? data.generatedAt : "",
+          sources: Array.isArray(data.sources) ? data.sources : [],
+          missingBrands: Array.isArray(data.missingBrands) ? data.missingBrands : [],
+          minimumReleaseDate: bowlingValidDate(data.minimumReleaseDate) ? data.minimumReleaseDate : "2020-01-01",
+          balls: data.balls.filter(bowlingValidCatalogBall)
+            .map((ball) => ({ ...ball, rg: bowlingSpecNumber(ball.rg), diff: bowlingSpecNumber(ball.diff), intDiff: bowlingSpecNumber(ball.intDiff) }))
+            .sort((a, b) => b.releaseDate.localeCompare(a.releaseDate) || a.name.localeCompare(b.name))
+        };
+        return bowlingCatalog;
+      })
+      .catch((error) => {
+        console.error("Could not load the bowling ball database.", error);
+        bowlingCatalogPromise = null;
+        bowlingCatalogFailed = true;
+        throw error;
+      });
+  }
+  return bowlingCatalogPromise;
+}
+
+function bowlingFormatSpec(value) {
+  return value === null || value === undefined ? "—" : value.toFixed(3);
+}
+
+function bowlingCoverLabel(type) {
+  return bowlingCoverTypes.find(([value]) => value === type)?.[1] || "";
+}
+
+function bowlingCatalogSummary(catalog) {
+  const parts = [catalog.brand, bowlingCoverLabel(catalog.coverType),
+    catalog.symmetry ? (catalog.symmetry === "asymmetric" ? "Asymmetric" : "Symmetric") : ""];
+  if (catalog.rg !== null) parts.push(`RG ${bowlingFormatSpec(catalog.rg)}`);
+  if (catalog.diff !== null) parts.push(`Diff ${bowlingFormatSpec(catalog.diff)}`);
+  if (catalog.symmetry === "asymmetric" && catalog.intDiff !== null) parts.push(`Int. diff ${bowlingFormatSpec(catalog.intDiff)}`);
+  const summary = parts.filter(Boolean).join(" · ");
+  return catalog.weight && catalog.rg !== null ? `${summary} (${catalog.weight} lb)` : summary;
+}
+
+function bowlingCatalogSnapshot(ball) {
+  return bowlingNormalizeCatalogRef({ ...ball, id: ball.id });
+}
+
+function bowlingCatalogMatches(ball, filters) {
+  if (filters.brand !== "all" && ball.brand !== filters.brand) return false;
+  if (filters.cover !== "all" && ball.coverType !== filters.cover) return false;
+  if (filters.symmetry !== "all" && ball.symmetry !== filters.symmetry) return false;
+  if (filters.year !== "all" && !ball.releaseDate.startsWith(filters.year)) return false;
+  const words = filters.query.toLocaleLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return true;
+  const haystack = [ball.brand, ball.name, ball.core, ball.coverstock, ball.coverTypeLabel].filter(Boolean).join(" ").toLocaleLowerCase();
+  return words.every((word) => haystack.includes(word));
+}
+
+function bowlingSelect(id, options, value) {
+  const select = document.createElement("select");
+  select.id = id;
+  for (const [optionValue, label] of options) {
+    const option = element("option", "", label);
+    option.value = optionValue;
+    option.selected = optionValue === value;
+    select.append(option);
+  }
+  return select;
+}
+
+function bowlingCatalogImage(ball, className) {
+  if (!ball.image || !ball.image.startsWith("https://")) return element("span", `${className} is-empty`);
+  const image = element("img", className);
+  image.src = ball.image;
+  image.alt = "";
+  image.loading = "lazy";
+  image.decoding = "async";
+  image.referrerPolicy = "no-referrer";
+  image.addEventListener("error", () => image.replaceWith(element("span", `${className} is-empty`)), { once: true });
+  return image;
+}
+
+function bowlingExternalLink(text, url, label) {
+  const link = element("a", "bowling-external", text);
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  if (label) link.setAttribute("aria-label", label);
+  return link;
+}
+
+function bowlingAddCatalogBall(ball) {
+  const catalog = bowlingCatalogSnapshot(ball);
+  const state = bowlingGetState();
+  const sameName = state.balls.find((item) => !item.catalog && item.name.toLocaleLowerCase() === ball.name.toLocaleLowerCase());
+  bowlingCommit((next, now) => {
+    if (sameName) {
+      const target = next.balls.find((item) => item.id === sameName.id);
+      if (target) {
+        target.catalog = catalog;
+        target.updatedAt = now;
+      }
+      return;
+    }
+    next.balls.push({
+      id: bowlingId("ball"), name: ball.name.slice(0, bowlingLimits.ballName), layout: "",
+      surface: (ball.finish || "").slice(0, bowlingLimits.surface), notes: "", archived: false,
+      catalog, createdAt: now, updatedAt: now
+    });
+  });
+  bowlingCatalogStatus = sameName
+    ? `Linked specs to ${sameName.name} in your arsenal.`
+    : `${ball.name} added to your arsenal${ball.finish ? " with its factory finish as the surface. Update it if the ball has been resurfaced" : ""}.`;
+}
+
+function bowlingSourceNote(catalog) {
+  const note = element("div", "bowling-catalog-note");
+  const generated = Date.parse(catalog.generatedAt);
+  const refreshed = Number.isFinite(generated)
+    ? ` Last refreshed ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(generated))}.`
+    : "";
+  note.append(element("p", "", `Specs and release dates come from manufacturer websites, back to ${bowlingFormatDate(catalog.minimumReleaseDate, { month: "long", year: "numeric" })}, and are refreshed daily.${refreshed} RG and differential are for the weight shown (15 lb where listed; Storm, Roto Grip and 900 Global list 16 lb). Intermediate differential is shown for asymmetric balls only.`));
+  const problems = catalog.sources.filter((source) => source.status && source.status !== "ok");
+  for (const source of problems) {
+    note.append(element("p", "bowling-catalog-warning", `${source.brand}: ${source.message || "Not refreshed."}`));
+  }
+  for (const missing of catalog.missingBrands) {
+    if (missing?.brand) note.append(element("p", "", `${missing.brand} isn’t included: ${missing.reason || "its data is unavailable."}`));
+  }
+  return note;
+}
+
+function createBowlingCatalogLoading(panel, build) {
+  if (bowlingCatalog) {
+    build(bowlingCatalog);
+    return;
+  }
+  const status = element("p", "bowling-empty", bowlingCatalogFailed ? "The ball database couldn’t be loaded." : "Loading the ball database…");
+  status.setAttribute("role", "status");
+  panel.append(status);
+  if (bowlingCatalogFailed) {
+    const retry = element("button", "secondary", "Try again");
+    retry.type = "button";
+    retry.addEventListener("click", () => {
+      bowlingCatalogFailed = false;
+      bowlingRefresh();
+      bowlingLoadCatalog().then(() => bowlingRefresh(), () => bowlingRefresh());
+    });
+    panel.append(retry);
+    return;
+  }
+  bowlingLoadCatalog().then(() => bowlingRefresh(), () => bowlingRefresh());
+}
+
+function createBowlingCatalogView() {
+  const panel = element("section", "bowling-panel bowling-catalog");
+  panel.setAttribute("aria-labelledby", "bowling-catalog-title");
+  const title = element("h3", "", "Ball database");
+  title.id = "bowling-catalog-title";
+  panel.append(title, element("p", "bowling-panel-intro", "Look up a ball’s RG, differential, intermediate differential and cover type, then add it to your arsenal."));
+  createBowlingCatalogLoading(panel, (catalog) => {
+    const state = bowlingGetState();
+    const brands = [...new Set(catalog.balls.map((ball) => ball.brand))].sort();
+    const years = [...new Set(catalog.balls.map((ball) => ball.releaseDate.slice(0, 4)))].sort().reverse();
+    for (const [key, values] of [["brand", brands], ["year", years]]) {
+      if (bowlingCatalogFilters[key] !== "all" && !values.includes(bowlingCatalogFilters[key])) bowlingCatalogFilters[key] = "all";
+    }
+    const filters = element("div", "bowling-catalog-filters");
+    const query = bowlingInput("bowling-catalog-query", bowlingCatalogFilters.query, { type: "search", placeholder: "Ball, core or coverstock" });
+    query.autocomplete = "off";
+    const brand = bowlingSelect("bowling-catalog-brand", [["all", "All brands"], ...brands.map((item) => [item, item])], bowlingCatalogFilters.brand);
+    const cover = bowlingSelect("bowling-catalog-cover", [["all", "All cover types"], ...bowlingCoverTypes], bowlingCatalogFilters.cover);
+    const symmetry = bowlingSelect("bowling-catalog-symmetry", [["all", "Any core"], ["symmetric", "Symmetric"], ["asymmetric", "Asymmetric"]], bowlingCatalogFilters.symmetry);
+    const year = bowlingSelect("bowling-catalog-year", [["all", "Any year"], ...years.map((item) => [item, item])], bowlingCatalogFilters.year);
+    filters.append(
+      bowlingField("Search", query), bowlingField("Brand", brand), bowlingField("Cover type", cover),
+      bowlingField("Core", symmetry), bowlingField("Released", year)
+    );
+    const status = element("p", "bowling-status", bowlingCatalogStatus);
+    status.setAttribute("role", "status");
+    const count = element("p", "bowling-history-count");
+    count.setAttribute("aria-live", "polite");
+    const list = element("div", "bowling-catalog-list");
+    const more = element("button", "secondary bowling-catalog-more", "");
+    more.type = "button";
+
+    function renderResults() {
+      const matches = catalog.balls.filter((ball) => bowlingCatalogMatches(ball, bowlingCatalogFilters));
+      const shown = matches.slice(0, bowlingCatalogLimit);
+      count.textContent = `${matches.length} ball${matches.length === 1 ? "" : "s"}${matches.length > shown.length ? `, showing ${shown.length}` : ""}`;
+      list.replaceChildren();
+      if (!matches.length) {
+        const empty = element("div", "bowling-empty");
+        const clear = element("button", "secondary", "Clear filters");
+        clear.type = "button";
+        clear.addEventListener("click", () => {
+          bowlingCatalogFilters = { ...bowlingCatalogDefaults };
+          bowlingCatalogLimit = 30;
+          bowlingRefresh("bowling-catalog-query");
+        });
+        empty.append(element("span", "", catalog.balls.length ? "No balls match. Check the spelling or clear the filters. " : "No balls are available yet. "), clear);
+        list.append(empty);
+      }
+      const linked = new Set(state.balls.map((ball) => ball.catalog?.id).filter(Boolean));
+      for (const ball of shown) list.append(createBowlingCatalogCard(ball, linked.has(ball.id), state));
+      more.hidden = matches.length <= shown.length;
+      more.textContent = `Show ${Math.min(30, matches.length - shown.length)} more`;
+    }
+
+    const update = () => {
+      bowlingCatalogFilters = { query: query.value, brand: brand.value, cover: cover.value, symmetry: symmetry.value, year: year.value };
+      bowlingCatalogLimit = 30;
+      renderResults();
+    };
+    query.addEventListener("input", update);
+    [brand, cover, symmetry, year].forEach((select) => select.addEventListener("change", update));
+    more.addEventListener("click", () => {
+      bowlingCatalogLimit += 30;
+      renderResults();
+      list.children[bowlingCatalogLimit - 30]?.querySelector("a, button")?.focus();
+    });
+    renderResults();
+    panel.append(filters, status, count, list, more, bowlingSourceNote(catalog));
+  });
+  return panel;
+}
+
+function createBowlingCatalogCard(ball, inArsenal, state) {
+  const card = element("article", "bowling-catalog-ball");
+  card.append(bowlingCatalogImage(ball, "bowling-catalog-image"));
+  const body = element("div", "bowling-catalog-body");
+  const heading = element("div", "bowling-catalog-heading");
+  heading.append(element("h4", "", ball.name), element("span", "bowling-badge", ball.brand));
+  if (ball.coverType) heading.append(element("span", `bowling-badge bowling-cover-${ball.coverType}`, bowlingCoverLabel(ball.coverType)));
+  if (ball.discontinued) heading.append(element("span", "bowling-badge", "Discontinued"));
+  const meta = element("p", "bowling-catalog-meta", `Released ${bowlingFormatDate(ball.releaseDate, { month: "short", day: "numeric", year: "numeric" })}`);
+  const specs = element("dl", "bowling-catalog-specs");
+  const addSpec = (label, value, note) => {
+    const item = element("div", "");
+    item.append(element("dt", "", label), element("dd", "", value));
+    if (note) item.lastChild.append(element("small", "", note));
+    specs.append(item);
+  };
+  addSpec("RG", bowlingFormatSpec(ball.rg), ball.rg !== null && ball.weight ? `${ball.weight} lb` : "");
+  addSpec("Diff", bowlingFormatSpec(ball.diff));
+  addSpec("Int. diff", ball.symmetry === "asymmetric" ? bowlingFormatSpec(ball.intDiff) : "—", ball.symmetry === "symmetric" ? "symmetric" : "");
+  const details = element("p", "bowling-catalog-meta");
+  details.textContent = [ball.core && `Core: ${ball.core}${ball.symmetry ? ` (${ball.symmetry})` : ""}`, ball.coverstock && `Cover: ${ball.coverstock}`].filter(Boolean).join(" · ");
+  const actions = element("div", "item-footer");
+  const sameName = state.balls.find((item) => !item.catalog && item.name.toLocaleLowerCase() === ball.name.toLocaleLowerCase());
+  if (inArsenal) {
+    actions.append(element("span", "bowling-badge bowling-in-arsenal", "In your arsenal"));
+  } else {
+    const add = element("button", "secondary", sameName ? `Add specs to ${sameName.name}` : "Add to arsenal");
+    add.type = "button";
+    add.id = `bowling-catalog-add-${ball.id}`;
+    add.setAttribute("aria-label", sameName ? `Add ${ball.brand} ${ball.name} specs to ${sameName.name} in your arsenal` : `Add ${ball.brand} ${ball.name} to your arsenal`);
+    add.addEventListener("click", () => {
+      bowlingAddCatalogBall(ball);
+      bowlingRefresh("bowling-catalog-title");
+    });
+    actions.append(add);
+  }
+  actions.append(bowlingExternalLink("Manufacturer page ↗", ball.url, `${ball.brand} ${ball.name} on the manufacturer’s site`));
+  body.append(heading, meta, specs);
+  if (details.textContent) body.append(details);
+  body.append(actions);
+  card.append(body);
+  return card;
+}
+
+function bowlingMonthKey(date) {
+  return date.slice(0, 7);
+}
+
+function bowlingShiftMonth(month, delta) {
+  const [year, monthIndex] = month.split("-").map(Number);
+  const date = new Date(year, monthIndex - 1 + delta, 1);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function createBowlingReleaseItem(ball) {
+  const item = element("li", "game-calendar-release bowling-release");
+  item.append(bowlingCatalogImage(ball, "bowling-release-image"));
+  const copy = element("div", "game-calendar-release-copy");
+  copy.append(bowlingExternalLink(ball.name, ball.url, `${ball.brand} ${ball.name} on the manufacturer’s site`));
+  const facts = [ball.brand, bowlingCoverLabel(ball.coverType), ball.symmetry === "asymmetric" ? "Asymmetric" : ball.symmetry === "symmetric" ? "Symmetric" : ""];
+  copy.append(element("small", "", facts.filter(Boolean).join(" · ")));
+  if (ball.rg !== null) {
+    copy.append(element("small", "", `RG ${bowlingFormatSpec(ball.rg)} · Diff ${bowlingFormatSpec(ball.diff)}${ball.symmetry === "asymmetric" && ball.intDiff !== null ? ` · Int. diff ${bowlingFormatSpec(ball.intDiff)}` : ""}`));
+  }
+  item.append(copy);
+  return item;
+}
+
+function createBowlingReleaseView() {
+  const wrapper = element("div", "bowling-releases");
+  const panel = element("section", "bowling-panel game-release-calendar bowling-calendar");
+  panel.setAttribute("aria-labelledby", "bowling-calendar-title");
+  wrapper.append(panel);
+  createBowlingCatalogLoading(panel, (catalog) => {
+    const today = bowlingToday();
+    const brands = [...new Set(catalog.balls.map((ball) => ball.brand))].sort();
+    if (bowlingCalendarState.brand !== "all" && !brands.includes(bowlingCalendarState.brand)) bowlingCalendarState.brand = "all";
+    const firstMonth = bowlingMonthKey(catalog.minimumReleaseDate);
+    const latest = catalog.balls[0]?.releaseDate || today;
+    const lastMonth = [bowlingMonthKey(latest), bowlingMonthKey(today)].sort().pop();
+    if (!bowlingCalendarState.month || bowlingCalendarState.month < firstMonth || bowlingCalendarState.month > lastMonth) {
+      bowlingCalendarState.month = bowlingMonthKey(today) < firstMonth ? firstMonth : bowlingMonthKey(today) > lastMonth ? lastMonth : bowlingMonthKey(today);
+      bowlingCalendarState.day = "";
+    }
+    const header = element("div", "game-calendar-header");
+    const titleBlock = element("div");
+    const title = element("h3", "", "Bowling ball release calendar");
+    title.id = "bowling-calendar-title";
+    titleBlock.append(title, element("p", "", "Release dates from manufacturer websites."));
+    const nav = element("div", "game-calendar-nav");
+    const previous = element("button", "", "Previous");
+    previous.type = "button";
+    previous.setAttribute("aria-label", "Show previous month");
+    const picker = element("div", "game-calendar-month-picker");
+    picker.setAttribute("aria-live", "polite");
+    const monthNames = Array.from({ length: 12 }, (_, index) => new Intl.DateTimeFormat(undefined, { month: "long" }).format(new Date(2026, index, 1)));
+    const monthSelect = bowlingSelect("bowling-calendar-month", monthNames.map((name, index) => [String(index + 1).padStart(2, "0"), name]), "");
+    monthSelect.setAttribute("aria-label", "Select month");
+    const yearOptions = [];
+    for (let year = Number(firstMonth.slice(0, 4)); year <= Number(lastMonth.slice(0, 4)); year++) yearOptions.push([String(year), String(year)]);
+    const yearSelect = bowlingSelect("bowling-calendar-year", yearOptions, "");
+    yearSelect.setAttribute("aria-label", "Select year");
+    picker.append(monthSelect, yearSelect);
+    const next = element("button", "", "Next");
+    next.type = "button";
+    next.setAttribute("aria-label", "Show next month");
+    nav.append(previous, picker, next);
+    header.append(titleBlock, nav);
+    const brand = bowlingSelect("bowling-calendar-brand", [["all", "All brands"], ...brands.map((item) => [item, item])], bowlingCalendarState.brand);
+    const brandField = bowlingField("Brand", brand);
+    brandField.classList.add("bowling-calendar-brand");
+    const grid = element("div", "game-calendar-grid");
+    grid.setAttribute("role", "grid");
+    grid.setAttribute("aria-label", "Release dates");
+    const releases = element("section", "game-calendar-releases");
+    releases.setAttribute("aria-live", "polite");
+    panel.append(header, brandField, grid, releases, bowlingSourceNote(catalog));
+
+    const filtered = () => catalog.balls.filter((ball) => bowlingCalendarState.brand === "all" || ball.brand === bowlingCalendarState.brand);
+    function byDate() {
+      const map = new Map();
+      for (const ball of filtered()) {
+        if (!map.has(ball.releaseDate)) map.set(ball.releaseDate, []);
+        map.get(ball.releaseDate).push(ball);
+      }
+      return map;
+    }
+    function defaultDay(map) {
+      const days = [...map.keys()].filter((date) => date.startsWith(`${bowlingCalendarState.month}-`)).sort();
+      return days.find((date) => date >= today) || days[0] || `${bowlingCalendarState.month}-01`;
+    }
+    function renderReleases(map) {
+      releases.replaceChildren();
+      const list = map.get(bowlingCalendarState.day) || [];
+      releases.append(element("h4", "", bowlingFormatDate(bowlingCalendarState.day, { weekday: "long", month: "long", day: "numeric", year: "numeric" })));
+      if (!list.length) {
+        const monthCount = [...map.keys()].filter((date) => date.startsWith(`${bowlingCalendarState.month}-`)).length;
+        releases.append(element("p", "game-calendar-status", monthCount ? "No releases listed for this date. Pick a highlighted day." : "No releases listed this month."));
+        return;
+      }
+      const items = element("ul", "game-calendar-release-list");
+      list.forEach((ball) => items.append(createBowlingReleaseItem(ball)));
+      releases.append(items);
+    }
+    function renderMonth(focusDay) {
+      const map = byDate();
+      if (!bowlingCalendarState.day.startsWith(`${bowlingCalendarState.month}-`)) bowlingCalendarState.day = defaultDay(map);
+      const [year, month] = bowlingCalendarState.month.split("-").map(Number);
+      monthSelect.value = String(month).padStart(2, "0");
+      yearSelect.value = String(year);
+      grid.replaceChildren();
+      for (const weekday of ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]) {
+        const label = element("span", "game-calendar-weekday", weekday);
+        label.setAttribute("role", "columnheader");
+        grid.append(label);
+      }
+      const firstWeekday = new Date(year, month - 1, 1).getDay();
+      for (let index = 0; index < firstWeekday; index++) {
+        const blank = element("span");
+        blank.setAttribute("role", "gridcell");
+        grid.append(blank);
+      }
+      const daysInMonth = new Date(year, month, 0).getDate();
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = `${bowlingCalendarState.month}-${String(day).padStart(2, "0")}`;
+        const dayBalls = map.get(date) || [];
+        const button = element("button", `game-calendar-day${date === today ? " is-today" : ""}`);
+        button.type = "button";
+        button.dataset.date = date;
+        button.setAttribute("role", "gridcell");
+        button.setAttribute("aria-pressed", String(date === bowlingCalendarState.day));
+        button.setAttribute("aria-label", `${bowlingFormatDate(date, { month: "long", day: "numeric", year: "numeric" })}${dayBalls.length ? `, ${dayBalls.length} release${dayBalls.length === 1 ? "" : "s"}` : ""}`);
+        button.append(element("span", "game-calendar-day-number", String(day)));
+        if (dayBalls.length) button.append(element("span", "game-calendar-day-count", `${dayBalls.length} ball${dayBalls.length === 1 ? "" : "s"}`));
+        button.addEventListener("click", () => {
+          bowlingCalendarState.day = date;
+          renderMonth(date);
+        });
+        grid.append(button);
+      }
+      previous.disabled = bowlingCalendarState.month <= firstMonth;
+      next.disabled = bowlingCalendarState.month >= lastMonth;
+      renderReleases(map);
+      if (focusDay) grid.querySelector(`[data-date="${focusDay}"]`)?.focus();
+    }
+    const goTo = (month) => {
+      bowlingCalendarState.month = month < firstMonth ? firstMonth : month > lastMonth ? lastMonth : month;
+      bowlingCalendarState.day = "";
+      renderMonth();
+    };
+    previous.addEventListener("click", () => goTo(bowlingShiftMonth(bowlingCalendarState.month, -1)));
+    next.addEventListener("click", () => goTo(bowlingShiftMonth(bowlingCalendarState.month, 1)));
+    monthSelect.addEventListener("change", () => goTo(`${yearSelect.value}-${monthSelect.value}`));
+    yearSelect.addEventListener("change", () => goTo(`${yearSelect.value}-${monthSelect.value}`));
+    brand.addEventListener("change", () => {
+      bowlingCalendarState.brand = brand.value;
+      bowlingCalendarState.day = "";
+      renderMonth();
+      renderUpcoming();
+    });
+    renderMonth();
+
+    const side = element("section", "bowling-panel bowling-upcoming");
+    side.setAttribute("aria-labelledby", "bowling-upcoming-title");
+    wrapper.append(side);
+    function renderUpcoming() {
+      side.replaceChildren();
+      const upcoming = filtered().filter((ball) => ball.releaseDate >= today).sort((a, b) => a.releaseDate.localeCompare(b.releaseDate)).slice(0, 12);
+      const recent = filtered().filter((ball) => ball.releaseDate < today).slice(0, 8);
+      for (const [id, heading, list, empty] of [
+        ["bowling-upcoming-title", "Upcoming releases", upcoming, "No upcoming releases announced yet. Manufacturers usually list new balls a few weeks ahead."],
+        ["bowling-recent-title", "Recently released", recent, "No recent releases."]
+      ]) {
+        const title = element("h3", "", heading);
+        title.id = id;
+        side.append(title);
+        if (!list.length) {
+          side.append(element("p", "bowling-empty", empty));
+          continue;
+        }
+        const items = element("ul", "game-calendar-release-list");
+        for (const ball of list) {
+          const item = createBowlingReleaseItem(ball);
+          const date = element("button", "secondary bowling-release-date", bowlingFormatDate(ball.releaseDate, { month: "short", day: "numeric", year: "numeric" }));
+          date.type = "button";
+          date.setAttribute("aria-label", `Show ${bowlingFormatDate(ball.releaseDate, { month: "long", day: "numeric", year: "numeric" })} on the calendar`);
+          date.addEventListener("click", () => {
+            bowlingCalendarState.month = bowlingMonthKey(ball.releaseDate);
+            bowlingCalendarState.day = ball.releaseDate;
+            renderMonth(ball.releaseDate);
+          });
+          item.append(date);
+          items.append(item);
+        }
+        side.append(items);
+      }
+    }
+    renderUpcoming();
+  });
+  return wrapper;
+}
+
+function bowlingView() {
+  const match = /^#bowling\/(balls|releases)$/.exec(location.hash);
+  return match ? match[1] : "log";
+}
+
+function createBowlingTabs(active) {
+  const nav = element("nav", "bowling-tabs");
+  nav.setAttribute("aria-label", "Bowling sections");
+  for (const [view, label, href] of [["log", "League night", "#bowling"], ["balls", "Ball database", "#bowling/balls"], ["releases", "Release calendar", "#bowling/releases"]]) {
+    const link = element("a", "", label);
+    link.href = href;
+    if (view === active) link.setAttribute("aria-current", "page");
+    nav.append(link);
+  }
+  return nav;
+}
+
 function createBowlingChannel() {
+  const view = bowlingView();
+  if (view !== "log") {
+    const root = element("div", "bowling");
+    root.append(createBowlingTabs(view), view === "balls" ? createBowlingCatalogView() : createBowlingReleaseView());
+    bowlingRoot = root;
+    return root;
+  }
   const state = bowlingGetState();
   const root = element("div", "bowling");
   const layout = element("div", "bowling-layout");
@@ -1197,7 +1753,7 @@ function createBowlingChannel() {
     observer.observe(log);
     root.bowlingObserver = observer;
   }
-  root.append(createBowlingDashboard(state), layout, fab);
+  root.append(createBowlingTabs(view), createBowlingDashboard(state), layout, fab);
   bowlingRoot = root;
   return root;
 }
