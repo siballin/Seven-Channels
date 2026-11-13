@@ -52,6 +52,22 @@ jobs:
         with:
           path: data/politics.json
           key: politics-snapshot-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Restore last Congress member snapshot
+        uses: actions/cache/restore@v4
+        with:
+          path: data/congress-members.json
+          key: congress-members-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: congress-members-
+      - name: Refresh Congress member database
+        continue-on-error: true
+        env:
+          CONGRESS_GOV_API_KEY: ${{ secrets.CONGRESS_GOV_API_KEY }}
+        run: python scripts/update_congress_members.py
+      - name: Cache Congress member snapshot
+        uses: actions/cache/save@v4
+        with:
+          path: data/congress-members.json
+          key: congress-members-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Restore last bowling ball snapshot
         uses: actions/cache/restore@v4
         with:

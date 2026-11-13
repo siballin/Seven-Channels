@@ -50,6 +50,18 @@ The Pages workflow refreshes each source independently and restores the most rec
 
 To enable Bill Watch, add a repository Actions secret named `CONGRESS_GOV_API_KEY` from Congress.gov. The key is sent only to Congress.gov during the workflow and is not included in the published snapshot. Bill Watch searches the latest 20 published bill records, not the entire Congress.gov catalog. Saved bills remain on the device even after they leave the snapshot. Full text and further details are linked on Congress.gov rather than embedded.
 
+### Members of Congress
+
+The **Members of Congress** tab (`#politics/members`) lists every senator, representative and delegate. Search by name or state, and filter by chamber, party and committee. **Your delegation** shows your state's senators and your representative; pick your district (or look it up with your ZIP code on house.gov), and the choice is saved on this device only. Each member has a shareable profile at `#politics/members/<Bioguide ID>` with:
+
+- Party, state or district, leadership roles, the year they entered Congress, and when the seat is next up for election.
+- Washington office, phone, website, contact form, and social media accounts.
+- Committee and subcommittee assignments, with chair, vice chair and ranking member roles. A House ranking member is the minority party's top-ranked member of the committee.
+- A voting record for up to the 50 most recent roll calls in their chamber this session: votes cast and missed, and how often they voted with the Republican and Democratic majorities. This is a recent sample, not a full career record.
+- Sponsored and cosponsored bill totals and their 10 most recent sponsored bills, linked to Congress.gov.
+
+`scripts/update_congress_members.py` builds `data/congress-members.json` during the daily Pages workflow. Members, offices, committees and votes come from the House Clerk and Senate.gov; terms, leadership roles and bills come from the Congress.gov API using the `CONGRESS_GOV_API_KEY` secret; photos come from the Biographical Directory of the U.S. Congress. Social media accounts are the one non-government source: the volunteer-maintained [@unitedstates/congress-legislators](https://github.com/unitedstates/congress-legislators) list, matched by Bioguide ID. Each source refreshes independently and keeps its last data if a refresh fails. Without the API key, terms and bills keep their last saved values. Run `python3 -m unittest discover -s scripts -p 'test_update_congress_members.py'` to test the parsers.
+
 The optional editorial list is `data/politics-stories.json`: an array of objects with `title`, `date`, `source`, `url`, `what`, `affected`, and `next`. Only sourced, dated stories with all three context fields are displayed. The file starts empty; the site does not generate editorial claims.
 
 ## Bowling
