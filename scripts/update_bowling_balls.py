@@ -13,6 +13,7 @@ new or changed pages. A brand that fails keeps its previous data and is marked s
 """
 
 from datetime import datetime, timezone
+import hashlib
 import html
 import json
 import os
@@ -291,6 +292,13 @@ def parse_storm_page(markup, item):
     )
 
 
+def shopify_version(product):
+    """Fingerprint of a product's own listing. Shopify's updated_at changes on store-wide syncs, so it isn't used."""
+    content = json.dumps([product.get("title"), product.get("handle"), product.get("published_at"),
+                          sorted(product.get("tags", [])), product.get("body_html") or ""], ensure_ascii=False)
+    return hashlib.sha1(content.encode("utf-8")).hexdigest()[:16]
+
+
 def shopify_is_ball(product):
     tags = {tag.lower() for tag in product.get("tags", [])}
     return product.get("product_type", "").lower() in ("bowling ball", "ball") or bool(tags & {"balls", "ball", "retired ball"})
@@ -413,7 +421,7 @@ def collect_shopify(collector, brand, site):
             if not shopify_is_ball(product):
                 continue
             url = f"{site}/products/{product['handle']}"
-            version = product.get("updated_at", "")
+            version = shopify_version(product)
             if collector.cached(url, version):
                 continue
             body = product.get("body_html") or ""

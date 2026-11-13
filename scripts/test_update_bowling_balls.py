@@ -147,6 +147,13 @@ class BowlingBallTests(unittest.TestCase):
         self.assertEqual(sorted(ball["name"] for ball in second.balls.values()), ["Phaze A.I.", "Road Warrior"])
         self.assertEqual({ball["url"] for ball in second.balls.values()}, {balls.STORM_CATALOG_URL})
 
+    def test_shopify_version_ignores_store_wide_updates(self):
+        product = {"title": "Tempo", "handle": "tempo", "published_at": "2020-08-01", "tags": ["Ball"], "body_html": "<p>x</p>",
+                   "updated_at": "2026-11-13T13:50:52-05:00"}
+        same = balls.shopify_version({**product, "updated_at": "2026-11-13T14:23:55-05:00"})
+        self.assertEqual(balls.shopify_version(product), same)
+        self.assertNotEqual(balls.shopify_version(product), balls.shopify_version({**product, "tags": ["Ball", "Retired Ball"]}))
+
     def test_symmetric_balls_hide_small_intermediate_numbers(self):
         ball = balls.build_ball(brand="Test", name="Sym", url="https://x.test/a", numbers={15: (2.5, 0.04, 0.003)})
         self.assertEqual((ball["symmetry"], ball["intDiff"]), ("symmetric", None))
