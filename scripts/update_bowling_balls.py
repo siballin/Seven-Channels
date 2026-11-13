@@ -18,7 +18,7 @@ from pathlib import Path
 import re
 import sys
 import time
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 
 OUTPUT_PATH = Path(__file__).resolve().parents[1] / "data" / "bowling-balls.json"
@@ -164,6 +164,12 @@ def core_numbers(text):
     for match in re.finditer(r"(\d{2}) lb - RG \(([\d.]+)\) DIFF \(([\d.]+)\)(?: (?:ASY|MB|INT\.? DIFF|PSA) \(([\d.]+)\))?", text, re.I):
         found[int(match.group(1))] = (float(match.group(2)), float(match.group(3)), float(match.group(4)) if match.group(4) else None)
     if found:
+        return found
+    # Inline, one weight: "RG 2.501 (15 lb.) DIFF 0.051 (15 lb.) ASY 0.020 (15 lb.)"
+    match = re.search(r"RG (\d*\.\d+) \((\d{2}) lbs?\.?\) DIFF (\d*\.\d+)(?: \(\d{2} lbs?\.?\))?"
+                      r"(?: (?:ASY|MB|INT\.? DIFF|PSA) (\d*\.\d+))?", text, re.I)
+    if match:
+        found[int(match.group(2))] = (float(match.group(1)), float(match.group(3)), float(match.group(4)) if match.group(4) else None)
         return found
     # Columns: "16 lb 15 lb ... RG 2.517 2.568 ... DIFF 0.044 0.032 ... (ASY ...)"
     match = re.search(r"((?:\d{2} lbs? ){2,})RG ((?:\d*\.\d+ ?)+)DIFF ((?:\d*\.\d+ ?)+)(?:(?:ASY|MB|INT\.? DIFF|PSA) ((?:\d*\.\d+ ?)+))?", text, re.I)
@@ -322,9 +328,11 @@ class Collector:
 def collect_storm(collector):
     feed = json.loads(fetch(STORM_FEED, budgeted=False))
     for item in feed:
-        url = item.get("url", "")
-        if not url.startswith("https://www.stormbowling.com/"):
+        # The feed mixes absolute and site-relative links.
+        url = urljoin("https://www.stormbowling.com/", str(item.get("url") or "").strip())
+        if not item.get("url") or not url.startswith("https://www.stormbowling.com/"):
             continue
+        item = {**item, "url": url}
         version = f"{item.get('dateAvailable', '')}|{item.get('discontinued', '')}"
         if collector.cached(url, version):
             continue

@@ -75,6 +75,30 @@ class BowlingBallTests(unittest.TestCase):
         self.assertEqual((ball["weight"], ball["rg"], ball["diff"], ball["intDiff"], ball["symmetry"]), (16, 2.47, 0.035, 0.013, "asymmetric"))
         self.assertIs(ball["discontinued"], False)
 
+    def test_inline_single_weight_layout(self):
+        page = """<h3>Spec Table</h3><p>Level Top Shelf Core Katana Assault Asymmetric Coverstock HK22 - HyperKinetic
+        Cover Type Hybrid Reactive Weights 16-14 lbs. RG 2.501 (15 lb.) DIFF 0.051 (15 lb.) ASY 0.020 (15 lb.)
+        Warranty Two years from purchase date Release Date August 17, 2023</p>"""
+        ball = balls.parse_brunswick_family_page(page, brand="Radical", url="https://radicalbowling.com/products/balls/retired/katana-strike",
+                                                 fallback_name="Katana Strike")
+        self.assertEqual((ball["weight"], ball["rg"], ball["diff"], ball["intDiff"], ball["symmetry"]), (15, 2.501, 0.051, 0.02, "asymmetric"))
+        self.assertEqual((ball["releaseDate"], ball["coverType"], ball["discontinued"]), ("2023-08-17", "hybrid", True))
+
+    def test_storm_feed_relative_links(self):
+        feed = [{"name": "Level", "brand": "STORM", "dateAvailable": "2025-01-17", "url": "/storm-level-bowling-ball-2025", "discontinued": "no"},
+                {"name": "No link", "brand": "STORM", "dateAvailable": "2025-01-17", "url": "", "discontinued": "no"}]
+        fetched = []
+
+        def fake_fetch(url, budgeted=True):
+            fetched.append(url)
+            return json.dumps(feed) if url == balls.STORM_FEED else STORM_PAGE
+
+        collector = balls.Collector({})
+        with patch.object(balls, "fetch", side_effect=fake_fetch):
+            balls.collect_storm(collector)
+        self.assertEqual(fetched[1:], ["https://www.stormbowling.com/storm-level-bowling-ball-2025"])
+        self.assertEqual([ball["url"] for ball in collector.balls.values()], ["https://www.stormbowling.com/storm-level-bowling-ball-2025"])
+
     def test_symmetric_balls_hide_small_intermediate_numbers(self):
         ball = balls.build_ball(brand="Test", name="Sym", url="https://x.test/a", numbers={15: (2.5, 0.04, 0.003)})
         self.assertEqual((ball["symmetry"], ball["intDiff"]), ("symmetric", None))
