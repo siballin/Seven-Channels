@@ -384,6 +384,7 @@ function bowlingRefresh(focusId) {
   const activeId = focusId || document.activeElement?.id;
   const previous = bowlingRoot;
   previous.bowlingObserver?.disconnect();
+  previous.querySelector(".bowling-catalog")?.bowlingCatalogObserver?.disconnect();
   const next = createBowlingChannel();
   previous.replaceWith(next);
   if (activeId) document.getElementById(activeId)?.focus({ preventScroll: !focusId });
@@ -1432,13 +1433,31 @@ function createBowlingCatalogView() {
     const count = element("p", "bowling-history-count");
     count.setAttribute("aria-live", "polite");
     const list = element("div", "bowling-catalog-list");
+    // Infinite scroll: a marker after the list loads the next page when it nears the viewport.
+    // The button is only shown where IntersectionObserver isn't available.
+    const sentinel = element("div", "bowling-catalog-sentinel");
+    sentinel.setAttribute("aria-hidden", "true");
     const more = element("button", "secondary bowling-catalog-more", "");
     more.type = "button";
+    const autoLoad = "IntersectionObserver" in window;
+    const linked = new Set(state.balls.map((ball) => ball.catalog?.id).filter(Boolean));
+    let matches = [];
+    let shownCount = 0;
+
+    function showMore() {
+      const next = matches.slice(shownCount, bowlingCatalogLimit);
+      for (const ball of next) list.append(createBowlingCatalogCard(ball, linked.has(ball.id), state));
+      shownCount += next.length;
+      const remaining = matches.length - shownCount;
+      sentinel.hidden = remaining <= 0;
+      more.hidden = autoLoad || remaining <= 0;
+      more.textContent = `Show ${Math.min(30, remaining)} more`;
+    }
 
     function renderResults() {
-      const matches = catalog.balls.filter((ball) => bowlingCatalogMatches(ball, bowlingCatalogFilters));
-      const shown = matches.slice(0, bowlingCatalogLimit);
-      count.textContent = `${matches.length} ball${matches.length === 1 ? "" : "s"}${matches.length > shown.length ? `, showing ${shown.length}` : ""}`;
+      matches = catalog.balls.filter((ball) => bowlingCatalogMatches(ball, bowlingCatalogFilters));
+      shownCount = 0;
+      count.textContent = `${matches.length} ball${matches.length === 1 ? "" : "s"}`;
       list.replaceChildren();
       if (!matches.length) {
         const empty = element("div", "bowling-empty");
@@ -1452,10 +1471,7 @@ function createBowlingCatalogView() {
         empty.append(element("span", "", catalog.balls.length ? "No balls match. Check the spelling or clear the filters. " : "No balls are available yet. "), clear);
         list.append(empty);
       }
-      const linked = new Set(state.balls.map((ball) => ball.catalog?.id).filter(Boolean));
-      for (const ball of shown) list.append(createBowlingCatalogCard(ball, linked.has(ball.id), state));
-      more.hidden = matches.length <= shown.length;
-      more.textContent = `Show ${Math.min(30, matches.length - shown.length)} more`;
+      showMore();
     }
 
     const update = () => {
@@ -1465,13 +1481,27 @@ function createBowlingCatalogView() {
     };
     query.addEventListener("input", update);
     [brand, cover, symmetry, year].forEach((select) => select.addEventListener("change", update));
+    const loadNext = () => {
+      if (shownCount >= matches.length) return;
+      bowlingCatalogLimit = shownCount + 30;
+      showMore();
+      // The observer only reports changes, so keep filling while the marker is still near the viewport.
+      if (autoLoad && sentinel.isConnected && sentinel.getBoundingClientRect().top < innerHeight + 600) requestAnimationFrame(loadNext);
+    };
     more.addEventListener("click", () => {
-      bowlingCatalogLimit += 30;
-      renderResults();
-      list.children[bowlingCatalogLimit - 30]?.querySelector("a, button")?.focus();
+      const first = shownCount;
+      loadNext();
+      list.children[first]?.querySelector("a, button")?.focus();
     });
+    if (autoLoad) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) loadNext();
+      }, { rootMargin: "0px 0px 600px 0px" });
+      observer.observe(sentinel);
+      panel.bowlingCatalogObserver = observer;
+    }
     renderResults();
-    panel.append(filters, status, count, list, more, bowlingSourceNote(catalog));
+    panel.append(filters, status, count, list, sentinel, more, bowlingSourceNote(catalog));
   });
   return panel;
 }
@@ -1500,7 +1530,11 @@ function createBowlingCatalogCard(ball, inArsenal, state) {
   const actions = element("div", "item-footer");
   const sameName = state.balls.find((item) => !item.catalog && item.name.toLocaleLowerCase() === ball.name.toLocaleLowerCase());
   if (inArsenal) {
-    actions.append(element("span", "bowling-badge bowling-in-arsenal", "In your arsenal"));
+    const badge = element("span", "bowling-badge bowling-in-arsenal", "In your arsenal");
+    // Focus lands here after adding, so the page stays where the bowler was scrolled.
+    badge.id = `bowling-catalog-in-${ball.id}`;
+    badge.tabIndex = -1;
+    actions.append(badge);
   } else {
     const add = element("button", "secondary", sameName ? `Add specs to ${sameName.name}` : "Add to arsenal");
     add.type = "button";
@@ -1508,7 +1542,7 @@ function createBowlingCatalogCard(ball, inArsenal, state) {
     add.setAttribute("aria-label", sameName ? `Add ${ball.brand} ${ball.name} specs to ${sameName.name} in your arsenal` : `Add ${ball.brand} ${ball.name} to your arsenal`);
     add.addEventListener("click", () => {
       bowlingAddCatalogBall(ball);
-      bowlingRefresh("bowling-catalog-title");
+      bowlingRefresh(`bowling-catalog-in-${ball.id}`);
     });
     actions.append(add);
   }
