@@ -286,6 +286,15 @@ function bowlingRecordLabel(next) {
   return `${knocked} pin${knocked === 1 ? "" : "s"}, leave ${leave}`;
 }
 
+// Link from the League night dashboard; it names the frame when a game is in progress.
+function createBowlingScorerLink() {
+  const replay = bowlingReplayFrames(bowlingLoadLive().frames);
+  const inProgress = replay.data.length && replay.next;
+  const link = element("a", "bowling-head-link", inProgress ? `Resume game · frame ${replay.next.frame + 1}` : replay.complete ? "Save tracked game" : "Score a game");
+  link.href = "#bowling/scorer";
+  return link;
+}
+
 function bowlingSaveTargets(state) {
   const today = bowlingToday();
   const options = [["new", `New session · ${bowlingFormatDate(today, { weekday: "short", month: "short", day: "numeric" })}`]];
@@ -314,12 +323,12 @@ function bowlingSaveLiveGame() {
       message = `Saved as game ${slot >= 0 ? slot + 1 : session.games.length} of your ${bowlingFormatDate(session.date, { weekday: "long", month: "short", day: "numeric" })} session.`;
     } else {
       next.sessions.push({ id: bowlingId("session"), date: bowlingToday(), type: "league", center: "", startBall: null, notes: "", games: [game], createdAt: now, updatedAt: now });
-      message = "Saved as a new session for today. Add the center, balls and notes from League night.";
+      message = "Saved as a new session for today.";
     }
   });
   bowlingResetLive();
   bowlingLiveTarget = null;
-  bowlingLiveStatus = saved ? { text: message, error: false } : { text: "Saved for this visit only; browser storage is unavailable.", error: true };
+  bowlingLiveStatus = saved ? { text: message, error: false, link: target ? "View it in League night" : "Add the center, balls and notes in League night" } : { text: "Saved for this visit only; browser storage is unavailable.", error: true };
   bowlingRefresh("bowling-live-status");
 }
 
@@ -336,13 +345,22 @@ function createBowlingTracker(state) {
     element("strong", "", String(replay.complete ? replay.total : replay.running)),
     element("span", "", replay.complete ? "Final" : `Max possible ${bowlingMaxPossible(replay.data)}`)
   );
-  head.append(title, score);
+  const heading = element("div", "bowling-tracker-heading");
+  const back = element("a", "bowling-head-link", "League night dashboard");
+  back.href = "#bowling";
+  heading.append(title, back);
+  head.append(heading, score);
   panel.append(head, createBowlingScoresheet(replay.data, { current: replay.next?.frame ?? -1, label: "Current game" }));
 
   const status = element("p", `bowling-status bowling-live-status${bowlingLiveStatus.error ? " error" : ""}`, bowlingLiveStatus.text);
   status.id = "bowling-live-status";
   status.tabIndex = -1;
   status.setAttribute("role", "status");
+  if (bowlingLiveStatus.link) {
+    const view = element("a", "", bowlingLiveStatus.link);
+    view.href = "#bowling";
+    status.append(" ", view);
+  }
 
   if (replay.next) {
     const next = replay.next;

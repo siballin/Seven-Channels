@@ -752,7 +752,9 @@ function createBowlingDashboard(state) {
   const logButton = element("button", "bowling-log-jump", "Log session");
   logButton.type = "button";
   logButton.addEventListener("click", bowlingJumpToLog);
-  head.append(title, logButton);
+  const actions = element("div", "bowling-head-actions");
+  actions.append(createBowlingScorerLink(), logButton);
+  head.append(title, actions);
   const overall = bowlingOverall(state.sessions);
   const metrics = element("div", "bowling-metrics");
   for (const [label, value, note] of [
@@ -766,7 +768,18 @@ function createBowlingDashboard(state) {
     if (note) metric.append(element("small", "", note));
     metrics.append(metric);
   }
-  panel.append(head, metrics, createBowlingTrend(state));
+  panel.append(head, metrics);
+  const tracked = bowlingFrameStats(state.sessions);
+  if (tracked.games) {
+    const line = element("p", "bowling-tracked-line");
+    const spares = tracked.chances ? ` · ${bowlingPercent(tracked.spares, tracked.chances)} of spares converted` : "";
+    line.append(`From ${tracked.games} tracked game${tracked.games === 1 ? "" : "s"}: ${bowlingPercent(tracked.strikes, tracked.firstBalls)} strikes${spares}. `);
+    const link = element("a", "", "See spares and leaves");
+    link.href = "#bowling/scorer";
+    line.append(link);
+    panel.append(line);
+  }
+  panel.append(createBowlingTrend(state));
   return panel;
 }
 
