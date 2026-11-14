@@ -3,9 +3,9 @@
 
 let musicLabRoot = null;
 const musicLabUi = {
-  profile: { id: "", role: "all", artist: "all", year: "all", query: "", sort: "newest" },
+  profile: { id: "", role: "all", source: "all", artist: "all", year: "all", query: "", sort: "newest" },
   people: "",
-  network: { id: "", role: "all", year: "all", scale: 1, x: 0, y: 0, selected: "" },
+  network: { id: "", role: "all", source: "all", year: "all", scale: 1, x: 0, y: 0, selected: "" },
   status: {},
   enriching: new Set()
 };
@@ -25,7 +25,11 @@ function musicLabRoute() {
   if (view === "song" && a) return { view: "song", id: a };
   if (view === "album" && a) return { view: "album", id: a };
   if (view === "group" && a) return { view: "group", id: a };
-  if (view === "network") return { view: "network", id: a, focus: b };
+  if (view === "network") {
+    let focus = b;
+    try { focus = decodeURIComponent(b); } catch { focus = b; }
+    return { view: "network", id: a, focus };
+  }
   if (view === "library") return { view: "library" };
   if (view === "search") {
     let query = "";
@@ -158,15 +162,20 @@ function musicLabLength(ms) {
 }
 
 function musicLabRoleBadge(role) {
-  const badge = element("span", `music-role music-role-${role.category}`, role.label);
-  badge.title = musicLabRoleLabels[role.category];
+  const badge = element("span", `music-role music-role-${role.category}${role.source && role.source !== "musicbrainz" ? " is-external" : ""}`, role.label);
+  if (role.source && role.source !== "musicbrainz") badge.append(element("span", `music-src music-src-${role.source}`, musicLabSourceLabels[role.source]));
+  badge.title = `${musicLabRoleLabels[role.category]} · from ${musicLabSourceLabels[role.source || "musicbrainz"]}${role.source === "genius" ? " (community-edited)" : ""}`;
   return badge;
 }
 
 function musicLabSourceNote(snapshot) {
   const note = element("p", "music-source");
-  note.append("Credits from ", musicLabExternal("MusicBrainz", "https://musicbrainz.org/"), " (CC0), artwork from ",
-    musicLabExternal("Cover Art Archive", "https://coverartarchive.org/"), ". Credit databases are incomplete: a missing role means it isn’t documented, not that nobody did it.");
+  note.append("Credits from ", musicLabExternal("MusicBrainz", "https://musicbrainz.org/"), " (CC0), ", musicLabExternal("Discogs", "https://www.discogs.com/"),
+    " (booklet and liner-note credits) and ", musicLabExternal("Genius", "https://genius.com/"), " (community-edited); artwork from ",
+    musicLabExternal("Cover Art Archive", "https://coverartarchive.org/"), ". Every credit is labeled with its source. Credit databases are incomplete: a missing role means it isn’t documented, not that nobody did it.");
+  const status = snapshot?.sourceStatus || {};
+  if (status.genius?.status === "off") note.append(" Genius credits aren’t being refreshed yet because no Genius token is configured.");
+  if (status.discogs && !status.discogs.authenticated) note.append(" Discogs is read without a token, so it refreshes more slowly.");
   if (snapshot?.generatedAt) note.append(` Snapshot updated ${new Date(snapshot.generatedAt).toLocaleDateString()}.`);
   return note;
 }
@@ -399,26 +408,14 @@ function musicLabRecentAlbums(snapshot, limit = 8) {
 }
 
 function musicLabCollaborations(snapshot, limit = 6) {
-  const pairs = new Map();
+  const pairs = [];
   for (const person of snapshot.people) {
-    for (const song of person.songs) {
-      const recording = song.recording;
-      if (!recording) continue;
-      const others = new Map();
-      for (const credit of [...recording.credits, ...recording.writers]) {
-        const category = musicLabCategory(credit.work ? "work" : "recording", credit.type);
-        if (!credit.id || credit.id === person.mbid || category === "performance") continue;
-        others.set(credit.id, credit.name);
-      }
-      for (const [id, name] of others) {
-        const key = `${person.mbid}|${id}`;
-        const pair = pairs.get(key) || { person, id, name, songs: [] };
-        if (!pair.songs.some((item) => item.id === recording.id)) pair.songs.push(recording);
-        pairs.set(key, pair);
-      }
+    if (!person.mbid) continue;
+    for (const node of musicLabConnections(person)) {
+      if (node.kinds.has("creative")) pairs.push({ person, id: node.id, name: node.name, songs: [...node.songs.values()] });
     }
   }
-  return [...pairs.values()].sort((a, b) => b.songs.length - a.songs.length || a.name.localeCompare(b.name)).slice(0, limit);
+  return pairs.sort((a, b) => b.songs.length - a.songs.length || a.name.localeCompare(b.name)).slice(0, limit);
 }
 
 function musicLabFeatured(snapshot) {
@@ -487,7 +484,7 @@ function createMusicLabHome(snapshot) {
     const list = element("ul", "music-collab-list");
     for (const pair of pairs) {
       const item = element("li");
-      const link = musicLabLink("", `#music/network/${pair.person.mbid}/${pair.id}`, "music-collab");
+      const link = musicLabLink("", `#music/network/${pair.person.mbid}/${encodeURIComponent(pair.id)}`, "music-collab");
       link.append(element("strong", "", `${pair.person.name} × ${pair.name}`),
         element("small", "", `${pair.songs.length} shared song${pair.songs.length === 1 ? "" : "s"} · ${pair.songs.slice(0, 2).map((song) => song.title).join(", ")}`));
       item.append(link);
@@ -747,12 +744,12 @@ function createMusicLabProfile(id, snapshot) {
 
 function createMusicLabCredits(person, id) {
   const panel = musicLabPanel("Discography & credits", "music-credits-title");
-  const filters = musicLabUi.profile.id === id ? musicLabUi.profile : (musicLabUi.profile = { id, role: "all", artist: "all", year: "all", query: "", sort: "newest" });
+  const filters = musicLabUi.profile.id === id ? musicLabUi.profile : (musicLabUi.profile = { id, role: "all", source: "all", artist: "all", year: "all", query: "", sort: "newest" });
   const songs = person.songs;
   const artists = new Map();
   const years = new Set();
   for (const song of songs) {
-    for (const artist of song.recording?.artists || []) if (artist.id) artists.set(artist.id, artist.name);
+    for (const artist of song.recording?.artists || []) artists.set(artist.id || `name:${musicLabNormalizeName(artist.name)}`, artist.name);
     const year = musicLabYear(song.recording?.release?.date || song.recording?.date);
     if (year) years.add(year);
   }
@@ -760,6 +757,7 @@ function createMusicLabCredits(person, id) {
   const role = bowlingLikeSelect("music-filter-role", "Role", [["all", "All roles"], ...musicLabRoles], filters.role);
   const artist = bowlingLikeSelect("music-filter-artist", "Artist", [["all", "All artists"], ...[...artists].sort((a, b) => a[1].localeCompare(b[1]))], filters.artist);
   const year = bowlingLikeSelect("music-filter-year", "Year", [["all", "All years"], ...[...years].sort().reverse().map((value) => [value, value])], filters.year);
+  const sourceSelect = bowlingLikeSelect("music-filter-source", "Source", [["all", "All sources"], ["musicbrainz", "MusicBrainz"], ["discogs", "Discogs"], ["genius", "Genius"]], filters.source);
   const sort = bowlingLikeSelect("music-filter-sort", "Order", [["newest", "Newest first"], ["oldest", "Oldest first"], ["title", "Title A–Z"]], filters.sort);
   const queryField = element("div", "field");
   const queryLabel = element("label", "", "Search");
@@ -770,7 +768,7 @@ function createMusicLabCredits(person, id) {
   query.placeholder = "Song or album";
   query.value = filters.query;
   queryField.append(queryLabel, query);
-  controls.append(role.field, artist.field, year.field, sort.field, queryField);
+  controls.append(role.field, sourceSelect.field, artist.field, year.field, sort.field, queryField);
   const count = element("p", "music-count");
   count.setAttribute("aria-live", "polite");
   const list = element("ol", "music-credit-list");
@@ -778,8 +776,10 @@ function createMusicLabCredits(person, id) {
     const text = musicLabNormalizeName(filters.query);
     let rows = songs.filter((song) => {
       const recording = song.recording;
-      if (filters.role !== "all" && !song.roles.some((item) => item.category === filters.role)) return false;
-      if (filters.artist !== "all" && !(recording?.artists || []).some((item) => item.id === filters.artist)) return false;
+      const roles = filters.source === "all" ? song.roles : song.roles.filter((item) => item.source === filters.source);
+      if (!roles.length) return false;
+      if (filters.role !== "all" && !roles.some((item) => item.category === filters.role)) return false;
+      if (filters.artist !== "all" && !(recording?.artists || []).some((item) => (item.id || `name:${musicLabNormalizeName(item.name)}`) === filters.artist)) return false;
       if (filters.year !== "all" && musicLabYear(recording?.release?.date || recording?.date) !== filters.year) return false;
       if (text && !musicLabNormalizeName(`${song.title} ${recording?.release?.group?.title || ""} ${musicLabArtistLine(recording?.artists)}`).includes(text)) return false;
       return true;
@@ -788,8 +788,8 @@ function createMusicLabCredits(person, id) {
     rows = rows.sort(filters.sort === "title" ? (a, b) => a.title.localeCompare(b.title)
       : filters.sort === "oldest" ? (a, b) => (date(a) || "9999").localeCompare(date(b) || "9999") || a.title.localeCompare(b.title)
         : (a, b) => date(b).localeCompare(date(a)) || a.title.localeCompare(b.title));
-    count.textContent = filters.role === "vocalProduction"
-      ? "MusicBrainz has no vocal-production credit type. Add sourced credits from a song page and they’ll be listed under “Your additions”."
+    count.textContent = filters.role === "vocalProduction" && !rows.length
+      ? "No vocal-production credits found. MusicBrainz doesn’t track this role; Discogs and Genius list it when contributors have entered it. You can add sourced credits from a song page."
       : `${rows.length} of ${songs.length} credited song${songs.length === 1 ? "" : "s"}`;
     list.replaceChildren();
     for (const song of rows) {
@@ -797,22 +797,25 @@ function createMusicLabCredits(person, id) {
       const item = element("li", "music-credit");
       item.append(musicLabImage(recording ? musicLabCover(recording.release) : "", "", "music-credit-cover", "♪"));
       const body = element("div", "music-credit-body");
-      const title = recording ? musicLabLink(song.title, `#music/song/${recording.id}`, "music-credit-title") : element("span", "music-credit-title", song.title);
+      const title = recording?.id ? musicLabLink(song.title, `#music/song/${recording.id}`, "music-credit-title")
+        : recording?.externalUrl ? musicLabExternal(`${song.title} ↗`, recording.externalUrl, "music-credit-title")
+          : element("span", "music-credit-title", song.title);
       body.append(title);
       if (recording) {
         const line = element("span", "music-credit-meta");
         line.append(musicLabArtistLine(recording.artists) || "Unknown artist");
         if (recording.release?.group?.title) {
           line.append(" · ");
-          line.append(musicLabLink(recording.release.group.title, `#music/album/${recording.release.id}`));
+          line.append(recording.release.id ? musicLabLink(recording.release.group.title, `#music/album/${recording.release.id}`) : recording.release.group.title);
         }
+        if (song.discogsOnly) line.append(" · Discogs only");
         line.append(` · ${musicLabFormatDate(recording.release?.date || recording.date)}`);
         body.append(line);
       } else {
         body.append(element("span", "music-credit-meta", person.live ? "Song details not loaded yet" : "Details unavailable: MusicBrainz lists the credit but not a matching recording"));
       }
       const roles = element("div", "music-roles");
-      song.roles.forEach((roleItem) => roles.append(musicLabRoleBadge(roleItem)));
+      (filters.source === "all" ? song.roles : song.roles.filter((item) => item.source === filters.source)).forEach((roleItem) => roles.append(musicLabRoleBadge(roleItem)));
       body.append(roles);
       item.append(body);
       list.append(item);
@@ -824,6 +827,7 @@ function createMusicLabCredits(person, id) {
     render();
   });
   bind(role.select, "role");
+  bind(sourceSelect.select, "source");
   bind(artist.select, "artist");
   bind(year.select, "year");
   bind(sort.select, "sort");
@@ -853,24 +857,34 @@ function bowlingLikeSelect(id, labelText, options, value) {
 }
 
 // Everyone this person shares a documented recording with: performing artists and co-credited people.
-function musicLabConnections(person, { role = "all", year = "all" } = {}) {
+// Everyone this person shares a documented recording with, from every source: performing artists and co-credited people.
+// Nodes use the MusicBrainz ID when known, otherwise the credited name.
+function musicLabConnections(person, { role = "all", year = "all", source = "all" } = {}) {
   const nodes = new Map();
+  const names = musicLabPersonNames(person);
   for (const song of person.songs) {
     const recording = song.recording;
     if (!recording) continue;
-    if (role !== "all" && !song.roles.some((item) => item.category === role)) continue;
+    if (role !== "all" && !song.roles.some((item) => item.category === role && (source === "all" || item.source === source))) continue;
+    if (source !== "all" && !song.roles.some((item) => item.source === source)) continue;
     if (year !== "all" && musicLabYear(recording.release?.date || recording.date) !== year) continue;
-    const add = (id, name, kind, label) => {
-      if (!id || id === person.mbid) return;
-      const node = nodes.get(id) || { id, name, kinds: new Set(), roles: new Set(), songs: new Map() };
+    const songKey = recording.id || song.key;
+    const add = (id, name, kind, label, from) => {
+      const key = id || `name:${musicLabNormalizeName(name)}`;
+      if (!name || key === person.mbid || names.has(musicLabNormalizeName(name))) return;
+      const node = nodes.get(key) || { id: key, mbid: id || "", name, kinds: new Set(), roles: new Set(), sources: new Set(), songs: new Map() };
       node.kinds.add(kind);
       if (label) node.roles.add(label);
-      node.songs.set(recording.id, recording);
-      nodes.set(id, node);
+      node.sources.add(from);
+      node.songs.set(songKey, recording);
+      nodes.set(key, node);
     };
-    for (const artist of recording.artists || []) add(artist.id, artist.name, "artist", "Performing artist");
-    for (const credit of recording.credits || []) add(credit.id, credit.name, musicLabCategory("recording", credit.type) === "performance" ? "performer" : "creative", musicLabRoleLabel("recording", credit.type, credit.attributes));
-    for (const credit of recording.writers || []) add(credit.id, credit.name, "creative", musicLabRoleLabel("work", credit.type, credit.attributes));
+    for (const artist of recording.artists || []) add(artist.id, artist.name, "artist", "Performing artist", recording.id ? "musicbrainz" : "discogs");
+    for (const entry of musicLabRecordingEntries(recording)) {
+      if (source !== "all" && entry.source !== source) continue;
+      if (musicLabEntryIsPerson(entry, person, names)) continue;
+      add(entry.id, entry.name, entry.category === "performance" ? "performer" : "creative", entry.label, entry.source);
+    }
   }
   return [...nodes.values()].sort((a, b) => b.songs.size - a.songs.size || a.name.localeCompare(b.name));
 }
@@ -890,7 +904,7 @@ function createMusicLabCollaborators(person) {
     const list = element("ul", "music-chip-list");
     for (const node of nodes) {
       const item = element("li");
-      const link = musicLabLink(`${node.name}`, `#music/person/${node.id}`, "music-chip");
+      const link = musicLabLink(`${node.name}`, node.mbid ? `#music/person/${node.mbid}` : `#music/search/${encodeURIComponent(node.name)}`, "music-chip");
       link.append(element("small", "", ` ${node.songs.size}`));
       link.setAttribute("aria-label", `${node.name}, ${node.songs.size} shared song${node.songs.size === 1 ? "" : "s"}`);
       item.append(link);
@@ -909,15 +923,21 @@ function createMusicLabCollaborators(person) {
 function musicLabSongCreditGroups(recording, corrections = []) {
   const groups = musicLabRoles.map(([category, label]) => ({ category, label, verified: [], added: [] }));
   const find = (category) => groups.find((group) => group.category === category);
-  const push = (category, entry) => {
-    const group = find(category);
-    if (!group.verified.some((item) => item.id === entry.id && item.label === entry.label && item.name === entry.name)) group.verified.push(entry);
-  };
-  for (const credit of recording.writers || []) {
-    push(musicLabCategory("work", credit.type), { id: credit.id, name: credit.name, label: musicLabRoleLabel("work", credit.type, credit.attributes) });
-  }
-  for (const credit of recording.credits || []) {
-    push(musicLabCategory("recording", credit.type), { id: credit.id, name: credit.name, label: musicLabRoleLabel("recording", credit.type, credit.attributes) });
+  const index = new Map();
+  for (const entry of musicLabRecordingEntries(recording)) {
+    const group = find(entry.category);
+    const key = `${entry.category}|${entry.id || musicLabNormalizeName(entry.name)}`;
+    let item = index.get(key);
+    if (!item) {
+      item = { id: entry.id || "", name: entry.name, as: new Set(), labels: new Set(), sources: new Set() };
+      index.set(key, item);
+      group.verified.push(item);
+    }
+    if (!item.id && entry.id) item.id = entry.id;
+    if (entry.source === "musicbrainz") item.name = entry.name;
+    if (entry.as && entry.as !== item.name) item.as.add(entry.as);
+    item.labels.add(entry.label);
+    item.sources.add(entry.source);
   }
   for (const correction of corrections) find(correction.role).added.push(correction);
   return groups;
@@ -935,12 +955,20 @@ function createMusicLabCreditGroups(groups, { compact = false } = {}) {
       for (const credit of group.verified) {
         const item = element("li");
         item.append(credit.id ? musicLabLink(credit.name, `#music/person/${credit.id}`) : element("span", "", credit.name));
-        if (credit.label && credit.label.toLowerCase() !== group.label.toLowerCase()) item.append(element("small", "", ` ${credit.label}`));
+        if (credit.as.size) item.append(element("small", "", ` as ${[...credit.as].join(", ")}`));
+        const labels = [...credit.labels].filter((label) => label.toLowerCase() !== group.label.toLowerCase());
+        if (labels.length) item.append(element("small", "", ` ${[...new Set(labels)].join(" · ")}`));
+        for (const source of ["musicbrainz", "discogs", "genius"]) {
+          if (!credit.sources.has(source)) continue;
+          const mark = element("span", `music-src music-src-${source}`, source === "musicbrainz" ? "MB" : musicLabSourceLabels[source]);
+          mark.title = `From ${musicLabSourceLabels[source]}${source === "genius" ? " (community-edited)" : ""}`;
+          item.append(mark);
+        }
         names.append(item);
       }
       detail.append(names);
     } else if (!group.added.length) {
-      detail.append(element("span", "music-unavailable", group.category === "vocalProduction" ? "Not tracked by MusicBrainz" : "Not documented"));
+      detail.append(element("span", "music-unavailable", group.category === "vocalProduction" ? "Not documented (MusicBrainz doesn’t track this role)" : "Not documented"));
     }
     for (const correction of group.added) {
       const added = element("p", "music-added");
@@ -1062,8 +1090,9 @@ function createMusicLabSong(id, snapshot) {
   const credits = musicLabPanel("Credits", "music-song-credits-title");
   credits.append(createMusicLabCreditGroups(musicLabSongCreditGroups(recording, corrections)));
   const source = element("p", "music-source");
-  source.append("Writers and composers come from the song’s MusicBrainz work; producers, arrangers and engineers from this recording. ",
-    musicLabExternal("View on MusicBrainz", `https://musicbrainz.org/recording/${id}`), ".");
+  source.append("MusicBrainz writers and composers come from the song’s work, and its producers, arrangers and engineers from this recording. Discogs credits come from the release’s booklet credits; Genius credits are community-edited. Sources: ");
+  musicLabSourceLinks(recording).forEach(([kind, url], index) => source.append(index ? ", " : "", musicLabExternal(musicLabSourceLabels[kind], url)));
+  source.append(".");
   credits.append(source);
   wrap.append(credits);
   wrap.append(createMusicLabCorrections(key, recording.title, corrections));
@@ -1269,6 +1298,7 @@ function createMusicLabAlbum(id) {
     item.append(head2);
     const groups = musicLabSongCreditGroups(track.recording, musicLabGetState().corrections.filter((entry) => entry.target === `song:${track.recording.id}`));
     const writers = groups.filter((group) => ["songwriting", "composition"].includes(group.category)).flatMap((group) => group.verified.map((credit) => credit.name));
+    // Tracks Music Lab already knows pick up Discogs and Genius credits too.
     const producers = groups.find((group) => group.category === "production").verified.map((credit) => credit.name);
     const summary = element("p", "music-track-summary");
     summary.append(writers.length ? `Written by ${[...new Set(writers)].join(", ")}` : "Writers not documented", " · ",
@@ -1305,10 +1335,10 @@ function createMusicLabNetwork(route, snapshot) {
   const options = musicLabNetworkPeople(snapshot);
   const id = route.id || options[0]?.[0] || "";
   const state = musicLabUi.network;
-  if (state.id !== id) Object.assign(state, { id, role: "all", year: "all", scale: 1, x: 0, y: 0, selected: route.focus || "" });
+  if (state.id !== id) Object.assign(state, { id, role: "all", source: "all", year: "all", scale: 1, x: 0, y: 0, selected: route.focus || "" });
   else if (route.focus && !state.selected) state.selected = route.focus;
   const panel = musicLabPanel("Collaboration network", "music-network-title", "music-network-panel");
-  panel.append(element("p", "music-hint", "Every connection is a recording where both names appear in MusicBrainz credits. Select a person to see the songs you share."));
+  panel.append(element("p", "music-hint", "Every connection is a recording where both names appear in documented credits (MusicBrainz, Discogs or Genius). Select a person to see the songs you share."));
   if (!id) {
     panel.append(musicLabEmpty("Follow a producer or songwriter to explore their network."));
     return panel;
@@ -1332,11 +1362,13 @@ function createMusicLabNetwork(route, snapshot) {
   const controls = element("div", "music-filters");
   const who = bowlingLikeSelect("music-network-person", "Person", options.some(([value]) => value === id) ? options : [[id, person.name], ...options], id);
   const role = bowlingLikeSelect("music-network-role", "Their role", [["all", "All roles"], ...musicLabRoles], state.role);
+  const sourceSelect = bowlingLikeSelect("music-network-source", "Source", [["all", "All sources"], ["musicbrainz", "MusicBrainz"], ["discogs", "Discogs"], ["genius", "Genius"]], state.source);
+  sourceSelect.select.addEventListener("change", () => { state.source = sourceSelect.select.value; state.selected = ""; musicLabRefresh(sourceSelect.select.id); });
   const year = bowlingLikeSelect("music-network-year", "Year", [["all", "All years"], ...years.map((value) => [value, value])], state.year);
   who.select.addEventListener("change", () => { location.hash = `#music/network/${who.select.value}`; });
   role.select.addEventListener("change", () => { state.role = role.select.value; state.selected = ""; musicLabRefresh(role.select.id); });
   year.select.addEventListener("change", () => { state.year = year.select.value; state.selected = ""; musicLabRefresh(year.select.id); });
-  controls.append(who.field, role.field, year.field);
+  controls.append(who.field, role.field, sourceSelect.field, year.field);
   panel.append(controls);
   if (person.live && person.songs.some((song) => !song.recording)) {
     const note = element("p", "music-banner");
@@ -1345,7 +1377,7 @@ function createMusicLabNetwork(route, snapshot) {
   }
   const nodes = musicLabConnections(person, state).slice(0, 40);
   if (!nodes.length) {
-    panel.append(musicLabEmpty(state.role === "vocalProduction" ? "MusicBrainz has no vocal-production credit type, so there are no verified connections for this role." : "No documented connections for these filters."));
+    panel.append(musicLabEmpty(state.role === "vocalProduction" ? "No vocal-production credits are documented for this person yet (MusicBrainz doesn’t track the role; Discogs and Genius sometimes do)." : "No documented connections for these filters."));
     return panel;
   }
   const layout = element("div", "music-network-layout");
@@ -1377,7 +1409,7 @@ function createMusicLabNetwork(route, snapshot) {
   const max = Math.max(...nodes.map((node) => node.songs.size));
   const select = (nodeId) => {
     state.selected = state.selected === nodeId ? "" : nodeId;
-    musicLabRefresh(state.selected ? `music-node-btn-${nodeId}` : undefined);
+    musicLabRefresh(state.selected ? `music-node-btn-${nodeId.replace(/[^a-z0-9-]/gi, "-")}` : undefined);
   };
   for (const { node, x, y } of placed) {
     const line = document.createElementNS(svgNs, "line");
@@ -1461,16 +1493,19 @@ function createMusicLabNetwork(route, snapshot) {
   const side = element("aside", "music-network-side");
   const selected = nodes.find((node) => node.id === state.selected);
   if (selected) {
-    side.append(element("h4", "", selected.name), element("p", "music-meta", [...selected.roles].slice(0, 4).join(" · ")));
+    side.append(element("h4", "", selected.name), element("p", "music-meta", [...selected.roles].slice(0, 4).join(" · ")),
+      element("p", "music-meta", `Sources: ${[...selected.sources].map((source) => musicLabSourceLabels[source]).join(", ")}`));
     const songs = element("ul", "music-shared-songs");
     for (const recording of [...selected.songs.values()].sort((a, b) => (b.date || "").localeCompare(a.date || ""))) {
       const item = element("li");
-      item.append(musicLabLink(recording.title, `#music/song/${recording.id}`), element("small", "", ` ${musicLabArtistLine(recording.artists)} · ${musicLabYear(recording.release?.date || recording.date) || "year unknown"}`));
+      item.append(recording.id ? musicLabLink(recording.title, `#music/song/${recording.id}`) : musicLabExternal(`${recording.title} ↗`, recording.externalUrl || "https://www.discogs.com/"),
+        element("small", "", ` ${musicLabArtistLine(recording.artists)} · ${musicLabYear(recording.release?.date || recording.date) || "year unknown"}`));
       songs.append(item);
     }
     side.append(element("p", "music-count", `${selected.songs.size} shared song${selected.songs.size === 1 ? "" : "s"}`), songs);
     const actions = element("div", "music-actions");
-    actions.append(musicLabLink("Open profile", `#music/person/${selected.id}`, "music-button"), musicLabLink("Center on them", `#music/network/${selected.id}`, "music-text-link"));
+    if (selected.mbid) actions.append(musicLabLink("Open profile", `#music/person/${selected.mbid}`, "music-button"), musicLabLink("Center on them", `#music/network/${selected.mbid}`, "music-text-link"));
+    else actions.append(element("span", "music-meta", "Not matched to a MusicBrainz artist, so there’s no profile to open."), musicLabLink("Search Music Lab", `#music/search/${encodeURIComponent(selected.name)}`, "music-text-link"));
     side.append(actions);
   } else {
     side.append(element("p", "music-hint", "Select a person in the graph or the list to see your shared songs."));
@@ -1481,7 +1516,7 @@ function createMusicLabNetwork(route, snapshot) {
     const item = element("li");
     const button = element("button", `music-connection${state.selected === node.id ? " is-selected" : ""}`);
     button.type = "button";
-    button.id = `music-node-btn-${node.id}`;
+    button.id = `music-node-btn-${node.id.replace(/[^a-z0-9-]/gi, "-")}`;
     button.setAttribute("aria-pressed", String(state.selected === node.id));
     button.append(element("span", "", node.name), element("small", "", `${node.songs.size}`));
     button.addEventListener("click", () => select(node.id));

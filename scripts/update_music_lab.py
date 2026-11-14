@@ -24,6 +24,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
+import music_lab_enrich as enrich
+
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "music-lab.json"
 PEOPLE = Path(__file__).resolve().parent / "music_lab_people.json"
@@ -195,6 +197,8 @@ def person_links(relations):
             kind = URL_KINDS.get(kind)
         if kind and kind not in links:
             links[kind] = resource
+        if relation.get("type") == "discogs":
+            links.setdefault("discogsUrls", []).append(resource)
     return links
 
 
@@ -307,7 +311,8 @@ def build(client, people_config, previous, now):
             "area": (artist.get("area") or {}).get("name", ""), "beginArea": (artist.get("begin-area") or {}).get("name", ""),
             "begin": (artist.get("life-span") or {}).get("begin") or "",
             "aliases": sorted({alias.get("name", "") for alias in artist.get("aliases") or [] if alias.get("name") and alias.get("name") != artist.get("name")}),
-            "links": links, "credits": person_credits(relations), "status": "ok", "checkedAt": stamp,
+            "links": {key: value for key, value in links.items() if key != "discogsUrls"}, "discogsUrls": links.get("discogsUrls", []),
+            "credits": person_credits(relations), "status": "ok", "checkedAt": stamp,
             "releaseGroups": [{"id": group["id"], "title": group.get("title", ""), "type": group.get("primary-type") or "",
                                "secondary": group.get("secondary-types") or [], "date": group.get("first-release-date") or ""}
                               for group in groups.get("release-groups") or [] if group.get("id")],
@@ -368,7 +373,16 @@ def main():
     previous = load_previous()
     people_config = json.loads(PEOPLE.read_text(encoding="utf-8"))
     client = Client()
+    started = time.monotonic()
     people, recordings, works, complete = build(client, people_config, previous, now)
+    deadline = started + TIME_BUDGET
+    # Keep earlier Discogs links for people whose MusicBrainz lookup didn't run this time.
+    for person in people:
+        if "discogsUrls" not in person:
+            old = next((item for item in previous.get("people") or [] if item.get("key") == person.get("key")), {})
+            person["discogsUrls"] = old.get("discogsUrls", [])
+    discogs_tracks, discogs_cache, discogs_status = enrich.discogs_phase(client, people, recordings, previous, now, deadline)
+    genius_songs, genius_cache, genius_status = enrich.genius_phase(people, recordings, discogs_tracks, previous, now, deadline)
     output = {
         "generatedAt": now.isoformat(timespec="seconds"),
         "complete": complete,
@@ -376,10 +390,16 @@ def main():
             {"name": "MusicBrainz", "url": "https://musicbrainz.org/", "license": "CC0 (core data)"},
             {"name": "Cover Art Archive", "url": "https://coverartarchive.org/", "license": "Artwork © its owners"},
             {"name": "Wikidata / Wikimedia Commons / Wikipedia", "url": "https://www.wikidata.org/", "license": "CC0 / per-file / CC BY-SA 4.0"},
+            {"name": "Discogs", "url": "https://www.discogs.com/", "license": "Data from Discogs, linked per release"},
+            {"name": "Genius", "url": "https://genius.com/", "license": "Community-edited credits, linked per song"},
         ],
+        "sourceStatus": {"discogs": discogs_status, "genius": genius_status},
         "people": people,
         "works": works,
         "recordings": recordings,
+        "discogsTracks": discogs_tracks,
+        "geniusSongs": genius_songs,
+        "cache": {"discogs": discogs_cache, "genius": genius_cache},
     }
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     temporary = OUTPUT.with_suffix(".tmp")
@@ -389,6 +409,8 @@ def main():
                   if credit["kind"] == "recording" and credit["id"] not in recordings)
     print(f"Music Lab: {len(people)} people, {len(recordings)} recordings, {len(works)} works; "
           f"{client.used} MusicBrainz requests; {'complete' if complete and not missing else f'{missing} recording credits still pending'}")
+    print(f"Discogs: {len(discogs_tracks)} tracks, {discogs_status.get('requests', 0)} requests, {discogs_status['status']}"
+          f"{' (with token)' if discogs_status.get('authenticated') else ' (no token)'}; Genius: {len(genius_songs)} songs, {genius_status['status']}")
 
 
 if __name__ == "__main__":
