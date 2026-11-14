@@ -571,10 +571,37 @@ def parse_motiv_page(markup, url, *, image="", fallback_name=""):
     category = path.split("/")[3] if path.startswith("/products/balls/") and path.count("/") >= 4 else ""
     retired = category == "retired-balls"
     performance = "" if retired else category.replace("-", " ").capitalize()
+    cover_type = coverstock
+    named = re.search(r"\b(Pearl|Solid|Hybrid)\b", name)
+    if not cover_category(coverstock) and named:
+        cover_type = named.group(1)  # e.g. "Thrill Pink/Yellow Pearl" with an "Agility XP Reactive" cover
     return build_ball(
-        brand="Motiv", name=name, url=url, image=image, release_date=release, cover_type=coverstock, coverstock=coverstock,
+        brand="Motiv", name=name, url=url, image=image, release_date=release, cover_type=cover_type, coverstock=coverstock,
         core=core, numbers=numbers, symmetry=symmetry, performance=performance, finish=finish, discontinued=retired,
     )
+
+
+MOTIV_FILL_FIELDS = ("coverType", "coverTypeLabel", "coverstock", "core", "symmetry", "weight", "rg", "diff", "intDiff", "finish")
+
+
+def motiv_fill_missing(ball, retailer):
+    """Fill specs Motiv's page leaves out (some pages have no Specifications block, and some cover names
+    don't say solid/pearl/hybrid) from Bowling.com's listing of the same ball. Motiv's date and name are kept."""
+    if not ball or not retailer:
+        return ball
+    filled = dict(ball)
+    used = False
+    if filled.get("rg") is None and retailer.get("rg") is not None:
+        for field in ("weight", "rg", "diff", "intDiff", "symmetry"):
+            filled[field] = retailer.get(field)
+        used = True
+    for field in MOTIV_FILL_FIELDS:
+        if not filled.get(field) and retailer.get(field):
+            filled[field] = retailer[field]
+            used = True
+    if used:
+        filled["specsFrom"] = "Bowling.com"
+    return filled
 
 
 def collect_motiv_site(collector):
@@ -584,6 +611,7 @@ def collect_motiv_site(collector):
             tiles.setdefault(tile["link"], tile)
     if len(tiles) < MOTIV_MIN_BALLS:
         raise ValueError(f"Only {len(tiles)} balls were listed on motivbowling.com.")
+    retailer = {ball["id"]: ball for ball in collector.previous_balls.values() if ball.get("source") == "Bowling.com"}
     for link, tile in tiles.items():
         # The catalog link redirects to the ball's page; the thumbnail changes if Motiv updates the listing.
         version = "motiv-1:" + tile["image"].rsplit("/", 1)[-1]
@@ -592,6 +620,8 @@ def collect_motiv_site(collector):
         try:
             markup, final_url = fetch(link, with_url=True)
             ball = parse_motiv_page(markup, final_url, image=tile["image"], fallback_name=tile["title"])
+            if ball:
+                ball = motiv_fill_missing(ball, retailer.get(ball["id"]))
             collector.record(link, version, ball)
         except FetchBudgetExceeded:
             collector.incomplete = True

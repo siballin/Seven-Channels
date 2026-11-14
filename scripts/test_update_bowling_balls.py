@@ -214,6 +214,17 @@ class MotivSiteTests(unittest.TestCase):
         self.assertEqual(balls.motiv_catalog(markup), [{"link": "https://www.motivbowling.com/n_933271982218939987",
             "image": "https://www.motivbowling.com/userfiles/filemanager-format/thumb-transparent/abc", "title": "Frenzy Blue/Teal"}])
 
+    def test_missing_specs_filled_from_bowling_com(self):
+        no_specs = "<h1>Venom Hysteria</h1><p>Item Number: MTVBVMHYS Venom Hysteria AVAILABLE 4/22/2026 $199.99</p>"
+        ball = balls.parse_motiv_page(no_specs, "https://www.motivbowling.com/products/balls/light-medium-oil/venom-hysteria.html")
+        retailer = {"rg": 2.5, "diff": 0.04, "intDiff": None, "weight": 15, "symmetry": "symmetric", "coverType": "pearl",
+                    "coverstock": "Propulsion MXV Pearl Reactive", "core": "Gear", "releaseDate": "2026-04-01"}
+        filled = balls.motiv_fill_missing(ball, retailer)
+        self.assertEqual((filled["releaseDate"], filled["rg"], filled["coverType"], filled["core"], filled["specsFrom"]),
+                         ("2026-04-22", 2.5, "pearl", "Gear", "Bowling.com"))
+        complete = balls.motiv_fill_missing({**filled, "specsFrom": None, "coverType": "solid"}, retailer)
+        self.assertEqual(complete["coverType"], "solid")  # Motiv's own values win
+
     def test_falls_back_to_bowling_com(self):
         collector = balls.Collector({})
         with patch.object(balls, "collect_motiv_site", side_effect=ValueError("blocked")), \
