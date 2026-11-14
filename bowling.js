@@ -10,7 +10,7 @@ const bowlingStarterBalls = [
   ["starter-c300-pulse", "C300 Pulse"]
 ];
 const bowlingMaxGames = 12;
-const bowlingLimits = { center: 60, notes: 500, move: 140, result: 140, ballName: 60, layout: 40, surface: 60, ballNotes: 200 };
+const bowlingLimits = { league: 60, team: 60, center: 60, notes: 500, move: 140, result: 140, ballName: 60, layout: 40, surface: 60, ballNotes: 200 };
 const bowlingMoveSuggestions = [
   "Moved 2 boards right", "Moved 2 boards left", "Moved feet 2 left, eyes 1 left", "Moved feet 2 right, eyes 1 right",
   "Moved deeper", "More hand", "Less hand", "Slowed speed", "Picked up speed", "Earlier release", "Changed loft"
@@ -111,6 +111,32 @@ function bowlingNormalizeBall(value) {
   };
 }
 
+// Leagues are set up in the League tracker tab; sessions keep the league's id and name from when they were logged.
+function bowlingNormalizeLeague(value) {
+  if (!value || typeof value !== "object" || typeof value.id !== "string" || !value.id) return null;
+  const name = bowlingText(value.name, bowlingLimits.league);
+  if (!name) return null;
+  return {
+    id: value.id.slice(0, 80),
+    name,
+    center: bowlingText(value.center, bowlingLimits.center),
+    night: Number.isInteger(value.night) && value.night >= 0 && value.night <= 6 ? value.night : null,
+    time: typeof value.time === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(value.time) ? value.time : "",
+    team: bowlingText(value.team, bowlingLimits.team),
+    seasonStart: bowlingValidDate(value.seasonStart) ? value.seasonStart : "",
+    seasonEnd: bowlingValidDate(value.seasonEnd) ? value.seasonEnd : "",
+    archived: value.archived === true,
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : "",
+    updatedAt: typeof value.updatedAt === "string" ? value.updatedAt : ""
+  };
+}
+
+function bowlingNormalizeLeagueRef(value) {
+  if (!value || typeof value !== "object" || typeof value.id !== "string" || !value.id) return null;
+  const name = bowlingText(value.name, bowlingLimits.league);
+  return name ? { id: value.id.slice(0, 80), name } : null;
+}
+
 function bowlingNormalizeScore(value) {
   return Number.isInteger(value) && value >= 0 && value <= 300 ? value : null;
 }
@@ -118,20 +144,27 @@ function bowlingNormalizeScore(value) {
 function bowlingNormalizeSession(value) {
   if (!value || typeof value !== "object" || typeof value.id !== "string" || !value.id) return null;
   if (!bowlingValidDate(value.date) || !Array.isArray(value.games) || !value.games.length) return null;
-  const games = value.games.slice(0, bowlingMaxGames).map((game, index) => ({
+  const games = value.games.slice(0, bowlingMaxGames).map((game, index) => {
+    // Frame-by-frame games (from the score tracker) keep their throws; the total always comes from the frames.
+    const frames = typeof bowlingNormalizeFrames === "function" ? bowlingNormalizeFrames(game?.frames) : null;
+    const record = {
     id: typeof game?.id === "string" && game.id ? game.id.slice(0, 80) : `game-${index + 1}`,
-    score: bowlingNormalizeScore(game?.score),
+    score: frames ? bowlingReplayFrames(frames).total : bowlingNormalizeScore(game?.score),
     adjustments: (Array.isArray(game?.adjustments) ? game.adjustments : []).map((adjustment, adjustmentIndex) => ({
       id: typeof adjustment?.id === "string" && adjustment.id ? adjustment.id.slice(0, 80) : `adj-${index + 1}-${adjustmentIndex + 1}`,
       ball: bowlingNormalizeBallRef(adjustment?.ball),
       move: bowlingText(adjustment?.move, bowlingLimits.move),
       result: bowlingText(adjustment?.result, bowlingLimits.result)
     })).filter((adjustment) => adjustment.ball || adjustment.move || adjustment.result)
-  }));
+    };
+    if (frames) record.frames = frames;
+    return record;
+  });
   return {
     id: value.id.slice(0, 80),
     date: value.date,
     type: bowlingSessionTypes.some(([type]) => type === value.type) ? value.type : "league",
+    league: bowlingNormalizeLeagueRef(value.league),
     center: bowlingText(value.center, bowlingLimits.center),
     startBall: bowlingNormalizeBallRef(value.startBall),
     notes: bowlingText(value.notes, bowlingLimits.notes),
@@ -159,8 +192,13 @@ function bowlingNormalizeState(value) {
   for (const ball of (Array.isArray(source.balls) ? source.balls : []).map(bowlingNormalizeBall)) {
     if (ball && !balls.has(ball.id)) balls.set(ball.id, ball);
   }
+  const leagues = new Map();
+  for (const league of (Array.isArray(source.leagues) ? source.leagues : []).map(bowlingNormalizeLeague)) {
+    if (league && !leagues.has(league.id)) leagues.set(league.id, league);
+  }
   return {
     sessions: [...sessions.values()].sort(bowlingSortSessions),
+    leagues: [...leagues.values()].sort((a, b) => bowlingTime(a.createdAt) - bowlingTime(b.createdAt) || a.id.localeCompare(b.id)),
     balls: [...balls.values()].sort((a, b) => bowlingTime(a.createdAt) - bowlingTime(b.createdAt) || a.id.localeCompare(b.id)),
     deletedSessionIds: tombstones
   };
@@ -195,6 +233,7 @@ function bowlingMergeState(local, remote) {
   return bowlingNormalizeState({
     sessions: pick([...remoteState.sessions, ...localState.sessions]),
     balls: pick([...remoteState.balls, ...localState.balls]),
+    leagues: pick([...remoteState.leagues, ...localState.leagues]),
     deletedSessionIds: tombstones
   });
 }
@@ -300,11 +339,33 @@ function bowlingParseScore(text) {
   return score <= 300 ? { valid: true, score } : { valid: false, score: null };
 }
 
+// A new session picks the active league that bowls on today's weekday, else the league from the last session.
+function bowlingDefaultLeagueId(state = bowlingGetState()) {
+  const active = state.leagues.filter((league) => !league.archived);
+  const weekday = new Date().getDay();
+  const tonight = active.filter((league) => league.night === weekday);
+  if (tonight.length === 1) return tonight[0].id;
+  const recent = state.sessions.find((session) => session.league)?.league?.id;
+  return active.some((league) => league.id === recent) ? recent : "";
+}
+
+function bowlingLeagueRef(state, leagueId, previous) {
+  if (!leagueId) return null;
+  const league = state.leagues.find((item) => item.id === leagueId);
+  return league ? { id: league.id, name: league.name } : previous?.id === leagueId ? previous : null;
+}
+
+// Shows a league's current name, so renaming it in the League tracker updates past sessions.
+function bowlingLeagueName(state, ref) {
+  return ref ? state.leagues.find((league) => league.id === ref.id)?.name || ref.name : "";
+}
+
 function bowlingNewDraft() {
   return {
     id: null,
     date: bowlingToday(),
-    center: "",
+    leagueId: bowlingDefaultLeagueId(),
+    center: bowlingGetState().leagues.find((league) => league.id === bowlingDefaultLeagueId())?.center || "",
     type: "league",
     startBallId: "",
     notes: "",
@@ -316,6 +377,7 @@ function bowlingDraftFromSession(session) {
   return {
     id: session.id,
     date: session.date,
+    leagueId: session.league?.id || "",
     center: session.center,
     type: session.type,
     startBallId: session.startBall?.id || "",
@@ -358,7 +420,7 @@ function bowlingSessionMatches(session, filters) {
   const query = filters.query.trim().toLocaleLowerCase();
   if (!query) return true;
   const haystack = [
-    session.center, session.notes, session.startBall?.name, bowlingTypeLabel(session.type),
+    session.league?.name, session.center, session.notes, session.startBall?.name, bowlingTypeLabel(session.type),
     ...session.games.flatMap((game) => game.adjustments.flatMap((adjustment) => [adjustment.ball?.name, adjustment.move, adjustment.result]))
   ].filter(Boolean).join(" ").toLocaleLowerCase();
   return haystack.includes(query);
@@ -491,11 +553,32 @@ function createBowlingSessionForm(state) {
   center.autocomplete = "off";
   center.addEventListener("input", () => { draft.center = center.value; });
   const centers = [...new Set(state.sessions.map((session) => session.center).filter(Boolean))];
+  // Archived leagues only appear when editing a session that used one.
+  const leagueOptions = state.leagues.filter((item) => !item.archived || (editing && item.id === draft.leagueId)).map((item) => [item.id, item.name]);
+  if (!editing && !leagueOptions.some(([id]) => id === draft.leagueId)) draft.leagueId = "";
+  if (draft.leagueId && !leagueOptions.some(([id]) => id === draft.leagueId) && editing?.league?.id === draft.leagueId) {
+    leagueOptions.push([editing.league.id, editing.league.name]);
+  }
+  const league = bowlingSelect("bowling-league", [["", state.leagues.length ? "No league" : "No leagues yet"], ...leagueOptions], draft.leagueId);
+  league.addEventListener("change", () => {
+    draft.leagueId = league.value;
+    const chosen = state.leagues.find((item) => item.id === league.value);
+    if (chosen) {
+      draft.type = "league";
+      type.value = "league";
+      if (!center.value.trim() && chosen.center) center.value = draft.center = chosen.center;
+    }
+  });
+  const manage = element("a", "bowling-field-link", state.leagues.length ? "Manage leagues" : "Add your league in League tracker");
+  manage.href = "#bowling/leagues";
+  const leagueField = bowlingField("League", league, manage);
+  leagueField.classList.add("bowling-field-wide");
   const startBall = bowlingBallSelect("bowling-start-ball", draft.startBallId, state.balls.length ? "No ball selected" : "Add balls to your arsenal", state, editing?.startBall);
   startBall.addEventListener("change", () => { draft.startBallId = startBall.value; });
   meta.append(
     bowlingField("Date", date),
     bowlingField("Session type", type),
+    leagueField,
     bowlingField("Bowling center", center),
     bowlingField("Starting ball", startBall),
     bowlingDatalist("bowling-center-list", centers)
@@ -698,9 +781,13 @@ function bowlingSaveDraft(form) {
   };
   const games = draft.games.map((game) => {
     const savedGame = existing?.games.find((saved) => saved.id === game.id);
+    const score = bowlingParseScore(game.score).score;
+    // Editing a tracked game's total by hand drops its frames, since they no longer add up.
+    const frames = savedGame?.frames && savedGame.score === score ? { frames: savedGame.frames } : {};
     return {
+      ...frames,
       id: game.id,
-      score: bowlingParseScore(game.score).score,
+      score,
       adjustments: game.adjustments.map((adjustment) => {
         const savedAdjustment = savedGame?.adjustments.find((saved) => saved.id === adjustment.id);
         return {
@@ -717,6 +804,7 @@ function bowlingSaveDraft(form) {
       id: existing?.id || bowlingId("session"),
       date: draft.date,
       type: draft.type,
+      league: bowlingLeagueRef(state, draft.leagueId, existing?.league),
       center: draft.center.trim(),
       startBall: snapshotFor(draft.startBallId, existing?.startBall),
       notes: draft.notes.trim(),
@@ -742,7 +830,9 @@ function createBowlingDashboard(state) {
   const logButton = element("button", "bowling-log-jump", "Log session");
   logButton.type = "button";
   logButton.addEventListener("click", bowlingJumpToLog);
-  head.append(title, logButton);
+  const actions = element("div", "bowling-head-actions");
+  actions.append(createBowlingScorerLink(), logButton);
+  head.append(title, actions);
   const overall = bowlingOverall(state.sessions);
   const metrics = element("div", "bowling-metrics");
   for (const [label, value, note] of [
@@ -756,7 +846,18 @@ function createBowlingDashboard(state) {
     if (note) metric.append(element("small", "", note));
     metrics.append(metric);
   }
-  panel.append(head, metrics, createBowlingTrend(state));
+  panel.append(head, metrics);
+  const tracked = bowlingFrameStats(state.sessions);
+  if (tracked.games) {
+    const line = element("p", "bowling-tracked-line");
+    const spares = tracked.chances ? ` · ${bowlingPercent(tracked.spares, tracked.chances)} of spares converted` : "";
+    line.append(`From ${tracked.games} tracked game${tracked.games === 1 ? "" : "s"}: ${bowlingPercent(tracked.strikes, tracked.firstBalls)} strikes${spares}. `);
+    const link = element("a", "", "See spares and leaves");
+    link.href = "#bowling/scorer";
+    line.append(link);
+    panel.append(line);
+  }
+  panel.append(createBowlingTrend(state));
   return panel;
 }
 
@@ -886,6 +987,11 @@ function createBowlingSessionCard(session, ballsById) {
   const time = element("time", "", bowlingFormatDate(session.date));
   time.dateTime = session.date;
   when.append(time, element("span", `bowling-badge bowling-type-${session.type}`, bowlingTypeLabel(session.type)));
+  if (session.league) {
+    const league = element("a", "bowling-league-name", bowlingLeagueName(bowlingGetState(), session.league));
+    league.href = "#bowling/leagues";
+    when.append(league);
+  }
   if (session.center) when.append(element("span", "bowling-center", session.center));
   const total = element("div", "bowling-session-total");
   total.append(
@@ -901,6 +1007,13 @@ function createBowlingSessionCard(session, ballsById) {
     scores.append(chip);
   });
   card.append(head, scores);
+  session.games.forEach((game, index) => {
+    if (!game.frames) return;
+    const details = element("details", "bowling-session-frames");
+    details.append(element("summary", "", `Game ${index + 1} frame by frame`),
+      createBowlingScoresheet(game.frames, { label: `Game ${index + 1} scoresheet` }));
+    card.append(details);
+  });
   if (session.startBall) card.append(bowlingBallLine("Started with", session.startBall, ballsById));
   const adjustments = session.games.flatMap((game, index) => game.adjustments.map((adjustment) => ({ adjustment, index })));
   if (adjustments.length) {
@@ -1773,14 +1886,14 @@ function createBowlingReleaseView() {
 }
 
 function bowlingView() {
-  const match = /^#bowling\/(balls|releases)$/.exec(location.hash);
+  const match = /^#bowling\/(scorer|balls|releases|leagues)$/.exec(location.hash);
   return match ? match[1] : "log";
 }
 
 function createBowlingTabs(active) {
   const nav = element("nav", "bowling-tabs");
   nav.setAttribute("aria-label", "Bowling sections");
-  for (const [view, label, href] of [["log", "League night", "#bowling"], ["balls", "Ball database", "#bowling/balls"], ["releases", "Release calendar", "#bowling/releases"]]) {
+  for (const [view, label, href] of [["log", "League night", "#bowling"], ["scorer", "Score tracker", "#bowling/scorer"], ["balls", "Ball database", "#bowling/balls"], ["releases", "Release calendar", "#bowling/releases"], ["leagues", "League tracker", "#bowling/leagues"]]) {
     const link = element("a", "", label);
     link.href = href;
     if (view === active) link.setAttribute("aria-current", "page");
@@ -1793,7 +1906,9 @@ function createBowlingChannel() {
   const view = bowlingView();
   if (view !== "log") {
     const root = element("div", "bowling");
-    root.append(createBowlingTabs(view), view === "balls" ? createBowlingCatalogView() : createBowlingReleaseView());
+    root.append(createBowlingTabs(view), view === "scorer" ? createBowlingScorerView()
+      : view === "leagues" ? createBowlingLeagueView()
+      : view === "balls" ? createBowlingCatalogView() : createBowlingReleaseView());
     bowlingRoot = root;
     return root;
   }

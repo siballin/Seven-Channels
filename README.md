@@ -84,11 +84,19 @@ The optional editorial list is `data/politics-stories.json`: an array of objects
 
 ## Bowling
 
-Bowling (`#bowling`) is a personal league-night log. Each session defaults to today's local date and three games; you can change the date, add or remove games for practice or tournaments, and record an optional bowling center, session type (League, Practice, Tournament), starting ball and notes. Scores must be whole numbers from 0 to 300; leave unfinished games blank. Add any number of adjustments to a game, each with an optional ball switch, a move or release change, and what happened afterward.
+Bowling (`#bowling`) is a personal league-night log. Each session defaults to today's local date and three games; you can change the date, add or remove games for practice or tournaments, and record an optional league, bowling center, session type (League, Practice, Tournament), starting ball and notes. The League menu lists the leagues set up in League tracker; a new session starts with the league that bowls on today's weekday (or your last session's league), and choosing a league fills in its center. Scores must be whole numbers from 0 to 300; leave unfinished games blank. Add any number of adjustments to a game, each with an optional ball switch, a move or release change, and what happened afterward.
 
 The arsenal stores each ball's name, layout, surface and notes as free text (for example `5 × 4.5 × 3.5` or `4000 grit + polish`). Black Venom, Motiv Nebula and C300 Pulse are offered as optional quick-add entries. Retire a ball to move it below active balls in the session form; sessions keep the ball name, layout and surface recorded that night even after the ball is edited or retired.
 
 The dashboard's average, games bowled and high game are calculated across individual scored games, so sessions with different game counts are weighted correctly. The series trend chart and high series only include three-game sessions with all three games scored. History is newest first and can be filtered by session type, by any ball used (starting ball or switch), and by text in notes and adjustments.
+
+### Score tracker
+
+**Score tracker** (`#bowling/scorer`) scores a game frame by frame as you bowl. For each throw, tap the pins left standing (or press 1–9 and 0 for the 10 pin) and record it; no pins selected records a strike on a full rack or a spare on the second ball, and **Gutter**/**Missed** records a ball that hit nothing. The scoresheet shows marks, circled splits and running totals, with the highest score still possible. **Undo last throw** steps back, and the game in progress is kept on this device until you finish it. A finished game saves to a new session for today or to a recent session, filling its first unscored game; it then syncs with the rest of your bowling data. Tracked games show their scoresheet in History, and the **Spares and leaves** panel adds up strike rate, spare conversion, single-pin and split conversion, first-ball average and your most common leaves. Changing a tracked game's score by hand in the session form drops its frames.
+
+### League tracker
+
+**League tracker** (`#bowling/leagues`) is where you set up each league once: its name, bowling center, night, start time, season dates and team. Each league card shows its average, weeks bowled, high game and high series, tracked-game strike and spare rates, and a week-by-week table of scores. **Log a session** opens League night with that league selected. Renaming a league updates the name on past sessions; archiving one at the end of a season hides it from the League menu while its sessions keep it. Leagues sync with the rest of your bowling data.
 
 ### Ball database and release calendar
 
@@ -101,6 +109,37 @@ The dashboard's average, games bowled and high game are calculated across indivi
 Manufacturer listings can be incomplete. Storm's feed covers mostly 2023 and later, so older Storm, Roto Grip and 900 Global balls may be missing. Feed entries whose product page no longer exists keep their release date but have no specs and link to Storm's ball catalog. Balls whose manufacturer page doesn't list numbers, such as many spare balls, show dashes. Run `python3 -m unittest discover -s scripts -p 'test_update_bowling_balls.py'` to test the parsers.
 
 Bowling logic lives in `bowling.js`. Sessions and arsenal entries are stored in browser storage and, when signed in, sync as part of the account state. Each session and ball has a stable ID and edit time; edits merge per record (the newest edit wins) and deleted sessions are remembered, so another device's stale copy does not bring them back.
+
+## Music Lab
+
+Music Lab (`#music`) is a research space for producers, songwriters and the credits behind songs, plus a personal listening library.
+
+- **Dashboard** (`#music`): a featured producer or songwriter (rotating daily), recently released albums with documented credits, featured collaborations (pairs who share the most credited recordings), recently explored pages, people you follow, and saved albums and discoveries. The search box on every Music Lab page searches songs, albums, artists and credited people.
+- **Producers & songwriters** (`#music/people`, `#music/person/<MusicBrainz artist ID>`): profiles with aliases, photo and biography when Wikidata links them, a per-role credit summary, and a chronological discography of credited songs filterable by role, performing artist, year and title. Roles are kept distinct: songwriting (writer, lyricist), composition, production, vocal production, arrangement, engineering, programming, performance and remix. Any MusicBrainz artist can be opened; people outside the tracked list load live, and **Load song details** fetches their songs' artists, dates and albums on request.
+- **Collaboration network** (`#music/network/<ID>`): an ego graph of everyone who shares a credited recording with the selected person (performing artists, co-writers, co-producers, engineers), filterable by the person's role and by year, with zoom, pan, and a keyboard-accessible connection list. Selecting a connection lists the shared songs and links to profiles.
+- **Song pages** (`#music/song/<recording ID>`): artwork, performing artists, release date, album, writers, composers, producers, arrangers, engineers and other credits, Spotify/Apple Music/YouTube links, and related songs that share a writer, producer or engineer.
+- **Album pages** (`#music/album/<release ID>`, or `#music/group/<release-group ID>` to pick the main release): release details, the full track list with each track's credits, and your rating and review.
+- **My library** (`#music/library`): 1–10 ratings, saved songs and albums, followed people, discoveries, listening notes and reviews, listening lists, and your credit additions.
+
+### Data sources and accuracy
+
+- **MusicBrainz** (CC0) is the backbone and supplies stable IDs for people, songs and albums. Writing credits come from the song's *work* (writer, lyricist, composer); production, arrangement, engineering and performance credits come from the *recording*. A composer is never shown as a producer. MusicBrainz has no vocal-production credit type.
+- **Discogs** (official API) adds credits transcribed from album booklets and liner notes, including roles MusicBrainz lacks such as `Producer [Vocals]` (shown as vocal production) and per-track recording, mixing and mastering engineers. Releases are found through the Discogs links MusicBrainz stores on releases, release groups and people, not by searching names; tracks are matched by title within the release. Credits a tracked person has on Discogs releases MusicBrainz doesn't link appear on their profile as "Discogs only" rows linking to Discogs. Non-musical roles (A&R, management, art direction, legal) are dropped.
+- **Genius** (official API) adds community-edited writer, producer and custom roles (vocal producer, mixing engineer…). A song is accepted only when its title and a performing artist match. Genius credits are labeled as community-edited.
+- Every credit shows its source (MB, Discogs, Genius), and the profile and network have a Source filter. Versions of the same song (explicit and clean recordings, singles, vinyl pressings) are merged into one row per title and lead artist, and the collaboration network counts each shared song once. Discogs and Genius names are linked to a Music Lab profile only through a person's Discogs ID, a MusicBrainz credit on the same recording, or a tracked person's name or alias.
+- **Cover Art Archive** supplies artwork; **Wikidata, Wikimedia Commons and Wikipedia** supply a photo (with its author and license) and biography when MusicBrainz links a Wikidata item. Otherwise the profile shows a short factual summary from the MusicBrainz record.
+- **Apple's iTunes Search API** is used to find an Apple Music link for a song when MusicBrainz doesn't list one; only an exact title and artist match counts. Other listening links fall back to clearly labeled searches.
+- Credit databases are incomplete. Missing roles show as "Not documented" rather than being guessed. On a song page you can add a missing credit with a required source link; additions are labeled **unverified**, kept apart from MusicBrainz data, and appear on the matching profile.
+
+Optional repository secrets: `DISCOGS_TOKEN` (a Discogs personal access token from Settings → Developers; without it Discogs is read anonymously at 25 instead of 60 requests a minute) and `GENIUS_ACCESS_TOKEN` (a client access token from genius.com/api-clients; without it Genius credits aren't refreshed and the last saved ones stay). Both are used only by the build, never by the page. Discogs data is reused for 60 days and Genius data for 30; songs with no match are retried after 14 days.
+
+`scripts/update_music_lab.py` builds `data/music-lab.json` during the daily Pages workflow for the people in `scripts/music_lab_people.json` (stable MusicBrainz IDs, chosen by checking each candidate's credits and links). It spaces MusicBrainz requests a second apart, retries busy (503) responses with backoff, stops at a request and time budget, and reuses song details fetched in the last 30 days, so each run only fetches new credits and a slice of stale ones. Add someone by appending their name and MusicBrainz artist ID. FVBII has no MusicBrainz record yet (the closest result, FVBIIAN, is a different artist), so the profile says so instead of borrowing a lookalike. In the browser, live lookups go through a queue of one request per second with retries and a seven-day local cache. No API keys are needed, and none are used in the page. Run `python3 -m unittest discover -s scripts -p 'test_*music_lab*.py'` to test the builder and the Discogs and Genius parsers.
+
+Your library (ratings, saved items, follows, notes, lists, discoveries and credit additions) is stored in this browser and syncs through your Seven Channels account, merging per record so edits on different devices don't overwrite each other. Recently explored pages sync along with your next library change.
+
+### K-Pop links
+
+K-Pop release calendar entries have a **Credits** link: it opens the album in Music Lab when the snapshot has a matching album by that artist, and a Music Lab search (which includes MusicBrainz) otherwise. The MusicBrainz discography browser in K-Pop links each artist and album to Music Lab by its MusicBrainz ID. Music Lab doesn't duplicate the K-Pop release calendar.
 
 ## Glass appearance
 

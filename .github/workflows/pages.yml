@@ -106,6 +106,23 @@ jobs:
         with:
           path: data/bowling-balls.json
           key: bowling-balls-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Restore last Music Lab snapshot
+        uses: actions/cache/restore@v4
+        with:
+          path: data/music-lab.json
+          key: music-lab-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: music-lab-
+      - name: Refresh Music Lab credits from MusicBrainz, Discogs and Genius
+        continue-on-error: true
+        env:
+          DISCOGS_TOKEN: ${{ secrets.DISCOGS_TOKEN }}
+          GENIUS_ACCESS_TOKEN: ${{ secrets.GENIUS_ACCESS_TOKEN }}
+        run: python scripts/update_music_lab.py
+      - name: Cache Music Lab snapshot
+        uses: actions/cache/save@v4
+        with:
+          path: data/music-lab.json
+          key: music-lab-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload site files
