@@ -95,6 +95,14 @@ class MusicLabTests(unittest.TestCase):
         self.assertEqual(people[0]["releaseGroups"][0]["id"], "g1")
         self.assertEqual(set(recordings), {"r2"})
 
+    def test_display_name_uses_configured_alias(self):
+        person = {"name": "藤田織也", "aliases": ["Fujita Kenya", "Kenya Fujita"]}
+        lab.apply_display_name(person, "Kenya Fujita")
+        self.assertEqual((person["name"], person["mbName"], person["aliases"]), ("Kenya Fujita", "藤田織也", ["藤田織也", "Fujita Kenya"]))
+        other = {"name": "Kiddo AI", "aliases": ["Amanda Ibanez"]}
+        lab.apply_display_name(other, "Kiddo A.I.")
+        self.assertEqual((other["name"], other["aliases"]), ("Kiddo AI", ["Kiddo A.I.", "Amanda Ibanez"]))
+
     def test_budget_marks_snapshot_incomplete(self):
         client = lab.Client(budget=0)
         people, recordings, works, complete = lab.build(client, [{"name": "Person", "mbid": "p1"}], {}, datetime.now(timezone.utc))

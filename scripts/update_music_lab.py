@@ -212,6 +212,20 @@ def person_credits(relations):
     return credits
 
 
+def apply_display_name(person, configured):
+    """Show the configured name when MusicBrainz lists it as an alias (e.g. 藤田織也 is credited as Kenya Fujita);
+    the MusicBrainz name stays visible as an alias. Other configured spellings are only added as aliases."""
+    official = person["name"]
+    if configured == official:
+        return
+    if configured.lower() in {alias.lower() for alias in person["aliases"]}:
+        person["name"] = configured
+        person["mbName"] = official
+        person["aliases"] = [official] + [alias for alias in person["aliases"] if alias.lower() != configured.lower()]
+    elif configured not in person["aliases"]:
+        person["aliases"].insert(0, configured)
+
+
 def wiki_profile(client, wikidata_url, previous):
     """Photo (Wikimedia Commons) and summary (English Wikipedia) for a Wikidata item; keeps the last copy on failure."""
     match = re.search(r"(Q\d+)", wikidata_url or "")
@@ -298,8 +312,7 @@ def build(client, people_config, previous, now):
                                "secondary": group.get("secondary-types") or [], "date": group.get("first-release-date") or ""}
                               for group in groups.get("release-groups") or [] if group.get("id")],
         }
-        if config["name"] != person["name"] and config["name"] not in person["aliases"]:
-            person["aliases"].insert(0, config["name"])
+        apply_display_name(person, config["name"])
         person.update(wiki_profile(client, links.get("wikidata"), old) if links.get("wikidata") else {})
         people.append(person)
         for credit in person["credits"]:
