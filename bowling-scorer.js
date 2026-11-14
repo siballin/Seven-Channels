@@ -322,13 +322,13 @@ function bowlingSaveLiveGame() {
       session.updatedAt = now;
       message = `Saved as game ${slot >= 0 ? slot + 1 : session.games.length} of your ${bowlingFormatDate(session.date, { weekday: "long", month: "short", day: "numeric" })} session.`;
     } else {
-      next.sessions.push({ id: bowlingId("session"), date: bowlingToday(), type: "league", center: "", startBall: null, notes: "", games: [game], createdAt: now, updatedAt: now });
+      next.sessions.push({ id: bowlingId("session"), date: bowlingToday(), type: "league", league: bowlingRecentLeague(), center: "", startBall: null, notes: "", games: [game], createdAt: now, updatedAt: now });
       message = "Saved as a new session for today.";
     }
   });
   bowlingResetLive();
   bowlingLiveTarget = null;
-  bowlingLiveStatus = saved ? { text: message, error: false, link: target ? "View it in League night" : "Add the center, balls and notes in League night" } : { text: "Saved for this visit only; browser storage is unavailable.", error: true };
+  bowlingLiveStatus = saved ? { text: message, error: false, link: target ? "View it in League night" : "Add the league, center, balls and notes in League night" } : { text: "Saved for this visit only; browser storage is unavailable.", error: true };
   bowlingRefresh("bowling-live-status");
 }
 

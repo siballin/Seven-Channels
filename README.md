@@ -84,7 +84,7 @@ The optional editorial list is `data/politics-stories.json`: an array of objects
 
 ## Bowling
 
-Bowling (`#bowling`) is a personal league-night log. Each session defaults to today's local date and three games; you can change the date, add or remove games for practice or tournaments, and record an optional bowling center, session type (League, Practice, Tournament), starting ball and notes. Scores must be whole numbers from 0 to 300; leave unfinished games blank. Add any number of adjustments to a game, each with an optional ball switch, a move or release change, and what happened afterward.
+Bowling (`#bowling`) is a personal league-night log. Each session defaults to today's local date and three games; you can change the date, add or remove games for practice or tournaments, and record an optional league name, bowling center, session type (League, Practice, Tournament), starting ball and notes. A new session starts with the league name from your most recent session, and past league names are suggested as you type. Scores must be whole numbers from 0 to 300; leave unfinished games blank. Add any number of adjustments to a game, each with an optional ball switch, a move or release change, and what happened afterward.
 
 The arsenal stores each ball's name, layout, surface and notes as free text (for example `5 × 4.5 × 3.5` or `4000 grit + polish`). Black Venom, Motiv Nebula and C300 Pulse are offered as optional quick-add entries. Retire a ball to move it below active balls in the session form; sessions keep the ball name, layout and surface recorded that night even after the ball is edited or retired.
 
