@@ -16,6 +16,9 @@ let gamesStatusError = false;
 let gamesCatalogPromise = null;
 let gamesCatalog = null;
 let gamesCatalogMissing = false;
+// The catalog is built during the Pages deploy and isn't committed, so previews of a branch borrow the live site's copy.
+const GAMES_LIVE_CATALOG = "https://siballin.github.io/Seven-Channels/data/games-catalog/";
+let gamesCatalogBase = "data/games-catalog/";
 const gamesShardCache = new Map();
 const gamesPriceCache = new Map();
 let gamesStoresPromise = null;
@@ -141,14 +144,17 @@ function gamesSave(draft) {
 
 function gamesLoadCatalog() {
   if (!gamesCatalogPromise) {
-    gamesCatalogPromise = fetch("data/games-catalog/index.json").then((response) => {
-      if (response.status === 404) {
-        gamesCatalogMissing = true;
-        return null;
-      }
+    const request = (base) => fetch(`${base}index.json`).then((response) => {
+      if (response.status === 404) return null;
       if (!response.ok) throw new Error(`Catalog request failed (${response.status}).`);
+      gamesCatalogBase = base;
       return response.json();
-    }).then((data) => {
+    });
+    const onLiveSite = location.hostname === new URL(GAMES_LIVE_CATALOG).hostname;
+    gamesCatalogPromise = request(gamesCatalogBase)
+      .then((data) => data || onLiveSite ? data : request(GAMES_LIVE_CATALOG).catch(() => null))
+      .then((data) => {
+      if (!data) gamesCatalogMissing = true;
       if (data && Array.isArray(data.games)) {
         gamesCatalog = {
           shards: data.shards || 64, generatedAt: data.generatedAt || "",
@@ -184,7 +190,7 @@ function gamesSearch(query, limit = 8) {
 
 function gamesDetails(id) {
   const shard = Number(id) % (gamesCatalog?.shards || 64);
-  const path = `data/games-catalog/details-${String(shard).padStart(2, "0")}.json`;
+  const path = `${gamesCatalogBase}details-${String(shard).padStart(2, "0")}.json`;
   if (!gamesShardCache.has(path)) gamesShardCache.set(path, gamesFetchJson(path));
   return gamesShardCache.get(path).then((shardData) => shardData[String(id)] || null);
 }
