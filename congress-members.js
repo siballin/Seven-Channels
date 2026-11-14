@@ -192,7 +192,8 @@ function congressField(labelText, control) {
 function congressTabs(active) {
   const nav = element("nav", "congress-tabs");
   nav.setAttribute("aria-label", "Politics sections");
-  for (const [view, label, href] of [["overview", "Overview", "#politics"], ["members", "Members of Congress", "#politics/members"]]) {
+  for (const [view, label, href] of [["overview", "Overview", "#politics"], ["members", "Members of Congress", "#politics/members"],
+    ["elections", "Election maps", "#politics/elections"]]) {
     const link = element("a", "", label);
     link.href = href;
     if (view === active) link.setAttribute("aria-current", "page");

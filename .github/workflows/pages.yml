@@ -68,6 +68,9 @@ jobs:
         with:
           path: data/congress-members.json
           key: congress-members-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Refresh preliminary 2026 election results
+        continue-on-error: true
+        run: python scripts/update_election_2026.py
       - name: Restore last bowling ball snapshot
         uses: actions/cache/restore@v4
         with:

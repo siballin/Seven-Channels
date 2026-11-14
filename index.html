@@ -1526,6 +1526,95 @@
     .politics-controls input, .politics-controls select { min-width: 0; }
     .politics-status { font-size: .75rem; color: var(--muted); }
     @media (max-width: 760px) { .politics-top, .politics-scores { grid-template-columns: 1fr; } }
+    /* Election maps */
+    .election-maps { --el-d1: #c6dbf7; --el-d2: #8fb6ec; --el-d3: #4a83d6; --el-d4: #1d4f9e; --el-r1: #f9c8c0; --el-r2: #f2918a; --el-r3: #d9534b; --el-r4: #9e1f1c;
+      --el-o1: #ddd0f2; --el-o2: #bfa6e6; --el-o3: #9474cf; --el-o4: #6a4aa6; --el-none: color-mix(in srgb, var(--ink) 8%, var(--surface)); --el-uncalled: color-mix(in srgb, var(--ink) 22%, var(--surface)); }
+    .election-panel { display: grid; gap: 14px; }
+    .election-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+    .election-heading h3 { margin: 0; }
+    .election-badge { padding: 2px 8px; border: 1px solid var(--glass-edge); border-radius: 999px; color: var(--ink); font-size: .68rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+    .election-badge-warn { border-color: #c9862a; color: #a45b0a; }
+    :root[data-theme="dark"] .election-badge-warn { color: #ffca77; }
+    .election-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+    .election-race-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .election-race-tabs a { padding: 6px 12px; border: 1px solid var(--glass-edge); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: .84rem; font-weight: 700; text-decoration: none; }
+    .election-race-tabs a[aria-current="page"] { border-color: color-mix(in srgb, var(--signal) 45%, var(--glass-edge)); background: color-mix(in srgb, var(--signal) 17%, var(--surface)); color: var(--glass-accent-ink); }
+    .election-year { display: flex; align-items: center; gap: 8px; min-width: min(100%, 320px); flex: 1 1 320px; max-width: 480px; }
+    .election-year input[type="range"] { flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; accent-color: var(--signal); }
+    .election-year-label { min-width: 3.2em; font: 800 1.15rem var(--data); font-variant-numeric: tabular-nums; }
+    .election-step { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--glass-edge); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 1.2rem; font-weight: 800; text-decoration: none; }
+    .election-step[aria-disabled="true"] { opacity: .35; pointer-events: none; }
+    .election-summary { display: grid; gap: 8px; }
+    .election-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+    .election-candidate-card { display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--glass-edge); border-left-width: 5px; border-radius: var(--glass-radius-small); background: var(--surface); }
+    .election-border-d { border-left-color: var(--el-d3); } .election-border-r { border-left-color: var(--el-r3); } .election-border-o { border-left-color: var(--el-o3); }
+    .election-candidate-card small { color: var(--muted); }
+    .election-card-figures { display: flex; flex-wrap: wrap; gap: 4px 12px; font: 700 .9rem var(--data); font-variant-numeric: tabular-nums; }
+    .election-candidate-card .election-badge { justify-self: start; }
+    .election-bar { position: relative; display: flex; height: 16px; overflow: hidden; border-radius: 6px; background: var(--el-none); }
+    .election-bar-part { min-width: 1px; }
+    .election-bar-majority { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); }
+    .election-d { background: var(--el-d3); } .election-r { background: var(--el-r3); } .election-o { background: var(--el-o3); }
+    .election-uncalled { background: var(--el-uncalled); } .election-none { background: var(--el-none); }
+    .election-balance { display: grid; gap: 6px; }
+    .election-balance h4 { margin: 0; font-size: .86rem; }
+    .election-balance-row { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 2px 10px; align-items: center; }
+    .election-balance-row small { grid-column: 2; color: var(--muted); font-size: .74rem; font-variant-numeric: tabular-nums; }
+    .election-balance-row > span { color: var(--muted); font-size: .76rem; font-weight: 700; }
+    .election-flips { margin: 0; }
+    .election-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: 16px; align-items: start; }
+    .election-map-column { display: grid; gap: 8px; min-width: 0; }
+    .election-map-tools select { width: auto; min-width: 200px; }
+    .election-map-wrap { position: relative; min-width: 0; }
+    .election-map { display: block; width: 100%; height: auto; }
+    .election-shape { stroke: var(--surface); stroke-width: .5; vector-effect: non-scaling-stroke; cursor: pointer; transition: opacity .15s; }
+    .election-shape:hover { stroke: var(--ink); stroke-width: 1.5; }
+    .election-shape.is-selected { stroke: var(--ink); stroke-width: 2.5; }
+    .election-state-outline path { fill: none; stroke: var(--screen); stroke-width: 1.2; vector-effect: non-scaling-stroke; pointer-events: none; }
+    .election-fill-d1 { fill: var(--el-d1); background: var(--el-d1); } .election-fill-d2 { fill: var(--el-d2); background: var(--el-d2); }
+    .election-fill-d3 { fill: var(--el-d3); background: var(--el-d3); } .election-fill-d4 { fill: var(--el-d4); background: var(--el-d4); }
+    .election-fill-r1 { fill: var(--el-r1); background: var(--el-r1); } .election-fill-r2 { fill: var(--el-r2); background: var(--el-r2); }
+    .election-fill-r3 { fill: var(--el-r3); background: var(--el-r3); } .election-fill-r4 { fill: var(--el-r4); background: var(--el-r4); }
+    .election-fill-o1 { fill: var(--el-o1); background: var(--el-o1); } .election-fill-o2 { fill: var(--el-o2); background: var(--el-o2); }
+    .election-fill-o3 { fill: var(--el-o3); background: var(--el-o3); } .election-fill-o4 { fill: var(--el-o4); background: var(--el-o4); }
+    .election-fill-none { fill: var(--el-none); background: var(--el-none); }
+    .election-fill-uncalled { fill: var(--el-uncalled); background: var(--el-uncalled); }
+    details.election-flips summary { cursor: pointer; font-size: .8rem; font-weight: 700; }
+    details.election-flips p { margin: 6px 0 0; }
+    .election-tooltip { position: absolute; z-index: 3; display: grid; gap: 2px; max-width: 220px; padding: 7px 10px; border: 1px solid var(--glass-edge); border-radius: 8px; background: var(--surface); box-shadow: var(--glass-shadow); color: var(--ink); font-size: .78rem; pointer-events: none; }
+    .election-tooltip[hidden] { display: none; }
+    .election-tooltip small { color: var(--muted); }
+    .election-legend { display: grid; gap: 4px; font-size: .72rem; }
+    .election-legend-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+    .election-legend-row small { color: var(--muted); margin-right: 4px; }
+    .election-legend-label { min-width: 84px; font-weight: 700; }
+    .election-swatch { display: inline-block; width: 16px; height: 12px; border-radius: 3px; border: 1px solid var(--glass-edge); }
+    .election-detail { display: grid; gap: 6px; padding: 12px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius-small); background: var(--surface); }
+    .election-detail h4 { margin: 0; font-size: .95rem; }
+    .election-detail h4:focus { outline: none; }
+    .election-detail h5 { margin: 6px 0 0; color: var(--muted); font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; }
+    .election-detail-meta { margin: 0; color: var(--muted); font-size: .78rem; }
+    .election-candidates { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .election-candidates li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; align-items: baseline; gap: 0 8px; font-size: .84rem; }
+    .election-candidates li small { grid-column: 2; color: var(--muted); font-size: .72rem; }
+    .election-candidates li .election-figures { font-variant-numeric: tabular-nums; }
+    .election-candidates li .election-badge { grid-column: 3; grid-row: 1; }
+    .election-candidates li.is-winner .election-candidate-name { font-weight: 800; }
+    .election-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .election-table summary { width: fit-content; cursor: pointer; font-weight: 700; }
+    .election-table table { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: .8rem; }
+    .election-table :is(th, td) { padding: 5px 6px; border-bottom: 1px solid var(--glass-edge); text-align: left; }
+    .election-link { min-height: 0; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; font-weight: 700; text-align: left; text-decoration: underline; cursor: pointer; }
+    .election-link:hover { color: var(--signal); filter: none; }
+    .election-sources { display: grid; gap: 4px; font-size: .74rem; }
+    .election-sources p { margin: 0; }
+    .election-preliminary { padding: 8px 10px; border: 1px solid #c9862a; border-radius: 8px; color: var(--ink); }
+    @media (max-width: 900px) { .election-layout { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 520px) {
+      .election-balance-row { grid-template-columns: 1fr; }
+      .election-balance-row small { grid-column: 1; }
+      .election-table table { font-size: .74rem; }
+    }
     /* Capitol Hill member database */
     .congress, .congress-profile { display: grid; gap: 16px; min-width: 0; }
     .congress-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
@@ -1899,6 +1988,7 @@
   <script src="nba-team-hub.js"></script>
   <script src="bowling.js"></script>
   <script src="congress-members.js"></script>
+  <script src="election-maps.js"></script>
   <script>
     "use strict";
     const channels = [
@@ -5835,6 +5925,7 @@
         /^sports\/nba\/(teams|games)\//.test(route)) return "sports";
       if (/^bowling\/(balls|releases)$/.test(route)) return "bowling";
       if (/^politics\/members(\/[A-Z]\d{6})?$/.test(route)) return "politics";
+      if (/^politics\/elections(\/(president|senate|house)(\/\d{4})?)?$/.test(route)) return "politics";
       return route === "guide" || channels.some((channel) => channel.id === route) ? route : "guide";
     }
 
@@ -10330,7 +10421,8 @@
       heading.append(element("span", "number", `CH ${channel.number}`), element("h2", "", channel.name));
       const description = element("p", "lede", channel.description);
       if (channel.id === "politics") {
-        view.replaceChildren(heading, description, ...(congressView() ? [createCongressMembersView()] : [congressTabs("overview"), createPoliticsDashboard()]));
+        view.replaceChildren(heading, description, ...(congressView() ? [createCongressMembersView()]
+          : electionView() ? [createElectionMapsView()] : [congressTabs("overview"), createPoliticsDashboard()]));
         return;
       }
       if (channel.id === "bowling") {
