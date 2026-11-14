@@ -5,7 +5,8 @@ Official sources:
 - House Clerk member data (members, offices, committees) and House roll-call votes.
 - Senate.gov senator contact list, committee rosters and roll-call votes.
 - Congress.gov API (terms, leadership, sponsored and cosponsored legislation) when
-  CONGRESS_GOV_API_KEY is set; without it, those fields keep their last saved values.
+  CONGRESS_GOV_API_KEY is set. Each member's bills are refreshed weekly (terms monthly), and
+  without a key those fields keep their last saved values.
 - Official member photos from the Biographical Directory of the U.S. Congress.
 
 One volunteer-maintained source: social media accounts from the @unitedstates
@@ -15,7 +16,7 @@ Each source refreshes independently; a source that fails keeps its last saved da
 """
 
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import html
 import json
 import os
@@ -31,6 +32,8 @@ USER_AGENT = "SevenChannelsPolitics/1.0 (+https://siballin.github.io/Seven-Chann
 ROLL_CALLS_PER_CHAMBER = 50
 SPONSORED_PER_MEMBER = 5
 DETAIL_MAX_AGE_DAYS = 30
+# Sponsored-bill lists are refreshed weekly; the daily run reuses them in between (the full refresh takes ~20 minutes).
+LEGISLATION_MAX_AGE_DAYS = 7
 CONGRESS_API = "https://api.congress.gov/v3"
 SOCIAL_URL = "https://raw.githubusercontent.com/unitedstates/congress-legislators/gh-pages/legislators-social-media.json"
 HOUSE_BUILDINGS = {"CHOB": "Cannon House Office Building", "LHOB": "Longworth House Office Building", "RHOB": "Rayburn House Office Building"}
@@ -314,13 +317,33 @@ def voting_summary(members, calls):
 
 # ---------- Congress.gov ----------
 
+def age_days(checked, now):
+    if not checked:
+        return None
+    try:
+        return (now - datetime.fromisoformat(checked.replace("Z", "+00:00"))).days
+    except ValueError:
+        return None
+
+
+def is_stale(checked, now, limit):
+    age = age_days(checked, now)
+    return age is None or age >= limit
+
+
+def needs_congress_refresh(old, now):
+    """True when a member's saved Congress.gov data is missing, its bills are a week old, or its terms are a month old."""
+    return (old.get("detail") is None or old.get("legislation") is None
+            or is_stale(old.get("legislationCheckedAt", ""), now, LEGISLATION_MAX_AGE_DAYS)
+            or is_stale(old.get("detailCheckedAt", ""), now, DETAIL_MAX_AGE_DAYS))
+
+
 def congress_details(member, key, previous, now):
-    """Terms and leadership change rarely, so they're refetched monthly; bills are refreshed every run."""
+    """Terms and leadership change rarely, so they're refetched monthly; bills are refetched whenever this is called."""
     old = previous.get(member["id"], {})
     detail = old.get("detail")
     checked = old.get("detailCheckedAt", "")
-    stale = not checked or (now - datetime.fromisoformat(checked.replace("Z", "+00:00"))).days >= DETAIL_MAX_AGE_DAYS
-    if detail is None or stale:
+    if detail is None or is_stale(checked, now, DETAIL_MAX_AGE_DAYS):
         data = json.loads(fetch(f"{CONGRESS_API}/member/{member['id']}?format=json", key, delay=0.2)).get("member", {})
         terms = data.get("terms") if isinstance(data.get("terms"), list) else []
         first = min((term.get("startYear") for term in terms if isinstance(term.get("startYear"), int)), default=None)
@@ -427,23 +450,31 @@ def main():
     print(f"{len(members)} members; roll calls: " + ", ".join(f"{chamber} {len(calls)}" for chamber, calls in roll_calls.items()), flush=True)
     key = os.environ.get("CONGRESS_GOV_API_KEY", "").strip()
     api_failures = 0
-    for index, member in enumerate(members, start=1):
-        if index % 100 == 0:
-            print(f"Congress.gov: {index} of {len(members)} members", flush=True)
+    refreshed = 0
+    for position, member in enumerate(sorted(members, key=lambda item: item["id"])):
         old = previous_members.get(member["id"], {})
-        if key:
+        if old.get("legislation") is not None and not old.get("legislationCheckedAt") and old.get("detailCheckedAt"):
+            # Snapshots from before the weekly schedule: spread members over the week so each daily run does about a seventh.
+            old = dict(old, legislationCheckedAt=(now - timedelta(days=position % LEGISLATION_MAX_AGE_DAYS)).isoformat(timespec="seconds"))
+            member["legislationCheckedAt"] = old["legislationCheckedAt"]
+        if key and needs_congress_refresh(old, now):
+            refreshed += 1
+            if refreshed % 100 == 0:
+                print(f"Congress.gov: {refreshed} members refreshed", flush=True)
             try:
                 detail, checked, legislation = congress_details(member, key, previous_members, now)
-                member.update(detail=detail, detailCheckedAt=checked, legislation=legislation)
+                member.update(detail=detail, detailCheckedAt=checked, legislation=legislation,
+                              legislationCheckedAt=now.isoformat(timespec="seconds"))
                 continue
             except Exception as error:
                 api_failures += 1
                 print(f"Congress.gov failed for {member['id']}: {error}", file=sys.stderr)
-        for field in ("detail", "detailCheckedAt", "legislation"):
+        for field in ("detail", "detailCheckedAt", "legislation", "legislationCheckedAt"):
             if old.get(field) is not None:
                 member[field] = old[field]
     if key:
-        record("Congress.gov", api_failures < len(members) / 10,
+        print(f"Congress.gov: refreshed {refreshed} of {len(members)} members; the rest were checked in the last {LEGISLATION_MAX_AGE_DAYS} days", flush=True)
+        record("Congress.gov", api_failures <= refreshed / 10,
                f"{api_failures} members could not be refreshed from Congress.gov." if api_failures else "")
     else:
         record("Congress.gov", False, "No Congress.gov API key is configured, so terms and bills aren't refreshed.")

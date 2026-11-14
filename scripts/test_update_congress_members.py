@@ -82,6 +82,18 @@ class CongressMemberTests(unittest.TestCase):
         self.assertEqual(calls[1]["partyMajority"], {"D": "Y"})  # Republicans split evenly
         self.assertEqual(by_id["R1"]["withR"], 2)
 
+    def test_congress_gov_refresh_schedule(self):
+        now = members.datetime(2026, 11, 14, tzinfo=members.timezone.utc)
+        def days_ago(days):
+            return (now - members.timedelta(days=days)).isoformat()
+        fresh = {"detail": {}, "legislation": {}, "detailCheckedAt": days_ago(10), "legislationCheckedAt": days_ago(6)}
+        self.assertFalse(members.needs_congress_refresh(fresh, now))
+        self.assertTrue(members.needs_congress_refresh(dict(fresh, legislationCheckedAt=days_ago(7)), now))
+        self.assertTrue(members.needs_congress_refresh(dict(fresh, detailCheckedAt=days_ago(30)), now))
+        self.assertTrue(members.needs_congress_refresh(dict(fresh, legislation=None), now))
+        self.assertTrue(members.needs_congress_refresh({}, now))
+        self.assertTrue(members.needs_congress_refresh(dict(fresh, legislationCheckedAt="not a date"), now))
+
     def test_roles_and_bill_links(self):
         self.assertEqual([members.normalize_role(role) for role in ("Chairman", "Chairwoman", "Ranking", "Vice Chairman", "Member", "Ex Officio")],
                          ["Chair", "Chair", "Ranking Member", "Vice Chair", "", "Ex Officio"])
