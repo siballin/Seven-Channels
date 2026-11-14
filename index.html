@@ -1526,6 +1526,94 @@
     .politics-controls input, .politics-controls select { min-width: 0; }
     .politics-status { font-size: .75rem; color: var(--muted); }
     @media (max-width: 760px) { .politics-top, .politics-scores { grid-template-columns: 1fr; } }
+    /* Video Games hub */
+    .games-hub { display: grid; gap: 16px; min-width: 0; }
+    .games-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .games-tabs a { padding: 7px 13px; border: 1px solid var(--glass-edge); border-radius: 999px; background: var(--surface); color: var(--ink); font-size: .84rem; font-weight: 700; text-decoration: none; }
+    .games-tabs a[aria-current="page"] { border-color: color-mix(in srgb, var(--signal) 45%, var(--glass-edge)); background: color-mix(in srgb, var(--signal) 17%, var(--surface)); color: var(--glass-accent-ink); }
+    .games-panel { min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-sheen), var(--glass-base); box-shadow: var(--glass-inset), var(--glass-shadow); }
+    .games-panel h3 { margin: 0 0 10px; font: 600 clamp(.9375rem, 1.4vw, 1.05rem)/1.35 var(--font-heading); }
+    .games-panel h3:focus { outline: none; }
+    .games-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 310px); gap: 16px; align-items: start; }
+    .games-main, .games-sidebar { display: grid; gap: 14px; min-width: 0; }
+    .games-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+    .games-metric { display: grid; gap: 2px; padding: 10px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius-small); background: var(--surface); min-width: 0; }
+    .games-metric span { color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+    .games-metric strong { font: 700 1.35rem/1.1 var(--data); font-variant-numeric: tabular-nums; }
+    .games-metric small { color: var(--muted); font-size: .72rem; overflow-wrap: anywhere; }
+    .games-form { display: grid; gap: 10px; }
+    .games-title-field { position: relative; }
+    .games-suggestions { position: absolute; top: 100%; left: 0; right: 0; z-index: 5; display: grid; gap: 2px; max-height: 340px; overflow-y: auto; margin: 4px 0 0; padding: 4px; list-style: none; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius-small); background: var(--surface); box-shadow: var(--glass-shadow-prominent); }
+    .games-suggestions[hidden] { display: none; }
+    .games-suggestion { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 6px; cursor: pointer; font-size: .86rem; }
+    .games-suggestion[aria-selected="true"], .games-suggestion:hover { background: color-mix(in srgb, var(--signal) 15%, var(--surface)); }
+    .games-suggestion img, .games-suggestion .games-cover-empty { width: 32px; height: 42px; border-radius: 3px; object-fit: cover; }
+    .games-suggestion small { color: var(--muted); }
+    .games-catalog-note { color: var(--muted); font-size: .72rem; }
+    .games-catalog-note:empty { display: none; }
+    .games-form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+    .games-form-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .games-status { flex-basis: 100%; margin: 0; color: var(--muted); font-size: .78rem; }
+    .games-status:empty { display: none; }
+    .games-status:focus { outline: none; }
+    .games-status.error { color: #c43d3d; }
+    :root[data-theme="dark"] .games-status.error { color: #ff8e86; }
+    .games-preview { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 10px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius-small); background: var(--surface); }
+    .games-preview-body { display: grid; gap: 4px; min-width: 0; }
+    .games-preview-body small { color: var(--muted); font-size: .72rem; }
+    .games-cover { width: 54px; height: 72px; border-radius: 4px; object-fit: cover; background: var(--panel); flex: none; }
+    .games-cover-large { width: 64px; height: 86px; }
+    .games-cover-empty { display: block; border: 1px dashed var(--glass-edge); background: linear-gradient(135deg, var(--surface), var(--panel)); }
+    .games-lists { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+    .games-column { display: grid; gap: 8px; padding: 12px; }
+    .games-column-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; }
+    .games-column-head h3 { margin: 0; }
+    .games-column-head select { width: auto; min-height: 30px; padding: 2px 6px; font-size: .74rem; }
+    .games-count { margin-left: 4px; color: var(--muted); font: .78rem var(--data); }
+    .games-card { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 10px; padding: 9px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius-small); background: var(--surface); min-width: 0; }
+    .games-card-body { display: grid; gap: 4px; min-width: 0; }
+    .games-card h4 { margin: 0; font-size: .9rem; overflow-wrap: anywhere; }
+    .games-mine { margin: 0; font-size: .76rem; font-weight: 700; }
+    .games-note { margin: 0; color: var(--muted); font-size: .76rem; overflow-wrap: anywhere; }
+    .games-facts { display: flex; flex-wrap: wrap; gap: 3px 10px; color: var(--muted); font-size: .72rem; }
+    .games-score { padding: 0 6px; border: 1px solid var(--glass-edge); border-radius: 5px; color: var(--ink); font-weight: 800; }
+    .games-score.is-high { border-color: #2f9e62; } .games-score.is-mid { border-color: #c9a227; } .games-score.is-low { border-color: #c45a3d; }
+    .games-card .item-footer { gap: 5px; }
+    .games-card .item-footer select { flex: 0 1 auto; min-height: 30px; padding: 2px 6px; font-size: .76rem; }
+    .games-card .item-footer button { min-height: 30px; padding: 3px 8px; font-size: .74rem; }
+    .games-price-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: .76rem; }
+    .games-price-line:empty { display: none; }
+    .games-price strong { font-variant-numeric: tabular-nums; }
+    .games-price-status, .games-price-low { color: var(--muted); }
+    .games-badge { margin-left: 6px; padding: 0 6px; border-radius: 999px; font-size: .68rem; font-weight: 800; }
+    .games-badge-deal { background: color-mix(in srgb, #2f9e62 22%, var(--surface)); color: var(--ink); }
+    .games-external { font-weight: 700; }
+    .games-empty { margin: 0; color: var(--muted); font-size: .8rem; }
+    .games-side-section { display: grid; gap: 8px; }
+    .games-side-section h3 { margin: 0; }
+    .games-side-list { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+    .games-side-list a { font-size: .82rem; font-weight: 700; text-decoration: none; overflow-wrap: anywhere; }
+    .games-side-list a:hover { color: var(--signal); text-decoration: underline; }
+    .games-side-list small, .games-side-meta { display: block; color: var(--muted); font-size: .7rem; }
+    .games-free { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 8px; align-items: center; }
+    .games-free img, .games-free-image { width: 72px; height: 40px; border-radius: 4px; object-fit: cover; }
+    .games-free-now { color: #2f9e62 !important; font-weight: 700; }
+    :root[data-theme="dark"] .games-free-now { color: #59d499 !important; }
+    .games-trailer-link { display: grid; gap: 4px; }
+    .games-trailer-link img { width: 100%; aspect-ratio: 16 / 9; border-radius: 6px; object-fit: cover; }
+    .games-releases { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 320px); gap: 16px; align-items: start; }
+    .games-calendar { margin: 0; }
+    .games-calendar-filters { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 8px; margin-bottom: 10px; }
+    .games-search-results { margin-bottom: 12px; }
+    .games-search-results[hidden] { display: none; }
+    .games-jump { justify-self: start; min-height: 28px; margin-top: 4px; padding: 2px 8px; font-size: .72rem; }
+    .games-favorites { display: grid; gap: 10px; }
+    .games-favorites h3 { margin: 0; }
+    .games-countdown { color: var(--glass-accent-ink) !important; font-weight: 700; }
+    .games-past-favorites summary { cursor: pointer; font-size: .82rem; font-weight: 700; }
+    @media (max-width: 1100px) { .games-lists { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 900px) { .games-layout, .games-releases { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 520px) { .games-calendar-filters { grid-template-columns: minmax(0, 1fr); } }
     /* Election maps */
     .election-maps { --el-d1: #c6dbf7; --el-d2: #8fb6ec; --el-d3: #4a83d6; --el-d4: #1d4f9e; --el-r1: #f9c8c0; --el-r2: #f2918a; --el-r3: #d9534b; --el-r4: #9e1f1c;
       --el-o1: #ddd0f2; --el-o2: #bfa6e6; --el-o3: #9474cf; --el-o4: #6a4aa6; --el-none: color-mix(in srgb, var(--ink) 8%, var(--surface)); --el-uncalled: color-mix(in srgb, var(--ink) 22%, var(--surface)); }
@@ -1989,6 +2077,7 @@
   <script src="bowling.js"></script>
   <script src="congress-members.js"></script>
   <script src="election-maps.js"></script>
+  <script src="games-hub.js"></script>
   <script>
     "use strict";
     const channels = [
@@ -2006,7 +2095,6 @@
     const kpopFollowStorageKey = "seven-channels.kpop-followed-artists.v1";
     const appearanceStorageKey = "seven-channels.appearance.v1";
     const betUnitSizeStorageKey = "seven-channels.bet-unit-size.v1";
-    const gameFavoriteStorageKey = "seven-channels.game-release-favorites.v1";
     const deletedEntriesStorageKey = "seven-channels.deleted-entry-ids.v1";
     const syncOwnerStorageKey = "seven-channels.sync-owner.v1";
     const syncBackupPrefix = "seven-channels.account-backup.v1.";
@@ -5924,6 +6012,7 @@
       if (route === "sports-standings" || route === "sports-leaders" ||
         /^sports\/nba\/(teams|games)\//.test(route)) return "sports";
       if (/^bowling\/(balls|releases)$/.test(route)) return "bowling";
+      if (route === "games/releases") return "games";
       if (/^politics\/members(\/[A-Z]\d{6})?$/.test(route)) return "politics";
       if (/^politics\/elections(\/(president|senate|house)(\/\d{4})?)?$/.test(route)) return "politics";
       return route === "guide" || channels.some((channel) => channel.id === route) ? route : "guide";
@@ -9319,353 +9408,6 @@
       return section;
     }
 
-    function createGameReleaseCalendar() {
-      const section = element("section", "game-release-calendar");
-      section.setAttribute("aria-label", "2026 video game release calendar");
-      const header = element("div", "game-calendar-header");
-      const title = element("div");
-      title.append(
-        element("h3", "", "2026 VIDEO GAME RELEASE CALENDAR"),
-        element("p", "", "Confirmed release dates from Game Informer, organized by month.")
-      );
-      const nav = element("div", "game-calendar-nav");
-      const previous = element("button", "", "Previous month");
-      previous.type = "button";
-      previous.setAttribute("aria-label", "Show previous month");
-      const monthTitle = element("div", "game-calendar-month-picker");
-      monthTitle.setAttribute("aria-live", "polite");
-      const monthSelect = document.createElement("select");
-      monthSelect.setAttribute("aria-label", "Select calendar month");
-      const yearSelect = document.createElement("select");
-      yearSelect.setAttribute("aria-label", "Select calendar year");
-      monthTitle.append(monthSelect, yearSelect);
-      const next = element("button", "", "Next month");
-      next.type = "button";
-      next.setAttribute("aria-label", "Show next month");
-      nav.append(previous, monthTitle, next);
-      header.append(title, nav);
-      const search = element("div", "game-calendar-search");
-      const searchLabel = element("label", "", "Find a game release date");
-      searchLabel.htmlFor = "game-release-search";
-      const searchInput = document.createElement("input");
-      searchInput.id = "game-release-search";
-      searchInput.type = "search";
-      searchInput.placeholder = "Search game titles…";
-      searchInput.autocomplete = "off";
-      const searchStatus = element("p", "game-calendar-search-status", "Search titles and favorite games to keep them at the top of the calendar.");
-      searchStatus.setAttribute("role", "status");
-      searchStatus.setAttribute("aria-live", "polite");
-      const searchResults = element("ul", "game-calendar-search-results");
-      searchResults.hidden = true;
-      search.append(searchLabel, searchInput, searchStatus, searchResults);
-      const grid = element("div", "game-calendar-grid");
-      grid.setAttribute("role", "grid");
-      grid.setAttribute("aria-label", "Release dates");
-      const releases = element("section", "game-calendar-releases");
-      releases.setAttribute("aria-live", "polite");
-      const status = element("p", "game-calendar-status", "Loading release dates…");
-      status.setAttribute("role", "status");
-      const updated = element("p", "game-calendar-updated");
-      const source = element("a", "game-calendar-source", "Source: Game Informer 2026 release schedule ↗");
-      source.href = "https://gameinformer.com/2026";
-      source.target = "_blank";
-      source.rel = "noopener noreferrer";
-      section.append(header, search, grid, releases, status, updated, source);
-
-      loadGameReleaseCalendar({ grid, monthTitle, monthSelect, yearSelect, previous, next, releases, status, updated, searchInput, searchStatus, searchResults });
-      return section;
-    }
-
-    async function loadGameReleaseCalendar(calendar) {
-      try {
-        const response = await fetch(new URL("data/game-releases.json", location.href));
-        if (!response.ok) throw new Error(`Release data request failed with status ${response.status}.`);
-        const data = await response.json();
-        if (!Array.isArray(data.releases) || !data.releases.length) throw new Error("Release data contained no games.");
-        const releasesByDate = new Map();
-        for (const release of data.releases) {
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(release.date) || !release.title || !release.url) continue;
-          if (!release.url.startsWith("https://gameinformer.com/")) continue;
-          const dayReleases = releasesByDate.get(release.date) || [];
-          dayReleases.push(release);
-          releasesByDate.set(release.date, dayReleases);
-        }
-        if (!releasesByDate.size) throw new Error("Release data did not contain any valid game entries.");
-        const calendarYears = [...new Set([...releasesByDate.keys()].map((date) => Number(date.slice(0, 4))))].sort((a, b) => a - b);
-        const firstCalendarMonth = new Date(calendarYears[0], 0, 1);
-        const lastCalendarMonth = new Date(calendarYears[calendarYears.length - 1], 11, 1);
-        for (let month = 0; month < 12; month++) {
-          const option = element("option", "", new Intl.DateTimeFormat(undefined, { month: "long" }).format(new Date(2026, month, 1)));
-          option.value = String(month);
-          calendar.monthSelect.append(option);
-        }
-        for (let year = calendarYears[0]; year <= calendarYears[calendarYears.length - 1]; year++) {
-          const option = element("option", "", String(year));
-          option.value = String(year);
-          calendar.yearSelect.append(option);
-        }
-        for (const dayReleases of releasesByDate.values()) {
-          dayReleases.sort((a, b) => a.title.localeCompare(b.title));
-        }
-        let favoriteUrls;
-        try {
-          const savedFavorites = localStorage.getItem(gameFavoriteStorageKey);
-          const parsedFavorites = savedFavorites === null ? [] : JSON.parse(savedFavorites);
-          if (!Array.isArray(parsedFavorites) || parsedFavorites.some((url) => typeof url !== "string")) {
-            throw new TypeError("Saved game favorites are invalid.");
-          }
-          favoriteUrls = new Set(parsedFavorites);
-        } catch (error) {
-          console.error("Could not load saved game favorites.", error);
-          showNotice("Game favorites could not be loaded. You can still search the release calendar.");
-          favoriteUrls = new Set();
-        }
-
-        const today = new Date();
-        const todayLocal = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-        let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        const currentMonthHasReleases = [...releasesByDate.keys()].some((date) => {
-          const releaseDate = new Date(`${date}T12:00:00`);
-          return releaseDate.getFullYear() === visibleMonth.getFullYear() && releaseDate.getMonth() === visibleMonth.getMonth();
-        });
-        if (!currentMonthHasReleases) {
-          const firstUpcoming = [...releasesByDate.keys()].find((date) => date >= todayLocal);
-          if (firstUpcoming) {
-            const firstDate = new Date(`${firstUpcoming}T12:00:00`);
-            visibleMonth = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
-          } else {
-            const releaseDates = [...releasesByDate.keys()].sort();
-            const latestDate = new Date(`${releaseDates[releaseDates.length - 1]}T12:00:00`);
-            visibleMonth = new Date(latestDate.getFullYear(), latestDate.getMonth(), 1);
-          }
-        }
-        let selectedDate = "";
-
-        function firstReleaseDateInMonth(month) {
-          const monthPrefix = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}-`;
-          const firstRelease = [...releasesByDate.keys()]
-            .filter((date) => date.startsWith(monthPrefix))
-            .sort()[0];
-          return firstRelease || `${monthPrefix}01`;
-        }
-
-        function toggleFavorite(release) {
-          const wasFavorite = favoriteUrls.has(release.url);
-          if (wasFavorite) favoriteUrls.delete(release.url);
-          else favoriteUrls.add(release.url);
-          try {
-            localStorage.setItem(gameFavoriteStorageKey, JSON.stringify([...favoriteUrls]));
-          } catch (error) {
-            if (wasFavorite) favoriteUrls.add(release.url);
-            else favoriteUrls.delete(release.url);
-            console.error("Could not save game favorites.", error);
-            showNotice("Your game favorite could not be saved. Check your browser storage settings.");
-            return;
-          }
-          notice.hidden = true;
-          renderSearchResults();
-          renderMonth();
-          renderSelectedReleases();
-        }
-
-        function createFavoriteButton(release) {
-          const favorite = favoriteUrls.has(release.url);
-          const button = element("button", "game-calendar-favorite", favorite ? "★" : "☆");
-          button.type = "button";
-          button.setAttribute("aria-pressed", String(favorite));
-          button.setAttribute("aria-label", `${favorite ? "Remove" : "Add"} ${release.title} ${favorite ? "from" : "to"} favorites`);
-          button.title = favorite ? "Remove from favorites" : "Add to favorites";
-          button.addEventListener("click", () => toggleFavorite(release));
-          return button;
-        }
-
-        function renderSearchResults() {
-          const query = calendar.searchInput.value.trim().toLocaleLowerCase();
-          calendar.searchResults.replaceChildren();
-          calendar.searchResults.hidden = query.length < 2;
-          if (query.length < 2) {
-            calendar.searchStatus.textContent = `Search titles and favorite games to keep them at the top of the calendar. ${favoriteUrls.size} favorite${favoriteUrls.size === 1 ? "" : "s"}.`;
-            return;
-          }
-          const matches = data.releases
-            .filter((release) => release.title.toLocaleLowerCase().includes(query))
-            .sort((a, b) => Number(favoriteUrls.has(b.url)) - Number(favoriteUrls.has(a.url))
-              || a.date.localeCompare(b.date)
-              || a.title.localeCompare(b.title));
-          if (!matches.length) {
-            calendar.searchStatus.textContent = `No games found for “${calendar.searchInput.value.trim()}”.`;
-            return;
-          }
-          const visibleMatches = matches.slice(0, 10);
-          for (const release of visibleMatches) {
-            const result = element("li", "game-calendar-search-result");
-            const select = element("button", "game-calendar-search-select");
-            select.type = "button";
-            select.append(
-              element("strong", "", release.title),
-              element("small", "", `${new Intl.DateTimeFormat(undefined, {
-                month: "long", day: "numeric", year: "numeric"
-              }).format(new Date(`${release.date}T12:00:00`))}${favoriteUrls.has(release.url) ? " · Favorite" : ""}`)
-            );
-            select.addEventListener("click", () => {
-              const releaseDate = new Date(`${release.date}T12:00:00`);
-              visibleMonth = new Date(releaseDate.getFullYear(), releaseDate.getMonth(), 1);
-              selectedDate = release.date;
-              renderMonth();
-              renderSelectedReleases();
-              calendar.releases.scrollIntoView({ behavior: "smooth", block: "nearest" });
-            });
-            result.append(select, createFavoriteButton(release));
-            calendar.searchResults.append(result);
-          }
-          calendar.searchStatus.textContent = `${matches.length} release date${matches.length === 1 ? "" : "s"} found${matches.length > visibleMatches.length ? ` · showing first ${visibleMatches.length}` : ""}. Favorite a game to prioritize it in the calendar.`;
-        }
-
-        function renderSelectedReleases() {
-          calendar.releases.replaceChildren();
-          const dayReleases = [...(releasesByDate.get(selectedDate) || [])]
-            .sort((a, b) => Number(favoriteUrls.has(b.url)) - Number(favoriteUrls.has(a.url))
-              || a.title.localeCompare(b.title));
-          const heading = element("h4", "", new Intl.DateTimeFormat(undefined, {
-            weekday: "long", month: "long", day: "numeric", year: "numeric"
-          }).format(new Date(`${selectedDate}T12:00:00`)));
-          calendar.releases.append(heading);
-          if (!dayReleases.length) {
-            calendar.releases.append(element("p", "game-calendar-status", "No releases listed for this date."));
-            return;
-          }
-          const list = element("ul", "game-calendar-release-list");
-          for (const release of dayReleases) {
-            const isFavorite = favoriteUrls.has(release.url);
-            const item = element("li", `game-calendar-release${isFavorite ? " is-favorite" : ""}`);
-            if (release.cover?.startsWith("https://static.gameinformer.com/")) {
-              const coverLink = element("a");
-              coverLink.href = release.url;
-              coverLink.target = "_blank";
-              coverLink.rel = "noopener noreferrer";
-              coverLink.setAttribute("aria-label", `Open ${release.title} on Game Informer`);
-              const cover = element("img", "game-calendar-cover");
-              cover.src = release.cover;
-              cover.alt = "";
-              cover.loading = "lazy";
-              cover.addEventListener("error", () => coverLink.remove(), { once: true });
-              coverLink.append(cover);
-              item.append(coverLink);
-            } else {
-              item.append(element("span"));
-            }
-            const copy = element("div", "game-calendar-release-copy");
-            const link = element("a", "", release.title);
-            link.href = release.url;
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            const platformNames = Array.isArray(release.platforms) ? release.platforms.join(", ") : "";
-            const titleRow = element("div", "game-calendar-title-row");
-            titleRow.append(link);
-            if (isFavorite) titleRow.append(element("span", "game-calendar-favorite-label", "★ FAVORITE"));
-            copy.append(titleRow);
-            if (platformNames) copy.append(element("small", "", platformNames));
-            item.append(copy, createFavoriteButton(release));
-            list.append(item);
-          }
-          calendar.releases.append(list);
-        }
-
-        function renderMonth() {
-          calendar.monthSelect.value = String(visibleMonth.getMonth());
-          calendar.yearSelect.value = String(visibleMonth.getFullYear());
-          calendar.grid.replaceChildren();
-          for (const weekday of ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]) {
-            const label = element("span", "game-calendar-weekday", weekday);
-            label.setAttribute("role", "columnheader");
-            calendar.grid.append(label);
-          }
-          const firstWeekday = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1).getDay();
-          const daysInMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0).getDate();
-          for (let index = 0; index < firstWeekday; index++) {
-            const blank = element("span");
-            blank.setAttribute("role", "gridcell");
-            calendar.grid.append(blank);
-          }
-          for (let day = 1; day <= daysInMonth; day++) {
-            const date = `${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-            const dayReleases = releasesByDate.get(date) || [];
-            const favoriteCount = dayReleases.filter((release) => favoriteUrls.has(release.url)).length;
-            const button = element("button", "game-calendar-day");
-            button.type = "button";
-            button.setAttribute("role", "gridcell");
-            button.setAttribute("aria-pressed", String(date === selectedDate));
-            const releaseCountLabel = `${dayReleases.length} release${dayReleases.length === 1 ? "" : "s"}`;
-            button.setAttribute("aria-label", `${new Intl.DateTimeFormat(undefined, {
-              month: "long", day: "numeric", year: "numeric"
-            }).format(new Date(`${date}T12:00:00`))}${dayReleases.length ? `, ${releaseCountLabel}` : ""}${favoriteCount ? `, ${favoriteCount} favorites` : ""}`);
-            if (favoriteCount) button.classList.add("has-favorite");
-            button.append(element("span", "game-calendar-day-number", String(day)));
-            if (dayReleases.length) {
-              const dayCount = element("span", "game-calendar-day-count", `${dayReleases.length} release${dayReleases.length === 1 ? "" : "s"}`);
-              if (favoriteCount) dayCount.textContent += ` · ★${favoriteCount}`;
-              button.append(dayCount);
-            }
-            button.addEventListener("click", () => {
-              selectedDate = date;
-              renderMonth();
-              renderSelectedReleases();
-            });
-            calendar.grid.append(button);
-          }
-          calendar.previous.disabled = visibleMonth <= firstCalendarMonth;
-          calendar.next.disabled = visibleMonth >= lastCalendarMonth;
-        }
-
-        const initialDate = [...releasesByDate.keys()]
-          .filter((date) => date.startsWith(`${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, "0")}-`) && date >= todayLocal)
-          .sort()[0]
-          || [...releasesByDate.keys()].find((date) => date.startsWith(`${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, "0")}-`))
-          || `${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, "0")}-01`;
-        selectedDate = initialDate;
-        calendar.previous.addEventListener("click", () => {
-          visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1);
-          selectedDate = firstReleaseDateInMonth(visibleMonth);
-          renderMonth();
-          renderSelectedReleases();
-        });
-        calendar.next.addEventListener("click", () => {
-          visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1);
-          selectedDate = firstReleaseDateInMonth(visibleMonth);
-          renderMonth();
-          renderSelectedReleases();
-        });
-        calendar.monthSelect.addEventListener("change", () => {
-          visibleMonth = new Date(visibleMonth.getFullYear(), Number(calendar.monthSelect.value), 1);
-          selectedDate = firstReleaseDateInMonth(visibleMonth);
-          renderMonth();
-          renderSelectedReleases();
-        });
-        calendar.yearSelect.addEventListener("change", () => {
-          visibleMonth = new Date(Number(calendar.yearSelect.value), visibleMonth.getMonth(), 1);
-          selectedDate = firstReleaseDateInMonth(visibleMonth);
-          renderMonth();
-          renderSelectedReleases();
-        });
-        calendar.searchInput.addEventListener("input", renderSearchResults);
-        renderSearchResults();
-        renderMonth();
-        renderSelectedReleases();
-        calendar.status.textContent = `${data.releases.length} release entries loaded from Game Informer.`;
-        const fetchedAt = new Date(data.fetchedAt);
-        calendar.updated.textContent = Number.isNaN(fetchedAt.getTime())
-          ? ""
-          : `Data refreshed ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(fetchedAt)}.`;
-      } catch (error) {
-        console.error("Could not load the Game Informer release calendar.", error);
-        calendar.monthSelect.disabled = true;
-        calendar.yearSelect.disabled = true;
-        calendar.grid.replaceChildren();
-        calendar.releases.replaceChildren();
-        calendar.status.textContent = "Release dates could not be loaded. Please try again later.";
-      }
-    }
-
     const mediaLookupChannels = new Set(["movies", "anime"]);
     const mediaPosterHosts = new Set(["s4.anilist.co", "upload.wikimedia.org", "thumb.wikimedia.org"]);
     const mediaLinkHosts = new Set(["anilist.co", "en.wikipedia.org", "www.imdb.com"]);
@@ -10470,7 +10212,10 @@
         return;
       }
 
-      const gameCalendar = channel.id === "games" ? createGameReleaseCalendar() : null;
+      if (channel.id === "games") {
+        view.replaceChildren(heading, description, resources, createGamesHub());
+        return;
+      }
       const isBetting = channel.id === "betting";
       const editingBet = isBetting ? entries.find((entry) => entry.id === editingBetId && entry.channel === "betting") : null;
       const form = element("form", `entry-form${isBetting ? " bet-entry-form" : ""}`);
@@ -10962,7 +10707,7 @@
       } else if (channel.id === "sports" && scoreboard) {
         view.replaceChildren(heading, description, createSportsHub(scoreboard, planner, resources));
       } else {
-        const content = [...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(scoreboard ? [scoreboard] : []), ...(gameCalendar ? [gameCalendar] : []), planner];
+        const content = [...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(scoreboard ? [scoreboard] : []), planner];
         view.replaceChildren(heading, description, resources, ...(redditDefaults[channel.id] ? [withRedditSidebar(channel.id, content)] : content));
       }
     }

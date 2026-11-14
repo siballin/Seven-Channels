@@ -11,7 +11,11 @@ from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 
 
-SOURCE_URL = "https://gameinformer.com/2026"
+SITE_URL = "https://gameinformer.com/"
+CURRENT_YEAR = datetime.now(timezone.utc).year
+# Game Informer publishes one schedule page per year; the calendar covers last year, this year and next year.
+YEARS = [CURRENT_YEAR - 1, CURRENT_YEAR, CURRENT_YEAR + 1]
+SOURCE_URL = f"{SITE_URL}{CURRENT_YEAR}"
 OUTPUT_PATH = Path(__file__).resolve().parents[1] / "data" / "game-releases.json"
 
 
@@ -33,7 +37,8 @@ class CoverParser(HTMLParser):
 
 
 class ReleaseParser(HTMLParser):
-    def __init__(self):
+    def __init__(self, year=CURRENT_YEAR):
+        self.year = year
         super().__init__(convert_charrefs=True)
         self.entry = None
         self.releases = []
@@ -91,7 +96,7 @@ class ReleaseParser(HTMLParser):
         platforms = " ".join("".join(entry["platforms"]).split())
         if not title or not entry["url"] or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", entry["date"]):
             return
-        if not entry["date"].startswith("2026-"):
+        if not entry["date"].startswith(f"{self.year}-"):
             return
         url = urljoin(SOURCE_URL, entry["url"])
         if urlparse(url).hostname != "gameinformer.com":
@@ -104,27 +109,22 @@ class ReleaseParser(HTMLParser):
         })
 
 
-def fetch_releases():
+def fetch_year(year):
     request = Request(
-        SOURCE_URL,
+        f"{SITE_URL}{year}",
         headers={"User-Agent": "SevenChannelsReleaseCalendar/1.0 (personal static calendar)"},
     )
     with urlopen(request, timeout=30) as response:
         if response.status != 200:
             raise RuntimeError(f"Game Informer returned HTTP {response.status}.")
         html = response.read().decode("utf-8")
-
-    parser = ReleaseParser()
+    parser = ReleaseParser(year)
     parser.feed(html)
-    unique = {
-        (release["date"], release["title"], tuple(release["platforms"]), release["url"]): release
-        for release in parser.releases
-    }
-    releases = sorted(unique.values(), key=lambda item: (item["date"], item["title"].casefold()))
-    if len(releases) < 20:
-        raise RuntimeError(f"Expected a populated 2026 schedule; parsed only {len(releases)} release entries.")
+    return parser.releases
 
-    previous_releases = {}
+
+def fetch_releases():
+    previous_data, previous_releases = {}, {}
     if OUTPUT_PATH.exists():
         try:
             previous_data = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
@@ -134,7 +134,31 @@ def fetch_releases():
                 if release.get("url")
             }
         except (OSError, json.JSONDecodeError) as error:
-            print(f"Could not reuse cached game covers: {error}")
+            print(f"Could not reuse cached game data: {error}")
+
+    found, sources = [], []
+    for year in YEARS:
+        try:
+            year_releases = fetch_year(year)
+            if len(year_releases) < 20:
+                raise RuntimeError(f"parsed only {len(year_releases)} release entries")
+            found += year_releases
+            sources.append({"year": year, "url": f"{SITE_URL}{year}", "fetchedAt": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+        except (OSError, UnicodeDecodeError, RuntimeError) as error:
+            if year == CURRENT_YEAR:
+                raise RuntimeError(f"Expected a populated {year} schedule: {error}") from error
+            # Another year's page may not exist yet or may fail; keep that year's last saved entries.
+            kept = [release for release in previous_releases.values() if release.get("date", "").startswith(f"{year}-")]
+            found += [{key: value for key, value in release.items() if key != "cover"} for release in kept]
+            old = next((source for source in previous_data.get("sources", []) if source.get("year") == year), None)
+            if old:
+                sources.append(old)
+            print(f"Could not refresh the {year} schedule ({error}); kept {len(kept)} saved entries.")
+    unique = {
+        (release["date"], release["title"], tuple(release["platforms"]), release["url"]): release
+        for release in found
+    }
+    releases = sorted(unique.values(), key=lambda item: (item["date"], item["title"].casefold()))
 
     missing_covers = {}
     for release in releases:
@@ -179,6 +203,7 @@ def fetch_releases():
     return {
         "source": "Game Informer",
         "sourceUrl": SOURCE_URL,
+        "sources": sorted(sources, key=lambda source: source["year"]),
         "fetchedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "releases": releases,
     }

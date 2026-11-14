@@ -1,0 +1,96 @@
+{
+ "news": {
+  "fetchedAt": "2026-11-14T02:30:43+00:00",
+  "items": [
+   {
+    "title": "“Physical” GTA 6 Copies Might Be Vulnerable To A Very Stupid But Serious Trick",
+    "url": "https://www.gamespot.com/articles/physical-gta-6-copies-might-be-vulnerable-to-a-very-stupid-but-serious-trick/",
+    "source": "GameSpot",
+    "published": "2026-11-13T21:03:51+00:00",
+    "image": "https://www.gamespot.com/wp-content/uploads/2026/11/GTA6-1.webp?w=300"
+   },
+   {
+    "title": "GTA 6 Owner Take-Two Is Not Interested In Selling Itself After EA Goes Private For $55 Billion",
+    "url": "https://www.gamespot.com/articles/gta-6-owner-take-two-is-not-interested-in-selling-itself-after-ea-goes-private-for-55-billion/",
+    "source": "GameSpot",
+    "published": "2026-11-13T21:02:34+00:00",
+    "image": "https://www.gamespot.com/wp-content/uploads/2026/11/Jason_and_Lucia_09-2-1.jpg?w=300"
+   },
+   {
+    "title": "GTA 6 Could Sell 55 Million Copies By Early Next Year, Report Says, And Average Selling Price Could Be $90",
+    "url": "https://www.gamespot.com/articles/gta-6-could-sell-55-million-copies-by-early-next-year-report-says-and-average-selling-price-could-be-90/",
+    "source": "GameSpot",
+    "published": "2026-11-13T19:36:04+00:00",
+    "image": "https://www.gamespot.com/wp-content/uploads/2026/11/Ambrosia_06_6fdec7.jpg?w=300"
+   },
+   {
+    "title": "You Can Probably Guess WoW: Forever’s Most Popular Race, Class, And Faction",
+    "url": "https://www.gamespot.com/articles/you-can-probably-guess-wow-forevers-most-popular-race-class-and-faction/",
+    "source": "GameSpot",
+    "published": "2026-11-13T19:15:27+00:00",
+    "image": "https://www.gamespot.com/wp-content/uploads/2026/11/WoW-Forever-Launch-Stats-Undead-Paladin.jpg?w=300"
+   },
+   {
+    "title": "Official Zelda Website Raises Eyebrows By Labeling 3DS Game As Playable On Switch",
+    "url": "https://www.gamespot.com/articles/official-zelda-website-raises-eyebrows-by-labeling-3ds-game-as-playable-on-switch/",
+    "source": "GameSpot",
+    "published": "2026-11-13T17:13:06+00:00",
+    "image": "https://www.gamespot.com/wp-content/uploads/2026/11/Nintendo-3DS-and-2DS-The-Legend-of-Zelda_-A-Link-Between-Worlds-Trailer-0-1-48.jpeg?w=300"
+   },
+   {
+    "title": "GTA 6 And These Other Games Can Justify An $80 Price, Expert Says",
+    "url": "https://www.gamespot.com/articles/gta-6-and-these-other-games-can-justify-an-80-price-expert-says/",
+    "source": "GameSpot",
+    "published": "2026-11-13T16:37:29+00:00",
+    "image": "https://www.gamespot.com/wp-content/uploads/2026/11/Vice_City_03.jpg?w=300"
+   },
+   {
+    "title": "GTA 6 In-Game TV Show Macca & Friends Looks Ridiculous In The Best Way",
+    "url": "https://www.gamespot.com/articles/gta-6-in-game-tv-show-macca-friends-looks-ridiculous-in-the-best-way/",
+    "source": "GameSpot",
+    "published": "2026-11-13T15:13:57+00:00",
+    "image": "https://www.gamespot.com/wp-content/uploads/2026/11/GTA6NewImage.png?w=300"
+   },
+   {
+    "title": "The PS5’s New Graphics-Upscaling Trick Is Spreading To More Games",
+    "url": "https://www.gamespot.com/articles/the-ps5s-new-graphics-upscaling-trick-is-spreading-to-more-games/",
+    "source": "GameSpot",
+    "published": "2026-11-13T14:47:08+00:00",
+    "image": "https://www.gamespot.com/wp-content/uploads/2026/09/Control-Resonant-1.jpg?w=300"
+   }
+  ],
+  "unavailable": [
+   "IGN",
+   "Polygon"
+  ]
+ },
+ "freeGames": {
+  "fetchedAt": "2026-11-14T02:30:43+00:00",
+  "items": [
+   {
+    "title": "Knightica",
+    "state": "now",
+    "start": "2026-11-12T16:00:00+00:00",
+    "end": "2026-11-19T16:00:00+00:00",
+    "url": "https://store.epicgames.com/en-US/p/knightica-3be45c",
+    "image": "https://cdn1.epicgames.com/spt-assets/357100ca5613420e98208c5f14585e9d/knightica-1nuxm.png"
+   },
+   {
+    "title": "Alien: Isolation",
+    "state": "upcoming",
+    "start": "2026-11-19T16:00:00+00:00",
+    "end": "2026-11-26T16:00:00+00:00",
+    "url": "https://store.epicgames.com/en-US/p/alien-isolation",
+    "image": "https://cdn1.epicgames.com/df37f065c3f14eadbf011177396e2966/offer/EGS_AlienIsolation_CreativeAssembly_S5-1920x1080-1cf3b9a86adcefeebf903451b1b3fb49.jpg"
+   },
+   {
+    "title": "Mark of the Deep",
+    "state": "upcoming",
+    "start": "2026-11-19T16:00:00+00:00",
+    "end": "2026-11-26T16:00:00+00:00",
+    "url": "https://store.epicgames.com/en-US/p/mark-of-the-deep-f7dc08",
+    "image": "https://cdn1.epicgames.com/spt-assets/83a240506a884c10ad8fb99694e57a0d/mark-of-the-deep-w1ygr.png"
+   }
+  ]
+ }
+}

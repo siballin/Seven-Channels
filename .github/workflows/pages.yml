@@ -31,6 +31,27 @@ jobs:
           python-version: "3.x"
       - name: Refresh game release data
         run: python scripts/update_game_releases.py
+      - name: Refresh games news, trailers and free games
+        continue-on-error: true
+        run: python scripts/update_games_sidebar.py
+      - name: Restore last game catalog
+        uses: actions/cache/restore@v4
+        with:
+          path: data/games-catalog
+          key: games-catalog-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: games-catalog-
+      - name: Refresh game catalog from IGDB
+        continue-on-error: true
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+        run: python scripts/update_game_catalog.py
+      - name: Cache game catalog
+        if: hashFiles('data/games-catalog/index.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: data/games-catalog
+          key: games-catalog-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Refresh K-pop calendar preview
         continue-on-error: true
         run: python scripts/update_kpop_releases.py
