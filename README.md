@@ -110,6 +110,32 @@ Manufacturer listings can be incomplete. Storm's feed covers mostly 2023 and lat
 
 Bowling logic lives in `bowling.js`. Sessions and arsenal entries are stored in browser storage and, when signed in, sync as part of the account state. Each session and ball has a stable ID and edit time; edits merge per record (the newest edit wins) and deleted sessions are remembered, so another device's stale copy does not bring them back.
 
+## Music Lab
+
+Music Lab (`#music`) is a research space for producers, songwriters and the credits behind songs, plus a personal listening library.
+
+- **Dashboard** (`#music`): a featured producer or songwriter (rotating daily), recently released albums with documented credits, featured collaborations (pairs who share the most credited recordings), recently explored pages, people you follow, and saved albums and discoveries. The search box on every Music Lab page searches songs, albums, artists and credited people.
+- **Producers & songwriters** (`#music/people`, `#music/person/<MusicBrainz artist ID>`): profiles with aliases, photo and biography when Wikidata links them, a per-role credit summary, and a chronological discography of credited songs filterable by role, performing artist, year and title. Roles are kept distinct: songwriting (writer, lyricist), composition, production, vocal production, arrangement, engineering, programming, performance and remix. Any MusicBrainz artist can be opened; people outside the tracked list load live, and **Load song details** fetches their songs' artists, dates and albums on request.
+- **Collaboration network** (`#music/network/<ID>`): an ego graph of everyone who shares a credited recording with the selected person (performing artists, co-writers, co-producers, engineers), filterable by the person's role and by year, with zoom, pan, and a keyboard-accessible connection list. Selecting a connection lists the shared songs and links to profiles.
+- **Song pages** (`#music/song/<recording ID>`): artwork, performing artists, release date, album, writers, composers, producers, arrangers, engineers and other credits, Spotify/Apple Music/YouTube links, and related songs that share a writer, producer or engineer.
+- **Album pages** (`#music/album/<release ID>`, or `#music/group/<release-group ID>` to pick the main release): release details, the full track list with each track's credits, and your rating and review.
+- **My library** (`#music/library`): 1–10 ratings, saved songs and albums, followed people, discoveries, listening notes and reviews, listening lists, and your credit additions.
+
+### Data sources and accuracy
+
+- **MusicBrainz** (CC0) supplies every verified credit. Writing credits come from the song's *work* (writer, lyricist, composer); production, arrangement, engineering and performance credits come from the *recording*. A composer is never shown as a producer. MusicBrainz has no vocal-production credit type, so that role only shows your own sourced additions.
+- **Cover Art Archive** supplies artwork; **Wikidata, Wikimedia Commons and Wikipedia** supply a photo (with its author and license) and biography when MusicBrainz links a Wikidata item. Otherwise the profile shows a short factual summary from the MusicBrainz record.
+- **Apple's iTunes Search API** is used to find an Apple Music link for a song when MusicBrainz doesn't list one; only an exact title and artist match counts. Other listening links fall back to clearly labeled searches.
+- Credit databases are incomplete. Missing roles show as "Not documented" rather than being guessed. On a song page you can add a missing credit with a required source link; additions are labeled **unverified**, kept apart from MusicBrainz data, and appear on the matching profile.
+
+`scripts/update_music_lab.py` builds `data/music-lab.json` during the daily Pages workflow for the people in `scripts/music_lab_people.json` (stable MusicBrainz IDs, chosen by checking each candidate's credits and links). It spaces MusicBrainz requests a second apart, retries busy (503) responses with backoff, stops at a request and time budget, and reuses song details fetched in the last 30 days, so each run only fetches new credits and a slice of stale ones. Add someone by appending their name and MusicBrainz artist ID. FVBII has no MusicBrainz record yet (the closest result, FVBIIAN, is a different artist), so the profile says so instead of borrowing a lookalike. In the browser, live lookups go through a queue of one request per second with retries and a seven-day local cache. No API keys are needed, and none are used in the page. Run `python3 -m unittest discover -s scripts -p 'test_update_music_lab.py'` to test the builder.
+
+Your library (ratings, saved items, follows, notes, lists, discoveries and credit additions) is stored in this browser and syncs through your Seven Channels account, merging per record so edits on different devices don't overwrite each other. Recently explored pages sync along with your next library change.
+
+### K-Pop links
+
+K-Pop release calendar entries have a **Credits** link: it opens the album in Music Lab when the snapshot has a matching album by that artist, and a Music Lab search (which includes MusicBrainz) otherwise. The MusicBrainz discography browser in K-Pop links each artist and album to Music Lab by its MusicBrainz ID. Music Lab doesn't duplicate the K-Pop release calendar.
+
 ## Glass appearance
 
 The interface uses the existing theme, background, and accent settings to tint its glass surfaces. Shared `--glass-*` CSS tokens in `index.html` control opacity, blur, border highlights, shadows, radii, and animation timing. Major panels and navigation use standard glass, nested data surfaces use a subtler opaque treatment, and dialogs and custom menus use prominent glass. Browsers without backdrop-filter support receive opaque surfaces instead.
