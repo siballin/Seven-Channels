@@ -322,7 +322,7 @@ function bowlingSaveLiveGame() {
       session.updatedAt = now;
       message = `Saved as game ${slot >= 0 ? slot + 1 : session.games.length} of your ${bowlingFormatDate(session.date, { weekday: "long", month: "short", day: "numeric" })} session.`;
     } else {
-      next.sessions.push({ id: bowlingId("session"), date: bowlingToday(), type: "league", league: bowlingRecentLeague(), center: "", startBall: null, notes: "", games: [game], createdAt: now, updatedAt: now });
+      next.sessions.push({ id: bowlingId("session"), date: bowlingToday(), type: "league", league: bowlingLeagueRef(next, bowlingDefaultLeagueId(next)), center: next.leagues.find((league) => league.id === bowlingDefaultLeagueId(next))?.center || "", startBall: null, notes: "", games: [game], createdAt: now, updatedAt: now });
       message = "Saved as a new session for today.";
     }
   });

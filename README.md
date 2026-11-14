@@ -84,7 +84,7 @@ The optional editorial list is `data/politics-stories.json`: an array of objects
 
 ## Bowling
 
-Bowling (`#bowling`) is a personal league-night log. Each session defaults to today's local date and three games; you can change the date, add or remove games for practice or tournaments, and record an optional league name, bowling center, session type (League, Practice, Tournament), starting ball and notes. A new session starts with the league name from your most recent session, and past league names are suggested as you type. Scores must be whole numbers from 0 to 300; leave unfinished games blank. Add any number of adjustments to a game, each with an optional ball switch, a move or release change, and what happened afterward.
+Bowling (`#bowling`) is a personal league-night log. Each session defaults to today's local date and three games; you can change the date, add or remove games for practice or tournaments, and record an optional league, bowling center, session type (League, Practice, Tournament), starting ball and notes. The League menu lists the leagues set up in League tracker; a new session starts with the league that bowls on today's weekday (or your last session's league), and choosing a league fills in its center. Scores must be whole numbers from 0 to 300; leave unfinished games blank. Add any number of adjustments to a game, each with an optional ball switch, a move or release change, and what happened afterward.
 
 The arsenal stores each ball's name, layout, surface and notes as free text (for example `5 × 4.5 × 3.5` or `4000 grit + polish`). Black Venom, Motiv Nebula and C300 Pulse are offered as optional quick-add entries. Retire a ball to move it below active balls in the session form; sessions keep the ball name, layout and surface recorded that night even after the ball is edited or retired.
 
@@ -93,6 +93,10 @@ The dashboard's average, games bowled and high game are calculated across indivi
 ### Score tracker
 
 **Score tracker** (`#bowling/scorer`) scores a game frame by frame as you bowl. For each throw, tap the pins left standing (or press 1–9 and 0 for the 10 pin) and record it; no pins selected records a strike on a full rack or a spare on the second ball, and **Gutter**/**Missed** records a ball that hit nothing. The scoresheet shows marks, circled splits and running totals, with the highest score still possible. **Undo last throw** steps back, and the game in progress is kept on this device until you finish it. A finished game saves to a new session for today or to a recent session, filling its first unscored game; it then syncs with the rest of your bowling data. Tracked games show their scoresheet in History, and the **Spares and leaves** panel adds up strike rate, spare conversion, single-pin and split conversion, first-ball average and your most common leaves. Changing a tracked game's score by hand in the session form drops its frames.
+
+### League tracker
+
+**League tracker** (`#bowling/leagues`) is where you set up each league once: its name, bowling center, night, start time, season dates and team. Each league card shows its average, weeks bowled, high game and high series, tracked-game strike and spare rates, and a week-by-week table of scores. **Log a session** opens League night with that league selected. Renaming a league updates the name on past sessions; archiving one at the end of a season hides it from the League menu while its sessions keep it. Leagues sync with the rest of your bowling data.
 
 ### Ball database and release calendar
 

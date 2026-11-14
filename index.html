@@ -1855,7 +1855,26 @@
     .bowling-session-when { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; }
     .bowling-session-when time { font-weight: 700; }
     .bowling-field-wide { grid-column: 1 / -1; }
-    .bowling-league-name { font-size: .84rem; font-weight: 700; overflow-wrap: anywhere; }
+    .bowling-league-name { color: var(--ink); font-size: .84rem; font-weight: 700; overflow-wrap: anywhere; text-decoration: none; }
+    .bowling-league-name:hover { color: var(--glass-accent-ink); text-decoration: underline; }
+    .bowling-field-link { width: fit-content; color: var(--glass-accent-ink); font-size: .76rem; font-weight: 700; }
+    .bowling-leagues { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: 16px; align-items: start; }
+    .bowling-league-list { display: grid; gap: 12px; }
+    .bowling-league-list .bowling-panel-head { margin-bottom: 0; }
+    .bowling-league { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; }
+    .bowling-league.archived { opacity: .7; }
+    .bowling-league-head { display: flex; align-items: start; justify-content: space-between; gap: 8px; }
+    .bowling-league-heading { display: grid; gap: 3px; min-width: 0; }
+    .bowling-league-heading h4 { margin: 0; font: 600 1.05rem/1.3 var(--font-heading); overflow-wrap: anywhere; }
+    .bowling-league-heading h4:focus { outline: none; }
+    .bowling-league-meta { color: var(--muted); font-size: .8rem; }
+    .bowling-league .bowling-tracked-line { margin: 0; }
+    .bowling-league-weeks summary { width: fit-content; color: var(--muted); font-size: .8rem; cursor: pointer; }
+    .bowling-league-weeks .bowling-leaves { margin-top: 6px; }
+    .bowling-league-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .bowling-league-note { margin: 0; color: var(--muted); font-size: .8rem; }
+    @media (max-width: 900px) { .bowling-leagues { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 560px) { .bowling-league-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bowling-league-editor :is(input, select) { font-size: 16px; } }
     .bowling-center { color: var(--muted); font-size: .8rem; overflow-wrap: anywhere; }
     .bowling-session-total { display: grid; justify-items: end; text-align: right; }
     .bowling-session-total strong { font: 700 1.6rem/1 var(--data); font-variant-numeric: tabular-nums; color: var(--glass-accent-ink); }
@@ -2139,6 +2158,7 @@
   <script src="nba-team-hub.js"></script>
   <script src="bowling.js"></script>
   <script src="bowling-scorer.js"></script>
+  <script src="bowling-leagues.js"></script>
   <script src="congress-members.js"></script>
   <script src="election-maps.js"></script>
   <script src="games-hub.js"></script>
@@ -6075,7 +6095,7 @@
       const route = location.hash.slice(1);
       if (route === "sports-standings" || route === "sports-leaders" ||
         /^sports\/nba\/(teams|games)\//.test(route)) return "sports";
-      if (/^bowling\/(scorer|balls|releases)$/.test(route)) return "bowling";
+      if (/^bowling\/(scorer|balls|releases|leagues)$/.test(route)) return "bowling";
       if (route === "games/releases") return "games";
       if (/^politics\/members(\/[A-Z]\d{6})?$/.test(route)) return "politics";
       if (/^politics\/elections(\/(president|senate|house)(\/\d{4})?)?$/.test(route)) return "politics";
