@@ -118,16 +118,22 @@ function bowlingNormalizeScore(value) {
 function bowlingNormalizeSession(value) {
   if (!value || typeof value !== "object" || typeof value.id !== "string" || !value.id) return null;
   if (!bowlingValidDate(value.date) || !Array.isArray(value.games) || !value.games.length) return null;
-  const games = value.games.slice(0, bowlingMaxGames).map((game, index) => ({
+  const games = value.games.slice(0, bowlingMaxGames).map((game, index) => {
+    // Frame-by-frame games (from the score tracker) keep their throws; the total always comes from the frames.
+    const frames = typeof bowlingNormalizeFrames === "function" ? bowlingNormalizeFrames(game?.frames) : null;
+    const record = {
     id: typeof game?.id === "string" && game.id ? game.id.slice(0, 80) : `game-${index + 1}`,
-    score: bowlingNormalizeScore(game?.score),
+    score: frames ? bowlingReplayFrames(frames).total : bowlingNormalizeScore(game?.score),
     adjustments: (Array.isArray(game?.adjustments) ? game.adjustments : []).map((adjustment, adjustmentIndex) => ({
       id: typeof adjustment?.id === "string" && adjustment.id ? adjustment.id.slice(0, 80) : `adj-${index + 1}-${adjustmentIndex + 1}`,
       ball: bowlingNormalizeBallRef(adjustment?.ball),
       move: bowlingText(adjustment?.move, bowlingLimits.move),
       result: bowlingText(adjustment?.result, bowlingLimits.result)
     })).filter((adjustment) => adjustment.ball || adjustment.move || adjustment.result)
-  }));
+    };
+    if (frames) record.frames = frames;
+    return record;
+  });
   return {
     id: value.id.slice(0, 80),
     date: value.date,
@@ -698,9 +704,13 @@ function bowlingSaveDraft(form) {
   };
   const games = draft.games.map((game) => {
     const savedGame = existing?.games.find((saved) => saved.id === game.id);
+    const score = bowlingParseScore(game.score).score;
+    // Editing a tracked game's total by hand drops its frames, since they no longer add up.
+    const frames = savedGame?.frames && savedGame.score === score ? { frames: savedGame.frames } : {};
     return {
+      ...frames,
       id: game.id,
-      score: bowlingParseScore(game.score).score,
+      score,
       adjustments: game.adjustments.map((adjustment) => {
         const savedAdjustment = savedGame?.adjustments.find((saved) => saved.id === adjustment.id);
         return {
@@ -901,6 +911,13 @@ function createBowlingSessionCard(session, ballsById) {
     scores.append(chip);
   });
   card.append(head, scores);
+  session.games.forEach((game, index) => {
+    if (!game.frames) return;
+    const details = element("details", "bowling-session-frames");
+    details.append(element("summary", "", `Game ${index + 1} frame by frame`),
+      createBowlingScoresheet(game.frames, { label: `Game ${index + 1} scoresheet` }));
+    card.append(details);
+  });
   if (session.startBall) card.append(bowlingBallLine("Started with", session.startBall, ballsById));
   const adjustments = session.games.flatMap((game, index) => game.adjustments.map((adjustment) => ({ adjustment, index })));
   if (adjustments.length) {
@@ -1773,14 +1790,14 @@ function createBowlingReleaseView() {
 }
 
 function bowlingView() {
-  const match = /^#bowling\/(balls|releases)$/.exec(location.hash);
+  const match = /^#bowling\/(scorer|balls|releases)$/.exec(location.hash);
   return match ? match[1] : "log";
 }
 
 function createBowlingTabs(active) {
   const nav = element("nav", "bowling-tabs");
   nav.setAttribute("aria-label", "Bowling sections");
-  for (const [view, label, href] of [["log", "League night", "#bowling"], ["balls", "Ball database", "#bowling/balls"], ["releases", "Release calendar", "#bowling/releases"]]) {
+  for (const [view, label, href] of [["log", "League night", "#bowling"], ["scorer", "Score tracker", "#bowling/scorer"], ["balls", "Ball database", "#bowling/balls"], ["releases", "Release calendar", "#bowling/releases"]]) {
     const link = element("a", "", label);
     link.href = href;
     if (view === active) link.setAttribute("aria-current", "page");
@@ -1793,7 +1810,8 @@ function createBowlingChannel() {
   const view = bowlingView();
   if (view !== "log") {
     const root = element("div", "bowling");
-    root.append(createBowlingTabs(view), view === "balls" ? createBowlingCatalogView() : createBowlingReleaseView());
+    root.append(createBowlingTabs(view), view === "scorer" ? createBowlingScorerView()
+      : view === "balls" ? createBowlingCatalogView() : createBowlingReleaseView());
     bowlingRoot = root;
     return root;
   }

@@ -1946,6 +1946,61 @@
       .bowling-catalog-image { width: 52px; height: 52px; }
       .bowling-calendar-brand { max-width: none; }
     }
+    .bowling-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+    .bowling-scorer { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, 1fr); gap: 16px; align-items: start; }
+    .bowling-tracker { display: grid; gap: 12px; }
+    .bowling-tracker .bowling-panel-head { margin-bottom: 0; }
+    .bowling-tracker-score { display: grid; justify-items: end; line-height: 1.1; }
+    .bowling-tracker-score strong { font: 700 1.75rem/1 var(--data); font-variant-numeric: tabular-nums; }
+    .bowling-tracker-score span { color: var(--muted); font-size: .72rem; }
+    .bowling-sheet { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)) minmax(0, 1.45fr); margin: 0; padding: 0; border: 1px solid var(--glass-edge); border-radius: 8px; overflow: hidden; list-style: none; }
+    .bowling-sheet-frame { position: relative; display: grid; grid-template-rows: auto auto 1fr; min-width: 0; border-left: 1px solid var(--glass-edge); }
+    .bowling-sheet-frame:first-child { border-left: 0; }
+    .bowling-sheet-frame.is-current { background: color-mix(in srgb, var(--signal) 14%, transparent); }
+    .bowling-sheet-number { padding: 2px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: .66rem; font-weight: 700; text-align: center; }
+    .bowling-sheet-marks { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); justify-items: center; }
+    .bowling-sheet-mark { display: grid; place-items: center; width: 100%; min-height: 22px; font: 700 .8rem/1 var(--data); }
+    .bowling-sheet-mark + .bowling-sheet-mark { border-left: 1px solid var(--line); }
+    .bowling-sheet-frame:not(.is-tenth) .bowling-sheet-mark:last-child { border-bottom: 1px solid var(--line); }
+    .bowling-sheet-mark.is-split { position: relative; }
+    .bowling-sheet-mark.is-split::after { content: ""; position: absolute; width: 17px; height: 17px; border: 1.5px solid currentColor; border-radius: 50%; }
+    .bowling-sheet-total { display: grid; place-items: center; min-height: 26px; font: 700 .9rem/1 var(--data); font-variant-numeric: tabular-nums; }
+    .bowling-tracker-where { margin: 0; font-weight: 700; }
+    .bowling-tracker-hint { margin: -8px 0 0; color: var(--muted); font-size: .8rem; }
+    .bowling-deck { display: grid; gap: 10px; justify-content: center; padding: 14px 8px; border: 1px solid var(--line); border-radius: 12px; }
+    .bowling-deck-row { display: flex; justify-content: center; gap: 12px; }
+    .bowling-pin { display: grid; place-items: center; width: 52px; height: 52px; padding: 0; border: 2px solid var(--glass-edge); border-radius: 50%; background: var(--surface); color: var(--muted); font: 700 1rem/1 var(--data); cursor: pointer; }
+    .bowling-pin:hover:not(:disabled) { background: var(--surface-hover); }
+    .bowling-pin.is-standing { border-color: var(--signal); background: var(--signal); color: var(--surface); }
+    .bowling-pin.is-down { border-style: dashed; opacity: .35; cursor: default; }
+    .bowling-tracker-actions, .bowling-tracker-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+    .bowling-record { flex: 1 1 220px; min-height: 48px; font-size: 1rem; }
+    .bowling-tracker-actions .secondary { min-height: 48px; }
+    .bowling-tracker-tools { padding-top: 4px; border-top: 1px solid var(--line); }
+    .bowling-tracker-save { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+    .bowling-tracker-save .field { flex: 1 1 240px; }
+    .bowling-tracker-save button { min-height: 44px; }
+    .bowling-live-status { margin: 0; font-size: .84rem; }
+    .bowling-live-status:empty { display: none; }
+    .bowling-live-status:focus { outline: none; }
+    .bowling-frame-stats .bowling-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .bowling-leaves { width: 100%; margin-top: 14px; border-collapse: collapse; font-size: .84rem; font-variant-numeric: tabular-nums; }
+    .bowling-leaves caption { margin-bottom: 6px; color: var(--muted); font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
+    .bowling-leaves :is(th, td) { padding: 6px; border-bottom: 1px solid var(--line); text-align: left; }
+    .bowling-leaves thead th { color: var(--muted); font-size: .72rem; }
+    .bowling-split-tag { margin-left: 6px; padding: 1px 6px; border: 1px solid var(--glass-edge); border-radius: 999px; color: var(--muted); font-size: .66rem; font-weight: 700; }
+    .bowling-session-frames { margin-top: 10px; font-size: .8rem; }
+    .bowling-session-frames summary { width: fit-content; color: var(--muted); cursor: pointer; }
+    .bowling-session-frames .bowling-sheet { margin-top: 6px; }
+    @media (max-width: 900px) { .bowling-scorer { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 560px) {
+      .bowling-tracker .bowling-sheet { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .bowling-tracker .bowling-sheet-frame:nth-child(6) { border-left: 0; }
+      .bowling-tracker .bowling-sheet-frame:nth-child(n + 6) { border-top: 1px solid var(--glass-edge); }
+      .bowling-pin { width: 48px; height: 48px; }
+      .bowling-deck-row { gap: 10px; }
+      .bowling-tracker-save select { font-size: 16px; }
+    }
     .bowling-fab { display: none; }
     @media (max-width: 960px) {
       .bowling-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "log" "history" "arsenal"; }
@@ -2075,6 +2130,7 @@
   <footer><div class="wrap">A personal guide, tuned by you. Your entries stay in this browser unless you sign in to sync them.</div></footer>
   <script src="nba-team-hub.js"></script>
   <script src="bowling.js"></script>
+  <script src="bowling-scorer.js"></script>
   <script src="congress-members.js"></script>
   <script src="election-maps.js"></script>
   <script src="games-hub.js"></script>
@@ -6011,7 +6067,7 @@
       const route = location.hash.slice(1);
       if (route === "sports-standings" || route === "sports-leaders" ||
         /^sports\/nba\/(teams|games)\//.test(route)) return "sports";
-      if (/^bowling\/(balls|releases)$/.test(route)) return "bowling";
+      if (/^bowling\/(scorer|balls|releases)$/.test(route)) return "bowling";
       if (route === "games/releases") return "games";
       if (/^politics\/members(\/[A-Z]\d{6})?$/.test(route)) return "politics";
       if (/^politics\/elections(\/(president|senate|house)(\/\d{4})?)?$/.test(route)) return "politics";
