@@ -870,13 +870,20 @@ function musicLabConnections(person, { role = "all", year = "all", source = "all
     if (year !== "all" && musicLabYear(recording.release?.date || recording.date) !== year) continue;
     const songKey = recording.id || song.key;
     const add = (id, name, kind, label, from) => {
-      const key = id || `name:${musicLabNormalizeName(name)}`;
-      if (!name || key === person.mbid || names.has(musicLabNormalizeName(name))) return;
-      const node = nodes.get(key) || { id: key, mbid: id || "", name, kinds: new Set(), roles: new Set(), sources: new Set(), songs: new Map() };
+      // One node per credited name, so the same collaborator from MusicBrainz and Discogs isn't counted twice.
+      const key = `name:${musicLabNormalizeName(name)}`;
+      if (!name || id === person.mbid || names.has(musicLabNormalizeName(name))) return;
+      const node = nodes.get(key) || { id: key, mbid: "", name, kinds: new Set(), roles: new Set(), sources: new Set(), songs: new Map(), titles: new Set() };
+      if (id && !node.mbid) node.mbid = id;
       node.kinds.add(kind);
       if (label) node.roles.add(label);
       node.sources.add(from);
-      node.songs.set(songKey, recording);
+      // Count each song title once per collaborator, whichever version or source it came from.
+      const title = musicLabNormalizeName(recording.title);
+      if (!node.titles.has(title)) {
+        node.titles.add(title);
+        node.songs.set(songKey, recording);
+      }
       nodes.set(key, node);
     };
     for (const artist of recording.artists || []) add(artist.id, artist.name, "artist", "Performing artist", recording.id ? "musicbrainz" : "discogs");

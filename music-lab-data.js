@@ -286,20 +286,36 @@ function musicLabRecordingEntries(recording, snapshot = musicLabSnapshot) {
   }
   const resolve = (name, discogsId) => (discogsId && snapshot?.discogsPeople?.get(discogsId)) || local.get(musicLabNormalizeName(name)) || snapshot?.trackedNames?.get(musicLabNormalizeName(name)) || "";
   const stored = (recording.id && snapshot?.recordings?.[recording.id]) || recording;
-  const track = recording.discogsTrack || (stored.discogs && snapshot?.discogsTracks?.[stored.discogs]);
-  for (const credit of track?.credits || []) {
-    entries.push({ category: credit.category, label: credit.label, name: credit.name, as: credit.as || "", id: resolve(credit.name, credit.id) || resolve(credit.as || ""), source: "discogs", discogsId: credit.id || 0 });
+  // A song can appear on several Discogs releases (album, single, vinyl); use every version tied to this recording.
+  const tracks = musicLabDiscogsTracksFor(recording, snapshot);
+  const seen = new Set();
+  for (const track of tracks) {
+    for (const credit of track.credits || []) {
+      const key = `${credit.category}|${credit.label}|${credit.name}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      entries.push({ category: credit.category, label: credit.label, name: credit.name, as: credit.as || "", id: resolve(credit.name, credit.id) || resolve(credit.as || ""), source: "discogs", discogsId: credit.id || 0 });
+    }
   }
-  const song = snapshot?.geniusSongs?.[recording.geniusId || stored.genius || track?.genius];
+  const song = snapshot?.geniusSongs?.[recording.geniusId || stored.genius || tracks.find((item) => item.genius)?.genius];
   for (const credit of song?.credits || []) {
     entries.push({ category: credit.category, label: credit.label, name: credit.name, id: resolve(credit.name), source: "genius" });
   }
   return entries;
 }
 
+function musicLabDiscogsTracksFor(recording, snapshot = musicLabSnapshot) {
+  if (recording.discogsTrack) return [recording.discogsTrack];
+  const stored = (recording.id && snapshot?.recordings?.[recording.id]) || recording;
+  const tracks = [];
+  if (stored.discogs && snapshot?.discogsTracks?.[stored.discogs]) tracks.push(snapshot.discogsTracks[stored.discogs]);
+  for (const track of (recording.id && snapshot?.tracksByRecording?.get(recording.id)) || []) if (!tracks.includes(track)) tracks.push(track);
+  return tracks;
+}
+
 function musicLabSourceLinks(recording, snapshot = musicLabSnapshot) {
   const stored = (recording.id && snapshot?.recordings?.[recording.id]) || recording;
-  const track = recording.discogsTrack || (stored.discogs && snapshot?.discogsTracks?.[stored.discogs]);
+  const track = musicLabDiscogsTracksFor(recording, snapshot)[0];
   const song = snapshot?.geniusSongs?.[recording.geniusId || stored.genius || track?.genius];
   const links = [];
   if (recording.id) links.push(["musicbrainz", `https://musicbrainz.org/recording/${recording.id}`]);
@@ -351,7 +367,32 @@ function musicLabPersonSongs(person, recordings, works, context = null) {
       if (entry.source !== "musicbrainz" && musicLabEntryIsPerson(entry, person, names)) addRole(row, { category: entry.category, label: entry.label, source: entry.source });
     }
   }
-  return [...rows.values()].filter((row) => row.roles.length);
+  return musicLabMergeSongRows([...rows.values()].filter((row) => row.roles.length));
+}
+
+// One row per song: versions of the same title by the same lead artist (explicit/clean, singles, vinyl pressings)
+// are merged, keeping a MusicBrainz recording when there is one and the earliest date, with every role combined.
+function musicLabMergeSongRows(rows) {
+  const date = (row) => row.recording?.release?.date || row.recording?.date || "9999";
+  const merged = new Map();
+  for (const row of rows) {
+    const lead = musicLabNormalizeName(row.recording?.artists?.[0]?.name || "");
+    const key = `${musicLabNormalizeName(row.title)}|${lead}`;
+    const current = merged.get(key);
+    if (!current) {
+      merged.set(key, { ...row, roles: [...row.roles], versions: 1 });
+      continue;
+    }
+    const better = (!current.recording?.id && row.recording?.id) || (Boolean(current.recording?.id) === Boolean(row.recording?.id) && date(row) < date(current));
+    const base = better ? { ...row, roles: [...current.roles], versions: current.versions } : current;
+    for (const role of row.roles) {
+      if (!base.roles.some((item) => item.category === role.category && item.label === role.label && item.source === role.source)) base.roles.push(role);
+    }
+    base.discogsOnly = Boolean(current.discogsOnly && row.discogsOnly);
+    base.versions += 1;
+    merged.set(key, base);
+  }
+  return [...merged.values()];
 }
 
 function musicLabIndexSnapshot(data) {
@@ -367,7 +408,14 @@ function musicLabIndexSnapshot(data) {
     for (const name of musicLabPersonNames(person)) trackedNames.set(name, person.mbid);
     for (const id of person.discogsIds || []) discogsPeople.set(id, person.mbid);
   }
-  const context = { recordings, discogsTracks: data?.discogsTracks || {}, geniusSongs: data?.geniusSongs || {}, trackedNames, discogsPeople };
+  const discogsTracks = data?.discogsTracks || {};
+  const tracksByRecording = new Map();
+  for (const track of Object.values(discogsTracks)) {
+    if (!track.recording) continue;
+    if (!tracksByRecording.has(track.recording)) tracksByRecording.set(track.recording, []);
+    tracksByRecording.get(track.recording).push(track);
+  }
+  const context = { recordings, discogsTracks, tracksByRecording, geniusSongs: data?.geniusSongs || {}, trackedNames, discogsPeople };
   for (const person of people) person.songs = musicLabPersonSongs(person, recordings, works, context);
   // Every credited name across the snapshot, for search and related songs.
   const contributors = new Map();

@@ -26,7 +26,9 @@ USER_AGENT = "SevenChannelsMusicLab/1.0 +https://github.com/siballin/Seven-Chann
 NON_MUSICAL = re.compile(r"^(a&r|art direction|artwork|booking|coordinator|creative director|design|graphics|layout|legal|liner notes|"
                          r"management|manager|marketing|photography|photography by|product manager|promotion|publicity|stylist|"
                          r"copyright|phonographic copyright|published by|licensed|distributed|manufactured|marketed|lacquer cut|"
-                         r"pressed by|printed by|translated by|other|technician|video|director|executive \(music\)|cover)", re.I)
+                         r"pressed by|printed by|translated by|other|technician|video|executive \(music\)|cover|administrator|public relations|logo|"
+                         r"illustration|make-up|hair|copyist|compiled by|supervised by|styling|wardrobe|styled by|choreograph|"
+                         r"sleeve|lettering|typography|authoring|transferred by)", re.I)
 
 
 def normalize(text):
@@ -64,8 +66,10 @@ def discogs_category(part):
     qualifier = " ".join(re.findall(r"\[(.*?)\]", part)).lower()
     if NON_MUSICAL.search(base):
         return None
-    if ("produc" in base and "vocal" in qualifier) or re.search(r"vocal produc", base):
+    if (("produc" in base or "directed by" in base) and "vocal" in qualifier) or re.search(r"vocal (produc|direct)", base):
         return "vocalProduction"
+    if base.startswith("directed by") or base.startswith("music director"):
+        return "other"
     if re.search(r"(^|-)produc|co-produc|producer", base) and "coordinator" not in base:
         return "production"
     if re.search(r"written-by|lyrics by|words by|songwriter|written by", base):
@@ -74,13 +78,15 @@ def discogs_category(part):
         return "composition"
     if re.search(r"arranged|arranger|orchestrat", base):
         return "arrangement"
-    if re.search(r"mixed|mastered|recorded|engineer|edited|remastered|mastering|mixing|recording", base):
+    if re.search(r"mixed|mastered|recorded|engineer|edited|editor|remastered|mastering|mixing|recording", base):
         return "engineering"
     if re.search(r"programm", base):
         return "programming"
     if re.search(r"remix", base):
         return "remix"
-    if re.search(r"vocal|featuring|guitar|bass|drum|keyboard|piano|synth|horn|sax|trumpet|strings|violin|cello|percussion|instrument|choir|rap|beatbox|turntable", base):
+    if re.search(r"vocal|featuring|guitar|bass|drum|keyboard|piano|synth|horn|sax|trumpet|trombone|tuba|strings|violin|viola|cello|"
+                 r"percussion|instrument|choir|chorus|rap|beatbox|turntable|musician|performer|organ|whistl|concertmaster|sampler|"
+                 r"clap|flute|harp|accordion|ukulele|mandolin|banjo|harmonica|clarinet|oboe|bassoon|orchestra|conductor|ensemble", base):
         return "performance"
     return "other"
 

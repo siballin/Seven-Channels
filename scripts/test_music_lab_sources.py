@@ -37,6 +37,14 @@ class DiscogsTests(unittest.TestCase):
         self.assertIsNone(src.discogs_category("A&R [Coordinator]"))
         self.assertIsNone(src.discogs_category("Coordinator [Production]"))
         self.assertIsNone(src.discogs_category("Art Direction"))
+        self.assertEqual(src.discogs_category("Directed By [Vocals]"), "vocalProduction")
+        self.assertEqual(src.discogs_category("Producer [Additional Vocal Production]"), "vocalProduction")
+        self.assertEqual(src.discogs_category("Editor [Vocal]"), "engineering")
+        self.assertEqual(src.discogs_category("Viola [Violas By]"), "performance")
+        self.assertEqual(src.discogs_category("Musician [Queen Charlotte's Global Orchestra]"), "performance")
+        self.assertIsNone(src.discogs_category("Public Relations [Publicity]"))
+        self.assertIsNone(src.discogs_category("Make-Up"))
+        self.assertIsNone(src.discogs_category("Administrator [JYP Entertainment Japan]"))
 
     def test_tracks_get_track_and_release_credits(self):
         tracks = src.discogs_tracks(RELEASE)
