@@ -187,5 +187,42 @@ class BowlingBallTests(unittest.TestCase):
         self.assertEqual(next(source for source in output["sources"] if source["brand"] == "Track")["status"], "error")
 
 
+class MotivSiteTests(unittest.TestCase):
+    PAGE = ("<html><body><h1>Jackal Onyx</h1><p>Item Number: MTVBJKOYX Jackal Onyx AVAILABLE 1/8/2025 $239.99</p>"
+            "<div>Specifications Length 53 Backend 70 Hook 87 Flare Potential 7\"+ Weight Block Predator™ V2 Asymmetric "
+            "Cover Stock Leverage™ HXC Solid Reactive Finish 1000 Grit LSS Weight Range 12, 13, 14, 15, 16 "
+            "16 Radius of Gyration 2.48 Max Differential .047 Int. Differential .013 "
+            "15 Radius of Gyration 2.47 Max Differential .054 Int. Differential .015 Leverage HXC solid coverstock</div></body></html>")
+
+    def test_page_gives_exact_date_and_specs(self):
+        ball = balls.parse_motiv_page(self.PAGE, "https://www.motivbowling.com/products/balls/heavy-oil/jackal-onyx.html", image="https://www.motivbowling.com/userfiles/x")
+        self.assertEqual((ball["id"], ball["releaseDate"], ball.get("releaseDatePrecision")), ("motiv-jackal-onyx", "2025-01-08", None))
+        self.assertEqual((ball["core"], ball["symmetry"], ball["coverstock"], ball["coverType"]), ("Predator V2", "asymmetric", "Leverage HXC Solid Reactive", "solid"))
+        self.assertEqual((ball["weight"], ball["rg"], ball["diff"], ball["intDiff"]), (15, 2.47, 0.054, 0.015))
+        self.assertEqual((ball["performance"], ball["discontinued"], ball["finish"]), ("Heavy oil", False, "1000 Grit LSS"))
+
+    def test_upcoming_and_retired_pages(self):
+        upcoming = self.PAGE.replace("AVAILABLE 1/8/2025", "").replace("</p>", " Available to Order – November 25, 2026</p>")
+        ball = balls.parse_motiv_page(upcoming, "https://www.motivbowling.com/products/balls/retired-balls/jackal-onyx.html")
+        self.assertEqual(ball["releaseDate"], "2026-11-25")
+        self.assertTrue(ball["discontinued"])
+        self.assertEqual(ball["performance"], "")
+
+    def test_catalog_tiles(self):
+        markup = ('<li><a href="./n_933271982218939987"><span class="image" style="background-image: url(./userfiles/filemanager-format/thumb-transparent/abc"></span>'
+                  '<span class="title">Frenzy - Blue / Teal</span></a></li>')
+        self.assertEqual(balls.motiv_catalog(markup), [{"link": "https://www.motivbowling.com/n_933271982218939987",
+            "image": "https://www.motivbowling.com/userfiles/filemanager-format/thumb-transparent/abc", "title": "Frenzy Blue/Teal"}])
+
+    def test_falls_back_to_bowling_com(self):
+        collector = balls.Collector({})
+        with patch.object(balls, "collect_motiv_site", side_effect=ValueError("blocked")), \
+                patch.object(balls, "collect_motiv") as fallback:
+            balls.collect_motiv_with_fallback(collector)
+        fallback.assert_called_once_with(collector)
+        self.assertTrue(collector.fallback)
+        self.assertFalse(hasattr(collector, "replaces_source"))
+
+
 if __name__ == "__main__":
     unittest.main()
