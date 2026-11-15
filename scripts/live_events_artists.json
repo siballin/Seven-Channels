@@ -1,0 +1,4 @@
+{
+  "note": "Artists whose recent setlists the daily build fetches from setlist.fm, by MusicBrainz ID. Live Events can copy an entry for any artist you follow (Artist page, 'Add to setlist snapshot').",
+  "artists": []
+}

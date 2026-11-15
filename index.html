@@ -1189,7 +1189,7 @@
     }
 
     /* Standard glass: major panels and the floating channel dial. */
-    :is(.dial ul, .scoreboard, .channel-planner, .bet-dashboard, .bet-importer, .musicbrainz, .game-release-calendar, .bowling-panel, .music-panel, .music-hero, .cs-panel) {
+    :is(.dial ul, .scoreboard, .channel-planner, .bet-dashboard, .bet-importer, .musicbrainz, .game-release-calendar, .bowling-panel, .music-panel, .music-hero, .cs-panel, .le-panel, .le-hero) {
       border: 1px solid var(--glass-edge);
       border-radius: var(--glass-radius);
       background-color: var(--glass-base);
@@ -1211,7 +1211,7 @@
     }
     .channel-heading .number, .channel-heading h2 { color: var(--glass-accent-ink); }
     @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-      :is(.dial ul, .scoreboard, .channel-planner, .bet-dashboard, .bet-importer, .musicbrainz, .game-release-calendar, .bowling-panel, .music-panel, .cs-panel) {
+      :is(.dial ul, .scoreboard, .channel-planner, .bet-dashboard, .bet-importer, .musicbrainz, .game-release-calendar, .bowling-panel, .music-panel, .cs-panel, .le-panel) {
         background-color: color-mix(in srgb, var(--glass-base) var(--glass-opacity-standard), transparent);
         -webkit-backdrop-filter: blur(var(--glass-blur-standard)) saturate(135%);
         backdrop-filter: blur(var(--glass-blur-standard)) saturate(135%);
@@ -2525,6 +2525,180 @@
       .cs-video, .cs-idea { animation: none; }
       .cs-video img, .cs-day { transition: none; }
     }
+
+    /* ---------- Live Events ---------- */
+    .live-events { --le-c1: #3987e5; --le-c2: #d95926; --le-c3: #199e70; --le-c4: #c98500; --le-c5: #d55181; display: grid; gap: 16px; min-width: 0; }
+    :root[data-theme="light"] .live-events { --le-c1: #2a78d6; --le-c2: #eb6834; --le-c3: #1baf7a; --le-c4: #eda100; --le-c5: #e87ba4; }
+    .le-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .le-tabs a { padding: 7px 13px; border: 1px solid var(--glass-edge); border-radius: 999px; background: var(--surface); color: var(--ink); font-size: .84rem; font-weight: 700; text-decoration: none; }
+    .le-tabs a:hover { background: var(--surface-hover); }
+    .le-tabs a[aria-current="page"] { border-color: color-mix(in srgb, var(--signal) 45%, var(--glass-edge)); background: color-mix(in srgb, var(--signal) 17%, var(--surface)); color: var(--glass-accent-ink); }
+    .le-stack { display: grid; gap: 16px; min-width: 0; }
+    .le-stack-tight { display: grid; gap: 8px; min-width: 0; }
+    .le-panel { display: grid; gap: 12px; min-width: 0; padding: 18px; }
+    .le-panel > h3 { margin: 0; font: 600 clamp(.95rem, 1.4vw, 1.12rem)/1.35 var(--font-heading); letter-spacing: -.02em; overflow-wrap: anywhere; }
+    .le-panel h3:focus { outline: none; }
+    .le-panel h4 { margin: 4px 0 0; font: 600 .86rem/1.3 var(--font-heading); }
+    .le-hint, .le-count, .le-meta, .le-where, .le-lineup { margin: 0; color: var(--muted); font-size: .8rem; line-height: 1.45; overflow-wrap: anywhere; }
+    .le-label { color: var(--muted); font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    .le-text-link { color: var(--glass-accent-ink); font-size: .84rem; font-weight: 700; }
+    .le-button { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 16px; border-radius: 999px; background: var(--signal); color: var(--screen); font-weight: 800; font-size: .86rem; text-decoration: none; }
+    .le-empty { display: grid; justify-items: start; gap: 8px; padding: 14px; border: 1px dashed var(--glass-edge); border-radius: var(--glass-radius-small); color: var(--muted); font-size: .84rem; }
+    .le-empty p, .le-error p { margin: 0; }
+    .le-error { display: grid; justify-items: start; gap: 8px; padding: 12px; border: 1px solid #c75c55; border-radius: var(--glass-radius-small); }
+    .le-loading { display: flex; align-items: center; gap: 10px; padding: 12px; color: var(--muted); font-size: .86rem; }
+    .le-spinner { width: 16px; height: 16px; border: 2px solid var(--glass-edge); border-top-color: var(--signal); border-radius: 50%; animation: music-spin .8s linear infinite; }
+    .le-message { margin: 0; font-size: .86rem; }
+    .le-message:empty { display: none; }
+    .le-message.error { color: #e58b84; }
+    .le-message:focus { outline: none; }
+    .le-banner { margin: 0; padding: 10px 14px; border: 1px solid color-mix(in srgb, var(--signal) 40%, var(--glass-edge)); border-radius: var(--glass-radius-small); background: color-mix(in srgb, var(--signal) 10%, var(--surface)); font-size: .84rem; }
+    .le-stale { font-style: italic; }
+    .le-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .le-danger:hover { border-color: #c75c55; }
+    .le-source { display: inline-flex; padding: 1px 7px; border: 1px solid var(--glass-edge); border-radius: 999px; color: var(--ink); font-size: .66rem; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
+    .le-status { padding: 1px 7px; border-radius: 999px; background: color-mix(in srgb, #e58b84 25%, transparent); color: var(--ink); font-size: .7rem; font-weight: 800; }
+    .le-status-rescheduled, .le-status-postponed { background: color-mix(in srgb, var(--le-c4) 30%, transparent); }
+    .le-plan-badge { padding: 1px 7px; border-radius: 999px; background: color-mix(in srgb, var(--signal) 20%, transparent); color: var(--ink); font-size: .7rem; font-weight: 800; }
+    .le-countdown { display: inline-flex; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--signal) 18%, transparent); color: var(--ink); font-size: .72rem; font-weight: 800; }
+    .le-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+    .le-metric { display: grid; gap: 2px; min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius-small); background: color-mix(in srgb, var(--glass-base) var(--glass-opacity-subtle), var(--screen)); box-shadow: var(--glass-inset); }
+    .le-metric span { color: var(--muted); font-size: .7rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    .le-metric strong { font: 700 1.5rem/1.15 var(--data); overflow-wrap: anywhere; }
+    .le-metric small { color: var(--muted); font-size: .72rem; }
+    .le-media { position: relative; display: grid; place-items: center; overflow: hidden; background: linear-gradient(140deg, color-mix(in srgb, var(--signal) 32%, var(--selected-surface)), var(--selected-surface)); color: var(--ink); font: 700 1.2rem/1 var(--font-heading); }
+    .le-media::before { content: attr(data-fallback); opacity: .55; }
+    .le-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
+    .le-hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); overflow: hidden; background-image: linear-gradient(120deg, color-mix(in srgb, var(--signal) 22%, var(--glass-base)), var(--glass-base)) !important; }
+    .le-hero-poster { min-height: 240px; }
+    .le-hero-copy { display: grid; align-content: center; gap: 8px; padding: 22px; }
+    .le-hero-copy p { margin: 0; }
+    .le-hero-title { color: var(--ink); font: 700 clamp(1.4rem, 3vw, 2rem)/1.1 var(--font-heading); letter-spacing: -.03em; text-decoration: none; }
+    .le-kicker { color: var(--glass-accent-ink); font-size: .7rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .le-big-countdown { display: flex; align-items: baseline; gap: 8px; }
+    .le-big-countdown strong { font: 800 clamp(2.4rem, 6vw, 3.6rem)/1 var(--font-heading); color: var(--glass-accent-ink); }
+    .le-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .le-span-2 { grid-column: 1 / -1; }
+    .le-event-list { display: grid; gap: 10px; }
+    .le-card-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .le-event { position: relative; display: grid; grid-template-columns: 220px minmax(0, 1fr); overflow: hidden; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius-small); background: var(--surface); transition: border-color .18s ease, transform .18s ease; animation: le-in .2s ease-out both; }
+    .le-event:hover { border-color: color-mix(in srgb, var(--signal) 50%, var(--glass-edge)); }
+    .le-event:hover img { transform: scale(1.03); }
+    .le-event.is-compact { grid-template-columns: minmax(0, 1fr); }
+    .le-event.is-cancelled { opacity: .7; }
+    .le-poster { aspect-ratio: 16 / 9; width: 100%; }
+    .le-event:not(.is-compact) .le-poster { height: 100%; min-height: 124px; aspect-ratio: auto; }
+    .le-event-body { display: grid; align-content: start; gap: 5px; padding: 12px; min-width: 0; }
+    .le-event-body p { margin: 0; }
+    .le-event-title { color: var(--ink); font-weight: 800; line-height: 1.3; overflow-wrap: anywhere; text-decoration: none; }
+    a.le-event-title:hover { color: var(--glass-accent-ink); }
+    .le-when { margin: 0; font-size: .84rem; font-weight: 700; }
+    .le-event .le-actions select { width: auto; max-width: 100%; }
+    @keyframes le-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+    @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+      .le-event.glass-lit, .le-artist-card.glass-lit { background-image: radial-gradient(circle at var(--pointer-x, 50%) var(--pointer-y, 50%), color-mix(in srgb, var(--signal) 12%, transparent), transparent 70%); }
+    }
+    .le-filters { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; align-items: end; }
+    .le-filters .field { display: grid; gap: 4px; min-width: 0; }
+    .le-panel-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 10px; }
+    .le-panel-head .le-filters { flex: 1 1 400px; }
+    .le-segmented { display: inline-flex; gap: 4px; }
+    .le-segmented .is-active { border-color: var(--signal); }
+    .le-calendar-box { display: grid; gap: 8px; }
+    .le-calendar-label { margin: 0; min-width: 160px; text-align: center; }
+    .le-calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+    .le-weekday { color: var(--muted); font-size: .72rem; font-weight: 800; text-align: center; text-transform: uppercase; }
+    .le-day { display: grid; align-content: start; gap: 3px; min-width: 0; min-height: 90px; padding: 5px; border: 1px solid var(--line); border-radius: 8px; }
+    .le-day.is-outside { opacity: .45; }
+    .le-day.is-today { border-color: var(--signal); }
+    .le-day-number { font: 700 .78rem/1 var(--data); }
+    .le-chip { display: block; padding: 3px 6px; overflow: hidden; border-left: 3px solid var(--signal); border-radius: 5px; background: color-mix(in srgb, var(--signal) 14%, var(--surface)); color: var(--ink); font-size: .7rem; font-weight: 700; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+    .le-simple-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .le-simple-list li { display: grid; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+    .le-simple-list a { color: var(--ink); font-weight: 700; overflow-wrap: anywhere; }
+    .le-simple-list small { color: var(--muted); font-size: .74rem; }
+    .le-artist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .le-artist-card { display: grid; justify-items: center; gap: 4px; padding: 12px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius-small); background: var(--surface); color: var(--ink); text-align: center; text-decoration: none; transition: border-color .18s ease, transform .18s ease; }
+    .le-artist-card:hover { border-color: var(--signal); transform: translateY(-2px); }
+    .le-artist-card small { color: var(--muted); font-size: .7rem; }
+    .le-artist-photo { width: 96px; aspect-ratio: 1; border-radius: 50%; }
+    .le-avatar { width: 44px; height: 44px; flex: none; border-radius: 50%; font-size: .9rem; }
+    .le-candidates { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .le-candidate { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 8px; }
+    .le-candidate > div { display: grid; gap: 2px; min-width: 0; }
+    .le-candidate small { color: var(--muted); font-size: .74rem; }
+    .le-kpop-row { gap: 6px !important; }
+    .le-artist-head, .le-event-head { grid-template-columns: 220px minmax(0, 1fr); align-items: start; gap: 20px; }
+    .le-artist-hero { width: 220px; aspect-ratio: 1; border-radius: 16px; }
+    .le-artist-head h3, .le-event-head h3 { margin: 0; font: 700 clamp(1.3rem, 2.8vw, 1.9rem)/1.15 var(--font-heading); letter-spacing: -.03em; overflow-wrap: anywhere; }
+    .le-event-poster { width: 220px; aspect-ratio: 3 / 4; border-radius: 14px; }
+    .le-lineup-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .le-lineup-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .le-lineup-list li > div { display: grid; flex: 1; min-width: 140px; }
+    .le-lineup-list small { color: var(--muted); font-size: .74rem; }
+    .le-info { margin: 0; color: var(--muted); font-size: .82rem; white-space: pre-wrap; }
+    .le-code { display: block; padding: 8px; overflow-x: auto; border-radius: 6px; background: var(--selected-surface); font-size: .78rem; white-space: pre; }
+    .le-details summary { width: fit-content; color: var(--muted); font-size: .8rem; cursor: pointer; }
+    .le-details[open] > :not(summary) { margin-top: 8px; }
+    .le-form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px 12px; }
+    .le-form-grid .field { display: grid; gap: 4px; min-width: 0; }
+    .le-wide { grid-column: 1 / -1; }
+    .le-panel textarea { width: 100%; padding: 8px 9px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius-small); color: var(--ink); resize: vertical; }
+    .le-form-row { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+    .le-form-row .field { display: grid; gap: 4px; flex: 1 1 200px; }
+    .le-plan-group { display: grid; gap: 8px; padding-left: 12px; border-left: 4px solid var(--le-plan); }
+    .le-plan { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: var(--glass-radius-small); }
+    .le-plan p { margin: 0; }
+    .le-plan-poster { width: 96px; aspect-ratio: 16 / 9; border-radius: 8px; }
+    .le-plan select { width: auto; }
+    .le-journal-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .le-journal-item { display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); text-decoration: none; }
+    .le-journal-item:hover { border-color: var(--signal); }
+    .le-journal-item span, .le-journal-item small { color: var(--muted); font-size: .78rem; }
+    .le-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0; font-size: .86rem; }
+    .le-facts dt { color: var(--muted); font-weight: 700; }
+    .le-facts dd { margin: 0; overflow-wrap: anywhere; }
+    .le-notes { margin: 0; white-space: pre-wrap; }
+    .le-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+    .le-photo { display: grid; place-items: center; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; color: var(--glass-accent-ink); font-size: .78rem; font-weight: 700; }
+    .le-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .le-setlist { display: grid; gap: 6px; }
+    .le-songs { margin: 0; padding-left: 24px; font-size: .86rem; }
+    .le-songs li { padding: 1px 0; }
+    .le-map { height: 440px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--glass-radius-small); background: var(--selected-surface); z-index: 0; }
+    .le-map-small { height: 260px; }
+    .le-popup { display: grid; gap: 4px; font: 500 .8rem/1.35 var(--font-body); }
+    .le-popup a { color: #1d4fd8; font-weight: 700; }
+    @media (max-width: 960px) {
+      .le-grid { grid-template-columns: minmax(0, 1fr); }
+      .le-event { grid-template-columns: 160px minmax(0, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .le-panel { padding: 12px; }
+      .le-hero { grid-template-columns: minmax(0, 1fr); }
+      .le-hero-poster { min-height: 160px; }
+      .le-event { grid-template-columns: minmax(0, 1fr); }
+      .le-event:not(.is-compact) .le-poster { aspect-ratio: 16 / 9; height: auto; min-height: 0; }
+      .le-artist-head, .le-event-head { grid-template-columns: minmax(0, 1fr); }
+      .le-artist-hero { width: 140px; }
+      .le-event-poster { width: min(240px, 100%); }
+      .le-calendar { grid-template-columns: minmax(0, 1fr); }
+      .le-weekday, .le-day.is-outside, .le-day:not(:has(.le-chip)) { display: none; }
+      .le-day { min-height: 0; }
+      .le-plan { grid-template-columns: 72px minmax(0, 1fr); }
+      .le-plan > select { grid-column: 1 / -1; justify-self: start; }
+      .le-plan-poster { width: 72px; }
+      .le-candidate { grid-template-columns: 44px minmax(0, 1fr); }
+      .le-candidate > button { grid-column: 1 / -1; justify-self: start; }
+      .le-map { height: 320px; }
+      .live-events :is(input, select, textarea) { font-size: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .le-event { animation: none; }
+      .le-event, .le-event img, .le-artist-card { transition: none; }
+      .le-artist-card:hover { transform: none; }
+      .le-spinner { animation-duration: 2s; }
+    }
   </style>
 </head>
 <body>
@@ -2636,6 +2810,8 @@
   <script src="creator-studio-data.js"></script>
   <script src="creator-studio.js"></script>
   <script src="creator-clips.js"></script>
+  <script src="live-events-data.js"></script>
+  <script src="live-events.js"></script>
   <script src="congress-members.js"></script>
   <script src="election-maps.js"></script>
   <script src="games-hub.js"></script>
@@ -2651,7 +2827,8 @@
       { id: "politics", number: "08", name: "Politics", description: "Official U.S. federal votes, legislation, and congressional schedules.", labels: ["Following", "Watchlist", "Archived"], hints: ["Title", "Notes"], links: [] },
       { id: "bowling", number: "09", name: "Bowling", description: "Log league nights, track your arsenal, and look back at which ball changes and lane moves worked.", labels: ["Last session", "Average", "High game"], hints: ["Session", "Notes"], links: [] },
       { id: "music", number: "10", name: "Music Lab", description: "Dig into who wrote, produced and engineered the songs you love, follow their collaborations, and keep your own ratings and notes.", labels: ["Following", "Last rated", "Saved"], hints: ["Song or album", "Notes"], links: [] },
-      { id: "creator", number: "11", name: "Creator Studio", description: "Plan, film, clip and track your YouTube channel: uploads, reaction clips, the content calendar and your ideas.", labels: ["Next post", "In production", "Ideas"], hints: ["Video", "Notes"], links: [] }
+      { id: "creator", number: "11", name: "Creator Studio", description: "Plan, film, clip and track your YouTube channel: uploads, reaction clips, the content calendar and your ideas.", labels: ["Next post", "In production", "Ideas"], hints: ["Video", "Notes"], links: [] },
+      { id: "live", number: "12", name: "Live Events", description: "Find concerts, follow your artists’ tours, plan trips, and keep a journal of every show you’ve seen.", labels: ["Next concert", "Following", "Seen live"], hints: ["Concert", "Notes"], links: [] }
     ];
     const storageKey = "seven-channels.entries.v1";
     const nbaFollowStorageKey = "seven-channels.nba-followed-teams.v1";
@@ -6101,7 +6278,8 @@
         betUnitSize,
         bowling: bowlingGetState(),
         musicLab: musicLabGetState(),
-        creator: creatorGetState()
+        creator: creatorGetState(),
+        live: liveGetState()
       };
       try {
         localStorage.setItem(`${syncBackupPrefix}${userId}`, JSON.stringify(state));
@@ -6135,7 +6313,8 @@
         (value.betUnitSize === undefined || validBetUnitSize(value.betUnitSize)) &&
         (value.bowling === undefined || bowlingValidState(value.bowling)) &&
         (value.musicLab === undefined || musicLabValidState(value.musicLab)) &&
-        (value.creator === undefined || creatorValidState(value.creator));
+        (value.creator === undefined || creatorValidState(value.creator)) &&
+        (value.live === undefined || liveValidState(value.live));
     }
 
     function mergeAccountState(localState, remoteState) {
@@ -6166,7 +6345,8 @@
         betUnitSize: mergeBetUnitSize(localState?.betUnitSize, remoteState?.betUnitSize),
         bowling: bowlingMergeState(localState?.bowling, remoteState?.bowling),
         musicLab: musicLabMergeState(localState?.musicLab, remoteState?.musicLab),
-        creator: creatorMergeState(localState?.creator, remoteState?.creator)
+        creator: creatorMergeState(localState?.creator, remoteState?.creator),
+        live: liveMergeState(localState?.live, remoteState?.live)
       };
     }
 
@@ -6180,7 +6360,8 @@
         betUnitSize,
         bowling: bowlingGetState(),
         musicLab: musicLabGetState(),
-        creator: creatorGetState()
+        creator: creatorGetState(),
+        live: liveGetState()
       };
     }
 
@@ -6197,6 +6378,7 @@
       bowlingReplaceState(state.bowling);
       musicLabReplaceState(state.musicLab);
       creatorReplaceState(state.creator);
+      liveReplaceState(state.live);
       Object.assign(appearance, loadAppearanceFromValue(state.appearance));
       try {
         localStorage.setItem(storageKey, JSON.stringify(entries));
@@ -6266,6 +6448,11 @@
           if (JSON.stringify(mergedCreator) !== JSON.stringify(creatorGetState())) {
             creatorReplaceState(mergedCreator);
             if (currentRoute() === "creator") creatorRefresh();
+          }
+          const mergedLive = liveMergeState(liveGetState(), remoteBeforeWrite?.live);
+          if (JSON.stringify(mergedLive) !== JSON.stringify(liveGetState())) {
+            liveReplaceState(mergedLive);
+            if (currentRoute() === "live") liveRefresh();
           }
           const state = { ...currentAccountState(), updatedAt: new Date().toISOString() };
           const { error } = await syncClient.from("seven_channels_state").upsert(
@@ -6533,7 +6720,7 @@
     function initializeGlassLighting() {
       const capable = window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
       const selector = ".dial a, .resources a, button.secondary, .bet-import-submit, .entry-form > button:not(.secondary), " +
-        ".sync-panel button:not(.secondary), .game-card, .artist-choice, .game-calendar-day:not(:disabled), .kpop-discovery-card, .kpop-quick-link, .music-card, .music-collab, .cs-video, .cs-idea";
+        ".sync-panel button:not(.secondary), .game-card, .artist-choice, .game-calendar-day:not(:disabled), .kpop-discovery-card, .kpop-quick-link, .music-card, .music-collab, .cs-video, .cs-idea, .le-event, .le-artist-card";
       let active = null;
       let frame = 0;
       let x = 50;
@@ -6598,6 +6785,7 @@
       if (route === "games/releases") return "games";
       if (/^music\/.+/.test(route)) return "music";
       if (/^creator\/.+/.test(route)) return "creator";
+      if (/^live\/.+/.test(route)) return "live";
       if (/^politics\/members(\/[A-Z]\d{6})?$/.test(route)) return "politics";
       if (/^politics\/elections(\/(president|senate|house)(\/\d{4})?)?$/.test(route)) return "politics";
       return route === "guide" || channels.some((channel) => channel.id === route) ? route : "guide";
@@ -7919,8 +8107,8 @@
         const title = element("div", "channel-cell");
         title.append(element("span", "number", `CH ${channel.number}`), element("span", "name", channel.name));
         row.append(title);
-        if (channel.id === "bowling" || channel.id === "music" || channel.id === "creator") {
-          (channel.id === "bowling" ? bowlingGuideCells() : channel.id === "music" ? musicLabGuideCells() : creatorGuideCells()).forEach((summary, index) => addSummaryCell(row, channel.labels[index], summary));
+        if (["bowling", "music", "creator", "live"].includes(channel.id)) {
+          ({ bowling: bowlingGuideCells, music: musicLabGuideCells, creator: creatorGuideCells, live: liveGuideCells })[channel.id]().forEach((summary, index) => addSummaryCell(row, channel.labels[index], summary));
         } else {
           addListingCell(row, channel, "now", channel.labels[0]);
           addListingCell(row, channel, "next", channel.labels[1]);
@@ -10789,6 +10977,10 @@
         view.replaceChildren(heading, description, createCreatorStudio());
         return;
       }
+      if (channel.id === "live") {
+        view.replaceChildren(heading, description, createLiveEvents());
+        return;
+      }
       const resources = element("div", "resources");
       resources.setAttribute("aria-label", `${channel.name} links`);
       const resourceUrls = {
@@ -11378,6 +11570,7 @@
     bowlingOnChange = scheduleCloudSync;
     musicLabOnChange = scheduleCloudSync;
     creatorOnChange = scheduleCloudSync;
+    liveOnChange = scheduleCloudSync;
     window.addEventListener("hashchange", render);
     initializeGlassLighting();
     updateClock();

@@ -1115,7 +1115,8 @@ function createCreatorCalendar() {
       const concerts = liveEventsPlannedConcerts() || [];
       if (concerts.length) {
         const vlogs = csPanel("Concert vlog ideas from Live Events", "cs-live-title");
-        vlogs.append(creatorSimpleList(concerts.slice(0, 6).map((concert) => ({ title: concert.title, meta: concert.date || "" }))));
+        vlogs.append(creatorSimpleList(concerts.slice(0, 6).map((concert) => ({ title: concert.title, meta: [concert.date ? csDate(concert.date) : "", concert.venue].filter(Boolean).join(" · "), href: concert.href }))),
+          csEl("p", "cs-hint", "Concerts you’re planning to attend in Live Events."));
         wrap.append(vlogs);
       }
     } catch (error) {

@@ -123,6 +123,11 @@ jobs:
         with:
           path: data/music-lab.json
           key: music-lab-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Refresh setlists from setlist.fm
+        continue-on-error: true
+        env:
+          SETLISTFM_API_KEY: ${{ secrets.SETLISTFM_API_KEY }}
+        run: python scripts/update_setlists.py
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload site files
