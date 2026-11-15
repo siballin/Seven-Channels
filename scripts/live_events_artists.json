@@ -1,4 +1,21 @@
 {
   "note": "Artists whose recent setlists the daily build fetches from setlist.fm, by MusicBrainz ID. Live Events can copy an entry for any artist you follow (Artist page, 'Add to setlist snapshot').",
-  "artists": []
+  "artists": [
+    {
+      "mbid": "b51c672b-85e0-48fe-8648-470a2422229f",
+      "name": "aespa"
+    },
+    {
+      "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158",
+      "name": "XG"
+    },
+    {
+      "mbid": "1ee37742-1e3d-4e61-84d2-bc85f4c1459a",
+      "name": "LE SSERAFIM"
+    },
+    {
+      "mbid": "40017bd7-139b-4998-8688-9b2478ad3325",
+      "name": "tripleS"
+    }
+  ]
 }
