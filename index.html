@@ -2915,6 +2915,32 @@
       box-shadow: var(--glass-inset, none), 0 0 0 1px color-mix(in srgb, var(--chan) 25%, transparent);
     }
     .dial a[data-channel][aria-current="page"] b { color: var(--chan); }
+    /* The channel heading takes the same color as its channel button. */
+    :root[data-channel="guide"] { --channel-color: #c3cad8; }
+    :root[data-channel="sports"] { --channel-color: #ff7a6b; }
+    :root[data-channel="betting"] { --channel-color: #45d98c; }
+    :root[data-channel="kpop"] { --channel-color: #ff7fb5; }
+    :root[data-channel="movies"] { --channel-color: #ffd166; }
+    :root[data-channel="anime"] { --channel-color: #ae95ff; }
+    :root[data-channel="games"] { --channel-color: #4fcdf2; }
+    :root[data-channel="politics"] { --channel-color: #7f9bff; }
+    :root[data-channel="bowling"] { --channel-color: #ffa24a; }
+    :root[data-channel="music"] { --channel-color: #e08aff; }
+    :root[data-channel="creator"] { --channel-color: #bde56f; }
+    :root[data-channel="live"] { --channel-color: #3fdcc8; }
+    :root[data-theme="light"][data-channel="guide"] { --channel-color: #4e5770; }
+    :root[data-theme="light"][data-channel="sports"] { --channel-color: #c0352a; }
+    :root[data-theme="light"][data-channel="betting"] { --channel-color: #137a45; }
+    :root[data-theme="light"][data-channel="kpop"] { --channel-color: #b8286b; }
+    :root[data-theme="light"][data-channel="movies"] { --channel-color: #8a6000; }
+    :root[data-theme="light"][data-channel="anime"] { --channel-color: #6142d0; }
+    :root[data-theme="light"][data-channel="games"] { --channel-color: #0a6f86; }
+    :root[data-theme="light"][data-channel="politics"] { --channel-color: #2f55c9; }
+    :root[data-theme="light"][data-channel="bowling"] { --channel-color: #a84f00; }
+    :root[data-theme="light"][data-channel="music"] { --channel-color: #8f2bb3; }
+    :root[data-theme="light"][data-channel="creator"] { --channel-color: #4f7a00; }
+    :root[data-theme="light"][data-channel="live"] { --channel-color: #0b7a6b; }
+    .channel-heading .number, .channel-heading h2 { color: var(--channel-color, var(--glass-accent-ink)); }
   </style>
 </head>
 <body>
