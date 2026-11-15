@@ -141,6 +141,59 @@ Your library (ratings, saved items, follows, notes, lists, discoveries and credi
 
 K-Pop release calendar entries have a **Credits** link: it opens the album in Music Lab when the snapshot has a matching album by that artist, and a Music Lab search (which includes MusicBrainz) otherwise. The MusicBrainz discography browser in K-Pop links each artist and album to Music Lab by its MusicBrainz ID. Music Lab doesn't duplicate the K-Pop release calendar.
 
+## Creator Studio
+
+Creator Studio (`#creator`) is a production headquarters for a YouTube channel. Everything you create is saved in this browser and syncs through your Seven Channels account, merging per record so edits on two devices don't overwrite each other.
+
+- **Dashboard** (`#creator`): subscribers and total channel views (only from a connected channel or stats you enter), recent uploads, recent performance (views, views per day since publishing, engagement), the next 14 days of planned posts, videos awaiting editing, unpublished Shorts and approved clips, the idea backlog, and recent production activity.
+- **Channel** (`#creator/channel`): connect your channel by @handle, URL or channel ID. Refreshing pulls the subscriber count (unless the channel hides it), total views, and your latest 50 uploads with titles, thumbnails, publish dates, durations, views, likes and comments, and records that day's totals as a snapshot. You can also enter totals by hand.
+- **Video library** (`#creator/library`): every video with thumbnail, dates, length, views, likes, comments, engagement rate ((likes + comments) ÷ views), category, production status (Idea, Planned, Recorded, Editing, Ready, Published), notes and associated Shorts. Add, edit and delete records; search, filter by status, format and category, and sort. Imported uploads of 3 minutes or less start out marked as Shorts.
+- **Clip workspace** (`#creator/clips`): import a YouTube link (or add any video by hand) and watch it in YouTube's official embedded player. Mark moments (M), set in and out points (I and O), trim clips by dragging their handles on the timeline or typing exact times, and use arrow keys on a selected handle (Shift for 5 s, Alt for 0.1 s). Each clip has a label (funny reaction, musical analysis, strong opinion, surprising moment, final verdict), a 1–5 potential rating, hook, title, caption, hashtags, notes, status and destination platform. Clicking a clip, moment, chapter or transcript line seeks the player. Chapters load from the video's description (with an API key) or can be pasted; transcripts are imported by pasting or opening an SRT, WebVTT or timestamped text file. **Export CSV** writes each clip's source URL, in and out points (time, seconds and timecode at 24/25/30/60 fps), title, label, status and notes for use as a cut list or marker reference in DaVinci Resolve. Creator Studio doesn't transcribe audio, analyze faces or video, or render video files. Videos whose owners block embedding show a link to YouTube instead, and times can be entered by hand.
+- **Calendar** (`#creator/calendar`): month, week and list views of YouTube uploads, Shorts, TikToks, Instagram Reels and livestreams, color-coded by type with text labels. Ideas and library videos with a planned date appear dashed. Drag items to another day to reschedule (or use the date pickers in the list view), and mark posts as draft, scheduled or published.
+- **Ideas** (`#creator/ideas`): title, category, description, priority, target platform, production status, notes, an associated music release or event, and a planned publishing date, with search, filters and sorting. An idea can become a planned video or be scheduled.
+- **Analytics** (`#creator/analytics`): total views and subscribers over time, subscriber changes between snapshots, views by video, engagement rate, per-video views over time, Shorts vs long-form (median views) and best-performing categories. Charts only use recorded snapshots and refreshed counts; anything without enough data says so. YouTube's public API has no historical totals, so history starts when you connect or begin entering stats.
+
+### APIs and setup
+
+- **Public data** uses the YouTube Data API v3 with the key saved in the page's YouTube settings (the same browser-only key the Sports channel uses for highlights). It isn't synced or committed. Restrict it to the YouTube Data API v3 and your site's address in Google Cloud. A channel refresh uses about 3 quota units.
+- **Private analytics** (watch time, retention, impressions, click-through rate) need the YouTube Analytics API with Google sign-in, which requires a server to keep the OAuth client secret and refresh token out of the static site. It isn't set up; [docs/creator-studio-oauth.md](docs/creator-studio-oauth.md) describes an optional Supabase Edge Function design. Until then these metrics are labeled unavailable.
+- **Embedded playback** uses YouTube's IFrame Player API (`https://www.youtube.com/iframe_api`).
+- Run `node tests/creator-studio.test.js` to test the time, transcript and chapter parsing, CSV export and sync merging.
+
+### Connections to other channels
+
+- **Music Lab**: song and album pages have **Reaction idea → Creator Studio**, which adds an idea linked back to that page. The idea form suggests albums and songs you've saved, rated or discovered in Music Lab.
+- **K-Pop**: release calendar entries have **+ Idea**, which adds a comeback reaction idea linked to the release's Music Lab credits.
+- **Live Events**: concerts you're planning to attend in Live Events (Interested through Attending) appear on the calendar page as vlog ideas, linked to their event pages.
+
+These links are optional; Creator Studio works on its own.
+
+## Live Events
+
+Live Events (`#live`) helps you find concerts, follow artists' tours, plan trips and keep a journal of every show you've seen. Planner entries, journal entries and followed artists save in this browser and sync through your Seven Channels account, merging per record with deletions kept so they don't come back.
+
+- **Dashboard** (`#live`): concerts attended, upcoming plans, artists followed, the artist you've seen most, a countdown to your next concert, upcoming shows from artists you follow, recently announced shows (ticket sales that opened in the last 3 weeks or haven't opened yet), shows near your saved location, your past concerts and favorite artists.
+- **Discover** (`#live/discover`): search Ticketmaster by artist, city, country, date range and genre, and filter the results by venue. List and calendar views. Cancelled, postponed and rescheduled shows are labeled.
+- **Artists** (`#live/artists`): search for an artist, pick the right match (each candidate shows its genre, number of upcoming shows and MusicBrainz link), and follow it. Follows are stored with Ticketmaster and MusicBrainz IDs, not names. **Import from K-Pop** lists the artists you follow in the K-Pop channel; for each, **Find on Ticketmaster** shows candidates to choose from, so no artist is matched automatically by name. An artist page lists upcoming shows, flags newly announced tours and shows recent setlists.
+- **Event pages** (`#live/event/<id>`): poster, date and local time, lineup with follow buttons, venue with a map, ticket link, a copyable link to the page, and your private plan. **Add to concert journal** fills a journal entry from the event.
+- **Planner** (`#live/planner`): each event can be Interested, Planning, Ticket Purchased, Attending, Attended or Cancelled, with ticket price, extra expenses, currency, seat, travel, hotel, friends going and notes. Statuses are color-coded and labeled with text. Planner details are private and never appear on shared event pages.
+- **Concert journal** (`#live/journal`): date, artist, venue, city, country, tour, seat, price, a 1–10 rating, favorite flag, notes, photo links, opening acts and the setlist. **Find this show on setlist.fm** imports the setlist for the artist and date from the snapshot; edited setlists are labeled as edited by you. Search and filter by year.
+- **Map** (`#live/map`): your journal entries on an OpenStreetMap map, grouped by venue, filterable by year and country, with a list version. Entries only appear if they have coordinates from Ticketmaster or from a venue you picked in an OpenStreetMap search. Coordinates are never guessed, and the number of entries without a location is shown.
+- **Settings** (`#live/settings`): Ticketmaster key, your location (searched on OpenStreetMap or from the browser, rounded to about 1 km), search radius and data source status.
+
+### Data sources and setup
+
+- **Ticketmaster Discovery API** for events, venues and artists. Get a free Consumer Key at [developer.ticketmaster.com](https://developer.ticketmaster.com/) (My Apps) and paste it in Live Events settings. It is saved only in this browser (not synced or committed) and is visible to anyone using the browser, so use a key just for this site. The free tier allows 5,000 calls a day and 5 a second; results are cached for 3 hours. Event data and ticket links come from Ticketmaster and are labeled.
+- **setlist.fm** doesn't allow requests from browsers, so a GitHub Actions step (`scripts/update_setlists.py`) saves recent setlists to `data/setlists.json` each time the site is published. Request an API key at [setlist.fm](https://www.setlist.fm/settings/api) (non-commercial use), add it as the `SETLISTFM_API_KEY` repository secret, and list artists by MusicBrainz ID in `scripts/live_events_artists.json` (each artist page has a line to copy). Without a key the file stays empty and the site says setlists aren't set up. Setlists link back to setlist.fm.
+- **OpenStreetMap**: maps use Leaflet 1.9.4 with OpenStreetMap tiles, and venue and location searches use Nominatim (no more than one request a second, started only by you). Map data © OpenStreetMap contributors.
+- Your location and planner never leave your browser except through your own sync account. Location searches send only the place name you type.
+- Run `node tests/live-events.test.js` for setlist parsing, record validation and sync merging, and `python3 -m unittest scripts/test_update_setlists.py` for the setlist snapshot.
+
+### Connections to other channels
+
+- **K-Pop**: follows can be imported (matched by you on Ticketmaster, as above).
+- **Creator Studio**: planned concerts appear as vlog ideas on the Creator Studio calendar page.
+
 ## Glass appearance
 
 The interface uses the existing theme, background, and accent settings to tint its glass surfaces. Shared `--glass-*` CSS tokens in `index.html` control opacity, blur, border highlights, shadows, radii, and animation timing. Major panels and navigation use standard glass, nested data surfaces use a subtler opaque treatment, and dialogs and custom menus use prominent glass. Browsers without backdrop-filter support receive opaque surfaces instead.
