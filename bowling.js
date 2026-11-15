@@ -852,8 +852,8 @@ function createBowlingDashboard(state) {
     const line = element("p", "bowling-tracked-line");
     const spares = tracked.chances ? ` · ${bowlingPercent(tracked.spares, tracked.chances)} of spares converted` : "";
     line.append(`From ${tracked.games} tracked game${tracked.games === 1 ? "" : "s"}: ${bowlingPercent(tracked.strikes, tracked.firstBalls)} strikes${spares}. `);
-    const link = element("a", "", "See spares and leaves");
-    link.href = "#bowling/scorer";
+    const link = element("a", "", "See all stats");
+    link.href = "#bowling/stats";
     line.append(link);
     panel.append(line);
   }
@@ -1886,14 +1886,14 @@ function createBowlingReleaseView() {
 }
 
 function bowlingView() {
-  const match = /^#bowling\/(scorer|balls|releases|leagues)$/.exec(location.hash);
+  const match = /^#bowling\/(scorer|stats|balls|releases|leagues)$/.exec(location.hash);
   return match ? match[1] : "log";
 }
 
 function createBowlingTabs(active) {
   const nav = element("nav", "bowling-tabs");
   nav.setAttribute("aria-label", "Bowling sections");
-  for (const [view, label, href] of [["log", "League night", "#bowling"], ["scorer", "Score tracker", "#bowling/scorer"], ["balls", "Ball database", "#bowling/balls"], ["releases", "Release calendar", "#bowling/releases"], ["leagues", "League tracker", "#bowling/leagues"]]) {
+  for (const [view, label, href] of [["log", "League night", "#bowling"], ["scorer", "Score tracker", "#bowling/scorer"], ["stats", "Stats", "#bowling/stats"], ["balls", "Ball database", "#bowling/balls"], ["releases", "Release calendar", "#bowling/releases"], ["leagues", "League tracker", "#bowling/leagues"]]) {
     const link = element("a", "", label);
     link.href = href;
     if (view === active) link.setAttribute("aria-current", "page");
@@ -1907,6 +1907,7 @@ function createBowlingChannel() {
   if (view !== "log") {
     const root = element("div", "bowling");
     root.append(createBowlingTabs(view), view === "scorer" ? createBowlingScorerView()
+      : view === "stats" ? createBowlingStatsView()
       : view === "leagues" ? createBowlingLeagueView()
       : view === "balls" ? createBowlingCatalogView() : createBowlingReleaseView());
     bowlingRoot = root;

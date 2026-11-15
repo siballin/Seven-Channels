@@ -2007,6 +2007,16 @@
     .bowling-record { flex: 1 1 220px; min-height: 48px; font-size: 1rem; }
     .bowling-tracker-actions .secondary { min-height: 48px; }
     .bowling-tracker-tools { padding-top: 4px; border-top: 1px solid var(--line); }
+    .bowling-live-mode { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+    .bowling-live-mode .field { max-width: 360px; }
+    .bowling-live-mode select { min-height: 44px; }
+    .bowling-live-mode .bowling-tracker-hint { margin: 0; }
+    .bowling-live-series { display: grid; grid-template-columns: repeat(auto-fit, minmax(62px, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .bowling-live-game { display: grid; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; font-variant-numeric: tabular-nums; }
+    .bowling-live-game span { color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .bowling-live-game strong { font: 700 1.1rem/1.2 var(--data); }
+    .bowling-live-game.is-current { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 12%, transparent); }
+    .bowling-live-game.is-total { border-style: dashed; }
     .bowling-tracker-save { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
     .bowling-tracker-save .field { flex: 1 1 240px; }
     .bowling-tracker-save button { min-height: 44px; }
@@ -2030,6 +2040,53 @@
       .bowling-pin { width: 48px; height: 48px; }
       .bowling-deck-row { gap: 10px; }
       .bowling-tracker-save select { font-size: 16px; }
+    }
+    /* Bowling stats */
+    .bowling-stats { --bs-c1: #3987e5; --bs-c2: #d95926; display: grid; gap: 16px; min-width: 0; }
+    :root[data-theme="light"] .bowling-stats { --bs-c1: #2a78d6; --bs-c2: #eb6834; }
+    .bowling-stats-head { display: grid; gap: 12px; }
+    .bowling-stats-head .bowling-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .bowling-stats-panel .bowling-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 10px; }
+    .bowling-stats-filters { display: flex; flex-wrap: wrap; gap: 10px; }
+    .bowling-stats-filters > * { min-width: 150px; }
+    .bowling-stats-note { margin: 4px 0 0; color: var(--muted); font-size: .8rem; }
+    .bowling-stats-sub { margin: 18px 0 0; font-size: .92rem; }
+    .bowling-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .bowling-stats-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; color: var(--muted); font-size: .78rem; }
+    .bowling-stats-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+    .bowling-stats-key { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--key); }
+    .bowling-stats-key.is-line { width: 18px; height: 3px; border-radius: 2px; }
+    .bowling-stats .is-c1 { --key: var(--bs-c1); }
+    .bowling-stats .is-c2 { --key: var(--bs-c2); }
+    .bowling-stats-line { fill: none; stroke: var(--key); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+    .bowling-stats-dot { fill: var(--key); stroke: var(--surface); stroke-width: 1.5; }
+    .bowling-stats .bowling-chart-hit:focus { outline: none; }
+    .bowling-stats .bowling-chart-hit:focus-visible { fill: color-mix(in srgb, var(--ink) 8%, transparent); }
+    .bowling-stats-bars { display: grid; gap: 8px; margin-top: 12px; }
+    .bowling-stats-bar { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: center; gap: 10px; font-size: .82rem; font-variant-numeric: tabular-nums; }
+    .bowling-stats-bar-label { color: var(--muted); font-weight: 700; }
+    .bowling-stats-track { height: 12px; border-radius: 4px; background: color-mix(in srgb, var(--line) 60%, transparent); overflow: hidden; }
+    .bowling-stats-fill { display: block; height: 100%; border-radius: 4px; background: var(--bs-c1); }
+    .bowling-stats-bar-value { min-width: 2ch; text-align: right; }
+    .bowling-stats-pin-grid { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; margin-top: 10px; }
+    .bowling-stats-pins { display: contents; }
+    .bowling-stats-pin-grid .bowling-leaves { margin-top: 0; }
+    .bowling-stats-deck { justify-content: center; }
+    .bowling-stats-pin { display: grid; place-items: center; align-content: center; width: 54px; height: 54px; border: 2px solid var(--bs-c1); border-radius: 50%; background: color-mix(in srgb, var(--bs-c1) calc(var(--share) * 100%), var(--surface)); color: var(--ink); font-variant-numeric: tabular-nums; }
+    .bowling-stats-pin b { font: 700 .95rem/1 var(--data); }
+    .bowling-stats-pin small { font-size: .66rem; font-weight: 700; }
+    .bowling-stats-more { font-size: .8rem; font-weight: 700; }
+    @media (max-width: 900px) {
+      .bowling-stats-grid { grid-template-columns: minmax(0, 1fr); }
+      .bowling-stats-pin-grid { grid-template-columns: auto minmax(0, 1fr); }
+      .bowling-stats-pin-grid > .bowling-leaves:last-child { grid-column: 1 / -1; }
+      .bowling-stats-panel .bowling-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      .bowling-stats-head .bowling-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .bowling-stats-filters > * { flex: 1 1 140px; min-width: 0; }
+      .bowling-stats-pin { width: 46px; height: 46px; }
+      .bowling-stats-pin-grid { grid-template-columns: minmax(0, 1fr); }
     }
     .bowling-fab { display: none; }
     @media (max-width: 960px) {
@@ -2804,6 +2861,7 @@
   <script src="nba-team-hub.js"></script>
   <script src="bowling.js"></script>
   <script src="bowling-scorer.js"></script>
+  <script src="bowling-stats.js"></script>
   <script src="bowling-leagues.js"></script>
   <script src="music-lab-data.js"></script>
   <script src="music-lab.js"></script>
@@ -6781,7 +6839,7 @@
       const route = location.hash.slice(1);
       if (route === "sports-standings" || route === "sports-leaders" ||
         /^sports\/nba\/(teams|games)\//.test(route)) return "sports";
-      if (/^bowling\/(scorer|balls|releases|leagues)$/.test(route)) return "bowling";
+      if (/^bowling\/(scorer|stats|balls|releases|leagues)$/.test(route)) return "bowling";
       if (route === "games/releases") return "games";
       if (/^music\/.+/.test(route)) return "music";
       if (/^creator\/.+/.test(route)) return "creator";
