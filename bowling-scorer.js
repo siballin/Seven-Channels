@@ -498,7 +498,11 @@ function createBowlingFrameStats(state) {
   panel.setAttribute("aria-labelledby", "bowling-frame-stats-title");
   const title = element("h3", "", "Spares and leaves");
   title.id = "bowling-frame-stats-title";
-  panel.append(title);
+  const more = element("a", "bowling-stats-more", "More stats");
+  more.href = "#bowling/stats";
+  const head = element("div", "bowling-panel-head");
+  head.append(title, more);
+  panel.append(head);
   const stats = bowlingFrameStats(state.sessions);
   if (!stats.games) {
     panel.append(element("p", "bowling-empty", "Finish and save a tracked game to see your strike rate, spare conversion and the leaves you see most."));
