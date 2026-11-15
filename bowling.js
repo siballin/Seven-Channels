@@ -1379,7 +1379,7 @@ function bowlingLoadCatalog() {
   return bowlingCatalogPromise;
 }
 
-// Some sources (Bowling.com for Motiv) give only a release month.
+// Some sources (Bowling.com, the fallback for Motiv) give only a release month.
 function bowlingReleaseLabel(ball, style = "short") {
   if (ball.releaseDatePrecision === "month") {
     return bowlingFormatDate(ball.releaseDate, { month: style === "long" ? "long" : "short", year: "numeric" });
