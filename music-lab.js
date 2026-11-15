@@ -313,6 +313,21 @@ function musicLabNoteEditor(ref, item, label, slug) {
   return form;
 }
 
+// Optional link to Creator Studio: turns a song or album into a reaction-video idea.
+function musicLabIdeaButton(title, label, href, category) {
+  const box = element("div", "music-actions");
+  if (typeof creatorStudioAddIdea !== "function") return box;
+  const button = element("button", "secondary", "Reaction idea → Creator Studio");
+  button.type = "button";
+  button.addEventListener("click", () => {
+    const idea = creatorStudioAddIdea({ title, category, release: { label, href, source: "Music Lab" } });
+    if (!idea) return;
+    button.replaceWith(element("span", "music-status", "Added to your Creator Studio ideas. "), musicLabLink("Open ideas", "#creator/ideas", "music-text-link"));
+  });
+  box.append(button);
+  return box;
+}
+
 // ---------- Shell ----------
 
 function createMusicLabTabs(active) {
@@ -1089,7 +1104,8 @@ function createMusicLabSong(id, snapshot) {
   fact("Released", musicLabFormatDate(recording.date || recording.release?.date));
   if (recording.release) fact("Album", musicLabLink(recording.release.group?.title || recording.release.title, `#music/album/${recording.release.id}`));
   fact("Length", musicLabLength(recording.length));
-  copy.append(facts, musicLabListenLinks(recording), musicLabControls(ref, { rate: true, favorite: true, discover: true, list: true, note: "Listening notes" }));
+  copy.append(facts, musicLabListenLinks(recording), musicLabControls(ref, { rate: true, favorite: true, discover: true, list: true, note: "Listening notes" }),
+    musicLabIdeaButton(`Reacting to ${artistLine ? `${artistLine} – ` : ""}${recording.title}`, `${artistLine ? `${artistLine} – ` : ""}${recording.title}`, `#music/song/${id}`, "Song reaction"));
   head.append(copy);
   wrap.append(head);
 
@@ -1284,7 +1300,8 @@ function createMusicLabAlbum(id) {
     musicLabExternal(album.links.spotify ? "Spotify" : "Search Spotify", album.links.spotify || `https://open.spotify.com/search/${encodeURIComponent(query)}`, "music-listen-link"),
     musicLabExternal(album.links.appleMusic ? "Apple Music" : "Search Apple Music", album.links.appleMusic || `https://music.apple.com/us/search?term=${encodeURIComponent(query)}`, "music-listen-link"),
     musicLabExternal(album.links.youtube ? "YouTube" : "Search YouTube", album.links.youtube || album.links.youtubeMusic || `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, "music-listen-link"));
-  copy.append(listen, musicLabControls(ref, { rate: true, favorite: true, discover: true, list: true, note: "Review" }));
+  copy.append(listen, musicLabControls(ref, { rate: true, favorite: true, discover: true, list: true, note: "Review" }),
+    musicLabIdeaButton(`Album reaction: ${artistLine ? `${artistLine} – ` : ""}${album.title}`, `${artistLine ? `${artistLine} – ` : ""}${album.title}`, `#music/album/${album.id}`, "Album reaction"));
   head.append(copy);
   wrap.append(head);
   if (album.credits.length) {

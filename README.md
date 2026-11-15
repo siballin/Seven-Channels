@@ -141,6 +141,33 @@ Your library (ratings, saved items, follows, notes, lists, discoveries and credi
 
 K-Pop release calendar entries have a **Credits** link: it opens the album in Music Lab when the snapshot has a matching album by that artist, and a Music Lab search (which includes MusicBrainz) otherwise. The MusicBrainz discography browser in K-Pop links each artist and album to Music Lab by its MusicBrainz ID. Music Lab doesn't duplicate the K-Pop release calendar.
 
+## Creator Studio
+
+Creator Studio (`#creator`) is a production headquarters for a YouTube channel. Everything you create is saved in this browser and syncs through your Seven Channels account, merging per record so edits on two devices don't overwrite each other.
+
+- **Dashboard** (`#creator`): subscribers and total channel views (only from a connected channel or stats you enter), recent uploads, recent performance (views, views per day since publishing, engagement), the next 14 days of planned posts, videos awaiting editing, unpublished Shorts and approved clips, the idea backlog, and recent production activity.
+- **Channel** (`#creator/channel`): connect your channel by @handle, URL or channel ID. Refreshing pulls the subscriber count (unless the channel hides it), total views, and your latest 50 uploads with titles, thumbnails, publish dates, durations, views, likes and comments, and records that day's totals as a snapshot. You can also enter totals by hand.
+- **Video library** (`#creator/library`): every video with thumbnail, dates, length, views, likes, comments, engagement rate ((likes + comments) ÷ views), category, production status (Idea, Planned, Recorded, Editing, Ready, Published), notes and associated Shorts. Add, edit and delete records; search, filter by status, format and category, and sort. Imported uploads of 3 minutes or less start out marked as Shorts.
+- **Clip workspace** (`#creator/clips`): import a YouTube link (or add any video by hand) and watch it in YouTube's official embedded player. Mark moments (M), set in and out points (I and O), trim clips by dragging their handles on the timeline or typing exact times, and use arrow keys on a selected handle (Shift for 5 s, Alt for 0.1 s). Each clip has a label (funny reaction, musical analysis, strong opinion, surprising moment, final verdict), a 1–5 potential rating, hook, title, caption, hashtags, notes, status and destination platform. Clicking a clip, moment, chapter or transcript line seeks the player. Chapters load from the video's description (with an API key) or can be pasted; transcripts are imported by pasting or opening an SRT, WebVTT or timestamped text file. **Export CSV** writes each clip's source URL, in and out points (time, seconds and timecode at 24/25/30/60 fps), title, label, status and notes for use as a cut list or marker reference in DaVinci Resolve. Creator Studio doesn't transcribe audio, analyze faces or video, or render video files. Videos whose owners block embedding show a link to YouTube instead, and times can be entered by hand.
+- **Calendar** (`#creator/calendar`): month, week and list views of YouTube uploads, Shorts, TikToks, Instagram Reels and livestreams, color-coded by type with text labels. Ideas and library videos with a planned date appear dashed. Drag items to another day to reschedule (or use the date pickers in the list view), and mark posts as draft, scheduled or published.
+- **Ideas** (`#creator/ideas`): title, category, description, priority, target platform, production status, notes, an associated music release or event, and a planned publishing date, with search, filters and sorting. An idea can become a planned video or be scheduled.
+- **Analytics** (`#creator/analytics`): total views and subscribers over time, subscriber changes between snapshots, views by video, engagement rate, per-video views over time, Shorts vs long-form (median views) and best-performing categories. Charts only use recorded snapshots and refreshed counts; anything without enough data says so. YouTube's public API has no historical totals, so history starts when you connect or begin entering stats.
+
+### APIs and setup
+
+- **Public data** uses the YouTube Data API v3 with the key saved in the page's YouTube settings (the same browser-only key the Sports channel uses for highlights). It isn't synced or committed. Restrict it to the YouTube Data API v3 and your site's address in Google Cloud. A channel refresh uses about 3 quota units.
+- **Private analytics** (watch time, retention, impressions, click-through rate) need the YouTube Analytics API with Google sign-in, which requires a server to keep the OAuth client secret and refresh token out of the static site. It isn't set up; [docs/creator-studio-oauth.md](docs/creator-studio-oauth.md) describes an optional Supabase Edge Function design. Until then these metrics are labeled unavailable.
+- **Embedded playback** uses YouTube's IFrame Player API (`https://www.youtube.com/iframe_api`).
+- Run `node tests/creator-studio.test.js` to test the time, transcript and chapter parsing, CSV export and sync merging.
+
+### Connections to other channels
+
+- **Music Lab**: song and album pages have **Reaction idea → Creator Studio**, which adds an idea linked back to that page. The idea form suggests albums and songs you've saved, rated or discovered in Music Lab.
+- **K-Pop**: release calendar entries have **+ Idea**, which adds a comeback reaction idea linked to the release's Music Lab credits.
+- **Live Events**: if a Live Events channel providing `liveEventsPlannedConcerts()` is added, its planned concerts appear on the calendar page as vlog ideas. There is no Live Events channel yet.
+
+These links are optional; Creator Studio works on its own.
+
 ## Glass appearance
 
 The interface uses the existing theme, background, and accent settings to tint its glass surfaces. Shared `--glass-*` CSS tokens in `index.html` control opacity, blur, border highlights, shadows, radii, and animation timing. Major panels and navigation use standard glass, nested data surfaces use a subtler opaque treatment, and dialogs and custom menus use prominent glass. Browsers without backdrop-filter support receive opaque surfaces instead.

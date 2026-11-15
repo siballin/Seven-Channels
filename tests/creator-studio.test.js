@@ -1,0 +1,37 @@
+// Unit tests for creator-studio-data.js (parsing, CSV, merge). Run: node tests/creator-studio.test.js
+const fs = require('fs'); const vm = require('vm'); const assert = require('assert');
+const store = {};
+const ctx = { localStorage: { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => delete store[k] }, crypto: require('crypto'), structuredClone, URL, URLSearchParams, Intl, console };
+vm.createContext(ctx);
+vm.runInContext(fs.readFileSync(require('path').join(__dirname, '..', 'creator-studio-data.js'), 'utf8') + ';this.C={creatorParseTime,creatorFormatTime,creatorTimecode,creatorIsoDuration,creatorYoutubeId,creatorChannelQuery,creatorParseTranscript,creatorChaptersFromDescription,creatorClipCsv,creatorNormalizeState,creatorMergeState,creatorStartTimeFromUrl,creatorEngagement,creatorStudioAddIdea,creatorGetState,creatorRemove,creatorUpsert};', ctx);
+const C = ctx.C; const eq = (a, b) => assert.strictEqual(JSON.stringify(a), JSON.stringify(b));
+eq(C.creatorParseTime('1:02:03.5'), 3723.5); eq(C.creatorParseTime('02:03'), 123); eq(C.creatorParseTime('1h2m3s'), 3723); eq(C.creatorParseTime('90'), 90); eq(C.creatorParseTime('1:75'), null); eq(C.creatorParseTime(''), null);
+eq(C.creatorFormatTime(3723.5, { decimals: 1 }), '1:02:03.5'); eq(C.creatorFormatTime(65), '1:05');
+eq(C.creatorTimecode(61.5, 30), '00:01:01:15'); eq(C.creatorTimecode(0, 24), '00:00:00:00');
+eq(C.creatorIsoDuration('PT1H2M3S'), 3723); eq(C.creatorIsoDuration('PT45S'), 45); eq(C.creatorIsoDuration('P1DT1S'), 86401);
+for (const u of ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42', 'https://youtu.be/dQw4w9WgXcQ', 'https://www.youtube.com/shorts/dQw4w9WgXcQ', 'https://music.youtube.com/watch?v=dQw4w9WgXcQ', 'dQw4w9WgXcQ']) eq(C.creatorYoutubeId(u), 'dQw4w9WgXcQ');
+eq(C.creatorYoutubeId('https://example.com/watch?v=dQw4w9WgXcQ'), ''); eq(C.creatorStartTimeFromUrl('https://youtu.be/dQw4w9WgXcQ?t=1m30s'), 90);
+eq(C.creatorChannelQuery('@SomeCreator'), { handle: '@SomeCreator' }); eq(C.creatorChannelQuery('https://www.youtube.com/channel/UC1234567890123456789012'), { id: 'UC1234567890123456789012' });
+eq(C.creatorChannelQuery('youtube.com/@abc.def'), { handle: '@abc.def' }); eq(C.creatorChannelQuery('hello'), null);
+const srt = '1\n00:00:01,000 --> 00:00:03,500\nHello <i>there</i>\n\n2\n00:01:05,250 --> 00:01:07,000\nSecond line\nwraps';
+eq(C.creatorParseTranscript(srt).map((r) => [r.t, r.text]), [[1, 'Hello there'], [65.25, 'Second line wraps']]);
+eq(C.creatorParseTranscript('WEBVTT\n\n00:00.000 --> 00:02.000\nHi\n\n00:02.500 --> 00:04.000\nBye').map((r) => r.t), [0, 2.5]);
+eq(C.creatorParseTranscript('[0:05] intro\n1:02:03 deep part\nno time here').map((r) => [r.t, r.text]), [[5, 'intro'], [3723, 'deep part']]);
+eq(C.creatorChaptersFromDescription('Watch!\n0:00 Intro\n1:30 Verse one\n3:10 Verdict').map((c) => c.title), ['Intro', 'Verse one', 'Verdict']);
+eq(C.creatorChaptersFromDescription('1:30 only\n2:00 two'), []);
+const project = C.creatorNormalizeState({ projects: [{ id: 'p', source: { youtubeId: 'dQw4w9WgXcQ', title: 'Song, "live"' }, clips: [{ id: 'c', start: 61.5, end: 75, title: '=SUM(A1)', label: 'verdict', rating: 4, hashtags: '#kpop, #react', notes: 'a\nb' }, { id: 'bad', start: 5, end: 2 }] }] }).projects[0];
+eq(project.clips.length, 1);
+const csv = C.creatorClipCsv(project, project.clips, 30).split('\r\n');
+assert(csv[0].startsWith('Source URL,Source title,Clip title,Start,End'));
+assert(csv[1].includes("https://www.youtube.com/watch?v=dQw4w9WgXcQ,\"Song, \"\"live\"\"\",'=SUM(A1),1:01.5,1:15.0,13.5,61.50,75.00,00:01:01:15,00:01:15:00,Final verdict,4,Candidate,YouTube Shorts"), csv[1]);
+assert(csv[1].includes('"#kpop, #react","a\nb"') || csv.join('\n').includes('"a\nb"'));
+// merge: newest wins, tombstones stick, snapshots union
+const a = { ideas: [{ id: 'i1', title: 'A', updatedAt: '2026-11-15T10:00:00Z' }, { id: 'i2', title: 'Gone', updatedAt: '2026-11-15T10:00:00Z' }], snapshots: [{ date: '2026-11-14', views: 10 }] };
+const b = { ideas: [{ id: 'i1', title: 'A newer', updatedAt: '2026-11-15T11:00:00Z' }], deleted: { ideas: ['i2'] }, snapshots: [{ date: '2026-11-15', views: 12 }] };
+const m = C.creatorMergeState(a, b); eq(m.ideas.map((i) => i.title), ['A newer']); eq(m.snapshots.map((s) => s.date), ['2026-11-14', '2026-11-15']);
+eq(C.creatorEngagement({ views: 200, likes: 10, comments: 10 }), 0.1); eq(C.creatorEngagement({ views: 0, likes: 1, comments: 1 }), null);
+const idea = C.creatorStudioAddIdea({ title: 'React: NewJeans', category: 'K-Pop comeback', release: { label: 'NewJeans – Get Up', href: '#music/search/x', source: 'K-Pop' } });
+assert(idea && idea.release.href === '#music/search/x');
+C.creatorUpsert('videos', { id: 'v1', title: 'Main' }); C.creatorUpsert('videos', { id: 'v2', title: 'Short', parentId: 'v1' }); C.creatorRemove('videos', 'v1');
+eq(C.creatorGetState().videos.map((v) => [v.id, v.parentId]), [['v2', '']]); eq(C.creatorGetState().deleted.videos, ['v1']);
+console.log('creator data ok');
