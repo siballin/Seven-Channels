@@ -2876,6 +2876,45 @@
         background-color: var(--glass-base);
       }
     }
+    /* Channel colors on the channel buttons (each also has its name, so color is never the only cue). */
+    .dial a[data-channel="guide"] { --chan: #c3cad8; }
+    .dial a[data-channel="sports"] { --chan: #ff7a6b; }
+    .dial a[data-channel="betting"] { --chan: #45d98c; }
+    .dial a[data-channel="kpop"] { --chan: #ff7fb5; }
+    .dial a[data-channel="movies"] { --chan: #ffd166; }
+    .dial a[data-channel="anime"] { --chan: #ae95ff; }
+    .dial a[data-channel="games"] { --chan: #4fcdf2; }
+    .dial a[data-channel="politics"] { --chan: #7f9bff; }
+    .dial a[data-channel="bowling"] { --chan: #ffa24a; }
+    .dial a[data-channel="music"] { --chan: #e08aff; }
+    .dial a[data-channel="creator"] { --chan: #bde56f; }
+    .dial a[data-channel="live"] { --chan: #3fdcc8; }
+    :root[data-theme="light"] .dial a[data-channel="guide"] { --chan: #4e5770; }
+    :root[data-theme="light"] .dial a[data-channel="sports"] { --chan: #c0352a; }
+    :root[data-theme="light"] .dial a[data-channel="betting"] { --chan: #137a45; }
+    :root[data-theme="light"] .dial a[data-channel="kpop"] { --chan: #b8286b; }
+    :root[data-theme="light"] .dial a[data-channel="movies"] { --chan: #8a6000; }
+    :root[data-theme="light"] .dial a[data-channel="anime"] { --chan: #6142d0; }
+    :root[data-theme="light"] .dial a[data-channel="games"] { --chan: #0a6f86; }
+    :root[data-theme="light"] .dial a[data-channel="politics"] { --chan: #2f55c9; }
+    :root[data-theme="light"] .dial a[data-channel="bowling"] { --chan: #a84f00; }
+    :root[data-theme="light"] .dial a[data-channel="music"] { --chan: #8f2bb3; }
+    :root[data-theme="light"] .dial a[data-channel="creator"] { --chan: #4f7a00; }
+    :root[data-theme="light"] .dial a[data-channel="live"] { --chan: #0b7a6b; }
+    .dial a[data-channel] b { color: var(--chan); }
+    .dial-dot { width: 7px; height: 7px; flex: none; align-self: center; border-radius: 50%; background: var(--chan, var(--signal)); box-shadow: 0 0 6px color-mix(in srgb, var(--chan, var(--signal)) 70%, transparent); }
+    .dial a[data-channel] { gap: 5px; padding-inline: 9px; }
+    @media (max-width: 760px) { .dial ul { border-radius: var(--glass-radius, 20px); } }
+    @media (min-width: 761px) { .dial-dot { display: none; } }
+    .dial a[data-channel] { border-color: color-mix(in srgb, var(--chan) 22%, transparent); background-color: color-mix(in srgb, var(--chan) 8%, transparent); }
+    .dial a[data-channel]:hover { background-color: color-mix(in srgb, var(--chan) 16%, transparent); }
+    .dial a[data-channel][aria-current="page"] {
+      border-color: color-mix(in srgb, var(--chan) 55%, transparent);
+      background-color: color-mix(in srgb, var(--chan) 22%, var(--glass-base, var(--panel)));
+      color: var(--ink);
+      box-shadow: var(--glass-inset, none), 0 0 0 1px color-mix(in srgb, var(--chan) 25%, transparent);
+    }
+    .dial a[data-channel][aria-current="page"] b { color: var(--chan); }
   </style>
 </head>
 <body>
@@ -7043,8 +7082,11 @@
         const li = document.createElement("li");
         const link = document.createElement("a");
         link.href = `#${item.id}`;
+        link.dataset.channel = item.id;
         if (route === item.id) link.setAttribute("aria-current", "page");
-        link.append(element("b", "", item.number), document.createTextNode(item.name));
+        const dot = element("i", "dial-dot");
+        dot.setAttribute("aria-hidden", "true");
+        link.append(dot, element("b", "", item.number), document.createTextNode(item.name));
         li.append(link);
         dial.append(li);
       }
