@@ -212,7 +212,11 @@ function createBowlingLeagueCard(league, state) {
     log.type = "button";
     log.setAttribute("aria-label", `Log a session for ${league.name}`);
     log.addEventListener("click", () => bowlingLogForLeague(league));
-    footer.append(log);
+    const score = element("button", "secondary", "Score games");
+    score.type = "button";
+    score.setAttribute("aria-label", `Score ${league.name} games frame by frame`);
+    score.addEventListener("click", () => bowlingScoreForLeague(league));
+    footer.append(log, score);
   }
   const edit = element("button", "secondary", "Edit");
   edit.type = "button";

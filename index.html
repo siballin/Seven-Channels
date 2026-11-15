@@ -2007,6 +2007,16 @@
     .bowling-record { flex: 1 1 220px; min-height: 48px; font-size: 1rem; }
     .bowling-tracker-actions .secondary { min-height: 48px; }
     .bowling-tracker-tools { padding-top: 4px; border-top: 1px solid var(--line); }
+    .bowling-live-mode { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+    .bowling-live-mode .field { max-width: 360px; }
+    .bowling-live-mode select { min-height: 44px; }
+    .bowling-live-mode .bowling-tracker-hint { margin: 0; }
+    .bowling-live-series { display: grid; grid-template-columns: repeat(auto-fit, minmax(62px, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .bowling-live-game { display: grid; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; font-variant-numeric: tabular-nums; }
+    .bowling-live-game span { color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .bowling-live-game strong { font: 700 1.1rem/1.2 var(--data); }
+    .bowling-live-game.is-current { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 12%, transparent); }
+    .bowling-live-game.is-total { border-style: dashed; }
     .bowling-tracker-save { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
     .bowling-tracker-save .field { flex: 1 1 240px; }
     .bowling-tracker-save button { min-height: 44px; }

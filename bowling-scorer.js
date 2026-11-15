@@ -151,19 +151,23 @@ function bowlingThrowMark(item) {
 function bowlingLoadLive() {
   if (bowlingLive) return bowlingLive;
   let frames = [];
+  let mode = null;
   try {
     const saved = JSON.parse(localStorage.getItem(bowlingLiveKey) || "null");
     if (saved && Array.isArray(saved.frames)) frames = bowlingReplayFrames(saved.frames).data;
+    if (saved?.mode && bowlingSessionTypes.some(([type]) => type === saved.mode.type)) {
+      mode = { type: saved.mode.type, league: saved.mode.type === "league" && typeof saved.mode.league === "string" ? saved.mode.league.slice(0, 80) : "" };
+    }
   } catch (error) {
     console.error("Could not read the game in progress.", error);
   }
-  bowlingLive = { frames };
+  bowlingLive = { frames, mode };
   return bowlingLive;
 }
 
 function bowlingStoreLive() {
   try {
-    if (bowlingLive.frames.length) localStorage.setItem(bowlingLiveKey, JSON.stringify({ frames: bowlingLive.frames, updatedAt: new Date().toISOString() }));
+    if (bowlingLive.frames.length || bowlingLive.mode) localStorage.setItem(bowlingLiveKey, JSON.stringify({ frames: bowlingLive.frames, mode: bowlingLive.mode, updatedAt: new Date().toISOString() }));
     else localStorage.removeItem(bowlingLiveKey);
   } catch (error) {
     console.error("Could not save the game in progress.", error);
@@ -202,6 +206,91 @@ function bowlingResetLive() {
   bowlingLiveSelection = 0;
   bowlingLiveConfirmReset = false;
   bowlingStoreLive();
+}
+
+// ---------- What the tracked games are for (a league night, practice or a tournament) ----------
+
+// The chosen mode, falling back to tonight's league; a league that was deleted or archived falls back too.
+function bowlingLiveMode(state = bowlingGetState()) {
+  const mode = bowlingLoadLive().mode;
+  const active = state.leagues.filter((league) => !league.archived);
+  if (mode && (mode.type !== "league" || !mode.league || active.some((league) => league.id === mode.league))) return mode;
+  return { type: "league", league: bowlingDefaultLeagueId(state) };
+}
+
+function bowlingSetLiveMode(mode) {
+  const live = bowlingLoadLive();
+  live.mode = { type: mode.type, league: mode.type === "league" ? mode.league || "" : "" };
+  bowlingLiveTarget = null;
+  bowlingStoreLive();
+}
+
+function bowlingModeLabel(state, mode) {
+  if (mode.type !== "league") return bowlingTypeLabel(mode.type);
+  return state.leagues.find((league) => league.id === mode.league)?.name || "League";
+}
+
+// Today's session for the chosen league or type, so each saved game joins the same series.
+function bowlingLiveSession(state, mode = bowlingLiveMode(state)) {
+  const today = bowlingToday();
+  return state.sessions.find((session) => session.date === today && session.type === mode.type
+    && (mode.type !== "league" || (session.league?.id || "") === (mode.league || ""))) || null;
+}
+
+// Opens the Score tracker set to a league (used by the League tracker).
+function bowlingScoreForLeague(league) {
+  bowlingSetLiveMode({ type: "league", league: league.id });
+  bowlingLiveStatus = { text: "", error: false };
+  location.hash = "#bowling/scorer";
+}
+
+function createBowlingLiveMode(state) {
+  const mode = bowlingLiveMode(state);
+  const wrap = element("div", "bowling-live-mode");
+  const options = state.leagues.filter((league) => !league.archived).map((league) => [`league:${league.id}`, `League · ${league.name}`]);
+  if (!options.length) options.push(["league:", "League"]);
+  options.push(["practice", "Practice"], ["tournament", "Tournament"]);
+  const value = mode.type === "league" ? `league:${mode.league || ""}` : mode.type;
+  if (!options.some(([option]) => option === value)) options.unshift([value, bowlingModeLabel(state, mode)]);
+  const select = bowlingSelect("bowling-live-mode", options, value);
+  select.addEventListener("change", () => {
+    const [type, league = ""] = select.value.split(":");
+    bowlingSetLiveMode({ type, league });
+    bowlingRefresh("bowling-live-mode");
+  });
+  const field = bowlingField("Bowling for", select);
+  wrap.append(field);
+  if (!state.leagues.some((league) => !league.archived)) {
+    const hint = element("p", "bowling-tracker-hint", "");
+    const link = element("a", "", "Add your league");
+    link.href = "#bowling/leagues";
+    hint.append(link, " in the League tracker to save games to it.");
+    wrap.append(hint);
+  }
+
+  // Tonight's series so far, with the game being bowled now.
+  const session = bowlingLiveSession(state, mode);
+  const scored = session ? session.games.filter((game) => game.score !== null) : [];
+  const replay = bowlingReplayFrames(bowlingLoadLive().frames);
+  const series = element("ol", "bowling-live-series");
+  series.setAttribute("aria-label", `${bowlingModeLabel(state, mode)} today`);
+  // A finished three-game league series only shows a 4th slot once a 4th game is started.
+  const seriesDone = mode.type === "league" && scored.length >= 3 && !replay.data.length;
+  const slots = Math.max(mode.type === "league" ? 3 : 1, scored.length + (seriesDone ? 0 : 1));
+  for (let index = 0; index < slots; index++) {
+    const game = scored[index];
+    const current = index === scored.length;
+    const item = element("li", `bowling-live-game${current ? " is-current" : ""}${game?.frames ? " is-tracked" : ""}`);
+    item.append(element("span", "", `Game ${index + 1}`), element("strong", "", game ? String(game.score) : current ? (replay.data.length ? String(replay.complete ? replay.total : replay.running) : "Up next") : "—"));
+    if (current) item.setAttribute("aria-current", "step");
+    series.append(item);
+  }
+  const total = scored.reduce((sum, game) => sum + game.score, 0);
+  const totals = element("li", "bowling-live-game is-total");
+  totals.append(element("span", "", "Series"), element("strong", "", scored.length ? String(total) : "—"));
+  series.append(totals);
+  wrap.append(series);
+  return wrap;
 }
 
 // ---------- Scoresheet ----------
@@ -297,11 +386,12 @@ function createBowlingScorerLink() {
 
 function bowlingSaveTargets(state) {
   const today = bowlingToday();
-  const options = [["new", `New session · ${bowlingFormatDate(today, { weekday: "short", month: "short", day: "numeric" })}`]];
+  const mode = bowlingLiveMode(state);
+  const options = [["new", `New ${bowlingModeLabel(state, mode)} session · ${bowlingFormatDate(today, { weekday: "short", month: "short", day: "numeric" })}`]];
   for (const session of state.sessions.slice(0, 8)) {
     const room = session.games.some((game) => game.score === null && !game.frames) || session.games.length < bowlingMaxGames;
     if (!room) continue;
-    options.push([session.id, `${bowlingFormatDate(session.date, { weekday: "short", month: "short", day: "numeric" })} · ${bowlingTypeLabel(session.type)} · ${session.games.length} game${session.games.length === 1 ? "" : "s"}`]);
+    options.push([session.id, `${bowlingFormatDate(session.date, { weekday: "short", month: "short", day: "numeric" })} · ${session.type === "league" && session.league ? bowlingLeagueName(state, session.league) : bowlingTypeLabel(session.type)} · ${session.games.length} game${session.games.length === 1 ? "" : "s"}`]);
   }
   return options;
 }
@@ -311,7 +401,9 @@ function bowlingSaveLiveGame() {
   if (!replay.complete) return;
   const state = bowlingGetState();
   const target = bowlingLiveTarget && bowlingLiveTarget !== "new" ? state.sessions.find((session) => session.id === bowlingLiveTarget) : null;
+  const mode = bowlingLiveMode(state);
   let message = "";
+  let number = 1;
   const saved = bowlingCommit((next, now) => {
     const game = { id: bowlingId("game"), score: replay.total, adjustments: [], frames: replay.data };
     if (target) {
@@ -320,15 +412,22 @@ function bowlingSaveLiveGame() {
       if (slot >= 0) session.games[slot] = { ...session.games[slot], score: replay.total, frames: replay.data };
       else session.games.push(game);
       session.updatedAt = now;
-      message = `Saved as game ${slot >= 0 ? slot + 1 : session.games.length} of your ${bowlingFormatDate(session.date, { weekday: "long", month: "short", day: "numeric" })} session.`;
+      number = slot >= 0 ? slot + 1 : session.games.length;
+      message = `Game ${number} saved: ${replay.total}${session.date === bowlingToday() ? "" : ` (${bowlingFormatDate(session.date, { weekday: "long", month: "short", day: "numeric" })})`}.`;
     } else {
-      next.sessions.push({ id: bowlingId("session"), date: bowlingToday(), type: "league", league: bowlingLeagueRef(next, bowlingDefaultLeagueId(next)), center: next.leagues.find((league) => league.id === bowlingDefaultLeagueId(next))?.center || "", startBall: null, notes: "", games: [game], createdAt: now, updatedAt: now });
-      message = "Saved as a new session for today.";
+      const leagueId = mode.type === "league" ? mode.league : "";
+      next.sessions.push({ id: bowlingId("session"), date: bowlingToday(), type: mode.type, league: bowlingLeagueRef(next, leagueId), center: next.leagues.find((league) => league.id === leagueId)?.center || "", startBall: null, notes: "", games: [game], createdAt: now, updatedAt: now });
+      message = `Game 1 saved: ${replay.total}.`;
     }
   });
+  if (saved && (!target || target.date === bowlingToday())) {
+    const session = bowlingGetState().sessions.find((item) => item.id === (target?.id)) || bowlingLiveSession(bowlingGetState(), mode);
+    const summary = session ? bowlingSeriesSummary(session) : null;
+    message += mode.type === "league" && summary?.complete ? ` Series: ${summary.total}.` : ` Game ${number + 1} is ready.`;
+  }
   bowlingResetLive();
   bowlingLiveTarget = null;
-  bowlingLiveStatus = saved ? { text: message, error: false, link: target ? "View it in League night" : "Add the league, center, balls and notes in League night" } : { text: "Saved for this visit only; browser storage is unavailable.", error: true };
+  bowlingLiveStatus = saved ? { text: message, error: false, link: "Add balls and notes in League night" } : { text: "Saved for this visit only; browser storage is unavailable.", error: true };
   bowlingRefresh("bowling-live-status");
 }
 
@@ -350,7 +449,7 @@ function createBowlingTracker(state) {
   back.href = "#bowling";
   heading.append(title, back);
   head.append(heading, score);
-  panel.append(head, createBowlingScoresheet(replay.data, { current: replay.next?.frame ?? -1, label: "Current game" }));
+  panel.append(head, createBowlingLiveMode(state), createBowlingScoresheet(replay.data, { current: replay.next?.frame ?? -1, label: "Current game" }));
 
   const status = element("p", `bowling-status bowling-live-status${bowlingLiveStatus.error ? " error" : ""}`, bowlingLiveStatus.text);
   status.id = "bowling-live-status";
@@ -401,7 +500,8 @@ function createBowlingTracker(state) {
     const save = element("div", "bowling-tracker-save");
     const options = bowlingSaveTargets(state);
     if (!options.some(([value]) => value === bowlingLiveTarget)) {
-      bowlingLiveTarget = state.sessions.find((session) => session.date === bowlingToday() && options.some(([value]) => value === session.id))?.id || "new";
+      const tonight = bowlingLiveSession(state);
+      bowlingLiveTarget = tonight && options.some(([value]) => value === tonight.id) ? tonight.id : "new";
     }
     const select = bowlingSelect("bowling-save-target", options, bowlingLiveTarget);
     select.addEventListener("change", () => { bowlingLiveTarget = select.value; });
