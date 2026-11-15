@@ -660,6 +660,7 @@
     .score-status { margin-block: 5px 3px; color: var(--muted); font-size: .78rem; }
     .score-updated { min-height: 1.2em; margin: 0 0 10px; color: var(--muted); font-size: .68rem; }
     .score-updated.error { color: #e58b84; }
+    .score-countdown { min-height: 1.2em; margin: -6px 0 10px; color: var(--muted); font-size: .68rem; font-variant-numeric: tabular-nums; }
     .followed-teams { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 12px; }
     .followed-teams[hidden] { display: none; }
     .followed-teams-label { margin-right: 2px; color: var(--muted); font-size: .72rem; }
@@ -5441,7 +5442,7 @@
           const competitors = event.competitions?.[0]?.competitors;
           return Array.isArray(competitors) && competitors.length >= 2;
         });
-        section.dataset.refreshInterval = games.some((event) => event.competitions?.[0]?.status?.type?.state === "in") ? "30000" : "300000";
+        section.dataset.refreshInterval = String(scoreRefreshInterval(games));
         section.dataset.lastRefresh = String(Date.now());
         document.dispatchEvent(new CustomEvent("sports-schedule", { detail: { sport: "nfl", events: games, date: dateValue } }));
         const dayLabel = new Date(`${dateValue}T12:00:00`).toLocaleDateString(undefined, {
@@ -6103,6 +6104,19 @@
       return container;
     }
 
+    // How often the scoreboard checks ESPN: every 10 s during live games (about as often as ESPN's free feed
+    // changes), every 30 s from 15 minutes before a scheduled start, and every 5 minutes otherwise.
+    function scoreRefreshInterval(events) {
+      const now = Date.now();
+      const state = (event) => event.competitions?.[0]?.status?.type?.state;
+      if (events.some((event) => state(event) === "in")) return 10_000;
+      if (events.some((event) => {
+        const untilStart = Date.parse(event.date) - now;
+        return state(event) === "pre" && untilStart < 15 * 60_000 && untilStart > -2 * 3600_000;
+      })) return 30_000;
+      return 300_000;
+    }
+
     async function loadNbaGames(section, dateValue, { automatic = false } = {}) {
       const requestId = ++nbaRequestId;
       nbaController?.abort();
@@ -6139,7 +6153,7 @@
         const data = await response.json();
         if (!Array.isArray(data.events)) throw new TypeError("NBA scoreboard response was incomplete.");
         if (requestId !== nbaRequestId) return;
-        section.dataset.refreshInterval = data.events.some((event) => event.competitions?.[0]?.status?.type?.state === "in") ? "30000" : "300000";
+        section.dataset.refreshInterval = String(scoreRefreshInterval(data.events));
         section.dataset.lastRefresh = String(Date.now());
         document.dispatchEvent(new CustomEvent("sports-schedule", { detail: { sport: "nba", events: data.events, date: dateValue } }));
 
@@ -11763,17 +11777,58 @@
     initializeGlassLighting();
     updateClock();
     window.setInterval(updateClock, 1000);
-    window.setInterval(() => {
-      if (currentRoute() !== "sports" || currentSportsPage() !== "sports-scores" || document.visibilityState !== "visible") return;
+    function activeScoreboard() {
+      if (currentRoute() !== "sports" || currentSportsPage() !== "sports-scores") return null;
       const wrapper = view.querySelector(".sports-scoreboards");
-      if (!wrapper) return;
-      const sport = wrapper.dataset.activeSport;
-      const scoreboard = wrapper.querySelector(`.${sport}-scoreboard`);
-      if (!scoreboard || scoreboard.dataset.loading === "true") return;
-      if (Date.now() - Number(scoreboard.dataset.lastRefresh || 0) < Number(scoreboard.dataset.refreshInterval || 30000)) return;
+      const sport = wrapper?.dataset.activeSport;
+      const scoreboard = sport ? wrapper.querySelector(`.${sport}-scoreboard`) : null;
+      return scoreboard ? { sport, scoreboard } : null;
+    }
+
+    function refreshScoreboard({ sport, scoreboard }) {
+      if (scoreboard.dataset.loading === "true") return;
       if (sport === "nfl") loadNflGames(scoreboard, selectedNflDate, { automatic: true });
       else loadNbaGames(scoreboard, selectedNbaDate, { automatic: true });
-    }, 30_000);
+    }
+
+    // Shows when the scores update next, under "Last updated".
+    function updateScoreCountdown() {
+      const active = activeScoreboard();
+      if (!active) return;
+      const { scoreboard } = active;
+      const updated = scoreboard.querySelector(".score-updated");
+      if (!updated) return;
+      let countdown = scoreboard.querySelector(".score-countdown");
+      if (!countdown) {
+        countdown = element("p", "score-countdown", "");
+        updated.after(countdown);
+      }
+      const last = Number(scoreboard.dataset.lastRefresh || 0);
+      const interval = Number(scoreboard.dataset.refreshInterval || 0);
+      if (!last || !interval) { countdown.textContent = ""; return; }
+      if (scoreboard.dataset.loading === "true") { countdown.textContent = "Updating…"; return; }
+      const left = Math.max(0, Math.ceil((last + interval - Date.now()) / 1000));
+      const when = left >= 90 ? `${Math.round(left / 60)} min` : `${left}s`;
+      countdown.textContent = interval <= 10_000 ? `Live · next update in ${when}`
+        : interval <= 30_000 ? `Game starting soon · next update in ${when}` : `Next update in ${when}`;
+    }
+
+    window.setInterval(() => {
+      updateScoreCountdown();
+      if (document.visibilityState !== "visible") return;
+      const active = activeScoreboard();
+      if (!active) return;
+      const { scoreboard } = active;
+      if (Date.now() - Number(scoreboard.dataset.lastRefresh || 0) < Number(scoreboard.dataset.refreshInterval || 30_000)) return;
+      refreshScoreboard(active);
+    }, 1_000);
+
+    // Coming back to the tab refreshes right away if the scores are more than a few seconds old.
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState !== "visible") return;
+      const active = activeScoreboard();
+      if (active && Date.now() - Number(active.scoreboard.dataset.lastRefresh || 0) > 5_000) refreshScoreboard(active);
+    });
     render();
     initializeSync();
   </script>
