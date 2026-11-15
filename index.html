@@ -660,6 +660,7 @@
     .score-status { margin-block: 5px 3px; color: var(--muted); font-size: .78rem; }
     .score-updated { min-height: 1.2em; margin: 0 0 10px; color: var(--muted); font-size: .68rem; }
     .score-updated.error { color: #e58b84; }
+    .score-countdown { min-height: 1.2em; margin: -6px 0 10px; color: var(--muted); font-size: .68rem; font-variant-numeric: tabular-nums; }
     .followed-teams { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 12px; }
     .followed-teams[hidden] { display: none; }
     .followed-teams-label { margin-right: 2px; color: var(--muted); font-size: .72rem; }
@@ -2777,6 +2778,103 @@
       .le-event, .le-event img, .le-artist-card { transition: none; }
       .le-artist-card:hover { transform: none; }
       .le-spinner { animation-duration: 2s; }
+    }
+
+    /* Liquid glass pass: more translucency, a specular rim and sticky chrome over a colored backdrop. */
+    :root {
+      --glass-opacity-standard: 66%;
+      --glass-opacity-prominent: 76%;
+      --glass-blur-standard: 22px;
+      --glass-radius: 20px;
+      --glass-rim: linear-gradient(140deg, rgb(255 255 255 / 50%), rgb(255 255 255 / 8%) 35%, transparent 60%, rgb(255 255 255 / 16%));
+      --glass-inset: inset 0 1px 0 rgb(255 255 255 / 14%), inset 0 -10px 18px -14px rgb(0 0 0 / 40%);
+      --channel-photo-opacity: .32;
+    }
+    :root[data-glass-tone="light"] {
+      --glass-rim: linear-gradient(140deg, rgb(255 255 255 / 95%), rgb(255 255 255 / 30%) 35%, transparent 60%, rgb(255 255 255 / 55%));
+      --glass-inset: inset 0 1px 0 rgb(255 255 255 / 80%), inset 0 -10px 18px -14px rgb(45 61 85 / 18%);
+      --channel-photo-opacity: .22;
+    }
+
+    /* Ambient color field (above the channel photo) gives the blur something to refract. */
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      z-index: -1;
+      pointer-events: none;
+    }
+    body::before {
+      inset: -20vmax;
+      background:
+        radial-gradient(40vmax 30vmax at 15% 10%, color-mix(in srgb, var(--signal) 30%, transparent), transparent 70%),
+        radial-gradient(35vmax 30vmax at 85% 25%, color-mix(in srgb, #c86bff 18%, transparent), transparent 70%),
+        radial-gradient(45vmax 35vmax at 60% 95%, color-mix(in srgb, #2fd3c4 14%, transparent), transparent 70%);
+      filter: blur(40px);
+    }
+    :root[data-glass-tone="light"] body::before { opacity: .6; }
+
+    /* Per-channel photo backdrop. Drop images into assets/backgrounds/ and uncomment the matching line. */
+    body::after {
+      z-index: -2;
+      inset: -24px;
+      background: var(--channel-photo, none) center / cover no-repeat;
+      filter: blur(8px) saturate(125%);
+      opacity: var(--channel-photo-opacity);
+      transition: opacity 500ms var(--glass-ease);
+    }
+    /* :root[data-channel="sports"]   { --channel-photo: url("assets/backgrounds/sports.webp"); } */
+    /* :root[data-channel="betting"]  { --channel-photo: url("assets/backgrounds/betting.webp"); } */
+    /* :root[data-channel="movies"]   { --channel-photo: url("assets/backgrounds/movies.webp"); } */
+    /* :root[data-channel="anime"]    { --channel-photo: url("assets/backgrounds/anime.webp"); } */
+    /* :root[data-channel="games"]    { --channel-photo: url("assets/backgrounds/games.webp"); } */
+    :root[data-channel="politics"] { --channel-photo: url("assets/backgrounds/politics.webp"); }
+    /* :root[data-channel="bowling"]  { --channel-photo: url("assets/backgrounds/bowling.webp"); } */
+    /* :root[data-channel="music"]    { --channel-photo: url("assets/backgrounds/music.webp"); } */
+    /* :root[data-channel="creator"]  { --channel-photo: url("assets/backgrounds/creator.webp"); } */
+    /* :root[data-channel="live"]     { --channel-photo: url("assets/backgrounds/live.webp"); } */
+    /* K-pop uses the featured release's album art, which the script sets as --kpop-art. */
+    :root[data-channel="kpop"] { --channel-photo: var(--kpop-art, none); }
+    :root[data-channel="kpop"] body::after { filter: blur(28px) saturate(140%); }
+
+    /* Translucent chrome; sticky on screens with room for it. */
+    .masthead { background: color-mix(in srgb, var(--screen) 62%, transparent); }
+    @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .masthead {
+        -webkit-backdrop-filter: blur(24px) saturate(160%);
+        backdrop-filter: blur(24px) saturate(160%);
+      }
+    }
+    @media (min-width: 761px) and (min-height: 600px) {
+      .masthead { position: sticky; top: 0; z-index: 20; }
+      .dial { position: sticky; top: var(--masthead-h, 64px); z-index: 19; }
+    }
+    .dial ul, .dial a { border-radius: 999px; }
+
+    /* Specular rim on elevated glass (not dialogs: their content scrolls and would carry the rim with it). */
+    :is(.dial ul, .scoreboard, .music-hero, .le-hero, .kpop-featured) { position: relative; isolation: isolate; }
+    :is(.dial ul, .scoreboard, .music-hero, .le-hero, .kpop-featured)::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      padding: 1px;
+      border-radius: inherit;
+      background: var(--glass-rim);
+      pointer-events: none;
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask-composite: exclude;
+    }
+
+    .clock, .scoreboard { font-variant-numeric: tabular-nums; }
+
+    @media (prefers-reduced-transparency: reduce) {
+      body::before, body::after { display: none; }
+      .masthead, :is(.dial ul, .scoreboard, .channel-planner, .bet-dashboard, .bet-importer, .musicbrainz, .game-release-calendar, .bowling-panel, .music-panel, .cs-panel, .le-panel) {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background-color: var(--glass-base);
+      }
     }
   </style>
 </head>
@@ -5441,7 +5539,7 @@
           const competitors = event.competitions?.[0]?.competitors;
           return Array.isArray(competitors) && competitors.length >= 2;
         });
-        section.dataset.refreshInterval = games.some((event) => event.competitions?.[0]?.status?.type?.state === "in") ? "30000" : "300000";
+        section.dataset.refreshInterval = String(scoreRefreshInterval(games));
         section.dataset.lastRefresh = String(Date.now());
         document.dispatchEvent(new CustomEvent("sports-schedule", { detail: { sport: "nfl", events: games, date: dateValue } }));
         const dayLabel = new Date(`${dateValue}T12:00:00`).toLocaleDateString(undefined, {
@@ -6103,6 +6201,19 @@
       return container;
     }
 
+    // How often the scoreboard checks ESPN: every 10 s during live games (about as often as ESPN's free feed
+    // changes), every 30 s from 15 minutes before a scheduled start, and every 5 minutes otherwise.
+    function scoreRefreshInterval(events) {
+      const now = Date.now();
+      const state = (event) => event.competitions?.[0]?.status?.type?.state;
+      if (events.some((event) => state(event) === "in")) return 10_000;
+      if (events.some((event) => {
+        const untilStart = Date.parse(event.date) - now;
+        return state(event) === "pre" && untilStart < 15 * 60_000 && untilStart > -2 * 3600_000;
+      })) return 30_000;
+      return 300_000;
+    }
+
     async function loadNbaGames(section, dateValue, { automatic = false } = {}) {
       const requestId = ++nbaRequestId;
       nbaController?.abort();
@@ -6139,7 +6250,7 @@
         const data = await response.json();
         if (!Array.isArray(data.events)) throw new TypeError("NBA scoreboard response was incomplete.");
         if (requestId !== nbaRequestId) return;
-        section.dataset.refreshInterval = data.events.some((event) => event.competitions?.[0]?.status?.type?.state === "in") ? "30000" : "300000";
+        section.dataset.refreshInterval = String(scoreRefreshInterval(data.events));
         section.dataset.lastRefresh = String(Date.now());
         document.dispatchEvent(new CustomEvent("sports-schedule", { detail: { sport: "nba", events: data.events, date: dateValue } }));
 
@@ -9198,6 +9309,9 @@
             image.src = url.href;
             image.alt = imageUrl("album details") ? "Album cover" : "Artist or teaser image";
             image.addEventListener("error", () => image.remove(), { once: true });
+            image.addEventListener("load", () => {
+              if (!signal.aborted) document.documentElement.style.setProperty("--kpop-art", `url("${url.href}")`);
+            }, { once: true });
             media.append(image);
           }).catch((error) => { if (error.name !== "AbortError") console.warn("Could not load featured artwork.", error); });
       }
@@ -11740,6 +11854,7 @@
       mediaLookupController?.abort();
       renderDial(route);
       const channel = channels.find((item) => item.id === route);
+      document.documentElement.dataset.channel = channel ? channel.id : "guide";
       if (channel) renderChannel(channel, route === "sports" ? currentSportsPage() : null);
       else renderGuide();
     }
@@ -11760,20 +11875,65 @@
     creatorOnChange = scheduleCloudSync;
     liveOnChange = scheduleCloudSync;
     window.addEventListener("hashchange", render);
+    const masthead = document.querySelector(".masthead");
+    new ResizeObserver(() => {
+      document.documentElement.style.setProperty("--masthead-h", `${masthead.offsetHeight}px`);
+    }).observe(masthead);
     initializeGlassLighting();
     updateClock();
     window.setInterval(updateClock, 1000);
-    window.setInterval(() => {
-      if (currentRoute() !== "sports" || currentSportsPage() !== "sports-scores" || document.visibilityState !== "visible") return;
+    function activeScoreboard() {
+      if (currentRoute() !== "sports" || currentSportsPage() !== "sports-scores") return null;
       const wrapper = view.querySelector(".sports-scoreboards");
-      if (!wrapper) return;
-      const sport = wrapper.dataset.activeSport;
-      const scoreboard = wrapper.querySelector(`.${sport}-scoreboard`);
-      if (!scoreboard || scoreboard.dataset.loading === "true") return;
-      if (Date.now() - Number(scoreboard.dataset.lastRefresh || 0) < Number(scoreboard.dataset.refreshInterval || 30000)) return;
+      const sport = wrapper?.dataset.activeSport;
+      const scoreboard = sport ? wrapper.querySelector(`.${sport}-scoreboard`) : null;
+      return scoreboard ? { sport, scoreboard } : null;
+    }
+
+    function refreshScoreboard({ sport, scoreboard }) {
+      if (scoreboard.dataset.loading === "true") return;
       if (sport === "nfl") loadNflGames(scoreboard, selectedNflDate, { automatic: true });
       else loadNbaGames(scoreboard, selectedNbaDate, { automatic: true });
-    }, 30_000);
+    }
+
+    // Shows when the scores update next, under "Last updated".
+    function updateScoreCountdown() {
+      const active = activeScoreboard();
+      if (!active) return;
+      const { scoreboard } = active;
+      const updated = scoreboard.querySelector(".score-updated");
+      if (!updated) return;
+      let countdown = scoreboard.querySelector(".score-countdown");
+      if (!countdown) {
+        countdown = element("p", "score-countdown", "");
+        updated.after(countdown);
+      }
+      const last = Number(scoreboard.dataset.lastRefresh || 0);
+      const interval = Number(scoreboard.dataset.refreshInterval || 0);
+      if (!last || !interval) { countdown.textContent = ""; return; }
+      if (scoreboard.dataset.loading === "true") { countdown.textContent = "Updating…"; return; }
+      const left = Math.max(0, Math.ceil((last + interval - Date.now()) / 1000));
+      const when = left >= 90 ? `${Math.round(left / 60)} min` : `${left}s`;
+      countdown.textContent = interval <= 10_000 ? `Live · next update in ${when}`
+        : interval <= 30_000 ? `Game starting soon · next update in ${when}` : `Next update in ${when}`;
+    }
+
+    window.setInterval(() => {
+      updateScoreCountdown();
+      if (document.visibilityState !== "visible") return;
+      const active = activeScoreboard();
+      if (!active) return;
+      const { scoreboard } = active;
+      if (Date.now() - Number(scoreboard.dataset.lastRefresh || 0) < Number(scoreboard.dataset.refreshInterval || 30_000)) return;
+      refreshScoreboard(active);
+    }, 1_000);
+
+    // Coming back to the tab refreshes right away if the scores are more than a few seconds old.
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState !== "visible") return;
+      const active = activeScoreboard();
+      if (active && Date.now() - Number(active.scoreboard.dataset.lastRefresh || 0) > 5_000) refreshScoreboard(active);
+    });
     render();
     initializeSync();
   </script>
