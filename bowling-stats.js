@@ -118,6 +118,93 @@ function bowlingStatsFrames(sessions) {
   return { ...base, ...extra };
 }
 
+// ---------- By ball ----------
+
+// Per-ball numbers. Throw-level stats (strikes, carry, spares, leaves) come from Score tracker games that
+// recorded a ball; game averages also use League night's starting ball and ball changes for other games.
+function bowlingStatsBalls(sessions, state = bowlingGetState()) {
+  const rows = new Map();
+  const names = {};
+  const row = (id) => {
+    if (!rows.has(id)) {
+      rows.set(id, {
+        id, games: 0, total: 0,
+        firstBalls: 0, strikes: 0, firstPins: 0, pocketKnown: 0, pocketHits: 0, pocketStrikes: 0, splitsLeft: 0,
+        leaves: new Map(),
+        chances: 0, spares: 0, singles: 0, singlesMade: 0, tens: 0, tensMade: 0, sevens: 0, sevensMade: 0
+      });
+    }
+    return rows.get(id);
+  };
+  for (const session of sessions) {
+    let current = session.startBall?.id || "";
+    if (session.startBall) names[current] ||= session.startBall.name;
+    for (const game of session.games) {
+      const replay = game.frames ? bowlingReplayFrames(game.frames) : null;
+      const counts = new Map();
+      if (replay?.complete && game.balls) {
+        Object.assign(names, game.ballNames || {});
+        replay.frames.forEach((frame, index) => frame.throws.forEach((item, slot) => {
+          const id = game.balls[index]?.[slot];
+          if (!id) return;
+          const entry = row(id);
+          if (item.fresh) {
+            counts.set(id, (counts.get(id) || 0) + 1);
+            entry.firstBalls += 1;
+            entry.firstPins += item.knocked;
+            if (item.mask === 0) entry.strikes += 1;
+            else {
+              const leave = entry.leaves.get(item.mask) || { mask: item.mask, times: 0 };
+              leave.times += 1;
+              entry.leaves.set(item.mask, leave);
+              if (item.split) entry.splitsLeft += 1;
+            }
+            const pocket = game.pocket?.[index]?.[slot];
+            if (pocket === 1 || pocket === 0) {
+              entry.pocketKnown += 1;
+              if (pocket === 1) {
+                entry.pocketHits += 1;
+                if (item.mask === 0) entry.pocketStrikes += 1;
+              }
+            }
+          } else {
+            const made = item.mask === 0;
+            entry.chances += 1;
+            if (made) entry.spares += 1;
+            if (bowlingPinCount(item.before) === 1) {
+              entry.singles += 1;
+              if (made) entry.singlesMade += 1;
+              if (item.before === bowlingPinBit(10)) { entry.tens += 1; if (made) entry.tensMade += 1; }
+              if (item.before === bowlingPinBit(7)) { entry.sevens += 1; if (made) entry.sevensMade += 1; }
+            }
+          }
+        }));
+      }
+      // The game counts toward the ball thrown most on first balls, or else the ball in use when it started.
+      const tracked = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+      const owner = tracked || current;
+      if (owner && game.score !== null) {
+        const entry = row(owner);
+        entry.games += 1;
+        entry.total += game.score;
+      }
+      const switched = game.adjustments.filter((adjustment) => adjustment.ball).pop();
+      if (switched) {
+        current = switched.ball.id;
+        names[current] ||= switched.ball.name;
+      }
+    }
+  }
+  return [...rows.values()]
+    .map((entry) => ({
+      ...entry,
+      name: bowlingBallNameFor(entry.id, state, names),
+      average: entry.games ? entry.total / entry.games : null,
+      topLeaves: [...entry.leaves.values()].sort((a, b) => b.times - a.times || a.mask - b.mask).slice(0, 3)
+    }))
+    .sort((a, b) => b.games - a.games || b.firstBalls - a.firstBalls || b.chances - a.chances || a.name.localeCompare(b.name));
+}
+
 // ---------- Rendering ----------
 
 function bowlingStatsSelect(id, label, options, value, key) {
@@ -420,7 +507,7 @@ function createBowlingStatsView() {
     link.href = "#bowling/scorer";
     empty.append(link);
     framePanel.append(empty);
-    root.append(framePanel);
+    root.append(framePanel, createBowlingStatsByBall(sessions, state));
     return root;
   }
   framePanel.append(element("p", "bowling-stats-note", `From ${frames.games} game${frames.games === 1 ? "" : "s"} kept in the Score tracker.`));
@@ -457,6 +544,92 @@ function createBowlingStatsView() {
   pinGrid.append(bowlingStatsPinMap(frames));
   if (frames.leaves.size) pinGrid.append(bowlingStatsLeaves(frames));
   framePanel.append(pinsHead, pinsNote, pinGrid);
-  root.append(framePanel);
+  root.append(framePanel, createBowlingStatsByBall(sessions, state));
   return root;
+}
+
+function bowlingStatsTable(caption, headers, rows) {
+  const wrap = element("div", "bowling-stats-table");
+  const table = element("table", "bowling-leaves");
+  table.append(element("caption", "", caption));
+  const thead = element("thead", "");
+  const headRow = element("tr", "");
+  for (const text of headers) {
+    const cell = element("th", "", text);
+    cell.scope = "col";
+    headRow.append(cell);
+  }
+  thead.append(headRow);
+  const tbody = element("tbody", "");
+  for (const cells of rows) {
+    const line = element("tr", "");
+    cells.forEach((value, index) => {
+      const cell = element(index ? "td" : "th", "", "");
+      if (!index) cell.scope = "row";
+      cell.append(value);
+      line.append(cell);
+    });
+    tbody.append(line);
+  }
+  table.append(thead, tbody);
+  wrap.append(table);
+  return wrap;
+}
+
+function bowlingStatsRate(made, chances) {
+  return chances ? `${bowlingPercent(made, chances)} · ${made}/${chances}` : "—";
+}
+
+function createBowlingStatsByBall(sessions, state) {
+  const panel = bowlingStatsPanel("bowling-stats-balls", "By ball", "Strikes, carry and spares come from Score tracker games with a ball picked. Averages also count League night games by the ball you started with or switched to.");
+  const balls = bowlingStatsBalls(sessions, state);
+  if (!balls.length) {
+    const empty = element("p", "bowling-empty", "Pick a strike ball in the Score tracker, or a starting ball when you log a session, to compare your balls. ");
+    const link = element("a", "", "Open the Score tracker");
+    link.href = "#bowling/scorer";
+    empty.append(link);
+    panel.append(empty);
+    return panel;
+  }
+  const nameCell = (ball, note) => {
+    const span = element("span", "bowling-stats-ball", ball.name);
+    if (note) span.append(element("small", "", ` ${note}`));
+    return span;
+  };
+  const strikeBalls = balls.filter((ball) => ball.games || ball.firstBalls);
+  if (strikeBalls.length) {
+    panel.append(bowlingStatsTable("Scoring and first balls", ["Ball", "Games", "Average", "Strikes", "First ball", "Carry", "Most common leaves"], strikeBalls.map((ball) => [
+      nameCell(ball, ball.games < 5 ? "few games" : ""),
+      String(ball.games),
+      ball.average === null ? "—" : bowlingFormatAverage(Math.round(ball.average * 10) / 10),
+      bowlingStatsRate(ball.strikes, ball.firstBalls),
+      ball.firstBalls ? `${(ball.firstPins / ball.firstBalls).toFixed(1)} pins` : "—",
+      ball.pocketHits ? bowlingStatsRate(ball.pocketStrikes, ball.pocketHits) : ball.firstBalls ? "Not enough data" : "—",
+      ball.topLeaves.length ? ball.topLeaves.map((leave) => `${bowlingLeaveName(leave.mask)} (${leave.times})`).join(", ") : "—"
+    ])));
+  }
+  const spareBalls = balls.filter((ball) => ball.chances);
+  if (spareBalls.length) {
+    panel.append(bowlingStatsTable("Spare shooting", ["Ball", "Spares", "Single pins", "10 pin", "7 pin"], spareBalls.map((ball) => [
+      nameCell(ball, ball.chances < 10 ? "few chances" : ""),
+      bowlingStatsRate(ball.spares, ball.chances),
+      bowlingStatsRate(ball.singlesMade, ball.singles),
+      bowlingStatsRate(ball.tensMade, ball.tens),
+      bowlingStatsRate(ball.sevensMade, ball.sevens)
+    ])));
+  }
+  panel.append(element("p", "bowling-stats-note", "Carry is strikes out of first balls you marked as pocket hits. “Few games” (under 5) and “few chances” (under 10 spare shots) mark numbers that can still swing a lot."));
+  return panel;
+}
+
+// One-line summary for an arsenal ball card.
+function bowlingBallSummary(ballId, state = bowlingGetState()) {
+  const ball = bowlingStatsBalls(state.sessions, state).find((entry) => entry.id === ballId);
+  if (!ball || (!ball.games && !ball.firstBalls && !ball.chances)) return "";
+  return [
+    ball.games ? `Average ${bowlingFormatAverage(Math.round(ball.average * 10) / 10)} in ${ball.games} game${ball.games === 1 ? "" : "s"}` : "",
+    ball.firstBalls ? `${bowlingPercent(ball.strikes, ball.firstBalls)} strikes` : "",
+    ball.pocketHits ? `${bowlingPercent(ball.pocketStrikes, ball.pocketHits)} carry` : "",
+    ball.chances ? `${bowlingPercent(ball.spares, ball.chances)} spares` : ""
+  ].filter(Boolean).join(" · ");
 }

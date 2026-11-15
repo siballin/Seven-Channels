@@ -4,7 +4,7 @@ const store = {};
 const ctx = { localStorage: { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => delete store[k] }, crypto: require('crypto'), structuredClone, console, Intl, Date };
 vm.createContext(ctx);
 const load = (file) => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
-vm.runInContext([load('bowling.js'), load('bowling-scorer.js'), load('bowling-stats.js')].join('\n;\n') + ';this.B={bowlingStatsData,bowlingStatsSessions,bowlingNormalizeSession,bowlingPinBit};', ctx);
+vm.runInContext([load('bowling.js'), load('bowling-scorer.js'), load('bowling-stats.js')].join('\n;\n') + ';this.B={bowlingStatsData,bowlingStatsSessions,bowlingNormalizeSession,bowlingPinBit,bowlingStatsBalls,bowlingNormalizeThrowMeta,bowlingBallSwitches,bowlingNormalizeState};', ctx);
 const B = ctx.B; const eq = (a, b) => assert.strictEqual(JSON.stringify(a), JSON.stringify(b));
 const bit = (...pins) => pins.reduce((mask, pin) => mask | B.bowlingPinBit(pin), 0);
 const X = [0];
@@ -45,4 +45,31 @@ const practice = B.bowlingStatsSessions([s1, s2, s3], { range: 'all', league: 'a
 eq(practice.map((s) => s.id), ['s2']);
 const recent = B.bowlingStatsSessions([s1, s2, s3], { range: '90', league: 'all', type: 'all' }, '2026-03-01');
 eq(recent.map((s) => s.id), ['s1', 's2']);
+// ---- By ball ----
+const state = B.bowlingNormalizeState({ sessions: [], deletedSessionIds: [], balls: [{ id: 'phaze', name: 'Phaze II' }, { id: 'spare', name: 'Spare Ball' }] });
+// Game C: strike ball on first balls, spare ball on second shots; pocket marked on some first balls.
+const gameC = [X, [bit(10), 0], [bit(10), bit(10)], X, [bit(7), 0], X, X, [bit(4, 7, 10), bit(4)], X, [0, 0, 0]];
+const ballsC = gameC.map((frame) => frame.map((_, slot) => slot === 0 ? 'phaze' : 'spare'));
+ballsC[9] = ['phaze', 'phaze', 'phaze'];
+const pocketC = gameC.map((frame, i) => frame.map((_, slot) => slot === 0 && i < 4 ? 1 : null));
+pocketC[2][0] = 0; // missed the pocket in frame 3
+const s4 = session('s4', '2026-02-10', [{ frames: gameC, balls: ballsC, pocket: pocketC, ballNames: { phaze: 'Phaze II', spare: 'Spare Ball' } }, { score: 170 }],
+  { startBall: { id: 'old', name: 'Old Ball' } });
+eq(s4.games[0].balls[1], ['phaze', 'spare']);
+eq(s4.games[0].pocket[2], [0, null]);
+// Meta lines up with frames and drops extras / bad values
+eq(B.bowlingNormalizeThrowMeta([[0], [512, 0]], [['a', 'extra'], ['b', 5]], [[1], ['x', 0]]), { balls: [['a'], ['b', '']], pocket: [[1], [null, 0]] });
+eq(B.bowlingNormalizeThrowMeta([[0]], [['']], [[null]]), null);
+const rows = B.bowlingStatsBalls([s4], state);
+const phaze = rows.find((r) => r.id === 'phaze'); const spare = rows.find((r) => r.id === 'spare'); const old = rows.find((r) => r.id === 'old');
+eq([phaze.games, phaze.total, phaze.firstBalls, phaze.strikes], [1, s4.games[0].score, 12, 8]);
+eq([phaze.pocketKnown, phaze.pocketHits, phaze.pocketStrikes], [4, 3, 2]); // frames 1,2,4 pocket (1 and 4 struck), frame 3 missed
+eq([spare.chances, spare.spares, spare.tens, spare.tensMade, spare.sevens, spare.sevensMade], [4, 2, 2, 1, 1, 1]);
+eq([old.games, old.total], [1, 170]); // untracked game counts toward the starting ball
+eq(phaze.topLeaves.map((l) => l.times), [2, 1, 1]);
+eq(phaze.name, 'Phaze II');
+// Only strike-ball changes are marked, not spare-ball shots
+eq([...B.bowlingBallSwitches(gameC, ballsC).keys()], []);
+const switched = ballsC.map((row) => row.slice()); switched[5][0] = 'spare'; switched[6][0] = 'phaze';
+eq([...B.bowlingBallSwitches(gameC, switched).keys()], [5, 6]);
 console.log('bowling stats ok');

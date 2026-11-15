@@ -2011,10 +2011,23 @@
     .bowling-live-mode .field { max-width: 360px; }
     .bowling-live-mode select { min-height: 44px; }
     .bowling-live-mode .bowling-tracker-hint { margin: 0; }
+    .bowling-live-gear { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 14px; }
+    .bowling-live-gear .field { flex: 1 1 180px; max-width: 260px; }
+    .bowling-live-gear select { min-height: 44px; }
+    .bowling-live-gear .bowling-tracker-hint { flex-basis: 100%; margin: 0; }
+    .bowling-live-pocket { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: .84rem; font-weight: 600; cursor: pointer; }
+    .bowling-live-pocket input { width: 18px; height: 18px; accent-color: var(--signal); }
+    .bowling-pocket-choice { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .84rem; }
+    .bowling-pocket-choice > span { color: var(--muted); font-weight: 700; }
+    .bowling-pocket-choice button { min-height: 40px; }
+    .bowling-pocket-choice button[aria-pressed="true"] { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 20%, var(--surface)); color: var(--ink); }
+    .bowling-pocket-choice small { color: var(--muted); }
+    .bowling-tracker-ball { color: var(--muted); font-weight: 600; }
+    .bowling-sheet-switch { margin-left: 3px; color: var(--signal); font-size: .55rem; vertical-align: 1px; }
     .bowling-live-series { display: grid; grid-template-columns: repeat(auto-fit, minmax(62px, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
     .bowling-live-game { display: grid; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; font-variant-numeric: tabular-nums; }
     .bowling-live-game span { color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-    .bowling-live-game strong { font: 700 1.1rem/1.2 var(--data); }
+    .bowling-live-game strong { font: 700 clamp(.88rem, 3.6vw, 1.1rem)/1.2 var(--data); white-space: nowrap; }
     .bowling-live-game.is-current { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 12%, transparent); }
     .bowling-live-game.is-total { border-style: dashed; }
     .bowling-tracker-save { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
@@ -2075,6 +2088,12 @@
     .bowling-stats-pin { display: grid; place-items: center; align-content: center; width: 54px; height: 54px; border: 2px solid var(--bs-c1); border-radius: 50%; background: color-mix(in srgb, var(--bs-c1) calc(var(--share) * 100%), var(--surface)); color: var(--ink); font-variant-numeric: tabular-nums; }
     .bowling-stats-pin b { font: 700 .95rem/1 var(--data); }
     .bowling-stats-pin small { font-size: .66rem; font-weight: 700; }
+    .bowling-stats-table { margin-top: 12px; overflow-x: auto; }
+    .bowling-stats-table table { min-width: 560px; }
+    .bowling-stats-table td { white-space: nowrap; }
+    .bowling-stats-table td:last-child { white-space: normal; }
+    .bowling-stats-ball small { color: var(--muted); font-size: .7rem; font-weight: 600; }
+    .bowling-ball-summary { color: var(--ink); font-weight: 600; }
     .bowling-stats-more { font-size: .8rem; font-weight: 700; }
     @media (max-width: 900px) {
       .bowling-stats-grid { grid-template-columns: minmax(0, 1fr); }
@@ -2583,6 +2602,9 @@
       .cs-video img, .cs-day { transition: none; }
     }
 
+    .kpop-extra-note { color: var(--muted); font-size: .74rem; }
+    .kpop-extra-source { color: var(--muted); }
+    .kpop-extra-release a.kpop-album-open { text-decoration: none; }
     /* ---------- Live Events ---------- */
     .live-events { --le-c1: #3987e5; --le-c2: #d95926; --le-c3: #199e70; --le-c4: #c98500; --le-c5: #d55181; display: grid; gap: 16px; min-width: 0; }
     :root[data-theme="light"] .live-events { --le-c1: #2a78d6; --le-c2: #eb6834; --le-c3: #1baf7a; --le-c4: #eda100; --le-c5: #e87ba4; }
@@ -3031,6 +3053,54 @@
         console.error("Could not load followed NBA teams.", error);
         showNotice("Your followed NBA teams could not be read. You can still follow teams for this visit.");
         return [];
+      }
+    }
+
+    // K-pop-adjacent artists KPOP OFFICIAL doesn't cover (e.g. XG), with release dates from MusicBrainz,
+    // built into data/kpop-extra.json by scripts/update_kpop_extra.py. They count as followed for you.
+    let kpopExtraPromise = null;
+    function loadKpopExtra() {
+      kpopExtraPromise ||= fetch(new URL("data/kpop-extra.json", location.href))
+        .then((response) => {
+          if (!response.ok) throw new Error(`K-pop extras request failed (${response.status}).`);
+          return response.json();
+        })
+        .then((data) => {
+          const mbid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+          const artists = (Array.isArray(data?.artists) ? data.artists : [])
+            .filter((artist) => typeof artist?.name === "string" && artist.name.trim() && mbid.test(artist.mbid || ""))
+            .map((artist) => ({ name: artist.name.trim().slice(0, 100), mbid: artist.mbid, note: typeof artist.note === "string" ? artist.note.slice(0, 200) : "" }));
+          const known = new Set(artists.map((artist) => artist.mbid));
+          const releases = (Array.isArray(data?.releases) ? data.releases : [])
+            .filter((item) => item && mbid.test(item.id || "") && known.has(item.mbid) && /^\d{4}-\d{2}-\d{2}$/.test(item.date || "") &&
+              typeof item.title === "string" && item.title.trim())
+            .map((item) => ({ id: item.id, title: item.title.trim().slice(0, 200), type: typeof item.type === "string" ? item.type.slice(0, 60) : "",
+              date: item.date, artist: artists.find((artist) => artist.mbid === item.mbid).name, mbid: item.mbid }));
+          return { artists, releases, fetchedAt: typeof data?.fetchedAt === "string" ? data.fetchedAt : "" };
+        })
+        .catch((error) => {
+          console.warn("Could not load K-pop-adjacent releases.", error);
+          kpopExtraPromise = null;
+          return { artists: [], releases: [], fetchedAt: "" };
+        });
+      return kpopExtraPromise;
+    }
+
+    function kpopTitleMentions(title, name) {
+      const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return new RegExp(`(^|[^\\p{L}\\p{N}])${escaped}([^\\p{L}\\p{N}]|$)`, "iu").test(title);
+    }
+
+    // Adds MusicBrainz releases for a month to a date → releases map, skipping any KPOP OFFICIAL already lists that day.
+    function kpopMergeExtra(byDate, year, month, extra) {
+      const prefix = `${year}-${String(month).padStart(2, "0")}-`;
+      for (const release of extra.releases) {
+        if (!release.date.startsWith(prefix)) continue;
+        const items = byDate.get(release.date) || [];
+        if (items.some((item) => kpopTitleMentions(item.title, release.artist))) continue;
+        items.push({ id: `mb:${release.id}`, title: `${release.artist} – ${release.title}`, url: `https://musicbrainz.org/release-group/${release.id}`, artist: null, extra: release });
+        items.sort((a, b) => a.title.localeCompare(b.title));
+        byDate.set(release.date, items);
       }
     }
 
@@ -9001,6 +9071,7 @@
       right.append(news, trending, videos);
 
       let calendarData = null;
+      let kpopExtra = null;
       let searchController;
       signal.addEventListener("abort", () => searchController?.abort(), { once: true });
 
@@ -9029,13 +9100,23 @@
           item.append(identity, remove);
           favoriteList.append(item);
         }
+        for (const artist of kpopExtra?.artists || []) {
+          const item = element("li", "kpop-followed-item");
+          const identity = element("span", "kpop-identity");
+          identity.append(kpopAvatar(artist.name, signal), element("strong", "", artist.name));
+          const note = element("small", "kpop-extra-note", "Added from MusicBrainz");
+          note.title = artist.note || "Not covered by KPOP OFFICIAL; releases come from MusicBrainz.";
+          item.append(identity, note);
+          favoriteList.append(item);
+        }
+        if (kpopExtra?.artists.length) favoriteStatus.hidden = true;
       }
 
       function renderUpcoming() {
         upcomingList.replaceChildren();
         renderFeatured();
         const followed = kpopArtistFollows.filter((artist) => artist.followed);
-        if (!followed.length) {
+        if (!followed.length && !kpopExtra?.artists.length) {
           upcomingStatus.textContent = "Follow artists to see releases in the next three calendar months.";
           return;
         }
@@ -9044,23 +9125,30 @@
           return;
         }
         const today = localDateValue(new Date());
-        const matches = calendarData.releases.filter((release) => release.date >= today && followed.some((artist) =>
+        const horizon = localDateValue(new Date(Date.now() + 92 * 86400000));
+        const listed = calendarData.releases.filter((release) => release.date >= today && followed.some((artist) =>
           release.artists.some((item) => item.taxonomy === artist.taxonomy && item.id === artist.id)
-        )).sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
+        ));
+        const extras = (kpopExtra?.releases || []).filter((release) => release.date >= today && release.date <= horizon &&
+          !calendarData.releases.some((item) => item.date === release.date && kpopTitleMentions(item.title, release.artist)))
+          .map((release) => ({ title: `${release.artist} – ${release.title}`, date: release.date, url: `#music/group/${release.id}`, internal: true, extraArtist: release.artist, artists: [] }));
+        const matches = [...listed, ...extras].sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
         const coverage = `${calendarData.coverage}. Refreshed ${new Date(calendarData.fetchedAt).toLocaleString()}.`;
         upcomingStatus.textContent = matches.length
-          ? `From KPOP OFFICIAL, ${coverage}`
+          ? `From KPOP OFFICIAL${extras.length ? " and MusicBrainz" : ""}, ${coverage}`
           : `No dated releases found for your followed artists, ${coverage}`;
         for (const release of matches.slice(0, 8)) {
           const item = element("li");
           const link = element("a", "kpop-discovery-card kpop-upcoming-card");
           link.href = release.url;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
+          if (!release.internal) {
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+          }
           const date = new Date(`${release.date}T12:00:00`);
           const body = element("span", "kpop-card-body");
           body.append(element("strong", "", release.title), element("small", "", `${new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date)} · ${kpopCountdown(release.date)}`));
-          const matchedArtist = followed.find((artist) => release.artists.some((item) => item.taxonomy === artist.taxonomy && item.id === artist.id));
+          const matchedArtist = release.extraArtist ? { name: release.extraArtist } : followed.find((artist) => release.artists.some((item) => item.taxonomy === artist.taxonomy && item.id === artist.id));
           if (matchedArtist) link.append(kpopAvatar(matchedArtist.name, signal));
           link.append(body);
           item.append(link);
@@ -9327,6 +9415,12 @@
       }
       renderFavorites();
       loadCalendarActivity();
+      loadKpopExtra().then((data) => {
+        if (signal.aborted || !left.isConnected) return;
+        kpopExtra = data;
+        renderFavorites();
+        renderUpcoming();
+      });
       loadSidebarFeeds();
       return { left, right, featured };
     }
@@ -9664,6 +9758,34 @@
         return match && Number.isSafeInteger(Number(match.collectionId)) ? loadAppleTracks(Number(match.collectionId), signal) : [];
       }
 
+      // A release added from MusicBrainz: cover from the Cover Art Archive, credits in Music Lab.
+      function kpopExtraReleaseRow(release) {
+        const row = element("li", "game-calendar-release kpop-extra-release");
+        const images = element("div", "kpop-release-images");
+        const figure = element("figure", "kpop-release-image");
+        const image = element("img", "");
+        image.src = `https://coverartarchive.org/release-group/${release.id}/front-250`;
+        image.alt = `${release.title} cover`;
+        image.loading = "lazy";
+        image.addEventListener("error", () => figure.replaceChildren(element("span", "kpop-release-image-placeholder", "Not available")), { once: true });
+        figure.append(image, element("figcaption", "", "Album cover"));
+        images.append(figure);
+        const copy = element("div", "game-calendar-release-copy");
+        copy.append(element("span", "kpop-kicker", release.artist));
+        const title = element("a", "kpop-album-open", release.title);
+        title.href = `#music/group/${release.id}`;
+        copy.append(title, element("small", "", `${formatDate(release.date)}${release.type ? ` · ${release.type}` : ""}`));
+        const links = element("small", "kpop-extra-source", "");
+        const mb = element("a", "", "MusicBrainz ↗");
+        mb.href = `https://musicbrainz.org/release-group/${release.id}`;
+        mb.target = "_blank";
+        mb.rel = "noopener noreferrer";
+        links.append("Added from ", mb, " · credits in Music Lab");
+        copy.append(links);
+        row.append(images, copy);
+        return row;
+      }
+
       function openListedRelease(item, opener) {
         openTrackDrawer({
           title: item.title,
@@ -9974,6 +10096,10 @@
         const list = element("ul", "game-calendar-release-list");
         const imageJobs = [];
         for (const item of items) {
+          if (item.extra) {
+            list.append(kpopExtraReleaseRow(item.extra));
+            continue;
+          }
           const row = element("li", "game-calendar-release");
           const images = element("div", "kpop-release-images");
           const copy = element("div", "game-calendar-release-copy");
@@ -10144,8 +10270,12 @@
             loadedReleases.set(date, items);
           }
           for (const items of loadedReleases.values()) items.sort((a, b) => a.title.localeCompare(b.title));
+          const extra = await loadKpopExtra();
+          if (requestId !== monthRequestId || !section.isConnected) return;
+          kpopMergeExtra(loadedReleases, year, month, extra);
           const shown = all.length - omitted;
-          const summary = `${shown} listed release${shown === 1 ? "" : "s"}${omitted ? ` · ${omitted} could not be displayed because their date or details were unclear` : ""}.`;
+          const added = [...loadedReleases.values()].flat().filter((item) => item.extra).length;
+          const summary = `${shown} listed release${shown === 1 ? "" : "s"}${added ? ` · ${added} added from MusicBrainz` : ""}${omitted ? ` · ${omitted} could not be displayed because their date or details were unclear` : ""}.`;
           if (omitted) console.warn(`${omitted} K-pop releases had ambiguous or invalid calendar data.`);
           if (background && activityVersion !== activityAtStart &&
             JSON.stringify([...loadedReleases]) !== JSON.stringify([...releasesByDate])) {

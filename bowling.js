@@ -157,7 +157,16 @@ function bowlingNormalizeSession(value) {
       result: bowlingText(adjustment?.result, bowlingLimits.result)
     })).filter((adjustment) => adjustment.ball || adjustment.move || adjustment.result)
     };
-    if (frames) record.frames = frames;
+    if (frames) {
+      record.frames = frames;
+      // Which ball was thrown and whether it hit the pocket, per throw, when recorded in the Score tracker.
+      const meta = typeof bowlingNormalizeThrowMeta === "function" ? bowlingNormalizeThrowMeta(frames, game.balls, game.pocket) : null;
+      if (meta) {
+        const ids = new Set(meta.balls.flat().filter(Boolean));
+        const names = game.ballNames && typeof game.ballNames === "object" ? game.ballNames : {};
+        Object.assign(record, meta, { ballNames: Object.fromEntries([...ids].map((id) => [id, bowlingText(names[id], bowlingLimits.ballName) || "Unnamed ball"])) });
+      }
+    }
     return record;
   });
   return {
@@ -397,7 +406,7 @@ function bowlingDraftFromSession(session) {
 
 function bowlingSessionUsesBall(session, ballId) {
   return session.startBall?.id === ballId ||
-    session.games.some((game) => game.adjustments.some((adjustment) => adjustment.ball?.id === ballId));
+    session.games.some((game) => game.adjustments.some((adjustment) => adjustment.ball?.id === ballId) || game.balls?.some((row) => row.includes(ballId)));
 }
 
 // Every ball known from the arsenal or from recorded sessions, active first.
@@ -783,7 +792,9 @@ function bowlingSaveDraft(form) {
     const savedGame = existing?.games.find((saved) => saved.id === game.id);
     const score = bowlingParseScore(game.score).score;
     // Editing a tracked game's total by hand drops its frames, since they no longer add up.
-    const frames = savedGame?.frames && savedGame.score === score ? { frames: savedGame.frames } : {};
+    const frames = savedGame?.frames && savedGame.score === score
+      ? Object.fromEntries(["frames", "balls", "pocket", "ballNames"].filter((key) => savedGame[key]).map((key) => [key, savedGame[key]]))
+      : {};
     return {
       ...frames,
       id: game.id,
@@ -1011,7 +1022,7 @@ function createBowlingSessionCard(session, ballsById) {
     if (!game.frames) return;
     const details = element("details", "bowling-session-frames");
     details.append(element("summary", "", `Game ${index + 1} frame by frame`),
-      createBowlingScoresheet(game.frames, { label: `Game ${index + 1} scoresheet` }));
+      createBowlingScoresheet(game.frames, { label: `Game ${index + 1} scoresheet`, balls: game.balls, ballNames: game.ballNames }));
     card.append(details);
   });
   if (session.startBall) card.append(bowlingBallLine("Started with", session.startBall, ballsById));
@@ -1270,6 +1281,14 @@ function createBowlingArsenal(state) {
     if (ball.catalog) info.append(element("small", "bowling-ball-catalog", bowlingCatalogSummary(ball.catalog)));
     const used = state.sessions.filter((session) => bowlingSessionUsesBall(session, ball.id)).length;
     if (used) info.append(element("small", "", `Used in ${used} session${used === 1 ? "" : "s"}`));
+    const summary = typeof bowlingBallSummary === "function" ? bowlingBallSummary(ball.id, state) : "";
+    if (summary) {
+      const line = element("small", "bowling-ball-summary", summary);
+      const more = element("a", "", "Stats");
+      more.href = "#bowling/stats";
+      line.append(" · ", more);
+      info.append(line);
+    }
     const buttons = element("div", "item-footer");
     if (!ball.catalog) {
       const find = element("a", "bowling-find-specs", "Find specs");

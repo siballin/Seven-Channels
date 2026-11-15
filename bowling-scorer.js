@@ -146,29 +146,72 @@ function bowlingThrowMark(item) {
   return item.knocked === 0 ? "-" : String(item.knocked);
 }
 
+// ---------- Ball and pocket for each throw (kept alongside a tracked game's frames) ----------
+
+// Lines up per-throw ball IDs ("" = not set) and pocket hits (1, 0 or null = not recorded) with the frames.
+// Returns null when nothing was recorded, unless keepEmpty is set (the game in progress keeps its shape).
+function bowlingNormalizeThrowMeta(frames, balls, pocket, { keepEmpty = false } = {}) {
+  if (!Array.isArray(frames)) return null;
+  const ballRows = Array.isArray(balls) ? balls : [];
+  const pocketRows = Array.isArray(pocket) ? pocket : [];
+  const result = {
+    balls: frames.map((frame, index) => frame.map((_, slot) => {
+      const value = ballRows[index]?.[slot];
+      return typeof value === "string" ? value.slice(0, 80) : "";
+    })),
+    pocket: frames.map((frame, index) => frame.map((_, slot) => {
+      const value = pocketRows[index]?.[slot];
+      return value === 1 || value === 0 ? value : null;
+    }))
+  };
+  const any = result.balls.some((row) => row.some(Boolean)) || result.pocket.some((row) => row.some((value) => value !== null));
+  return any || keepEmpty ? result : null;
+}
+
+// A ball's current name, falling back to the name saved with the game.
+function bowlingBallNameFor(id, state = bowlingGetState(), names = {}) {
+  if (!id) return "";
+  return state.balls.find((ball) => ball.id === id)?.name || names[id] || "Unknown ball";
+}
+
 // ---------- Live game (kept on this device until it's saved to a session) ----------
 
 function bowlingLoadLive() {
   if (bowlingLive) return bowlingLive;
   let frames = [];
   let mode = null;
+  let meta = { balls: [], pocket: [] };
+  let gear = { strikeBall: "", spareBall: "", trackPocket: false };
   try {
     const saved = JSON.parse(localStorage.getItem(bowlingLiveKey) || "null");
     if (saved && Array.isArray(saved.frames)) frames = bowlingReplayFrames(saved.frames).data;
+    meta = bowlingNormalizeThrowMeta(frames, saved?.balls, saved?.pocket) || { balls: [], pocket: [] };
+    gear = {
+      strikeBall: typeof saved?.strikeBall === "string" ? saved.strikeBall.slice(0, 80) : "",
+      spareBall: typeof saved?.spareBall === "string" ? saved.spareBall.slice(0, 80) : "",
+      trackPocket: saved?.trackPocket === true
+    };
     if (saved?.mode && bowlingSessionTypes.some(([type]) => type === saved.mode.type)) {
       mode = { type: saved.mode.type, league: saved.mode.type === "league" && typeof saved.mode.league === "string" ? saved.mode.league.slice(0, 80) : "" };
     }
   } catch (error) {
     console.error("Could not read the game in progress.", error);
   }
-  bowlingLive = { frames, mode };
+  if (!meta.balls.length) meta = { balls: frames.map((frame) => frame.map(() => "")), pocket: frames.map((frame) => frame.map(() => null)) };
+  bowlingLive = { frames, mode, ...meta, ...gear, pocketChoice: null };
   return bowlingLive;
 }
 
 function bowlingStoreLive() {
   try {
-    if (bowlingLive.frames.length || bowlingLive.mode) localStorage.setItem(bowlingLiveKey, JSON.stringify({ frames: bowlingLive.frames, mode: bowlingLive.mode, updatedAt: new Date().toISOString() }));
-    else localStorage.removeItem(bowlingLiveKey);
+    const live = bowlingLive;
+    if (live.frames.length || live.mode || live.strikeBall || live.trackPocket) {
+      localStorage.setItem(bowlingLiveKey, JSON.stringify({
+        frames: live.frames, balls: live.balls, pocket: live.pocket, mode: live.mode,
+        strikeBall: live.strikeBall, spareBall: live.spareBall, trackPocket: live.trackPocket,
+        updatedAt: new Date().toISOString()
+      }));
+    } else localStorage.removeItem(bowlingLiveKey);
   } catch (error) {
     console.error("Could not save the game in progress.", error);
   }
@@ -178,11 +221,16 @@ function bowlingRecordThrow(standing) {
   const live = bowlingLoadLive();
   const replay = bowlingReplayFrames(live.frames);
   if (!replay.next) return;
-  const { frame, before } = replay.next;
+  const { frame, before, fresh } = replay.next;
   const frames = replay.data;
   if (!frames[frame]) frames[frame] = [];
   frames[frame].push(standing & before);
+  for (const key of ["balls", "pocket"]) if (!live[key][frame]) live[key][frame] = [];
+  live.balls[frame].push(fresh ? live.strikeBall : live.spareBall || live.strikeBall);
+  live.pocket[frame].push(fresh && live.trackPocket && live.pocketChoice !== null ? (live.pocketChoice ? 1 : 0) : null);
   live.frames = bowlingReplayFrames(frames).data;
+  Object.assign(live, bowlingNormalizeThrowMeta(live.frames, live.balls, live.pocket, { keepEmpty: true }));
+  live.pocketChoice = null;
   bowlingLiveSelection = 0;
   bowlingLiveStatus = { text: "", error: false };
   bowlingLiveConfirmReset = false;
@@ -196,13 +244,19 @@ function bowlingUndoThrow() {
   frames[frames.length - 1].pop();
   if (!frames[frames.length - 1].length) frames.pop();
   live.frames = frames;
+  Object.assign(live, bowlingNormalizeThrowMeta(frames, live.balls, live.pocket, { keepEmpty: true }));
+  live.pocketChoice = null;
   bowlingLiveSelection = 0;
   bowlingLiveStatus = { text: "", error: false };
   bowlingStoreLive();
 }
 
 function bowlingResetLive() {
-  bowlingLoadLive().frames = [];
+  const live = bowlingLoadLive();
+  live.frames = [];
+  live.balls = [];
+  live.pocket = [];
+  live.pocketChoice = null;
   bowlingLiveSelection = 0;
   bowlingLiveConfirmReset = false;
   bowlingStoreLive();
@@ -237,6 +291,50 @@ function bowlingLiveSession(state, mode = bowlingLiveMode(state)) {
     && (mode.type !== "league" || (session.league?.id || "") === (mode.league || ""))) || null;
 }
 
+// Strike ball, spare ball and pocket tracking for the throws that follow.
+function createBowlingLiveGear(state) {
+  const live = bowlingLoadLive();
+  const gear = element("div", "bowling-live-gear");
+  const active = state.balls.filter((ball) => !ball.archived || ball.id === live.strikeBall || ball.id === live.spareBall);
+  if (!active.length) {
+    const hint = element("p", "bowling-tracker-hint", "");
+    const link = element("a", "", "Add the balls you carry");
+    link.href = "#bowling";
+    link.addEventListener("click", () => requestAnimationFrame(() => document.getElementById("bowling-ball-name")?.focus()));
+    hint.append(link, " in your arsenal to track stats by ball.");
+    gear.append(hint);
+  } else {
+    const options = active.map((ball) => [ball.id, ball.archived ? `${ball.name} (retired)` : ball.name]);
+    const strike = bowlingSelect("bowling-live-strike-ball", [["", "Not set"], ...options], live.strikeBall);
+    strike.addEventListener("change", () => {
+      live.strikeBall = strike.value;
+      bowlingStoreLive();
+      bowlingRefresh(strike.id);
+    });
+    const spare = bowlingSelect("bowling-live-spare-ball", [["", "Same as strike ball"], ...options], live.spareBall);
+    spare.addEventListener("change", () => {
+      live.spareBall = spare.value;
+      bowlingStoreLive();
+      bowlingRefresh(spare.id);
+    });
+    gear.append(bowlingField("Strike ball", strike), bowlingField("Spare ball", spare));
+  }
+  const pocketField = element("label", "bowling-live-pocket");
+  const pocket = element("input", "");
+  pocket.type = "checkbox";
+  pocket.id = "bowling-live-track-pocket";
+  pocket.checked = live.trackPocket;
+  pocket.addEventListener("change", () => {
+    live.trackPocket = pocket.checked;
+    live.pocketChoice = null;
+    bowlingStoreLive();
+    bowlingRefresh(pocket.id);
+  });
+  pocketField.append(pocket, " Track pocket hits (for carry %)");
+  gear.append(pocketField);
+  return gear;
+}
+
 // Opens the Score tracker set to a league (used by the League tracker).
 function bowlingScoreForLeague(league) {
   bowlingSetLiveMode({ type: "league", league: league.id });
@@ -268,6 +366,8 @@ function createBowlingLiveMode(state) {
     wrap.append(hint);
   }
 
+  wrap.append(createBowlingLiveGear(state));
+
   // Tonight's series so far, with the game being bowled now.
   const session = bowlingLiveSession(state, mode);
   const scored = session ? session.games.filter((game) => game.score !== null) : [];
@@ -295,8 +395,29 @@ function createBowlingLiveMode(state) {
 
 // ---------- Scoresheet ----------
 
-function createBowlingScoresheet(frames, { current = -1, label = "Scoresheet" } = {}) {
+// Frames where you changed strike balls (a first ball thrown with a different ball than the last first ball).
+// Spare-ball shots aren't marked, since switching to a spare ball is routine.
+function bowlingBallSwitches(frames, balls) {
+  const switches = new Map();
+  let previous = "";
+  bowlingReplayFrames(frames).frames.forEach((frame, index) => {
+    frame.throws.forEach((item, slot) => {
+      const id = balls?.[index]?.[slot];
+      if (!item.fresh || !id) return;
+      if (previous && id !== previous) {
+        if (!switches.has(index)) switches.set(index, []);
+        switches.get(index).push(id);
+      }
+      previous = id;
+    });
+  });
+  return switches;
+}
+
+function createBowlingScoresheet(frames, { current = -1, label = "Scoresheet", balls = null, ballNames = {} } = {}) {
   const replay = bowlingReplayFrames(frames);
+  const switches = bowlingBallSwitches(frames, balls);
+  const state = switches.size ? bowlingGetState() : null;
   const sheet = element("ol", "bowling-sheet");
   sheet.setAttribute("aria-label", label);
   for (let index = 0; index < 10; index++) {
@@ -321,8 +442,17 @@ function createBowlingScoresheet(frames, { current = -1, label = "Scoresheet" } 
     total.setAttribute("aria-hidden", "true");
     const head = element("span", "bowling-sheet-number", String(index + 1));
     head.setAttribute("aria-hidden", "true");
+    const switched = switches.get(index);
+    const switchText = switched ? [...new Set(switched)].map((id) => bowlingBallNameFor(id, state, ballNames)).join(", ") : "";
+    if (switched) {
+      cell.classList.add("has-switch");
+      const flag = element("span", "bowling-sheet-switch", "●");
+      flag.title = `Switched to ${switchText}`;
+      flag.setAttribute("aria-hidden", "true");
+      head.append(flag);
+    }
     cell.append(head, marks, total);
-    const sr = element("span", "bowling-sr", `Frame ${index + 1}: ${spoken.length ? spoken.join(", ") : "not bowled"}${frame?.cumulative == null ? "" : `, total ${frame.cumulative}`}`);
+    const sr = element("span", "bowling-sr", `Frame ${index + 1}: ${spoken.length ? spoken.join(", ") : "not bowled"}${frame?.cumulative == null ? "" : `, total ${frame.cumulative}`}${switched ? `, switched to ${switchText}` : ""}`);
     cell.append(sr);
     sheet.append(cell);
   }
@@ -397,7 +527,8 @@ function bowlingSaveTargets(state) {
 }
 
 function bowlingSaveLiveGame() {
-  const replay = bowlingReplayFrames(bowlingLoadLive().frames);
+  const live = bowlingLoadLive();
+  const replay = bowlingReplayFrames(live.frames);
   if (!replay.complete) return;
   const state = bowlingGetState();
   const target = bowlingLiveTarget && bowlingLiveTarget !== "new" ? state.sessions.find((session) => session.id === bowlingLiveTarget) : null;
@@ -405,11 +536,13 @@ function bowlingSaveLiveGame() {
   let message = "";
   let number = 1;
   const saved = bowlingCommit((next, now) => {
-    const game = { id: bowlingId("game"), score: replay.total, adjustments: [], frames: replay.data };
+    const meta = bowlingNormalizeThrowMeta(replay.data, live.balls, live.pocket);
+    const extra = meta ? { ...meta, ballNames: Object.fromEntries([...new Set(meta.balls.flat().filter(Boolean))].map((id) => [id, bowlingBallNameFor(id, next)])) } : {};
+    const game = { id: bowlingId("game"), score: replay.total, adjustments: [], frames: replay.data, ...extra };
     if (target) {
       const session = next.sessions.find((item) => item.id === target.id);
       const slot = session.games.findIndex((item) => item.score === null && !item.frames);
-      if (slot >= 0) session.games[slot] = { ...session.games[slot], score: replay.total, frames: replay.data };
+      if (slot >= 0) session.games[slot] = { ...session.games[slot], score: replay.total, frames: replay.data, ...extra };
       else session.games.push(game);
       session.updatedAt = now;
       number = slot >= 0 ? slot + 1 : session.games.length;
@@ -449,7 +582,7 @@ function createBowlingTracker(state) {
   back.href = "#bowling";
   heading.append(title, back);
   head.append(heading, score);
-  panel.append(head, createBowlingLiveMode(state), createBowlingScoresheet(replay.data, { current: replay.next?.frame ?? -1, label: "Current game" }));
+  panel.append(head, createBowlingLiveMode(state), createBowlingScoresheet(replay.data, { current: replay.next?.frame ?? -1, label: "Current game", balls: bowlingLoadLive().balls }));
 
   const status = element("p", `bowling-status bowling-live-status${bowlingLiveStatus.error ? " error" : ""}`, bowlingLiveStatus.text);
   status.id = "bowling-live-status";
@@ -485,7 +618,30 @@ function createBowlingTracker(state) {
       bowlingRefresh("bowling-record");
     });
     actions.append(record, miss);
-    panel.append(where, hint, createBowlingPinDeck(next), actions);
+    const live = bowlingLoadLive();
+    const pocketRow = element("div", "bowling-pocket-choice");
+    if (next.fresh && live.trackPocket) {
+      pocketRow.setAttribute("role", "group");
+      pocketRow.setAttribute("aria-label", "Where the ball hit");
+      pocketRow.append(element("span", "", "Hit:"));
+      for (const [value, text, id] of [[true, "Pocket", "bowling-pocket-yes"], [false, "Missed pocket", "bowling-pocket-no"]]) {
+        const button = element("button", "secondary", text);
+        button.type = "button";
+        button.id = id;
+        button.setAttribute("aria-pressed", String(live.pocketChoice === value));
+        button.addEventListener("click", () => {
+          live.pocketChoice = live.pocketChoice === value ? null : value;
+          bowlingRefresh(id);
+        });
+        pocketRow.append(button);
+      }
+      pocketRow.append(element("small", "", live.pocketChoice === null ? "Optional · skipped throws don't count toward carry" : ""));
+    }
+    const ballNow = next.fresh ? live.strikeBall : live.spareBall || live.strikeBall;
+    if (ballNow) where.append(element("span", "bowling-tracker-ball", ` · ${bowlingBallNameFor(ballNow, state)}`));
+    panel.append(where, hint, createBowlingPinDeck(next));
+    if (pocketRow.childNodes.length) panel.append(pocketRow);
+    panel.append(actions);
     panel.addEventListener("keydown", (event) => {
       if (event.target.closest("select, input, textarea") || event.ctrlKey || event.metaKey || event.altKey) return;
       if (/^[0-9]$/.test(event.key)) {
