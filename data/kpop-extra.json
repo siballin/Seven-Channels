@@ -1,0 +1,94 @@
+{
+ "fetchedAt": "2026-11-15T18:28:13+00:00",
+ "status": "ok",
+ "artists": [
+  {
+   "name": "XG",
+   "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158",
+   "note": "Japanese girl group based in South Korea",
+   "status": "ok"
+  }
+ ],
+ "releases": [
+  {
+   "id": "12098969-aa7b-40a7-820b-00ef35bcee13",
+   "title": "XDM Unidentified Waves",
+   "type": "Album · Remix",
+   "date": "2025-01-31",
+   "artist": "XG",
+   "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158"
+  },
+  {
+   "id": "9cfe3156-b674-442b-a6b6-1ee752968dd4",
+   "title": "IS THIS LOVE",
+   "type": "EP",
+   "date": "2025-03-07",
+   "artist": "XG",
+   "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158"
+  },
+  {
+   "id": "9e61e139-89dc-4e11-b399-8ae1d944ac7c",
+   "title": "IN THE RAIN",
+   "type": "Single",
+   "date": "2025-04-11",
+   "artist": "XG",
+   "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158"
+  },
+  {
+   "id": "7b3fd7c9-c1ce-4246-adb6-7d72e63fae64",
+   "title": "MILLION PLACES",
+   "type": "Single",
+   "date": "2025-05-14",
+   "artist": "XG",
+   "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158"
+  },
+  {
+   "id": "4f777681-894e-41d3-8ca5-1c9b443ade93",
+   "title": "XG 1st WORLD TOUR “The first HOWL” Live",
+   "type": "Album · Live",
+   "date": "2025-08-08",
+   "artist": "XG",
+   "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158"
+  },
+  {
+   "id": "21c11d77-d1c5-45b0-903c-5fc7ec978ed0",
+   "title": "GALA",
+   "type": "Single",
+   "date": "2025-09-19",
+   "artist": "XG",
+   "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158"
+  },
+  {
+   "id": "1e3171d6-7791-41c2-8353-c14f88c99f56",
+   "title": "4 SEASONS",
+   "type": "Single",
+   "date": "2025-12-23",
+   "artist": "XG",
+   "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158"
+  },
+  {
+   "id": "e0f6cb1b-acaa-44d5-904d-aad0bece9eaf",
+   "title": "THE CORE - 核",
+   "type": "Album",
+   "date": "2026-01-23",
+   "artist": "XG",
+   "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158"
+  },
+  {
+   "id": "abe2478a-3f3c-447f-90f2-b313ac646cc4",
+   "title": "HYPNOTIZE",
+   "type": "Single",
+   "date": "2026-02-02",
+   "artist": "XG",
+   "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158"
+  },
+  {
+   "id": "8c465b67-9f01-411e-903c-a3a07336426c",
+   "title": "DEPENDS",
+   "type": "Single",
+   "date": "2026-11-06",
+   "artist": "XG",
+   "mbid": "8dfe067c-ae90-472e-80f2-fcee9be4e158"
+  }
+ ]
+}

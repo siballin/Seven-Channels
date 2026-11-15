@@ -142,6 +142,8 @@ Your library (ratings, saved items, follows, notes, lists, discoveries and credi
 
 ### K-Pop links
 
+**K-pop-adjacent artists:** KPOP OFFICIAL doesn't cover every artist K-pop fans follow (XG is a Japanese group based in South Korea). Artists listed in `scripts/kpop_extra_artists.json` get their releases from MusicBrainz (`scripts/update_kpop_extra.py`, saved to `data/kpop-extra.json` each time the site is published). They appear in the K-Pop release calendar and upcoming releases, labeled as added from MusicBrainz and linked to their credits in Music Lab, and show under your followed artists. XG is also a Music Lab profile (`scripts/music_lab_people.json`).
+
 K-Pop release calendar entries have a **Credits** link: it opens the album in Music Lab when the snapshot has a matching album by that artist, and a Music Lab search (which includes MusicBrainz) otherwise. The MusicBrainz discography browser in K-Pop links each artist and album to Music Lab by its MusicBrainz ID. Music Lab doesn't duplicate the K-Pop release calendar.
 
 ## Creator Studio
@@ -177,6 +179,7 @@ Live Events (`#live`) helps you find concerts, follow artists' tours, plan trips
 
 - **Dashboard** (`#live`): concerts attended, upcoming plans, artists followed, the artist you've seen most, a countdown to your next concert, upcoming shows from artists you follow, recently announced shows (ticket sales that opened in the last 3 weeks or haven't opened yet), shows near your saved location, your past concerts and favorite artists.
 - **Discover** (`#live/discover`): search Ticketmaster by artist, city, country, date range and genre, and filter the results by venue. List and calendar views. Cancelled, postponed and rescheduled shows are labeled.
+- **Default follows:** XG is followed for you the first time Live Events opens in a browser, by MusicBrainz ID. With a Ticketmaster key, it's linked to Ticketmaster automatically when exactly one Ticketmaster artist carries the same MusicBrainz ID; otherwise the artist page asks you to pick. Unfollowing it sticks.
 - **Artists** (`#live/artists`): search for an artist, pick the right match (each candidate shows its genre, number of upcoming shows and MusicBrainz link), and follow it. Follows are stored with Ticketmaster and MusicBrainz IDs, not names. **Import from K-Pop** lists the artists you follow in the K-Pop channel; for each, **Find on Ticketmaster** shows candidates to choose from, so no artist is matched automatically by name. An artist page lists upcoming shows, flags newly announced tours and shows recent setlists.
 - **Event pages** (`#live/event/<id>`): poster, date and local time, lineup with follow buttons, venue with a map, ticket link, a copyable link to the page, and your private plan. **Add to concert journal** fills a journal entry from the event.
 - **Planner** (`#live/planner`): each event can be Interested, Planning, Ticket Purchased, Attending, Attended or Cancelled, with ticket price, extra expenses, currency, seat, travel, hotel, friends going and notes. Statuses are color-coded and labeled with text. Planner details are private and never appear on shared event pages.

@@ -246,6 +246,7 @@ function createLiveTabs(active) {
 }
 
 function createLiveEvents() {
+  liveSeedDefaultFollows();
   const route = liveRoute();
   const root = leEl("div", "live-events");
   root.append(createLiveTabs(route.view));
@@ -320,8 +321,18 @@ function leEventList(events, { compact = false } = {}) {
 // ---------- Dashboard ----------
 
 function liveFollowedEventsLoader() {
-  const follows = liveGetState().follows.filter((follow) => follow.following && follow.tmId).slice(0, 12);
+  const pending = liveGetState().follows.filter((follow) => follow.following && !follow.tmId && follow.mbid);
+  let follows = liveGetState().follows.filter((follow) => follow.following && follow.tmId).slice(0, 12);
   return async () => {
+    // Followed artists without a Ticketmaster match are linked when their MusicBrainz ID matches exactly.
+    for (const follow of pending.slice(0, 4)) {
+      try {
+        const linked = await liveResolveFollow(follow);
+        if (linked && follows.length < 12) follows = [...follows, linked];
+      } catch (error) {
+        console.warn(`Could not match ${follow.name} on Ticketmaster.`, error);
+      }
+    }
     const seen = new Map();
     let cachedAt = Date.now();
     for (const follow of follows) {
@@ -390,7 +401,7 @@ function createLiveDashboard() {
 
   const grid = leEl("div", "le-grid");
   const followed = lePanel("Upcoming from artists you follow", "le-followed-title", "le-span-2");
-  if (!state.follows.some((follow) => follow.following && follow.tmId)) {
+  if (!state.follows.some((follow) => follow.following && (follow.tmId || follow.mbid))) {
     followed.append(leEmpty("Follow artists to see their upcoming shows here.", leLink("Find artists", "#live/artists", "le-text-link")));
   } else {
     followed.append(leSection("followed", liveFollowedEventsLoader(), (value) => {
@@ -402,7 +413,7 @@ function createLiveDashboard() {
 
   const announced = lePanel("Recently announced", "le-announced-title");
   announced.append(leEl("p", "le-hint", "Followed artists’ shows whose public ticket sale opened in the last 3 weeks or opens soon."));
-  if (state.follows.some((follow) => follow.following && follow.tmId)) {
+  if (state.follows.some((follow) => follow.following && (follow.tmId || follow.mbid))) {
     announced.append(leSection("followed", liveFollowedEventsLoader(), (value) => {
       const cutoff = Date.now() - 21 * 86400000;
       const recent = value.events.filter((event) => event.onSale && Date.parse(event.onSale) >= cutoff).sort((a, b) => b.onSale.localeCompare(a.onSale));
@@ -656,6 +667,13 @@ function createLiveArtists() {
 function createLiveArtist(id) {
   const follow = liveGetState().follows.find((item) => item.id === id);
   const wrap = leEl("div", "le-stack");
+  // A MusicBrainz-only follow that has since been matched to Ticketmaster lives under its new ID.
+  const moved = !follow && id.startsWith("mb:") ? liveGetState().follows.find((item) => item.mbid === id.slice(3) && item.following) : null;
+  if (moved) {
+    setTimeout(() => location.replace(`#live/artist/${encodeURIComponent(moved.id)}`), 0);
+    wrap.append(leLoading(`Opening ${moved.name}…`));
+    return wrap;
+  }
   if (!follow) {
     wrap.append(leEmpty("You’re not following this artist.", leLink("Your artists", "#live/artists", "le-text-link")));
     return wrap;
@@ -692,6 +710,28 @@ function createLiveArtist(id) {
         box.append(note);
       }
       box.append(leEventList(value.events));
+      return box;
+    }));
+  } else if (!liveLocal().ticketmasterKey) {
+    shows.append(leNeedsKey("Upcoming shows"));
+  } else if (follow.mbid) {
+    shows.append(leSection(`link:${follow.id}`, async () => {
+      const linked = await liveResolveFollow(follow);
+      return { linked, candidates: linked ? [] : await liveSearchAttractions(follow.name) };
+    }, ({ linked, candidates }) => {
+      if (linked) {
+        setTimeout(() => { location.replace(`#live/artist/${encodeURIComponent(linked.id)}`); }, 0);
+        return leLoading(`Matched ${follow.name} on Ticketmaster by MusicBrainz ID…`);
+      }
+      const box = leEl("div", "le-stack");
+      box.append(leEl("p", "le-hint", candidates.length
+        ? `No Ticketmaster artist carries ${follow.name}’s MusicBrainz ID, so pick the right one to see their shows.`
+        : `Ticketmaster has no artist named ${follow.name} right now.`));
+      if (candidates.length) box.append(leCandidateList(candidates.slice(0, 5), (candidate) => {
+        liveRemove("follows", follow.id);
+        liveFollow({ ...candidate, mbid: candidate.mbid || follow.mbid }, { kpopId: follow.kpopId });
+        location.hash = `#live/artist/${encodeURIComponent(`tm:${candidate.tmId}`)}`;
+      }));
       return box;
     }));
   } else {

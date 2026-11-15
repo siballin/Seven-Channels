@@ -55,6 +55,9 @@ jobs:
       - name: Refresh K-pop calendar preview
         continue-on-error: true
         run: python scripts/update_kpop_releases.py
+      - name: Refresh K-pop-adjacent releases from MusicBrainz
+        continue-on-error: true
+        run: python scripts/update_kpop_extra.py
       - name: Refresh K-pop news and videos
         continue-on-error: true
         run: python scripts/update_kpop_sidebar.py

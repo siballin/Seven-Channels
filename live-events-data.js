@@ -163,6 +163,40 @@ function liveNormalizeFollow(value) {
     following: value.following !== false, updatedAt: liveDateTime(value.updatedAt) };
 }
 
+// Artists followed for you by default (by MusicBrainz ID). Unfollowing or removing one is respected and it isn't re-added.
+const liveDefaultFollows = [{ name: "XG", mbid: "8dfe067c-ae90-472e-80f2-fcee9be4e158" }];
+
+// Seeds once per browser, so an unfollow made on another device isn't undone by a later visit here.
+function liveSeedDefaultFollows() {
+  const seededKey = "seven-channels.live-events-seeded.v1";
+  let seeded = [];
+  try { seeded = JSON.parse(localStorage.getItem(seededKey) || "[]"); } catch { seeded = []; }
+  if (!Array.isArray(seeded)) seeded = [];
+  const state = liveGetState();
+  for (const artist of liveDefaultFollows) {
+    const id = `mb:${artist.mbid}`;
+    if (seeded.includes(artist.mbid)) continue;
+    seeded.push(artist.mbid);
+    if (state.follows.some((follow) => follow.id === id || follow.mbid === artist.mbid) || state.deleted.follows.includes(id)) continue;
+    liveUpsert("follows", { id, name: artist.name, mbid: artist.mbid, tmId: "", image: "", following: true });
+  }
+  try { localStorage.setItem(seededKey, JSON.stringify(seeded)); } catch { /* storage unavailable: seeding may repeat, which is harmless */ }
+}
+
+// Links a follow that only has a MusicBrainz ID to Ticketmaster when exactly one Ticketmaster artist carries
+// the same MusicBrainz ID (a stable-ID match, never a name match). Returns the linked follow, or null.
+async function liveResolveFollow(follow) {
+  if (follow.tmId || !follow.mbid || !liveLocal().ticketmasterKey) return null;
+  const candidates = await liveSearchAttractions(follow.name);
+  const exact = candidates.filter((candidate) => candidate.mbid === follow.mbid);
+  if (exact.length !== 1) return null;
+  const match = exact[0];
+  const linked = { ...follow, id: `tm:${match.tmId}`, tmId: match.tmId, image: follow.image || match.image };
+  liveRemove("follows", follow.id);
+  liveUpsert("follows", linked);
+  return linked;
+}
+
 function liveNormalizePlan(value) {
   if (!value || typeof value.id !== "string" || !value.id) return null;
   const event = liveNormalizeEventSnapshot(value.event);
