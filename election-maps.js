@@ -1,4 +1,5 @@
-// Election maps for the Politics channel: presidential results 1980–2024 and midterms 1982–2026.
+// Election maps for the Politics channel: presidential results 1980–2024 and midterms 1982–2026,
+// plus a side-by-side comparison of every midterm (#politics/elections/midterms).
 // Loaded as a classic script before the main app script; element() comes from the app.
 const electionBase = "data/elections/";
 const electionCache = new Map();
@@ -21,6 +22,7 @@ let electionLastView = "";
 let electionPendingFocus = "";
 
 function electionView() {
+  if (/^#politics\/elections\/midterms$/.test(location.hash)) return { race: "midterms", year: null };
   const match = /^#politics\/elections(?:\/(president|senate|house)(?:\/(\d{4}))?)?$/.exec(location.hash);
   if (!match) return null;
   return { race: match[1] || "", year: match[2] ? Number(match[2]) : null };
@@ -373,6 +375,9 @@ function electionControls(race, year) {
     if (value === race) link.setAttribute("aria-current", "page");
     tabs.append(link);
   }
+  const all = element("a", "", "All midterms");
+  all.href = "#politics/elections/midterms";
+  tabs.append(all);
   const years = electionYears(race);
   const index = years.indexOf(year);
   const stepper = element("div", "election-year");
@@ -440,6 +445,194 @@ function electionSources(data, race) {
   return note;
 }
 
+// ---------- Midterm detail (data/elections/midterm-summary.json, built by scripts/build_midterm_summary.py) ----------
+
+function electionSigned(value) {
+  return value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : "0";
+}
+
+function electionPartyShort(party) {
+  return party === "D" ? "Democrats" : party === "R" ? "Republicans" : "others";
+}
+
+function electionSwingText(swing) {
+  if (swing === null || swing === undefined) return "";
+  if (Math.abs(swing) < 0.05) return "no change from the last midterm";
+  return `${Math.abs(swing).toFixed(1)}-point swing toward ${swing > 0 ? "Democrats" : "Republicans"} since the last midterm`;
+}
+
+function electionMarginLabel(margin) {
+  if (margin === null || margin === undefined) return "";
+  return margin === 0 ? "tied" : `${margin > 0 ? "D" : "R"}+${Math.abs(margin).toFixed(1)}`;
+}
+
+// "Midterm at a glance" for one year's House or Senate page.
+function electionMidtermGlance(entry) {
+  const box = element("section", "election-glance");
+  box.setAttribute("aria-label", `${entry.year} midterm at a glance`);
+  const president = entry.president;
+  const party = president?.party;
+  const head = element("div", "election-glance-head");
+  head.append(element("strong", "", `${entry.year} midterm at a glance`));
+  const all = element("a", "", "Compare all midterms");
+  all.href = "#politics/elections/midterms";
+  head.append(all);
+  box.append(head);
+  const facts = element("dl", "election-glance-facts");
+  const fact = (label, value, note, cls = "") => {
+    const item = element("div", `election-glance-fact ${cls}`.trim());
+    item.append(element("dt", "", label), element("dd", "", value));
+    if (note) item.append(element("small", "", note));
+    facts.append(item);
+  };
+  if (president) fact("President", president.name, `${electionPartyNames[party] || "Other"} · ${electionOrdinal(entry.congress)} Congress elected`, `election-border-${party === "D" ? "d" : party === "R" ? "r" : "o"}`);
+  const house = entry.house;
+  if (house.presidentPartyChange !== null && house.presidentPartyChange !== undefined) {
+    const prelim = entry.preliminary && house.uncalled;
+    fact("President’s party, House", `${electionSigned(house.presidentPartyChange)} seats`,
+      prelim ? `So far, with ${house.uncalled} races not called` : house.presidentPartyChange < 0 ? "Seats lost" : house.presidentPartyChange > 0 ? "Seats gained" : "No net change");
+  }
+  const senate = entry.senate;
+  if (senate.presidentPartyChange !== null && senate.presidentPartyChange !== undefined) {
+    fact("President’s party, Senate", `${electionSigned(senate.presidentPartyChange)} seats`, entry.preliminary ? "From seats that changed party so far" : `${senate.racesUp} seats were up`);
+  }
+  if (house.share) {
+    fact("House votes", `D ${house.share.D.toFixed(1)}% · R ${house.share.R.toFixed(1)}%`, [electionMarginLabel(house.margin), electionSwingText(house.swing)].filter(Boolean).join(" · "));
+  } else {
+    fact("House votes", "Not counted yet", entry.preliminary ? "Vote totals arrive as states certify" : "");
+  }
+  box.append(facts);
+  if (senate.flips.length) {
+    const flips = element("p", "politics-meta election-glance-flips");
+    const gains = ["D", "R"].map((p) => senate.flipGains[p] > 0 ? `${electionPartyShort(p)} ${electionSigned(senate.flipGains[p])}` : "").filter(Boolean).join(", ");
+    flips.append(element("strong", "", `Senate seats that flipped${gains ? ` (${gains})` : ""}: `),
+      senate.flips.map((flip) => `${electionStateNames[flip.state] || flip.state}${flip.special ? " (special)" : ""} ${flip.from || "?"}→${flip.to}`).join(", "));
+    box.append(flips);
+  }
+  return box;
+}
+
+function electionChangeChart(entries, key, title) {
+  const ns = "http://www.w3.org/2000/svg";
+  const values = entries.map((entry) => entry[key].presidentPartyChange).filter((value) => value !== null && value !== undefined);
+  const extent = Math.max(10, ...values.map(Math.abs));
+  const width = 640;
+  const height = 230;
+  const pad = { top: 18, bottom: 34, left: 38, right: 8 };
+  const zero = pad.top + (height - pad.top - pad.bottom) * (extent / (extent * 2));
+  const scale = (height - pad.top - pad.bottom) / (extent * 2);
+  const step = (width - pad.left - pad.right) / entries.length;
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("class", "election-change-chart");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", `${title}: ${entries.map((entry) => `${entry.year} ${electionSigned(entry[key].presidentPartyChange ?? 0)}`).join(", ")}`);
+  const node = (tag, attrs, text) => {
+    const el = document.createElementNS(ns, tag);
+    for (const [name, value] of Object.entries(attrs)) el.setAttribute(name, value);
+    if (text !== undefined) el.textContent = text;
+    return el;
+  };
+  for (const value of [extent, 0, -extent]) {
+    const y = zero - value * scale;
+    svg.append(node("line", { x1: pad.left, x2: width - pad.right, y1: y, y2: y, class: value ? "election-chart-grid" : "election-chart-zero" }),
+      node("text", { x: pad.left - 6, y: y + 4, "text-anchor": "end", class: "election-chart-axis" }, electionSigned(Math.round(value))));
+  }
+  entries.forEach((entry, index) => {
+    const value = entry[key].presidentPartyChange;
+    const x = pad.left + index * step + step * 0.18;
+    const barWidth = step * 0.64;
+    const party = entry.president?.party === "D" ? "d" : "r";
+    if (value !== null && value !== undefined) {
+      const y = value >= 0 ? zero - value * scale : zero;
+      const bar = node("rect", { x, y, width: barWidth, height: Math.max(1, Math.abs(value) * scale), rx: 3,
+        class: `election-chart-bar election-fill-${party}3${entry.preliminary ? " is-preliminary" : ""}` });
+      bar.append(node("title", {}, `${entry.year}: ${entry.president?.name || ""}’s party ${electionSigned(value)}${entry.preliminary ? " (preliminary)" : ""}`));
+      svg.append(bar, node("text", { x: x + barWidth / 2, y: value >= 0 ? y - 4 : y + Math.abs(value) * scale + 12, "text-anchor": "middle", class: "election-chart-value" }, electionSigned(value)));
+    }
+    svg.append(node("text", { x: x + barWidth / 2, y: height - 12, "text-anchor": "middle", class: "election-chart-axis" }, `’${String(entry.year).slice(2)}`));
+  });
+  const figure = element("figure", "election-change");
+  figure.append(element("figcaption", "", title), svg);
+  return figure;
+}
+
+function createElectionMidtermsView(panel, summary) {
+  const entries = summary.years;
+  const title = element("h3", "", "Every midterm since 1982");
+  title.id = "election-title";
+  const heading = element("div", "election-heading");
+  heading.append(title);
+  const tabs = element("div", "election-controls");
+  const tabRow = element("div", "election-race-tabs");
+  tabRow.setAttribute("role", "group");
+  tabRow.setAttribute("aria-label", "Election type");
+  const latest = entries[entries.length - 1]?.year;
+  for (const [href, label, current] of [[electionHash("president", 2024), "Presidential", false], [electionHash("senate", latest), "Senate", false], [electionHash("house", latest), "House", false], ["#politics/elections/midterms", "All midterms", true]]) {
+    const link = element("a", "", label);
+    link.href = href;
+    if (current) link.setAttribute("aria-current", "page");
+    tabRow.append(link);
+  }
+  tabs.append(tabRow);
+
+  const final = entries.filter((entry) => !entry.preliminary && entry.house.presidentPartyChange !== null);
+  const lost = final.filter((entry) => entry.house.presidentPartyChange < 0);
+  const gained = final.filter((entry) => entry.house.presidentPartyChange > 0);
+  const average = final.length ? Math.round(final.reduce((sum, entry) => sum + entry.house.presidentPartyChange, 0) / final.length) : 0;
+  const flipped = final.filter((entry) => {
+    const before = entry.house.before; const after = entry.house.after;
+    return (before.D > before.R) !== (after.D > after.R);
+  });
+  const lead = element("p", "election-midterm-lead", `The president’s party lost House seats in ${lost.length} of ${final.length} completed midterms${gained.length ? `, gaining only in ${gained.map((entry) => entry.year).join(" and ")}` : ""}. The average change was ${electionSigned(average)} seats, and control of the House changed hands ${flipped.length} times (${flipped.map((entry) => entry.year).join(", ")}).`);
+
+  const charts = element("div", "election-change-grid");
+  charts.append(electionChangeChart(entries, "house", "House seats gained or lost by the president’s party"),
+    electionChangeChart(entries, "senate", "Senate seats gained or lost by the president’s party"));
+  const legend = element("p", "politics-meta election-change-legend");
+  legend.append(element("span", "election-key election-d", ""), " Democratic president ", element("span", "election-key election-r", ""), " Republican president · Faded bars are preliminary.");
+
+  const wrap = element("div", "election-midterm-table");
+  const table = element("table", "");
+  table.append(element("caption", "", "Midterms side by side"));
+  const head = element("tr", "");
+  for (const text of ["Year", "President", "House seats (pres. party)", "House after", "House votes", "Swing", "Senate seats (pres. party)", "Senate after", "Senate flips"]) {
+    const cell = element("th", "", text);
+    cell.scope = "col";
+    head.append(cell);
+  }
+  const thead = element("thead", "");
+  thead.append(head);
+  const tbody = element("tbody", "");
+  const balance = (seats) => seats ? `D ${seats.D || 0} · R ${seats.R || 0}${(seats.O || 0) + (seats.I || 0) ? ` · ${(seats.O || 0) + (seats.I || 0)} other` : ""}` : "—";
+  for (const entry of [...entries].reverse()) {
+    const row = element("tr", entry.preliminary ? "is-preliminary" : "");
+    const yearCell = element("th", "");
+    yearCell.scope = "row";
+    const link = element("a", "", String(entry.year));
+    link.href = electionHash("house", entry.year);
+    yearCell.append(link);
+    if (entry.preliminary) yearCell.append(element("small", "", " prelim."));
+    const pres = element("td", "");
+    pres.append(element("span", `election-key election-${entry.president?.party === "D" ? "d" : "r"}`, ""), ` ${entry.president?.name || "—"}`);
+    const h = entry.house; const se = entry.senate;
+    row.append(yearCell, pres,
+      element("td", `election-num ${h.presidentPartyChange < 0 ? "is-loss" : h.presidentPartyChange > 0 ? "is-gain" : ""}`, h.presidentPartyChange === null ? "—" : `${electionSigned(h.presidentPartyChange)}${entry.preliminary && h.uncalled ? "*" : ""}`),
+      element("td", "", entry.preliminary ? `${balance(h.after)}${h.uncalled ? ` · ${h.uncalled} uncalled` : ""}` : balance(h.after)),
+      element("td", "", h.share ? `D ${h.share.D.toFixed(1)}% · R ${h.share.R.toFixed(1)}% (${electionMarginLabel(h.margin)})` : "Not counted yet"),
+      element("td", "election-num", h.swing === null || h.swing === undefined ? "—" : `${h.swing > 0 ? "D" : "R"} ${Math.abs(h.swing).toFixed(1)}`),
+      element("td", `election-num ${se.presidentPartyChange < 0 ? "is-loss" : se.presidentPartyChange > 0 ? "is-gain" : ""}`, se.presidentPartyChange === null ? "—" : electionSigned(se.presidentPartyChange)),
+      element("td", "", se.after ? balance(se.after) : "Not final"),
+      element("td", "election-flip-cell", se.flips.length ? se.flips.map((flip) => `${flip.state}${flip.special ? "*" : ""} ${flip.from || "?"}→${flip.to}`).join(", ") : "None"));
+    tbody.append(row);
+  }
+  table.append(thead, tbody);
+  wrap.append(table);
+  const notes = element("div", "election-sources");
+  notes.append(element("p", "politics-meta", `${summary.note} Swing is the change in the House vote margin (Democratic share minus Republican share) from the previous midterm. Senate flips marked * were special elections. 2026 figures are preliminary: House seats are those called so far, and Senate changes come from seats that flipped.`));
+  panel.replaceChildren(heading, tabs, lead, charts, legend, wrap, notes);
+}
+
 function createElectionMapsView() {
   const root = element("div", "congress election-maps");
   root.append(congressTabs("elections"));
@@ -451,6 +644,21 @@ function createElectionMapsView() {
   status.setAttribute("role", "status");
   panel.append(status);
   const view = electionView() || { race: "", year: null };
+  if (view.race === "midterms") {
+    Promise.all([electionFetch("index.json"), electionFetch("midterm-summary.json")]).then(([index, summary]) => {
+      electionIndex = index;
+      if (electionRoot !== root) return;
+      createElectionMidtermsView(panel, summary);
+      if (electionPendingFocus) {
+        document.getElementById(electionPendingFocus)?.focus();
+        electionPendingFocus = "";
+      }
+    }).catch((error) => {
+      console.error("Could not load the midterm summary.", error);
+      if (electionRoot === root) status.textContent = "The midterm comparison couldn’t be loaded.";
+    });
+    return root;
+  }
   electionFetch("index.json").then((index) => {
     electionIndex = index;
     const race = view.race || "president";
@@ -469,9 +677,11 @@ function createElectionMapsView() {
     const isMidterm = race !== "president";
     return Promise.all([
       electionFetch(isMidterm ? `midterm-${year}.json` : "president.json"),
-      electionFetch(race === "house" ? `map-districts-${year}.json` : "map-states.json")
-    ]).then(([data, shapes]) => ({ race, year, data: isMidterm ? data : data.years[String(year)], shapes }));
-  }).then(({ race, year, data, shapes }) => {
+      electionFetch(race === "house" ? `map-districts-${year}.json` : "map-states.json"),
+      isMidterm ? electionFetch("midterm-summary.json").catch(() => null) : null
+    ]).then(([data, shapes, summary]) => ({ race, year, data: isMidterm ? data : data.years[String(year)], shapes,
+      glance: summary?.years?.find((entry) => entry.year === year) || null }));
+  }).then(({ race, year, data, shapes, glance }) => {
     if (electionRoot !== root) return;
     const title = element("h3", "", `${year} ${race === "president" ? "presidential election" : race === "senate" ? "Senate elections" : "House elections"}`);
     title.id = "election-title";
@@ -543,6 +753,7 @@ function createElectionMapsView() {
     mapColumn.append(tools, wrapper, electionLegend(Boolean(data.preliminary), race));
     layout.append(mapColumn, detail);
     panel.replaceChildren(heading, electionControls(race, year),
+      ...(glance ? [electionMidtermGlance(glance)] : []),
       race === "president" ? electionPresidentSummary(data) : electionMidtermSummary(data, race),
       layout, electionTable(race, entries, select), electionSources(race === "president" ? null : data, race));
     if (race === "house" && electionZoom) panel.querySelector(".election-table summary").textContent = `Results by district: ${electionStateNames[electionZoom] || electionZoom}`;

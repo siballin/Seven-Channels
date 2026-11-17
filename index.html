@@ -1662,6 +1662,40 @@
     .election-step { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--glass-edge); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 1.2rem; font-weight: 800; text-decoration: none; }
     .election-step[aria-disabled="true"] { opacity: .35; pointer-events: none; }
     .election-summary { display: grid; gap: 8px; }
+    .election-glance { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+    .election-glance-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; align-items: baseline; }
+    .election-glance-head a { font-size: .8rem; font-weight: 700; }
+    .election-glance-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin: 0; }
+    .election-glance-fact { display: grid; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-left-width: 4px; border-radius: 8px; }
+    .election-glance-fact dt { color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+    .election-glance-fact dd { margin: 0; font: 700 1.05rem/1.25 var(--data); font-variant-numeric: tabular-nums; }
+    .election-glance-fact small { color: var(--muted); font-size: .72rem; }
+    .election-glance-flips { margin: 0; }
+    .election-midterm-lead { margin: 4px 0 0; font-size: .95rem; line-height: 1.5; }
+    .election-change-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .election-change { margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 12px; }
+    .election-change figcaption { margin-bottom: 6px; font-weight: 700; font-size: .85rem; }
+    .election-change-chart { display: block; width: 100%; height: auto; }
+    .election-chart-grid { stroke: var(--line); stroke-width: 1; }
+    .election-chart-zero { stroke: var(--muted); stroke-width: 1.2; }
+    .election-chart-axis { fill: var(--muted); font: 600 11px var(--font-body); }
+    .election-chart-value { fill: var(--ink); font: 700 11px var(--font-body); }
+    .election-chart-bar.is-preliminary { opacity: .5; }
+    .election-change-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+    .election-key { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; }
+    .election-midterm-table { overflow-x: auto; }
+    .election-midterm-table table { width: 100%; min-width: 860px; border-collapse: collapse; font-size: .8rem; font-variant-numeric: tabular-nums; }
+    .election-midterm-table caption { text-align: left; font-weight: 700; margin-bottom: 6px; }
+    .election-midterm-table :is(th, td) { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .election-midterm-table thead th { color: var(--muted); font-size: .7rem; }
+    .election-midterm-table tr.is-preliminary { color: var(--muted); }
+    .election-num { white-space: nowrap; font-weight: 700; }
+    .election-num.is-loss { color: var(--el-loss, #e07a72); }
+    .election-num.is-gain { color: var(--el-gain, #4fc48b); }
+    :root[data-theme="light"] .election-num.is-loss { color: #b3261e; }
+    :root[data-theme="light"] .election-num.is-gain { color: #137a45; }
+    .election-flip-cell { min-width: 180px; }
+    @media (max-width: 760px) { .election-change-grid { grid-template-columns: minmax(0, 1fr); } }
     .election-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
     .election-candidate-card { display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--glass-edge); border-left-width: 5px; border-radius: var(--glass-radius-small); background: var(--surface); }
     .election-border-d { border-left-color: var(--el-d3); } .election-border-r { border-left-color: var(--el-r3); } .election-border-o { border-left-color: var(--el-o3); }
@@ -7128,7 +7162,7 @@
       if (/^creator\/.+/.test(route)) return "creator";
       if (/^live\/.+/.test(route)) return "live";
       if (/^politics\/members(\/[A-Z]\d{6})?$/.test(route)) return "politics";
-      if (/^politics\/elections(\/(president|senate|house)(\/\d{4})?)?$/.test(route)) return "politics";
+      if (/^politics\/elections(\/midterms|\/(president|senate|house)(\/\d{4})?)?$/.test(route)) return "politics";
       return route === "guide" || channels.some((channel) => channel.id === route) ? route : "guide";
     }
 
