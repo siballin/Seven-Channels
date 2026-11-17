@@ -206,6 +206,22 @@ Live Events (`#live`) helps you find concerts, follow artists' tours, plan trips
 - **K-Pop**: follows can be imported (matched by you on Ticketmaster, as above).
 - **Creator Studio**: planned concerts appear as vlog ideas on the Creator Studio calendar page.
 
+## News columns
+
+Betting, Movies, Anime, Bowling, Music Lab, Creator Studio and Live Events each have a news column on the left (below the content on narrow screens), and the Guide has **Top headlines** from every channel. Sports, K-Pop, Video Games and Politics keep their own news sections.
+
+| Channel | Outlets |
+| --- | --- |
+| Movies | Variety, Deadline, The Hollywood Reporter, IndieWire |
+| Anime | Anime News Network, Crunchyroll News |
+| Bowling | PBA, Bowling This Month, USBC |
+| Music Lab | Billboard, Pitchfork, Stereogum |
+| Live Events | Pollstar, Consequence (tour news) |
+| Betting | Covers, Action Network |
+| Creator Studio | YouTube Official Blog, Creator Insider, Tubefilter |
+
+`scripts/update_channel_news.py` reads each outlet's public RSS or Atom feed when the site is published and saves the last 10 days to `data/channel-news.json` (up to 12 stories per outlet). Outlets without a usable feed of their own (PBA, USBC, Covers, Action Network) come from Google News results limited to their site. Broad feeds are narrowed to the topic (betting odds and picks, tour announcements, creator news). The Guide takes the newest few headlines from each channel, including Politics, Video Games and K-pop. Only headlines, times and short summaries are kept; every story opens on the outlet's site. Bowlers Journal was considered but has no working feed. Run `python3 -m unittest scripts/test_update_channel_news.py` to test it.
+
 ## Glass appearance
 
 The interface uses the existing theme, background, and accent settings to tint its glass surfaces. Shared `--glass-*` CSS tokens in `index.html` control opacity, blur, border highlights, shadows, radii, and animation timing. Major panels and navigation use standard glass, nested data surfaces use a subtler opaque treatment, and dialogs and custom menus use prominent glass. Browsers without backdrop-filter support receive opaque surfaces instead.

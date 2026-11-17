@@ -64,6 +64,9 @@ jobs:
       - name: Refresh Politics news (The Hill, Politico, Punchbowl News, Roll Call, Axios)
         continue-on-error: true
         run: python scripts/update_politics_news.py
+      - name: Refresh channel news columns (Movies, Anime, Bowling, Music Lab, Live Events, Betting, Creator Studio, Guide)
+        continue-on-error: true
+        run: cd scripts && python update_channel_news.py
       - name: Restore last Politics snapshot
         uses: actions/cache/restore@v4
         with:
