@@ -1,0 +1,16 @@
+name: Check politics feeds (temporary)
+on:
+  push:
+    branches: ["claude/dazzling-hamilton-4jcfnt"]
+    paths: [".github/workflows/check-politics-feeds.yml", "scripts/update_politics_news.py"]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/update_politics_news.py && python -c "import json;d=json.load(open('data/politics-news.json'));[print(i['source'],'|',i['published'],'|',i['title'][:90]) for i in d['items'][:40]]"
