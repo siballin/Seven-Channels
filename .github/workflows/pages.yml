@@ -61,6 +61,9 @@ jobs:
       - name: Refresh K-pop news and videos
         continue-on-error: true
         run: python scripts/update_kpop_sidebar.py
+      - name: Refresh Politics news (The Hill, Politico, Punchbowl News, Roll Call, Axios)
+        continue-on-error: true
+        run: python scripts/update_politics_news.py
       - name: Restore last Politics snapshot
         uses: actions/cache/restore@v4
         with:

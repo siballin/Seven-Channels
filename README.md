@@ -58,6 +58,10 @@ The Pages workflow refreshes each source independently and restores the most rec
 
 To enable Bill Watch, add a repository Actions secret named `CONGRESS_GOV_API_KEY` from Congress.gov. The key is sent only to Congress.gov during the workflow and is not included in the published snapshot. Bill Watch searches the latest 20 published bill records, not the entire Congress.gov catalog. Saved bills remain on the device even after they leave the snapshot. Full text and further details are linked on Congress.gov rather than embedded.
 
+### Political news
+
+The Politics overview has a **Political news** feed with recent headlines from The Hill, Politico, Punchbowl News, Roll Call and Axios, newest first, with a filter for each outlet. `scripts/update_politics_news.py` reads each outlet's public RSS feed when the site is published and keeps the last 7 days (up to 15 stories per outlet). The Hill comes from its Senate, House, Administration and Campaign feeds; Axios has no politics-only feed, so its main feed is narrowed to political headlines; Punchbowl News items are its newsletter editions, titled with each edition's lead story. Only headlines, times and short summaries are saved, and every story links to the outlet (some need a subscription). If an outlet's feed fails, its earlier stories are kept and the feed says so. Run `python3 -m unittest scripts/test_update_politics_news.py` to test it.
+
 ### Members of Congress
 
 The **Members of Congress** tab (`#politics/members`) lists every senator, representative and delegate. Search by name or state, and filter by chamber, party and committee. **Your delegation** shows your state's senators and your representative; pick your district (or look it up with your ZIP code on house.gov), and the choice is saved on this device only. Each member has a shareable profile at `#politics/members/<Bioguide ID>` with:

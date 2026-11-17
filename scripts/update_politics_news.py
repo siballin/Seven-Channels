@@ -102,7 +102,10 @@ def punchbowl_title(title, summary):
     if len(parts) == 1:
         # No markup between headings: drop the labels and keep the remaining text as one line.
         parts = [re.sub(r"\b(PRESENTED BY|IN THIS EDITION|(?:TECH |VAULT |DEFENSE )?LOOKAHEAD)\b\s*", "", parts[0]).strip()]
-    lead = parts[0][:160] if parts else ""
+    if parts:
+        # Section labels can also sit inside the run-on text ("… Leader Look: …"); drop them.
+        parts[0] = re.sub(r"\s*\bLeader( Look:?)?\s*$|\bLeader Look:\s*", " ", parts[0]).strip(" :")
+    lead = re.sub(r"\s{2,}", " ", parts[0])[:160].strip() if parts else ""
     headline = f"Punchbowl {edition}: {lead}" if lead else f"Punchbowl News {edition}"
     return headline, " · ".join(parts[1:4])[:240]
 
