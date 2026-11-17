@@ -21,7 +21,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "politics-news.json"
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; SevenChannelsPolitics/1.0)", "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml, */*"}
-MAX_PER_SOURCE = 15
+MAX_PER_SOURCE = 10
 MAX_AGE_DAYS = 7
 ATOM = "{http://www.w3.org/2005/Atom}"
 
@@ -42,6 +42,24 @@ SOURCES = [
      [("https://punchbowl.news/feed/", None), (google_news("site:punchbowl.news"), "google")]),
     ("rollcall", "Roll Call", "https://rollcall.com/", {"rollcall.com"},
      [("https://rollcall.com/feed/", None)]),
+    ("npr", "NPR", "https://www.npr.org/sections/politics/", {"npr.org"},
+     [("https://feeds.npr.org/1014/rss.xml", None)]),
+    ("ap", "AP", "https://apnews.com/politics", {"apnews.com"},
+     [(google_news("site:apnews.com politics"), "google")]),
+    ("nbc", "NBC News", "https://www.nbcnews.com/politics", {"nbcnews.com"},
+     [("https://feeds.nbcnews.com/nbcnews/public/politics", None), (google_news("site:nbcnews.com/politics"), "google")]),
+    ("cnn", "CNN", "https://www.cnn.com/politics", {"cnn.com"},
+     [("http://rss.cnn.com/rss/cnn_allpolitics.rss", None), (google_news("site:cnn.com/politics"), "google")]),
+    ("semafor", "Semafor", "https://www.semafor.com/vertical/politics", {"semafor.com"},
+     [("https://www.semafor.com/rss.xml", "politics"), (google_news("site:semafor.com politics"), "google")]),
+    ("notus", "NOTUS", "https://www.notus.org/", {"notus.org"},
+     [("https://www.notus.org/feed", None), (google_news("site:notus.org"), "google")]),
+    ("cook", "Cook Political Report", "https://www.cookpolitical.com/", {"cookpolitical.com"},
+     [("https://www.cookpolitical.com/rss.xml", None), (google_news("site:cookpolitical.com"), "google")]),
+    ("splitticket", "Split Ticket", "https://split-ticket.org/", {"split-ticket.org"},
+     [("https://split-ticket.org/feed/", None)]),
+    ("silver", "Silver Bulletin", "https://www.natesilver.net/", {"natesilver.net"},
+     [("https://www.natesilver.net/feed", None)]),
     ("axios", "Axios", "https://www.axios.com/politics-policy", {"axios.com"},
      [("https://api.axios.com/feed/", "politics"), ("https://api.axios.com/feed/top/", "politics"),
       (google_news("site:axios.com politics"), "google")]),

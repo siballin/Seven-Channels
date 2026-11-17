@@ -5153,7 +5153,7 @@
       news.append(element("h3", "", "Sports news"), newsBody);
       leaders.append(element("h3", "", "Game leaders"), leadersBody);
       upcoming.append(element("h3", "", "Upcoming games"), upcomingBody);
-      left.append(teams, standings, injuries);
+      left.append(teams, standings, injuries, createChannelNews("sports"));
       right.append(news, leaders, upcoming, createRedditWidget("sports"));
       main.append(featured, scoreboard, planner);
       const sideColumn = element("div", "sports-hub-side-column");
@@ -12077,7 +12077,7 @@
       if (channel.id === "kpop") {
         const { left, right, featured } = createKpopSidebars();
         const leftColumn = element("div", "kpop-dashboard-left");
-        leftColumn.append(left, createRedditWidget(channel.id));
+        leftColumn.append(left, createChannelNews("kpop"), createRedditWidget(channel.id));
         const middle = element("div", "kpop-dashboard-main");
         middle.append(featured, kpopCalendar, kpopLookup);
         const dashboard = element("div", "kpop-dashboard");

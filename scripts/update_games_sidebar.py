@@ -29,6 +29,10 @@ NEWS_FEEDS = [
     ("IGN", "https://feeds.ign.com/ign/games-all", ("ign.com", "www.ign.com")),
     ("GameSpot", "https://www.gamespot.com/feeds/game-news/", ("www.gamespot.com", "gamespot.com")),
     ("Polygon", "https://www.polygon.com/rss/index.xml", ("www.polygon.com", "polygon.com")),
+    ("Kotaku", "https://kotaku.com/rss", ("kotaku.com", "www.kotaku.com")),
+    ("VGC", "https://www.videogameschronicle.com/feed/", ("www.videogameschronicle.com", "videogameschronicle.com")),
+    ("PC Gamer", "https://www.pcgamer.com/rss/", ("www.pcgamer.com", "pcgamer.com")),
+    ("Eurogamer", "https://www.eurogamer.net/feed", ("www.eurogamer.net", "eurogamer.net")),
 ]
 TRAILER_CHANNELS = [
     ("PlayStation", "UC-2Y8dQb0S6DtpxNgAKoJKA"),
@@ -157,11 +161,11 @@ def main():
         items, failures = [], []
         for source, url, hosts in NEWS_FEEDS:
             try:
-                items += feed_items(fetch(url), source, hosts)[:8]
+                items += feed_items(fetch(url), source, hosts)[:6]
             except Exception as error:
                 failures.append(source)
                 print(f"News feed {source} failed: {error}", file=sys.stderr)
-        return sorted(items, key=lambda item: item["published"], reverse=True)[:15], failures
+        return sorted(items, key=lambda item: item["published"], reverse=True)[:30], failures
 
     def trailers():
         items, failures = [], []
