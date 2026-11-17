@@ -2,7 +2,7 @@ name: Check politics feeds (temporary)
 on:
   push:
     branches: ["claude/dazzling-hamilton-4jcfnt"]
-    paths: [".github/workflows/check-politics-feeds.yml", "scripts/update_politics_news.py"]
+    paths: [".github/workflows/check-politics-feeds.yml", "scripts/update_politics_news.py", "scripts/check_politics_feeds.py"]
 permissions:
   contents: read
 jobs:
@@ -13,7 +13,4 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python scripts/update_politics_news.py && python -c "import json;d=json.load(open('data/politics-news.json'));[print(i['source'],'|',i['published'][:16],'|',i['title'][:110],'|',i['summary'][:80]) for i in d['items'][:60]]" && python -c "
-import sys; sys.path.insert(0, 'scripts'); import update_politics_news as n
-for item in list(n.parse_feed(n.fetch('https://api.axios.com/feed/')))[:25]: print('AXIOS', item[4], '|', item[0][:70])
-"
+      - run: cd scripts && python check_politics_feeds.py
