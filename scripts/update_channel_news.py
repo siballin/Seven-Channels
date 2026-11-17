@@ -50,7 +50,10 @@ CHANNELS = {
             [("https://cr-news-api-service.prd.crunchyrollsvc.com/v1/en-US/rss", None)], "site:crunchyroll.com/news"),
     ]},
     "bowling": {"title": "Bowling news", "sources": [
-        src("Bowlers Journal", "https://www.bowlersjournal.com/", {"bowlersjournal.com"}, [("https://www.bowlersjournal.com/feed/", None)], "site:bowlersjournal.com"),
+        src("Bowlers Journal", "https://www.bowlersjournal.com/", {"bowlersjournal.com"},
+            [("https://www.bowlersjournal.com/feed/", None), ("https://www.bowlersjournal.com/rss/", None), ("https://bowlersjournal.com/feed", None),
+             ("https://www.bowlersjournal.com/news/feed/", None)], "\"Bowlers Journal\""),
+        src("USBC", "https://bowl.com/news", {"bowl.com"}, [("https://bowl.com/rss", None), ("https://bowl.com/news/rss", None)], "site:bowl.com"),
         src("PBA", "https://www.pba.com/", {"pba.com"}, [("https://www.pba.com/rss.xml", None), ("https://www.pba.com/news/rss", None)], "site:pba.com"),
         src("Bowling This Month", "https://www.bowlingthismonth.com/", {"bowlingthismonth.com"}, [("https://www.bowlingthismonth.com/feed/", None)], "site:bowlingthismonth.com"),
     ]},
