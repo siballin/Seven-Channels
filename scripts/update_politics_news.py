@@ -33,7 +33,9 @@ def google_news(query):
 # (id, name, homepage, allowed link hosts, [(feed url, filter)])
 SOURCES = [
     ("thehill", "The Hill", "https://thehill.com/", {"thehill.com"},
-     [("https://thehill.com/homenews/feed/", None), ("https://thehill.com/news/feed/", None)]),
+     [("https://thehill.com/homenews/senate/feed/", "combine"), ("https://thehill.com/homenews/house/feed/", "combine"),
+      ("https://thehill.com/homenews/administration/feed/", "combine"), ("https://thehill.com/homenews/campaign/feed/", "combine"),
+      ("https://thehill.com/homenews/feed/", "politics")]),
     ("politico", "Politico", "https://www.politico.com/", {"politico.com"},
      [("https://rss.politico.com/politics-news.xml", None), ("https://rss.politico.com/congress.xml", None)]),
     ("punchbowl", "Punchbowl News", "https://punchbowl.news/", {"punchbowl.news"},
@@ -77,6 +79,17 @@ def when(value):
     return stamp.astimezone(timezone.utc)
 
 
+def punchbowl_title(title, summary):
+    """Punchbowl's items are newsletter editions titled like "paid 11/17/26🕛 Midday:"; name the edition and
+    lead with its first line so the headline says what it covers."""
+    edition = re.sub(r"^(paid\s+)?\d{1,2}/\d{1,2}/\d{2,4}\s*", "", title, flags=re.I)
+    edition = re.sub(r"[^\w\s'’&-]", "", edition).strip(" :") or "Newsletter"
+    lead = plain(summary)
+    first = re.split(r"(?<=[.!?])\s", lead, maxsplit=1)[0] if lead else ""
+    headline = f"{edition}: {first}" if first and len(first) <= 200 else f"Punchbowl News {edition}"
+    return headline, lead if first else ""
+
+
 def host_ok(url, hosts):
     try:
         parsed = urlparse(url)
@@ -86,9 +99,25 @@ def host_ok(url, hosts):
     return parsed.scheme == "https" and any(host == allowed or host.endswith("." + allowed) for allowed in hosts)
 
 
+def parse_loose(raw):
+    """Regex fallback for RSS that isn't well-formed XML (Roll Call's feed has a duplicated attribute)."""
+    body = raw.decode("utf-8", "replace")
+    def field(block, name):
+        match = re.search(rf"<{name}(?:\s[^>]*)?>(.*?)</{name}>", block, re.S)
+        value = match.group(1) if match else ""
+        return re.sub(r"^<!\[CDATA\[(.*)\]\]>$", r"\1", value.strip(), flags=re.S)
+    for block in re.findall(r"<item[\s>].*?</item>", body, re.S):
+        yield (field(block, "title"), field(block, "link"), field(block, "pubDate"), field(block, "description"),
+               re.findall(r"<category[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</category>", block, re.S))
+
+
 def parse_feed(raw):
     """Yield (title, link, published, summary, categories) from RSS 2.0 or Atom."""
-    root = ET.fromstring(raw)
+    try:
+        root = ET.fromstring(raw)
+    except ET.ParseError:
+        yield from parse_loose(raw)
+        return
     if root.tag == f"{ATOM}feed":
         for entry in root.findall(f"{ATOM}entry"):
             link = next((node.get("href") for node in entry.findall(f"{ATOM}link") if node.get("rel") in (None, "alternate")), "")
@@ -113,6 +142,8 @@ def items_from(raw, name, hosts, mode, now):
             summary = ""
         elif not host_ok(link, hosts):
             continue
+        if name == "Punchbowl News" and mode != "google":
+            title, summary = punchbowl_title(title, summary)
         if mode == "politics" and not (any("politic" in category.lower() for category in categories) or "/politics" in link
                                        or POLITICS_WORDS.search(title + " " + plain(summary))):
             continue
@@ -131,16 +162,29 @@ def build(previous, fetcher=fetch, now=None):
     sources, items = [], []
     for source_id, name, home, hosts, feeds in SOURCES:
         found, used, errors = [], "", []
+        combined, combined_from = [], []
         for url, mode in feeds:
             try:
-                found = items_from(fetcher(url), name, hosts, mode, now)
+                batch = items_from(fetcher(url), name, hosts, mode, now)
             except Exception as error:  # network errors, HTTP errors, bad XML
                 errors.append(f"{url}: {error}")
                 continue
-            if found:
-                used = url
+            if mode == "combine":
+                # Section feeds are merged (e.g. The Hill's Senate, House, Administration and Campaign feeds).
+                combined.extend(batch)
+                if batch:
+                    combined_from.append(url)
+                continue
+            if combined:
+                break
+            if batch:
+                found, used = batch, url
                 break
             errors.append(f"{url}: no recent items")
+        if combined:
+            unique = {item["url"]: item for item in combined}
+            found = sorted(unique.values(), key=lambda item: item["published"], reverse=True)[:MAX_PER_SOURCE]
+            used = ", ".join(combined_from)
         if found:
             sources.append({"id": source_id, "name": name, "home": home, "status": "ok", "feed": used, "count": len(found)})
         else:

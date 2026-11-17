@@ -1530,6 +1530,19 @@
     .politics-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
     .politics-controls input, .politics-controls select { min-width: 0; }
     .politics-status { font-size: .75rem; color: var(--muted); }
+    .politics-news-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .politics-news-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .politics-news-filters button { min-height: 34px; padding: 5px 11px; font-size: .78rem; }
+    .politics-news-filters button[aria-pressed="true"] { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 18%, var(--surface)); color: var(--ink); }
+    .politics-news-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .politics-news-item { display: grid; align-content: start; gap: 5px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); min-width: 0; }
+    .politics-news-meta { color: var(--muted); font-size: .72rem; }
+    .politics-news-meta strong { color: var(--signal); font-weight: 700; }
+    .politics-news-title { color: var(--ink); font-weight: 700; line-height: 1.35; text-decoration: none; overflow-wrap: anywhere; }
+    .politics-news-title:hover { text-decoration: underline; }
+    .politics-news-item p { margin: 0; font-size: .8rem; }
+    .politics-news-more { margin-top: 10px; }
+    .politics-news-empty { color: var(--muted); }
     @media (max-width: 760px) { .politics-top, .politics-scores { grid-template-columns: 1fr; } }
     /* Video Games hub */
     .games-hub { display: grid; gap: 16px; min-width: 0; }
@@ -11104,6 +11117,96 @@
       return layout;
     }
 
+    // Headlines from The Hill, Politico, Punchbowl News, Roll Call and Axios, collected into
+    // data/politics-news.json by scripts/update_politics_news.py each time the site is published.
+    let politicsNewsSource = "all";
+    let politicsNewsLimit = 20;
+    function createPoliticsNews() {
+      const section = element("section", "politics-panel politics-news");
+      section.setAttribute("aria-labelledby", "politics-news-title");
+      const head = element("div", "politics-news-head");
+      const title = element("h3", "", "Political news");
+      title.id = "politics-news-title";
+      head.append(title);
+      const filters = element("div", "politics-news-filters");
+      filters.setAttribute("role", "group");
+      filters.setAttribute("aria-label", "Filter by outlet");
+      const status = element("p", "politics-status", "Loading headlines…");
+      status.setAttribute("role", "status");
+      const list = element("ol", "politics-news-list");
+      const more = element("button", "secondary politics-news-more", "Show more");
+      more.type = "button";
+      more.hidden = true;
+      section.append(head, filters, status, list, more);
+      const relative = (iso) => {
+        const time = Date.parse(iso || "");
+        if (!Number.isFinite(time)) return "";
+        const minutes = Math.round((Date.now() - time) / 60000);
+        if (minutes < 60) return `${Math.max(1, minutes)}m ago`;
+        if (minutes < 24 * 60) return `${Math.round(minutes / 60)}h ago`;
+        return new Date(time).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      };
+      const safeUrl = (value) => {
+        try {
+          const url = new URL(value);
+          return url.protocol === "https:" && !url.username && !url.password ? url.href : "";
+        } catch {
+          return "";
+        }
+      };
+      fetch("data/politics-news.json").then((response) => {
+        if (!response.ok) throw new Error(`Politics news unavailable (${response.status}).`);
+        return response.json();
+      }).then((data) => {
+        const sources = (Array.isArray(data?.sources) ? data.sources : []).filter((source) => source && typeof source.name === "string");
+        const items = (Array.isArray(data?.items) ? data.items : [])
+          .filter((item) => item && typeof item.title === "string" && item.title.trim() && typeof item.source === "string" && safeUrl(item.url));
+        const render = () => {
+          filters.replaceChildren();
+          for (const [id, label] of [["all", "All"], ...sources.map((source) => [source.name, source.name])]) {
+            const count = id === "all" ? items.length : items.filter((item) => item.source === id).length;
+            const button = element("button", "secondary", `${label} ${count}`);
+            button.type = "button";
+            button.id = `politics-news-${id.replace(/\W+/g, "-").toLowerCase()}`;
+            button.setAttribute("aria-pressed", String(politicsNewsSource === id));
+            button.addEventListener("click", () => {
+              politicsNewsSource = id;
+              politicsNewsLimit = 20;
+              render();
+              document.getElementById(button.id)?.focus();
+            });
+            filters.append(button);
+          }
+          const shown = items.filter((item) => politicsNewsSource === "all" || item.source === politicsNewsSource);
+          list.replaceChildren();
+          for (const item of shown.slice(0, politicsNewsLimit)) {
+            const row = element("li", "politics-news-item");
+            const link = element("a", "politics-news-title", item.title);
+            link.href = safeUrl(item.url);
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            const meta = element("span", "politics-news-meta");
+            meta.append(element("strong", "", item.source), document.createTextNode(item.published ? ` · ${relative(item.published)}` : ""));
+            row.append(meta, link);
+            if (typeof item.summary === "string" && item.summary) row.append(element("p", "", item.summary));
+            list.append(row);
+          }
+          if (!shown.length) list.append(element("li", "politics-news-empty", "No recent headlines from this outlet."));
+          more.hidden = shown.length <= politicsNewsLimit;
+          const fetched = Date.parse(data?.fetchedAt || "");
+          const missing = sources.filter((source) => source.status !== "ok").map((source) => `${source.name} ${source.status === "stale" ? "not refreshed" : "unavailable"}`);
+          status.textContent = [Number.isFinite(fetched) ? `Updated ${new Date(fetched).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : "",
+            Number.isFinite(fetched) && Date.now() - fetched > 36 * 3600000 ? "stale" : "", ...missing, "Headlines link to each outlet; some stories need a subscription."].filter(Boolean).join(" · ");
+        };
+        more.addEventListener("click", () => { politicsNewsLimit += 20; render(); });
+        render();
+      }).catch((error) => {
+        console.error("Could not load politics news.", error);
+        status.textContent = "Political news couldn’t be loaded right now.";
+      });
+      return section;
+    }
+
     function createPoliticsDashboard() {
       const dashboard = element("div", "politics-dashboard");
       const loading = element("p", "politics-status", "Loading official congressional data…");
@@ -11340,7 +11443,7 @@
         for (const control of [chamber, present, yes]) control.addEventListener("input", calculate);
         chamber.addEventListener("change", () => { present.value = chamber.value === "House" ? "435" : "100"; yes.value = "0"; calculate(); });
         calculate(); balance.append(calc, result);
-        dashboard.replaceChildren(top, scoreboard, bills, balance);
+        dashboard.replaceChildren(top, createPoliticsNews(), scoreboard, bills, balance);
       }).catch((error) => {
         console.error("Could not load Politics data.", error);
         loading.textContent = "Politics data is unavailable. The first snapshot may not have been published yet.";
