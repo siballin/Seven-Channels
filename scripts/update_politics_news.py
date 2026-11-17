@@ -46,8 +46,11 @@ SOURCES = [
      [("https://api.axios.com/feed/", "politics"), ("https://api.axios.com/feed/top/", "politics"),
       (google_news("site:axios.com politics"), "google")]),
 ]
-POLITICS_WORDS = re.compile(r"\b(politic|congress|senate|house|white house|trump|biden|election|campaign|gop|republican|democrat|"
-                            r"governor|supreme court|capitol|lawmaker|speaker|vote|policy|administration)", re.I)
+# Axios's feed only labels stories "top", so politics stories are picked by headline.
+POLITICS_WORDS = re.compile(r"\b(politic\w*|congress\w*|senat\w+|house (?:gop|democrats|republicans|speaker|vote)|white house|trump|vance|"
+                            r"biden|election\w*|midterm\w*|campaign\w*|gop|republican\w*|democrat\w*|governor\w*|supreme court|scotus|"
+                            r"capitol|lawmaker\w*|speaker|jeffries|schumer|thune|johnson|filibuster|impeach\w*|ballot\w*|voter\w*|"
+                            r"cabinet|administration|attorney general|doj|justice department|legislat\w+|bill|tariff\w*|shutdown)\b", re.I)
 
 
 def fetch(url):
@@ -79,15 +82,29 @@ def when(value):
     return stamp.astimezone(timezone.utc)
 
 
+PUNCHBOWL_LABELS = re.compile(r"^(presented by|in this edition|(?:tech |vault |defense )?lookahead|leader look:?)\b\s*", re.I)
+
+
 def punchbowl_title(title, summary):
-    """Punchbowl's items are newsletter editions titled like "paid 11/17/26🕛 Midday:"; name the edition and
-    lead with its first line so the headline says what it covers."""
+    """Punchbowl's items are newsletter editions titled like "paid 11/17/26🕛 Midday:" whose description lists the
+    edition's story headings after "PRESENTED BY" / "IN THIS EDITION" labels. The headline names the edition and
+    its lead story; the summary lists the next stories."""
     edition = re.sub(r"^(paid\s+)?\d{1,2}/\d{1,2}/\d{2,4}\s*", "", title, flags=re.I)
     edition = re.sub(r"[^\w\s'’&-]", "", edition).strip(" :") or "Newsletter"
-    lead = plain(summary)
-    first = re.split(r"(?<=[.!?])\s", lead, maxsplit=1)[0] if lead else ""
-    headline = f"{edition}: {first}" if first and len(first) <= 200 else f"Punchbowl News {edition}"
-    return headline, lead if first else ""
+    body = re.sub(r"The post .*? appeared first on .*$", "", summary or "", flags=re.S | re.I)
+    parts = []
+    for block in re.split(r"<(?:/p|/li|br\s*/?|/h\d|/div|/strong|/b)[^>]*>", body, flags=re.I):
+        text = plain(block)
+        while text and PUNCHBOWL_LABELS.match(text):
+            text = PUNCHBOWL_LABELS.sub("", text, count=1).strip()
+        if text and text.lower() not in {"presented by", "in this edition"}:
+            parts.append(text)
+    if len(parts) == 1:
+        # No markup between headings: drop the labels and keep the remaining text as one line.
+        parts = [re.sub(r"\b(PRESENTED BY|IN THIS EDITION|(?:TECH |VAULT |DEFENSE )?LOOKAHEAD)\b\s*", "", parts[0]).strip()]
+    lead = parts[0][:160] if parts else ""
+    headline = f"Punchbowl {edition}: {lead}" if lead else f"Punchbowl News {edition}"
+    return headline, " · ".join(parts[1:4])[:240]
 
 
 def host_ok(url, hosts):
@@ -145,7 +162,7 @@ def items_from(raw, name, hosts, mode, now):
         if name == "Punchbowl News" and mode != "google":
             title, summary = punchbowl_title(title, summary)
         if mode == "politics" and not (any("politic" in category.lower() for category in categories) or "/politics" in link
-                                       or POLITICS_WORDS.search(title + " " + plain(summary))):
+                                       or POLITICS_WORDS.search(title)):
             continue
         stamp = when(published)
         if not title or (stamp and stamp < cutoff):
