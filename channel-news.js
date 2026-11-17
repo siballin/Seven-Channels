@@ -102,7 +102,7 @@ function createChannelNews(channelId) {
     if (!shown.length) list.append(element("li", "channel-news-empty", items.length ? "No recent headlines from this outlet." : "No headlines yet."));
     more.hidden = shown.length <= ui.limit;
     const fetched = Date.parse(channelNewsData?.fetchedAt || "");
-    const missing = (block?.sources || []).filter((source) => source.status !== "ok").map((source) => `${source.name} ${source.status === "stale" ? "not refreshed" : "unavailable"}`);
+    const missing = (block?.sources || []).filter((source) => source.status === "stale" || source.status === "unavailable").map((source) => `${source.name} ${source.status === "stale" ? "not refreshed" : "unavailable"}`);
     status.textContent = [Number.isFinite(fetched) ? `Updated ${new Date(fetched).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : "",
       ...missing, "Headlines open on each outlet’s site."].filter(Boolean).join(" · ");
   };

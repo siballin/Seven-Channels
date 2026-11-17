@@ -11267,7 +11267,7 @@
           if (!shown.length) list.append(element("li", "politics-news-empty", "No recent headlines from this outlet."));
           more.hidden = shown.length <= politicsNewsLimit;
           const fetched = Date.parse(data?.fetchedAt || "");
-          const missing = sources.filter((source) => source.status !== "ok").map((source) => `${source.name} ${source.status === "stale" ? "not refreshed" : "unavailable"}`);
+          const missing = sources.filter((source) => source.status === "stale" || source.status === "unavailable").map((source) => `${source.name} ${source.status === "stale" ? "not refreshed" : "unavailable"}`);
           status.textContent = [Number.isFinite(fetched) ? `Updated ${new Date(fetched).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : "",
             Number.isFinite(fetched) && Date.now() - fetched > 36 * 3600000 ? "stale" : "", ...missing, "Headlines link to each outlet; some stories need a subscription."].filter(Boolean).join(" · ");
         };

@@ -44,8 +44,6 @@ CHANNELS = {
     ]},
     "kpop": {"title": "K-pop news", "sources": [
         src("Allkpop", "https://www.allkpop.com/", {"allkpop.com"}, [("https://www.allkpop.com/feed", None), ("https://www.allkpop.com/rss", None)], "site:allkpop.com"),
-        src("Koreaboo", "https://www.koreaboo.com/", {"koreaboo.com"}, [("https://www.koreaboo.com/feed/", None)], "site:koreaboo.com"),
-        src("KpopStarz", "https://www.kpopstarz.com/", {"kpopstarz.com"}, [("https://www.kpopstarz.com/rss/", None)], "site:kpopstarz.com"),
         src("The Korea Herald", "https://www.koreaherald.com/list.php?ct=020500000000", {"koreaherald.com"}, [], "site:koreaherald.com K-pop"),
         src("Billboard K-Pop", "https://www.billboard.com/t/k-pop/", {"billboard.com"}, [("https://www.billboard.com/t/k-pop/feed/", None)], "site:billboard.com k-pop"),
     ]},
@@ -67,7 +65,6 @@ CHANNELS = {
         src("Crunchyroll News", "https://www.crunchyroll.com/news", {"crunchyroll.com"},
             [("https://cr-news-api-service.prd.crunchyrollsvc.com/v1/en-US/rss", None)], "site:crunchyroll.com/news"),
         src("Anime Corner", "https://animecorner.me/", {"animecorner.me"}, [("https://animecorner.me/feed/", None)], "site:animecorner.me"),
-        src("Otaku USA", "https://otakuusamagazine.com/", {"otakuusamagazine.com"}, [("https://otakuusamagazine.com/feed/", None)], "site:otakuusamagazine.com"),
         src("MyAnimeList News", "https://myanimelist.net/news", {"myanimelist.net"}, [("https://myanimelist.net/rss/news.xml", None)], "site:myanimelist.net/news"),
     ]},
     "bowling": {"title": "Bowling news", "sources": [
@@ -75,8 +72,6 @@ CHANNELS = {
         src("PBA", "https://www.pba.com/", {"pba.com"}, [("https://www.pba.com/rss.xml", None), ("https://www.pba.com/news/rss", None)], "site:pba.com"),
         src("Bowling This Month", "https://www.bowlingthismonth.com/", {"bowlingthismonth.com"}, [("https://www.bowlingthismonth.com/feed/", None)], "site:bowlingthismonth.com"),
         src("Storm Bowling", "https://www.stormbowling.com/", {"stormbowling.com"}, [("https://www.stormbowling.com/feed", None)], "site:stormbowling.com"),
-        src("Motiv Bowling", "https://www.motivbowling.com/", {"motivbowling.com"}, [("https://www.motivbowling.com/feed", None)], "site:motivbowling.com"),
-        src("Bowling.com", "https://www.bowling.com/blog/", {"bowling.com"}, [("https://www.bowling.com/blog/feed/", None)], "site:bowling.com/blog"),
     ]},
     "music": {"title": "Music news", "sources": [
         src("Billboard", "https://www.billboard.com/c/music/music-news/", {"billboard.com"},
@@ -90,7 +85,6 @@ CHANNELS = {
         src("The Fader", "https://www.thefader.com/", {"thefader.com"}, [("https://www.thefader.com/rss", None), ("https://www.thefader.com/feed", None)], "site:thefader.com"),
         src("Complex Music", "https://www.complex.com/music", {"complex.com"}, [], "site:complex.com/music"),
         src("HotNewHipHop", "https://www.hotnewhiphop.com/", {"hotnewhiphop.com"}, [("https://www.hotnewhiphop.com/rss.xml", None), ("https://www.hotnewhiphop.com/feed", None)], "site:hotnewhiphop.com"),
-        src("Rap-Up", "https://www.rap-up.com/", {"rap-up.com"}, [("https://www.rap-up.com/feed/", None)], "site:rap-up.com"),
         src("Hypebeast Music", "https://hypebeast.com/music", {"hypebeast.com"}, [("https://hypebeast.com/music/feed", None)], "site:hypebeast.com/music"),
     ]},
     "live": {"title": "Tour news", "sources": [
@@ -108,7 +102,6 @@ CHANNELS = {
         src("Action Network", "https://www.actionnetwork.com/", {"actionnetwork.com"}, [("https://www.actionnetwork.com/rss", "betting")], "site:actionnetwork.com odds"),
         src("VSiN", "https://vsin.com/", {"vsin.com"}, [("https://vsin.com/feed/", "betting")], "site:vsin.com"),
         src("The Lines", "https://www.thelines.com/", {"thelines.com"}, [("https://www.thelines.com/feed/", None)], "site:thelines.com"),
-        src("ESPN Betting", "https://www.espn.com/sports-betting/", {"espn.com"}, [], "site:espn.com/sports-betting"),
         src("Legal Sports Report", "https://www.legalsportsreport.com/", {"legalsportsreport.com"}, [("https://www.legalsportsreport.com/feed/", None)], "site:legalsportsreport.com"),
         src("Sports Handle", "https://sportshandle.com/", {"sportshandle.com"}, [("https://sportshandle.com/feed/", None)], "site:sportshandle.com"),
     ]},
@@ -159,13 +152,14 @@ def build_channel(config, previous, fetcher, now):
     old_items = previous.get("items") or []
     sources, items = [], []
     for source in config["sources"]:
-        found, used, errors = [], "", []
+        found, used, errors, reachable = [], "", [], False
         for url, mode in source["feeds"]:
             try:
                 found = collect(fetcher(url), source, mode, now)
             except Exception as error:  # network errors, HTTP errors, bad XML
                 errors.append(f"{url}: {error}")
                 continue
+            reachable = True
             if found:
                 used = url
                 break
@@ -174,7 +168,8 @@ def build_channel(config, previous, fetcher, now):
         if not found:
             print(f"{source['name']}: " + "; ".join(errors), file=sys.stderr)
             found = [item for item in old_items if item.get("source") == source["name"]]
-            status = "stale" if found else "unavailable"
+            # A feed that answered but had nothing recent is just quiet, not broken.
+            status = "quiet" if reachable and not found else "stale" if found else "unavailable"
         sources.append({"name": source["name"], "home": source["home"], "status": status, "count": len(found),
                         "via": "Google News" if used.startswith("https://news.google.com") else ""})
         items.extend(found)

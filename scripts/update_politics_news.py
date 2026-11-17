@@ -201,12 +201,14 @@ def build(previous, fetcher=fetch, now=None):
     for source_id, name, home, hosts, feeds in SOURCES:
         found, used, errors = [], "", []
         combined, combined_from = [], []
+        reachable = False
         for url, mode in feeds:
             try:
                 batch = items_from(fetcher(url), name, hosts, mode, now)
             except Exception as error:  # network errors, HTTP errors, bad XML
                 errors.append(f"{url}: {error}")
                 continue
+            reachable = True
             if mode == "combine":
                 # Section feeds are merged (e.g. The Hill's Senate, House, Administration and Campaign feeds).
                 combined.extend(batch)
@@ -228,7 +230,9 @@ def build(previous, fetcher=fetch, now=None):
         else:
             print(f"{name}: " + "; ".join(errors), file=sys.stderr)
             kept = [item for item in old_items if item.get("source") == name]
-            sources.append({"id": source_id, "name": name, "home": home, "status": "stale" if kept else "unavailable", "feed": "", "count": len(kept)})
+            # A feed that answered but had nothing recent is just quiet, not broken.
+            status = "stale" if kept else "quiet" if reachable else "unavailable"
+            sources.append({"id": source_id, "name": name, "home": home, "status": status, "feed": "", "count": len(kept)})
             found = kept
         items.extend(found)
     seen, unique = set(), []

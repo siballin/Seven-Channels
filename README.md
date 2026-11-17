@@ -208,19 +208,23 @@ Live Events (`#live`) helps you find concerts, follow artists' tours, plan trips
 
 ## News columns
 
-Betting, Movies, Anime, Bowling, Music Lab, Creator Studio and Live Events each have a news column on the left (below the content on narrow screens), and the Guide has **Top headlines** from every channel. Sports, K-Pop, Video Games and Politics keep their own news sections.
+Betting, Movies, Anime, Bowling, Music Lab, Creator Studio and Live Events each have a news column on the left (below the content on narrow screens), Sports and K-Pop have one in their left sidebars, and the Guide has **Top headlines** from every channel.
 
 | Channel | Outlets |
 | --- | --- |
-| Movies | Variety, Deadline, The Hollywood Reporter, IndieWire |
-| Anime | Anime News Network, Crunchyroll News |
-| Bowling | PBA, Bowling This Month, USBC |
-| Music Lab | Billboard, Pitchfork, Stereogum |
-| Live Events | Pollstar, Consequence (tour news) |
-| Betting | Covers, Action Network |
-| Creator Studio | YouTube Official Blog, Creator Insider, Tubefilter |
+| Sports (More sports news) | The Athletic, CBS Sports, Yahoo Sports, Bleacher Report (alongside ESPN's NBA/NFL news) |
+| K-Pop | Allkpop, The Korea Herald, Billboard K-Pop (alongside Soompi in the right sidebar) |
+| Movies | Variety, Deadline, The Hollywood Reporter, IndieWire, Collider, /Film, Screen Rant, TheWrap, Letterboxd Journal |
+| Anime | Anime News Network, Crunchyroll News, Anime Corner, MyAnimeList News |
+| Bowling | PBA, Bowling This Month, USBC, Storm Bowling |
+| Music Lab | Billboard, Pitchfork, Stereogum, Rolling Stone, NME, Consequence, The Fader, Complex, HotNewHipHop, Hypebeast |
+| Live Events | Pollstar, Consequence, Billboard Touring, JamBase, Live Nation, Soompi (tour news) |
+| Betting | Covers, Action Network, VSiN, The Lines, Legal Sports Report, Sports Handle |
+| Creator Studio | YouTube Official Blog, Creator Insider, Tubefilter, The Verge, Social Media Today, TechCrunch, TikTok Newsroom, Instagram, Twitch Blog, Publish Press |
 
-`scripts/update_channel_news.py` reads each outlet's public RSS or Atom feed when the site is published and saves the last 10 days to `data/channel-news.json` (up to 12 stories per outlet). Outlets without a usable feed of their own (PBA, USBC, Covers, Action Network) come from Google News results limited to their site. Broad feeds are narrowed to the topic (betting odds and picks, tour announcements, creator news). The Guide takes the newest few headlines from each channel, including Politics, Video Games and K-pop. Only headlines, times and short summaries are kept; every story opens on the outlet's site. Bowlers Journal was considered but has no working feed. Run `python3 -m unittest scripts/test_update_channel_news.py` to test it.
+Video Games' news (in its own left column) comes from IGN, GameSpot, Polygon, Kotaku, VGC, PC Gamer and Eurogamer, and Politics' feed from The Hill, Politico, Punchbowl News, Roll Call, NPR, AP, NBC News, CNN, Semafor, NOTUS, Cook Political Report, Split Ticket, Silver Bulletin and Axios.
+
+`scripts/update_channel_news.py` reads each outlet's public RSS or Atom feed when the site is published and saves the last 10 days to `data/channel-news.json` (up to 12 stories per outlet). Outlets without a usable feed of their own come from Google News results limited to their site. Broad feeds are narrowed to the topic (betting odds and picks, tour announcements, creator news). An outlet with nothing new in that window is listed as quiet rather than unavailable. The Guide takes the newest few headlines from each channel. Only headlines, times and short summaries are kept; every story opens on the outlet's site. Considered but left out: Bowlers Journal, Motiv, Bowling.com, Rap-Up and ESPN Betting (no working feed), Otaku USA (no recent posts), and Koreaboo and KpopStarz (mostly gossip). Run `python3 -m unittest scripts/test_update_channel_news.py` to test it.
 
 ## Glass appearance
 
