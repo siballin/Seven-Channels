@@ -58,6 +58,10 @@ The Pages workflow refreshes each source independently and restores the most rec
 
 To enable Bill Watch, add a repository Actions secret named `CONGRESS_GOV_API_KEY` from Congress.gov. The key is sent only to Congress.gov during the workflow and is not included in the published snapshot. Bill Watch searches the latest 20 published bill records, not the entire Congress.gov catalog. Saved bills remain on the device even after they leave the snapshot. Full text and further details are linked on Congress.gov rather than embedded.
 
+### Political news
+
+The Politics overview has a **Political news** feed (next to Today in Politics, with This Week below them) with recent headlines from The Hill, Politico, Punchbowl News, Roll Call and Axios, newest first, with a filter for each outlet. `scripts/update_politics_news.py` reads each outlet's public RSS feed when the site is published and keeps the last 7 days (up to 15 stories per outlet). The Hill comes from its Senate, House, Administration and Campaign feeds; Axios has no politics-only feed, so its main feed is narrowed to political headlines; Punchbowl News items are its newsletter editions, titled with each edition's lead story. Only headlines, times and short summaries are saved, and every story links to the outlet (some need a subscription). If an outlet's feed fails, its earlier stories are kept and the feed says so. Run `python3 -m unittest scripts/test_update_politics_news.py` to test it.
+
 ### Members of Congress
 
 The **Members of Congress** tab (`#politics/members`) lists every senator, representative and delegate. Search by name or state, and filter by chamber, party and committee. **Your delegation** shows your state's senators and your representative; pick your district (or look it up with your ZIP code on house.gov), and the choice is saved on this device only. Each member has a shareable profile at `#politics/members/<Bioguide ID>` with:
@@ -81,6 +85,8 @@ Known gaps: the 1982–1990 maps have no boundary for New York's 33rd District (
 **2026 results are preliminary.** No official or academic compilation exists until states certify, so `scripts/update_election_2026.py` reads Wikipedia's 2026 House and Senate election articles during the daily Pages workflow. The page labels these results as preliminary, credits Wikipedia (CC BY-SA 4.0), and shows races not yet called. Many called races have no vote shares on Wikipedia yet; those use the middle shade. If Wikipedia can't be read, the last saved results stay. Run `python3 -m unittest discover -s scripts -p 'test_build_election_maps.py'` to test the parsers.
 
 The optional editorial list is `data/politics-stories.json`: an array of objects with `title`, `date`, `source`, `url`, `what`, `affected`, and `next`. Only sourced, dated stories with all three context fields are displayed. The file starts empty; the site does not generate editorial claims.
+
+**Midterm detail:** every midterm's House and Senate page opens with a "midterm at a glance" box: the sitting president and party, how many House and Senate seats the president's party gained or lost, House votes by party with the margin and the swing since the previous midterm, and the Senate seats that changed party (special elections marked). **All midterms** (`#politics/elections/midterms`) compares every midterm since 1982 side by side, with charts of the president's party's House and Senate seat changes and a table of results. Everything comes from the same result files as the maps (`scripts/build_midterm_summary.py` writes `data/elections/midterm-summary.json` each time the site is published). House votes are summed from district results, so they're the votes counted in this data rather than an official national popular vote (some states don't report votes for unopposed candidates). 2026 stays marked preliminary: House seats are those called so far and Senate changes come from seats that flipped.
 
 ## Bowling
 
@@ -199,6 +205,26 @@ Live Events (`#live`) helps you find concerts, follow artists' tours, plan trips
 
 - **K-Pop**: follows can be imported (matched by you on Ticketmaster, as above).
 - **Creator Studio**: planned concerts appear as vlog ideas on the Creator Studio calendar page.
+
+## News columns
+
+Betting, Movies, Anime, Bowling, Music Lab, Creator Studio and Live Events each have a news column on the left (below the content on narrow screens), Sports and K-Pop have one in their left sidebars, and the Guide has **Top headlines** from every channel.
+
+| Channel | Outlets |
+| --- | --- |
+| Sports (More sports news) | The Athletic, CBS Sports, Yahoo Sports, Bleacher Report (alongside ESPN's NBA/NFL news) |
+| K-Pop | Allkpop, The Korea Herald, Billboard K-Pop (alongside Soompi in the right sidebar) |
+| Movies | Variety, Deadline, The Hollywood Reporter, IndieWire, Collider, /Film, Screen Rant, TheWrap, Letterboxd Journal |
+| Anime | Anime News Network, Crunchyroll News, Anime Corner, MyAnimeList News |
+| Bowling | PBA, Bowling This Month, USBC, Storm Bowling |
+| Music Lab | Billboard, Pitchfork, Stereogum, Rolling Stone, NME, Consequence, The Fader, Complex, HotNewHipHop, Hypebeast |
+| Live Events | Pollstar, Consequence, Billboard Touring, JamBase, Live Nation, Soompi (tour news) |
+| Betting | Covers, Action Network, VSiN, The Lines, Legal Sports Report, Sports Handle |
+| Creator Studio | YouTube Official Blog, Creator Insider, Tubefilter, The Verge, Social Media Today, TechCrunch, TikTok Newsroom, Instagram, Twitch Blog, Publish Press |
+
+Video Games' news (in its own left column) comes from IGN, GameSpot, Polygon, Kotaku, VGC, PC Gamer and Eurogamer, and Politics' feed from The Hill, Politico, Punchbowl News, Roll Call, NPR, AP, NBC News, CNN, Semafor, NOTUS, Cook Political Report, Split Ticket, Silver Bulletin and Axios.
+
+`scripts/update_channel_news.py` reads each outlet's public RSS or Atom feed when the site is published and saves the last 10 days to `data/channel-news.json` (up to 12 stories per outlet). Outlets without a usable feed of their own come from Google News results limited to their site. Broad feeds are narrowed to the topic (betting odds and picks, tour announcements, creator news). An outlet with nothing new in that window is listed as quiet rather than unavailable. The Guide takes the newest few headlines from each channel. Only headlines, times and short summaries are kept; every story opens on the outlet's site. Considered but left out: Bowlers Journal, Motiv, Bowling.com, Rap-Up and ESPN Betting (no working feed), Otaku USA (no recent posts), and Koreaboo and KpopStarz (mostly gossip). Run `python3 -m unittest scripts/test_update_channel_news.py` to test it.
 
 ## Glass appearance
 

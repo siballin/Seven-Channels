@@ -61,6 +61,12 @@ jobs:
       - name: Refresh K-pop news and videos
         continue-on-error: true
         run: python scripts/update_kpop_sidebar.py
+      - name: Refresh Politics news (The Hill, Politico, Punchbowl News, Roll Call, Axios)
+        continue-on-error: true
+        run: python scripts/update_politics_news.py
+      - name: Refresh channel news columns (Movies, Anime, Bowling, Music Lab, Live Events, Betting, Creator Studio, Guide)
+        continue-on-error: true
+        run: cd scripts && python update_channel_news.py
       - name: Restore last Politics snapshot
         uses: actions/cache/restore@v4
         with:
@@ -95,6 +101,9 @@ jobs:
       - name: Refresh preliminary 2026 election results
         continue-on-error: true
         run: python scripts/update_election_2026.py
+      - name: Rebuild the midterm comparison
+        continue-on-error: true
+        run: python scripts/build_midterm_summary.py
       - name: Restore last bowling ball snapshot
         uses: actions/cache/restore@v4
         with:

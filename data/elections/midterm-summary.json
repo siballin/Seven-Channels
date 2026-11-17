@@ -1,0 +1,1140 @@
+{
+ "years": [
+  {
+   "year": 1982,
+   "congress": 98,
+   "preliminary": false,
+   "president": {
+    "name": "Ronald Reagan",
+    "party": "R"
+   },
+   "house": {
+    "before": {
+     "D": 243,
+     "R": 192
+    },
+    "after": {
+     "D": 269,
+     "R": 166
+    },
+    "uncalled": 0,
+    "change": {
+     "D": 26,
+     "R": -26
+    },
+    "presidentPartyChange": -26,
+    "votes": {
+     "D": 35281817,
+     "R": 27714730,
+     "O": 875414,
+     "total": 63871961
+    },
+    "share": {
+     "D": 55.2,
+     "R": 43.4
+    },
+    "uncontested": 27,
+    "margin": 11.8,
+    "swing": null
+   },
+   "senate": {
+    "before": {
+     "D": 46,
+     "R": 53,
+     "O": 1
+    },
+    "after": {
+     "D": 46,
+     "R": 54
+    },
+    "racesUp": 33,
+    "change": {
+     "D": 0,
+     "R": 1
+    },
+    "presidentPartyChange": 1,
+    "flips": [
+     {
+      "state": "NV",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "NM",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "VA",
+      "from": "I",
+      "to": "R",
+      "special": false
+     }
+    ],
+    "flipGains": {
+     "D": 0,
+     "R": 1
+    }
+   }
+  },
+  {
+   "year": 1986,
+   "congress": 100,
+   "preliminary": false,
+   "president": {
+    "name": "Ronald Reagan",
+    "party": "R"
+   },
+   "house": {
+    "before": {
+     "D": 253,
+     "R": 181
+    },
+    "after": {
+     "D": 258,
+     "R": 177
+    },
+    "uncalled": 0,
+    "change": {
+     "D": 5,
+     "R": -4
+    },
+    "presidentPartyChange": -4,
+    "votes": {
+     "D": 32447021,
+     "R": 26521112,
+     "O": 516232,
+     "total": 59484365
+    },
+    "share": {
+     "D": 54.5,
+     "R": 44.6
+    },
+    "uncontested": 52,
+    "margin": 9.9,
+    "swing": -1.9
+   },
+   "senate": {
+    "before": {
+     "D": 47,
+     "R": 53
+    },
+    "after": {
+     "D": 55,
+     "R": 45
+    },
+    "racesUp": 34,
+    "change": {
+     "D": 8,
+     "R": -8
+    },
+    "presidentPartyChange": -8,
+    "flips": [
+     {
+      "state": "AL",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "FL",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "GA",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "MD",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "MO",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "NV",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "SD",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "WA",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "NC",
+      "from": "R",
+      "to": "D",
+      "special": true
+     }
+    ],
+    "flipGains": {
+     "D": 7,
+     "R": -7
+    }
+   }
+  },
+  {
+   "year": 1990,
+   "congress": 102,
+   "preliminary": false,
+   "president": {
+    "name": "George H. W. Bush",
+    "party": "R"
+   },
+   "house": {
+    "before": {
+     "D": 260,
+     "R": 175
+    },
+    "after": {
+     "D": 267,
+     "R": 167,
+     "O": 1
+    },
+    "uncalled": 0,
+    "change": {
+     "D": 7,
+     "R": -8
+    },
+    "presidentPartyChange": -8,
+    "votes": {
+     "D": 32466812,
+     "R": 27605714,
+     "O": 1879405,
+     "total": 61951931
+    },
+    "share": {
+     "D": 52.4,
+     "R": 44.6
+    },
+    "uncontested": 52,
+    "margin": 7.8,
+    "swing": -2.1
+   },
+   "senate": {
+    "before": {
+     "D": 55,
+     "R": 45
+    },
+    "after": {
+     "D": 56,
+     "R": 44
+    },
+    "racesUp": 35,
+    "change": {
+     "D": 1,
+     "R": -1
+    },
+    "presidentPartyChange": -1,
+    "flips": [
+     {
+      "state": "MN",
+      "from": "R",
+      "to": "D",
+      "special": false
+     }
+    ],
+    "flipGains": {
+     "D": 1,
+     "R": -1
+    }
+   }
+  },
+  {
+   "year": 1994,
+   "congress": 104,
+   "preliminary": false,
+   "president": {
+    "name": "Bill Clinton",
+    "party": "D"
+   },
+   "house": {
+    "before": {
+     "D": 258,
+     "R": 176,
+     "O": 1
+    },
+    "after": {
+     "D": 204,
+     "R": 230,
+     "O": 1
+    },
+    "uncalled": 0,
+    "change": {
+     "D": -54,
+     "R": 54
+    },
+    "presidentPartyChange": -54,
+    "votes": {
+     "D": 31701006,
+     "R": 36594851,
+     "O": 2171874,
+     "total": 70467731
+    },
+    "share": {
+     "D": 45.0,
+     "R": 51.9
+    },
+    "uncontested": 36,
+    "margin": -6.9,
+    "swing": -14.7
+   },
+   "senate": {
+    "before": {
+     "D": 57,
+     "R": 43
+    },
+    "after": {
+     "D": 47,
+     "R": 53
+    },
+    "racesUp": 35,
+    "change": {
+     "D": -10,
+     "R": 10
+    },
+    "presidentPartyChange": -10,
+    "flips": [
+     {
+      "state": "AZ",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "ME",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "MI",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "OH",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "PA",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "TN",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "OK",
+      "from": "D",
+      "to": "R",
+      "special": true
+     },
+     {
+      "state": "TN",
+      "from": "D",
+      "to": "R",
+      "special": true
+     }
+    ],
+    "flipGains": {
+     "D": -8,
+     "R": 8
+    }
+   }
+  },
+  {
+   "year": 1998,
+   "congress": 106,
+   "preliminary": false,
+   "president": {
+    "name": "Bill Clinton",
+    "party": "D"
+   },
+   "house": {
+    "before": {
+     "D": 207,
+     "R": 226,
+     "O": 2
+    },
+    "after": {
+     "D": 211,
+     "R": 223,
+     "O": 1
+    },
+    "uncalled": 0,
+    "change": {
+     "D": 4,
+     "R": -3
+    },
+    "presidentPartyChange": 4,
+    "votes": {
+     "D": 31498287,
+     "R": 32170026,
+     "O": 2893668,
+     "total": 66561981
+    },
+    "share": {
+     "D": 47.3,
+     "R": 48.3
+    },
+    "uncontested": 44,
+    "margin": -1.0,
+    "swing": 5.9
+   },
+   "senate": {
+    "before": {
+     "D": 45,
+     "R": 55
+    },
+    "after": {
+     "D": 45,
+     "R": 55
+    },
+    "racesUp": 34,
+    "change": {
+     "D": 0,
+     "R": 0
+    },
+    "presidentPartyChange": 0,
+    "flips": [
+     {
+      "state": "IL",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "IN",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "KY",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "NY",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "NC",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "OH",
+      "from": "D",
+      "to": "R",
+      "special": false
+     }
+    ],
+    "flipGains": {
+     "D": 0,
+     "R": 0
+    }
+   }
+  },
+  {
+   "year": 2002,
+   "congress": 108,
+   "preliminary": false,
+   "president": {
+    "name": "George W. Bush",
+    "party": "R"
+   },
+   "house": {
+    "before": {
+     "D": 212,
+     "R": 221,
+     "O": 2
+    },
+    "after": {
+     "D": 205,
+     "R": 229,
+     "O": 1
+    },
+    "uncalled": 0,
+    "change": {
+     "D": -7,
+     "R": 8
+    },
+    "presidentPartyChange": 8,
+    "votes": {
+     "D": 33849212,
+     "R": 37457415,
+     "O": 3529910,
+     "total": 74836537
+    },
+    "share": {
+     "D": 45.2,
+     "R": 50.1
+    },
+    "uncontested": 27,
+    "margin": -4.9,
+    "swing": -3.9
+   },
+   "senate": {
+    "before": {
+     "D": 50,
+     "R": 50
+    },
+    "after": {
+     "D": 48,
+     "R": 51,
+     "O": 1
+    },
+    "racesUp": 34,
+    "change": {
+     "D": -2,
+     "R": 1
+    },
+    "presidentPartyChange": 1,
+    "flips": [
+     {
+      "state": "AR",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "GA",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "MN",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "MO",
+      "from": "D",
+      "to": "R",
+      "special": true
+     }
+    ],
+    "flipGains": {
+     "D": -2,
+     "R": 2
+    }
+   }
+  },
+  {
+   "year": 2006,
+   "congress": 110,
+   "preliminary": false,
+   "president": {
+    "name": "George W. Bush",
+    "party": "R"
+   },
+   "house": {
+    "before": {
+     "D": 202,
+     "R": 232,
+     "O": 1
+    },
+    "after": {
+     "D": 233,
+     "R": 202
+    },
+    "uncalled": 0,
+    "change": {
+     "D": 31,
+     "R": -30
+    },
+    "presidentPartyChange": -30,
+    "votes": {
+     "D": 42324398,
+     "R": 35913288,
+     "O": 2645023,
+     "total": 80882709
+    },
+    "share": {
+     "D": 52.3,
+     "R": 44.4
+    },
+    "uncontested": 24,
+    "margin": 7.9,
+    "swing": 12.8
+   },
+   "senate": {
+    "before": {
+     "D": 44,
+     "R": 55,
+     "O": 1
+    },
+    "after": {
+     "D": 49,
+     "R": 49,
+     "O": 2
+    },
+    "racesUp": 33,
+    "change": {
+     "D": 5,
+     "R": -6
+    },
+    "presidentPartyChange": -6,
+    "flips": [
+     {
+      "state": "CT",
+      "from": "D",
+      "to": "O",
+      "special": false
+     },
+     {
+      "state": "MO",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "MT",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "OH",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "PA",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "RI",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "VA",
+      "from": "R",
+      "to": "D",
+      "special": false
+     }
+    ],
+    "flipGains": {
+     "D": 5,
+     "R": -6
+    }
+   }
+  },
+  {
+   "year": 2010,
+   "congress": 112,
+   "preliminary": false,
+   "president": {
+    "name": "Barack Obama",
+    "party": "D"
+   },
+   "house": {
+    "before": {
+     "D": 257,
+     "R": 178
+    },
+    "after": {
+     "D": 193,
+     "R": 242
+    },
+    "uncalled": 0,
+    "change": {
+     "D": -64,
+     "R": 64
+    },
+    "presidentPartyChange": -64,
+    "votes": {
+     "D": 38980192,
+     "R": 44847944,
+     "O": 2927598,
+     "total": 86755734
+    },
+    "share": {
+     "D": 44.9,
+     "R": 51.7
+    },
+    "uncontested": 12,
+    "margin": -6.8,
+    "swing": -14.7
+   },
+   "senate": {
+    "before": {
+     "D": 56,
+     "R": 41,
+     "O": 2
+    },
+    "after": {
+     "D": 51,
+     "R": 47,
+     "O": 2
+    },
+    "racesUp": 37,
+    "change": {
+     "D": -5,
+     "R": 6
+    },
+    "presidentPartyChange": -5,
+    "flips": [
+     {
+      "state": "AR",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "IN",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "ND",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "PA",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "WI",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "IL",
+      "from": "D",
+      "to": "R",
+      "special": true
+     }
+    ],
+    "flipGains": {
+     "D": -6,
+     "R": 6
+    }
+   }
+  },
+  {
+   "year": 2014,
+   "congress": 114,
+   "preliminary": false,
+   "president": {
+    "name": "Barack Obama",
+    "party": "D"
+   },
+   "house": {
+    "before": {
+     "D": 201,
+     "R": 234
+    },
+    "after": {
+     "D": 188,
+     "R": 247
+    },
+    "uncalled": 0,
+    "change": {
+     "D": -13,
+     "R": 13
+    },
+    "presidentPartyChange": -13,
+    "votes": {
+     "D": 35626321,
+     "R": 40166660,
+     "O": 2936710,
+     "total": 78729691
+    },
+    "share": {
+     "D": 45.3,
+     "R": 51.0
+    },
+    "uncontested": 23,
+    "margin": -5.7,
+    "swing": 1.1
+   },
+   "senate": {
+    "before": {
+     "D": 53,
+     "R": 45,
+     "O": 2
+    },
+    "after": {
+     "D": 44,
+     "R": 54,
+     "O": 2
+    },
+    "racesUp": 36,
+    "change": {
+     "D": -9,
+     "R": 9
+    },
+    "presidentPartyChange": -9,
+    "flips": [
+     {
+      "state": "AK",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "AR",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "CO",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "IA",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "LA",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "MT",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "NC",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "SD",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "WV",
+      "from": "D",
+      "to": "R",
+      "special": false
+     }
+    ],
+    "flipGains": {
+     "D": -9,
+     "R": 9
+    }
+   }
+  },
+  {
+   "year": 2018,
+   "congress": 116,
+   "preliminary": false,
+   "president": {
+    "name": "Donald Trump",
+    "party": "R"
+   },
+   "house": {
+    "before": {
+     "D": 194,
+     "R": 241
+    },
+    "after": {
+     "D": 235,
+     "R": 199
+    },
+    "uncalled": 0,
+    "change": {
+     "D": 41,
+     "R": -42
+    },
+    "presidentPartyChange": -42,
+    "votes": {
+     "D": 67917508,
+     "R": 54739970,
+     "O": 2321972,
+     "total": 124979450
+    },
+    "share": {
+     "D": 54.3,
+     "R": 43.8
+    },
+    "uncontested": 18,
+    "margin": 10.5,
+    "swing": 16.2
+   },
+   "senate": {
+    "before": {
+     "D": 46,
+     "R": 52,
+     "O": 2
+    },
+    "after": {
+     "D": 45,
+     "R": 53,
+     "O": 2
+    },
+    "racesUp": 35,
+    "change": {
+     "D": -1,
+     "R": 1
+    },
+    "presidentPartyChange": 1,
+    "flips": [
+     {
+      "state": "AZ",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "FL",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "IN",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "MO",
+      "from": "D",
+      "to": "R",
+      "special": false
+     },
+     {
+      "state": "NV",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "ND",
+      "from": "D",
+      "to": "R",
+      "special": false
+     }
+    ],
+    "flipGains": {
+     "D": -2,
+     "R": 2
+    }
+   }
+  },
+  {
+   "year": 2022,
+   "congress": 118,
+   "preliminary": false,
+   "president": {
+    "name": "Joe Biden",
+    "party": "D"
+   },
+   "house": {
+    "before": {
+     "D": 222,
+     "R": 212
+    },
+    "after": {
+     "D": 213,
+     "R": 222
+    },
+    "uncalled": 0,
+    "change": {
+     "D": -9,
+     "R": 10
+    },
+    "presidentPartyChange": -9,
+    "votes": {
+     "D": 51527587,
+     "R": 54429061,
+     "O": 1639438,
+     "total": 107596086
+    },
+    "share": {
+     "D": 47.9,
+     "R": 50.6
+    },
+    "uncontested": 11,
+    "margin": -2.7,
+    "swing": -13.2
+   },
+   "senate": {
+    "before": {
+     "D": 48,
+     "R": 50,
+     "O": 2
+    },
+    "after": {
+     "D": 48,
+     "R": 49,
+     "O": 3
+    },
+    "racesUp": 35,
+    "change": {
+     "D": 0,
+     "R": -1
+    },
+    "presidentPartyChange": 0,
+    "flips": [
+     {
+      "state": "PA",
+      "from": "R",
+      "to": "D",
+      "special": false
+     }
+    ],
+    "flipGains": {
+     "D": 1,
+     "R": -1
+    }
+   }
+  },
+  {
+   "year": 2026,
+   "congress": 120,
+   "preliminary": true,
+   "president": {
+    "name": "Donald Trump",
+    "party": "R"
+   },
+   "house": {
+    "before": {
+     "D": 215,
+     "R": 220
+    },
+    "after": {
+     "D": 259,
+     "R": 170
+    },
+    "uncalled": 6,
+    "change": {
+     "D": 44,
+     "R": -50
+    },
+    "presidentPartyChange": -50,
+    "votes": null,
+    "share": null,
+    "uncontested": 5,
+    "margin": null,
+    "swing": null
+   },
+   "senate": {
+    "before": {
+     "D": 45,
+     "R": 53,
+     "O": 2
+    },
+    "after": null,
+    "racesUp": 35,
+    "change": null,
+    "presidentPartyChange": -8,
+    "flips": [
+     {
+      "state": "OH",
+      "from": "R",
+      "to": "D",
+      "special": true
+     },
+     {
+      "state": "IA",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "KS",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "ME",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "MS",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "NC",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "SC",
+      "from": "R",
+      "to": "D",
+      "special": false
+     },
+     {
+      "state": "TX",
+      "from": "R",
+      "to": "D",
+      "special": false
+     }
+    ],
+    "flipGains": {
+     "D": 8,
+     "R": -8
+    }
+   }
+  }
+ ],
+ "note": "House votes are summed from district results in this data; some states don't report votes for unopposed candidates."
+}
