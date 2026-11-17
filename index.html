@@ -1539,8 +1539,14 @@
     .games-panel { min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-sheen), var(--glass-base); box-shadow: var(--glass-inset), var(--glass-shadow); }
     .games-panel h3 { margin: 0 0 10px; font: 600 clamp(.9375rem, 1.4vw, 1.05rem)/1.35 var(--font-heading); }
     .games-panel h3:focus { outline: none; }
-    .games-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 310px); gap: 16px; align-items: start; }
-    .games-main, .games-sidebar { display: grid; gap: 14px; min-width: 0; }
+    .games-layout { display: grid; grid-template-columns: minmax(220px, 270px) minmax(0, 1fr) minmax(250px, 310px); grid-template-areas: "news main side"; gap: 16px; align-items: start; }
+    .games-newsbar { grid-area: news; }
+    .games-main { grid-area: main; }
+    .games-sidebar { grid-area: side; }
+    .games-main, .games-sidebar, .games-newsbar { display: grid; gap: 14px; min-width: 0; }
+    @media (max-width: 1199px) and (min-width: 901px) {
+      .games-layout { grid-template-columns: minmax(220px, 270px) minmax(0, 1fr); grid-template-areas: "news main" "news side"; }
+    }
     .games-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
     .games-metric { display: grid; gap: 2px; padding: 10px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius-small); background: var(--surface); min-width: 0; }
     .games-metric span { color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
@@ -1617,7 +1623,10 @@
     .games-countdown { color: var(--glass-accent-ink) !important; font-weight: 700; }
     .games-past-favorites summary { cursor: pointer; font-size: .82rem; font-weight: 700; }
     @media (max-width: 1100px) { .games-lists { grid-template-columns: minmax(0, 1fr); } }
-    @media (max-width: 900px) { .games-layout, .games-releases { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 900px) {
+      .games-layout, .games-releases { grid-template-columns: minmax(0, 1fr); }
+      .games-layout { grid-template-areas: "main" "news" "side"; }
+    }
     @media (max-width: 520px) { .games-calendar-filters { grid-template-columns: minmax(0, 1fr); } }
     /* Election maps */
     .election-maps { --el-d1: #c6dbf7; --el-d2: #8fb6ec; --el-d3: #4a83d6; --el-d4: #1d4f9e; --el-r1: #f9c8c0; --el-r2: #f2918a; --el-r3: #d9534b; --el-r4: #9e1f1c;
