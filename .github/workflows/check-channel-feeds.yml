@@ -1,0 +1,16 @@
+name: Check channel feeds (temporary)
+on:
+  push:
+    branches: ["claude/dazzling-hamilton-4jcfnt"]
+    paths: [".github/workflows/check-channel-feeds.yml", "scripts/update_channel_news.py", "scripts/check_channel_feeds.py"]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: cd scripts && python update_politics_news.py && python check_channel_feeds.py
