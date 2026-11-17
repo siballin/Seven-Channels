@@ -1534,7 +1534,9 @@
     .politics-news-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
     .politics-news-filters button { min-height: 34px; padding: 5px 11px; font-size: .78rem; }
     .politics-news-filters button[aria-pressed="true"] { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 18%, var(--surface)); color: var(--ink); }
-    .politics-news-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .politics-left { display: grid; gap: 14px; align-content: start; min-width: 0; }
+    .politics-top { align-items: start; }
+    .politics-news-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
     .politics-news-item { display: grid; align-content: start; gap: 5px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); min-width: 0; }
     .politics-news-meta { color: var(--muted); font-size: .72rem; }
     .politics-news-meta strong { color: var(--signal); font-weight: 700; }
@@ -11120,7 +11122,7 @@
     // Headlines from The Hill, Politico, Punchbowl News, Roll Call and Axios, collected into
     // data/politics-news.json by scripts/update_politics_news.py each time the site is published.
     let politicsNewsSource = "all";
-    let politicsNewsLimit = 20;
+    let politicsNewsLimit = 12;
     function createPoliticsNews() {
       const section = element("section", "politics-panel politics-news");
       section.setAttribute("aria-labelledby", "politics-news-title");
@@ -11171,7 +11173,7 @@
             button.setAttribute("aria-pressed", String(politicsNewsSource === id));
             button.addEventListener("click", () => {
               politicsNewsSource = id;
-              politicsNewsLimit = 20;
+              politicsNewsLimit = 12;
               render();
               document.getElementById(button.id)?.focus();
             });
@@ -11198,7 +11200,7 @@
           status.textContent = [Number.isFinite(fetched) ? `Updated ${new Date(fetched).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : "",
             Number.isFinite(fetched) && Date.now() - fetched > 36 * 3600000 ? "stale" : "", ...missing, "Headlines link to each outlet; some stories need a subscription."].filter(Boolean).join(" · ");
         };
-        more.addEventListener("click", () => { politicsNewsLimit += 20; render(); });
+        more.addEventListener("click", () => { politicsNewsLimit += 12; render(); });
         render();
       }).catch((error) => {
         console.error("Could not load politics news.", error);
@@ -11309,7 +11311,10 @@
           agenda.append(item);
         }
         agenda.append(link("House legislative activity", "https://www.house.gov/legislative-activity"), document.createTextNode(" · "), link("Senate floor schedule", "https://www.senate.gov/legislative/calendars.htm"));
-        top.append(today, agenda);
+        // The left column holds Today in Politics with the news feed under it; This Week stays on the right.
+        const leftColumn = element("div", "politics-left");
+        leftColumn.append(today, createPoliticsNews());
+        top.append(leftColumn, agenda);
 
         const scoreboard = panel("Congress Scoreboard");
         scoreboard.append(element("p", "politics-status", `${timestamp("House Clerk", data.house)} · ${timestamp("Senate", data.senate)}`));
@@ -11443,7 +11448,7 @@
         for (const control of [chamber, present, yes]) control.addEventListener("input", calculate);
         chamber.addEventListener("change", () => { present.value = chamber.value === "House" ? "435" : "100"; yes.value = "0"; calculate(); });
         calculate(); balance.append(calc, result);
-        dashboard.replaceChildren(top, createPoliticsNews(), scoreboard, bills, balance);
+        dashboard.replaceChildren(top, scoreboard, bills, balance);
       }).catch((error) => {
         console.error("Could not load Politics data.", error);
         loading.textContent = "Politics data is unavailable. The first snapshot may not have been published yet.";
