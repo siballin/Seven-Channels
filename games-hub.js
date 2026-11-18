@@ -647,17 +647,12 @@ function gamesRelativeDate(iso) {
   return days <= 0 ? "Today" : days === 1 ? "Yesterday" : days < 7 ? `${days} days ago` : new Date(time).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-// Gaming news sits in its own column on the left; free games, trailers and Reddit stay on the right.
+// Gaming news is in the news row at the top of the channel (channel-news.js); free games, trailers and Reddit stay on the right.
 function gamesSidebar() {
   const side = element("aside", "games-sidebar");
   side.setAttribute("aria-label", "Free games and trailers");
-  const newsColumn = element("aside", "games-newsbar");
-  newsColumn.setAttribute("aria-label", "Gaming news");
   const free = element("section", "games-panel games-side-section");
   free.append(element("h3", "", "Free on Epic"));
-  const news = element("section", "games-panel games-side-section");
-  news.append(element("h3", "", "Gaming news"));
-  newsColumn.append(news);
   const trailers = element("section", "games-panel games-side-section");
   trailers.append(element("h3", "", "New trailers"));
   side.append(free, trailers);
@@ -712,15 +707,10 @@ function gamesSidebar() {
       item.append(link, element("small", "", [video.channel, gamesRelativeDate(video.published)].filter(Boolean).join(" · ")));
       return item;
     }, "No trailers loaded yet.");
-    fill(news, data.news, (story) => {
-      const item = element("li", "games-news");
-      item.append(gamesLink(story.title, story.url), element("small", "", [story.source, gamesRelativeDate(story.published)].filter(Boolean).join(" · ")));
-      return item;
-    }, "No news loaded yet.");
   }).catch(() => {
-    for (const section of [free, trailers, news]) section.append(element("p", "games-empty", "Couldn’t load this section."));
+    for (const section of [free, trailers]) section.append(element("p", "games-empty", "Couldn’t load this section."));
   });
-  return { side, newsColumn };
+  return side;
 }
 
 // ---------- Release calendar ----------
@@ -1027,8 +1017,7 @@ function createGamesHub() {
   const layout = element("div", "games-layout");
   const main = element("div", "games-main");
   main.append(gamesDashboard(list), gamesForm(list), gamesLists(list));
-  const { side, newsColumn } = gamesSidebar();
-  layout.append(newsColumn, main, side);
+  layout.append(main, gamesSidebar());
   root.append(layout);
   return root;
 }
