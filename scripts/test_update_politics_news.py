@@ -19,6 +19,35 @@ GOOGLE = """<?xml version="1.0"?><rss><channel>
 </channel></rss>"""
 
 
+class ImageTests(unittest.TestCase):
+    def test_media_enclosure_and_inline_images(self):
+        raw = b"""<?xml version="1.0"?><rss xmlns:media="http://search.yahoo.com/mrss/" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel>
+<item><title>A</title><link>https://x/a</link><media:content url="https://img.example/a.jpg" medium="image"/></item>
+<item><title>B</title><link>https://x/b</link><enclosure url="http://img.example/b.jpg" type="image/jpeg"/></item>
+<item><title>C</title><link>https://x/c</link><description>&lt;img src="https://img.example/c.png"&gt; text</description></item>
+<item><title>D</title><link>https://x/d</link><content:encoded><![CDATA[<p><img src='https://img.example/d.webp'></p>]]></content:encoded></item>
+<item><title>E</title><link>https://x/e</link><description>&lt;img src="https://feeds.feedburner.com/1x1.gif"&gt;</description></item>
+</channel></rss>"""
+        self.assertEqual([item[5] for item in news.parse_feed(raw)],
+                         ["https://img.example/a.jpg", "https://img.example/b.jpg", "https://img.example/c.png", "https://img.example/d.webp", ""])
+
+
+class PageImageTests(unittest.TestCase):
+    def test_og_image_fallback_and_reuse(self):
+        items = [{"url": "https://rollcall.com/a", "image": ""}, {"url": "https://rollcall.com/b", "image": ""},
+                 {"url": "https://news.google.com/rss/articles/x", "image": ""}, {"url": "https://thehill.com/c", "image": "https://img/c.jpg"}]
+        pages = {"https://rollcall.com/a": b'<html><head><meta property="og:image" content="https://rollcall.com/a.jpg"></head></html>'}
+        fetched = []
+        def fetcher(url):
+            fetched.append(url)
+            if url in pages:
+                return pages[url]
+            raise OSError("paywall")
+        news.add_page_images(items, [{"url": "https://rollcall.com/b", "image": "https://rollcall.com/b-old.jpg"}], fetcher)
+        self.assertEqual([item["image"] for item in items], ["https://rollcall.com/a.jpg", "https://rollcall.com/b-old.jpg", "", "https://img/c.jpg"])
+        self.assertEqual(fetched, ["https://rollcall.com/a"])
+
+
 class BuildTests(unittest.TestCase):
     def test_parses_filters_and_falls_back(self):
         def fetcher(url):
