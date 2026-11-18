@@ -128,7 +128,7 @@ def collect(raw, source, mode, now):
     cutoff = now - timedelta(days=MAX_AGE_DAYS)
     pattern = FILTERS.get(mode or source.get("filter") or "")
     out = []
-    for title, link, published, summary, _categories in parse_feed(raw):
+    for title, link, published, summary, _categories, _image in parse_feed(raw):
         title, link = plain(title), (link or "").strip()
         if mode == "google":
             title = re.sub(r"\s+-\s+[^-]+$", "", title)

@@ -145,12 +145,46 @@ def parse_loose(raw):
         value = match.group(1) if match else ""
         return re.sub(r"^<!\[CDATA\[(.*)\]\]>$", r"\1", value.strip(), flags=re.S)
     for block in re.findall(r"<item[\s>].*?</item>", body, re.S):
+        media = re.search(r"<media:(?:content|thumbnail)[^>]+url=[\"']([^\"']+)", block) or IMG_TAG.search(html.unescape(block))
+        image = html.unescape(media.group(1)) if media else ""
         yield (field(block, "title"), field(block, "link"), field(block, "pubDate"), field(block, "description"),
-               re.findall(r"<category[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</category>", block, re.S))
+               re.findall(r"<category[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</category>", block, re.S),
+               image if image.startswith("https://") else "")
+
+
+MEDIA = "{http://search.yahoo.com/mrss/}"
+CONTENT = "{http://purl.org/rss/1.0/modules/content/}encoded"
+IMG_TAG = re.compile(r"<img[^>]+src=[\"']([^\"']+)[\"']", re.I)
+
+
+def image_of(node, *html):
+    """The article's picture: media:content/thumbnail, an image enclosure, or the first <img> in its HTML."""
+    candidates = []
+    for tag in (f"{MEDIA}content", f"{MEDIA}thumbnail", f"{MEDIA}group/{MEDIA}content", f"{MEDIA}group/{MEDIA}thumbnail"):
+        for media in node.findall(tag):
+            kind = (media.get("medium") or media.get("type") or "image").lower()
+            if "image" in kind or tag.endswith("thumbnail"):
+                candidates.append(media.get("url") or "")
+    for enclosure in node.findall("enclosure"):
+        if (enclosure.get("type") or "").startswith("image"):
+            candidates.append(enclosure.get("url") or "")
+    for text in html:
+        match = IMG_TAG.search(text or "")
+        if match:
+            candidates.append(html_unescape(match.group(1)))
+    for url in candidates:
+        url = url.strip().replace("http://", "https://", 1) if url.strip().startswith("http://") else url.strip()
+        if url.startswith("https://") and len(url) <= 600 and not re.search(r"(pixel|tracking|1x1|feedburner|gravatar)", url, re.I):
+            return url
+    return ""
+
+
+def html_unescape(value):
+    return html.unescape(value or "")
 
 
 def parse_feed(raw):
-    """Yield (title, link, published, summary, categories) from RSS 2.0 or Atom."""
+    """Yield (title, link, published, summary, categories, image) from RSS 2.0 or Atom."""
     try:
         root = ET.fromstring(raw)
     except ET.ParseError:
@@ -159,18 +193,21 @@ def parse_feed(raw):
     if root.tag == f"{ATOM}feed":
         for entry in root.findall(f"{ATOM}entry"):
             link = next((node.get("href") for node in entry.findall(f"{ATOM}link") if node.get("rel") in (None, "alternate")), "")
+            summary = entry.findtext(f"{ATOM}summary") or ""
             yield (entry.findtext(f"{ATOM}title") or "", link or "", entry.findtext(f"{ATOM}published") or entry.findtext(f"{ATOM}updated") or "",
-                   entry.findtext(f"{ATOM}summary") or "", [node.get("term", "") for node in entry.findall(f"{ATOM}category")])
+                   summary, [node.get("term", "") for node in entry.findall(f"{ATOM}category")],
+                   image_of(entry, summary, entry.findtext(f"{ATOM}content") or ""))
         return
     for item in root.iter("item"):
+        description = item.findtext("description") or ""
         yield (item.findtext("title") or "", item.findtext("link") or "", item.findtext("pubDate") or item.findtext("{http://purl.org/dc/elements/1.1/}date") or "",
-               item.findtext("description") or "", [node.text or "" for node in item.findall("category")])
+               description, [node.text or "" for node in item.findall("category")], image_of(item, description, item.findtext(CONTENT) or ""))
 
 
 def items_from(raw, name, hosts, mode, now):
     cutoff = now - timedelta(days=MAX_AGE_DAYS)
     out = []
-    for title, link, published, summary, categories in parse_feed(raw):
+    for title, link, published, summary, categories, image in parse_feed(raw):
         title, link = plain(title), (link or "").strip()
         if mode == "google":
             # Google News titles end with " - Outlet"; links go through news.google.com to the outlet.
@@ -189,6 +226,7 @@ def items_from(raw, name, hosts, mode, now):
         if not title or (stamp and stamp < cutoff):
             continue
         out.append({"source": name, "title": title[:300], "url": link[:600], "published": stamp.isoformat(timespec="seconds") if stamp else "",
+                    "image": image if mode != "google" else "",
                     "summary": plain(summary, 240)})
     out.sort(key=lambda item: item["published"], reverse=True)
     return out[:MAX_PER_SOURCE]

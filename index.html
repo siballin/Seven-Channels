@@ -1535,7 +1535,19 @@
     .politics-news-filters button { min-height: 34px; padding: 5px 11px; font-size: .78rem; }
     .politics-news-filters button[aria-pressed="true"] { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 18%, var(--surface)); color: var(--ink); }
     .politics-top { align-items: start; }
-    .politics-news-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .politics-news-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+    .politics-news-item { overflow: hidden; }
+    .politics-news-thumb { display: block; margin: -12px -12px 4px; text-decoration: none; aspect-ratio: 16 / 9; background: var(--surface); overflow: hidden; }
+    .politics-news-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .25s ease; }
+    .politics-news-item:hover .politics-news-thumb img { transform: scale(1.03); }
+    .politics-news-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; }
+    .politics-news-icon { width: 16px; height: 16px; flex: none; border-radius: 4px; background: #fff; }
+    .politics-news-placeholder { display: grid; place-content: center; justify-items: center; gap: 8px; width: 100%; height: 100%;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--signal) 14%, var(--surface)), var(--surface)); color: var(--muted); font-size: .78rem; font-weight: 700; }
+    .politics-news-placeholder .politics-news-icon { width: 36px; height: 36px; border-radius: 8px; }
+    .politics-news-filters button { display: inline-flex; align-items: center; gap: 6px; }
+    .politics-news-filters .politics-news-icon { width: 14px; height: 14px; }
+    @media (prefers-reduced-motion: reduce) { .politics-news-thumb img { transition: none; } }
     .politics-news .politics-news-filters button { padding-inline: 9px; }
     .politics-news-item { display: grid; align-content: start; gap: 5px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); min-width: 0; }
     .politics-news-meta { color: var(--muted); font-size: .72rem; }
@@ -11232,13 +11244,38 @@
         return response.json();
       }).then((data) => {
         const sources = (Array.isArray(data?.sources) ? data.sources : []).filter((source) => source && typeof source.name === "string");
+        // Each outlet's site icon, looked up by the domain of its homepage.
+        // Stories without a picture get the outlet's icon on a plain panel, so every card lines up.
+        const placeholder = (name) => {
+          const box = element("span", "politics-news-placeholder");
+          const big = iconFor(name);
+          if (big) box.append(big);
+          box.append(element("span", "", name));
+          return box;
+        };
+        const iconFor = (name) => {
+          const home = safeUrl(sources.find((source) => source.name === name)?.home || "");
+          if (!home) return null;
+          const icon = element("img", "politics-news-icon");
+          icon.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(home).hostname)}&sz=64`;
+          icon.alt = "";
+          icon.width = 16;
+          icon.height = 16;
+          icon.loading = "lazy";
+          icon.referrerPolicy = "no-referrer";
+          icon.addEventListener("error", () => icon.remove(), { once: true });
+          return icon;
+        };
         const items = (Array.isArray(data?.items) ? data.items : [])
           .filter((item) => item && typeof item.title === "string" && item.title.trim() && typeof item.source === "string" && safeUrl(item.url));
         const render = () => {
           filters.replaceChildren();
           for (const [id, label] of [["all", "All"], ...sources.map((source) => [source.name, source.name])]) {
             const count = id === "all" ? items.length : items.filter((item) => item.source === id).length;
-            const button = element("button", "secondary", `${label} ${count}`);
+            const button = element("button", "secondary", "");
+            const chipIcon = id === "all" ? null : iconFor(id);
+            if (chipIcon) button.append(chipIcon);
+            button.append(`${label} ${count}`);
             button.type = "button";
             button.id = `politics-news-${id.replace(/\W+/g, "-").toLowerCase()}`;
             button.setAttribute("aria-pressed", String(politicsNewsSource === id));
@@ -11254,11 +11291,40 @@
           list.replaceChildren();
           for (const item of shown.slice(0, politicsNewsLimit)) {
             const row = element("li", "politics-news-item");
+            const image = safeUrl(item.image || "");
+            if (image) {
+              // The thumbnail links to the story too; it's decorative, so the title carries the meaning.
+              const thumbLink = element("a", "politics-news-thumb");
+              thumbLink.href = safeUrl(item.url);
+              thumbLink.target = "_blank";
+              thumbLink.rel = "noopener noreferrer";
+              thumbLink.tabIndex = -1;
+              thumbLink.setAttribute("aria-hidden", "true");
+              const thumb = element("img", "");
+              thumb.src = image;
+              thumb.alt = "";
+              thumb.loading = "lazy";
+              thumb.referrerPolicy = "no-referrer";
+              thumb.addEventListener("error", () => thumb.replaceWith(placeholder(item.source)), { once: true });
+              thumbLink.append(thumb);
+              row.append(thumbLink);
+            } else {
+              const thumbLink = element("a", "politics-news-thumb");
+              thumbLink.href = safeUrl(item.url);
+              thumbLink.target = "_blank";
+              thumbLink.rel = "noopener noreferrer";
+              thumbLink.tabIndex = -1;
+              thumbLink.setAttribute("aria-hidden", "true");
+              thumbLink.append(placeholder(item.source));
+              row.append(thumbLink);
+            }
             const link = element("a", "politics-news-title", item.title);
             link.href = safeUrl(item.url);
             link.target = "_blank";
             link.rel = "noopener noreferrer";
             const meta = element("span", "politics-news-meta");
+            const icon = iconFor(item.source);
+            if (icon) meta.append(icon);
             meta.append(element("strong", "", item.source), document.createTextNode(item.published ? ` · ${relative(item.published)}` : ""));
             row.append(meta, link);
             if (typeof item.summary === "string" && item.summary) row.append(element("p", "", item.summary));
@@ -11382,8 +11448,8 @@
           agenda.append(item);
         }
         agenda.append(link("House legislative activity", "https://www.house.gov/legislative-activity"), document.createTextNode(" · "), link("Senate floor schedule", "https://www.senate.gov/legislative/calendars.htm"));
-        // Today in Politics and the news feed share the top row; This Week runs full width below them.
-        top.append(today, createPoliticsNews());
+        // The news feed gets its own row; Today in Politics and This Week sit together underneath it.
+        top.append(today, agenda);
 
         const scoreboard = panel("Congress Scoreboard");
         scoreboard.append(element("p", "politics-status", `${timestamp("House Clerk", data.house)} · ${timestamp("Senate", data.senate)}`));
@@ -11517,7 +11583,7 @@
         for (const control of [chamber, present, yes]) control.addEventListener("input", calculate);
         chamber.addEventListener("change", () => { present.value = chamber.value === "House" ? "435" : "100"; yes.value = "0"; calculate(); });
         calculate(); balance.append(calc, result);
-        dashboard.replaceChildren(top, agenda, scoreboard, bills, balance);
+        dashboard.replaceChildren(createPoliticsNews(), top, scoreboard, bills, balance);
       }).catch((error) => {
         console.error("Could not load Politics data.", error);
         loading.textContent = "Politics data is unavailable. The first snapshot may not have been published yet.";
