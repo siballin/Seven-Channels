@@ -1572,14 +1572,11 @@
     .games-panel { min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-sheen), var(--glass-base); box-shadow: var(--glass-inset), var(--glass-shadow); }
     .games-panel h3 { margin: 0 0 10px; font: 600 clamp(.9375rem, 1.4vw, 1.05rem)/1.35 var(--font-heading); }
     .games-panel h3:focus { outline: none; }
-    .games-layout { display: grid; grid-template-columns: minmax(220px, 270px) minmax(0, 1fr) minmax(250px, 310px); grid-template-areas: "news main side"; gap: 16px; align-items: start; }
-    .games-newsbar { grid-area: news; }
+    .games-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 310px); grid-template-areas: "main side"; gap: 16px; align-items: start; }
     .games-main { grid-area: main; }
     .games-sidebar { grid-area: side; }
-    .games-main, .games-sidebar, .games-newsbar { display: grid; gap: 14px; min-width: 0; }
-    @media (max-width: 1199px) and (min-width: 901px) {
-      .games-layout { grid-template-columns: minmax(220px, 270px) minmax(0, 1fr); grid-template-areas: "news main" "news side"; }
-    }
+    .games-main, .games-sidebar { display: grid; gap: 14px; min-width: 0; }
+
     .games-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
     .games-metric { display: grid; gap: 2px; padding: 10px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius-small); background: var(--surface); min-width: 0; }
     .games-metric span { color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
@@ -1658,7 +1655,7 @@
     @media (max-width: 1100px) { .games-lists { grid-template-columns: minmax(0, 1fr); } }
     @media (max-width: 900px) {
       .games-layout, .games-releases { grid-template-columns: minmax(0, 1fr); }
-      .games-layout { grid-template-areas: "main" "news" "side"; }
+      .games-layout { grid-template-areas: "main" "side"; }
     }
     @media (max-width: 520px) { .games-calendar-filters { grid-template-columns: minmax(0, 1fr); } }
     /* Election maps */
@@ -2683,30 +2680,34 @@
     .kpop-extra-note { color: var(--muted); font-size: .74rem; }
     .kpop-extra-source { color: var(--muted); }
     .kpop-extra-release a.kpop-album-open { text-decoration: none; }
-    /* News column on the left of channels (channel-news.js) */
-    .news-layout { display: grid; grid-template-columns: minmax(230px, 280px) minmax(0, 1fr); gap: 16px; align-items: start; }
-    .news-layout-main { min-width: 0; }
-    .news-layout-side { position: sticky; top: calc(var(--masthead-h, 64px) + 70px); max-height: calc(100vh - var(--masthead-h, 64px) - 90px); overflow-y: auto; overscroll-behavior: contain; min-width: 0; border-radius: var(--glass-radius, 16px); }
-    .channel-news { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--glass-edge, var(--line)); border-radius: var(--glass-radius, 16px); background: var(--glass-base, var(--panel)); box-shadow: var(--glass-shadow, none); }
+    /* News row at the top of channels (channel-news.js) */
+    .news-stack { display: grid; gap: 16px; min-width: 0; }
+    .news-stack > * { min-width: 0; }
+    .channel-news { display: grid; gap: 10px; padding: 16px 18px; border: 1px solid var(--glass-edge, var(--line)); border-radius: var(--glass-radius, 16px); background: var(--glass-base, var(--panel)); box-shadow: var(--glass-shadow, none); min-width: 0; }
     .channel-news h3 { margin: 0; font: 600 1rem/1.35 var(--font-heading); }
-    .channel-news-filters { display: flex; flex-wrap: wrap; gap: 5px; }
+    .channel-news-filters { display: flex; flex-wrap: wrap; gap: 6px; }
     .channel-news-filters[hidden] { display: none; }
-    .channel-news-filters button { min-height: 30px; padding: 3px 9px; font-size: .72rem; }
+    .channel-news-filters button { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 10px; font-size: .75rem; }
     .channel-news-filters button[aria-pressed="true"] { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 18%, var(--surface)); color: var(--ink); }
-    .channel-news-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-    .channel-news-item { display: grid; gap: 3px; padding: 9px 0; border-bottom: 1px solid var(--line); min-width: 0; }
-    .channel-news-item:last-child { border-bottom: 0; }
-    .channel-news-meta { color: var(--muted); font-size: .7rem; }
+    .channel-news-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+    .channel-news-card { display: grid; align-content: start; gap: 6px; padding: 0 12px 12px; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); min-width: 0; }
+    .channel-news-thumb { display: block; margin: 0 -12px 2px; aspect-ratio: 16 / 9; background: var(--surface); overflow: hidden; text-decoration: none; }
+    .channel-news-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .25s ease; }
+    .channel-news-card:hover .channel-news-thumb img { transform: scale(1.03); }
+    .channel-news-placeholder { display: grid; place-content: center; justify-items: center; gap: 8px; width: 100%; height: 100%;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--signal) 14%, var(--surface)), var(--surface)); color: var(--muted); font-size: .78rem; font-weight: 700; }
+    .channel-news-placeholder .channel-news-icon { width: 36px; height: 36px; border-radius: 8px; }
+    .channel-news-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; color: var(--muted); font-size: .72rem; }
     .channel-news-meta strong, .channel-news-channel { color: var(--signal); font-weight: 700; text-decoration: none; }
     .channel-news-channel:hover { text-decoration: underline; }
-    .channel-news-title { color: var(--ink); font-size: .84rem; font-weight: 700; line-height: 1.35; text-decoration: none; overflow-wrap: anywhere; }
+    .channel-news-icon { width: 16px; height: 16px; flex: none; border-radius: 4px; background: #fff; }
+    .channel-news-filters .channel-news-icon { width: 14px; height: 14px; }
+    .channel-news-title { color: var(--ink); font-size: .88rem; font-weight: 700; line-height: 1.35; text-decoration: none; overflow-wrap: anywhere; }
     .channel-news-title:hover { text-decoration: underline; }
-    .channel-news-status, .channel-news-empty { margin: 0; color: var(--muted); font-size: .7rem; }
+    .channel-news-summary { margin: 0; color: var(--muted); font-size: .78rem; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .channel-news-status, .channel-news-empty { margin: 0; color: var(--muted); font-size: .72rem; }
     .channel-news-more { justify-self: start; }
-    @media (max-width: 1099px) {
-      .news-layout { grid-template-columns: minmax(0, 1fr); }
-      .news-layout-side { order: 2; position: static; max-height: none; overflow: visible; }
-    }
+    @media (prefers-reduced-motion: reduce) { .channel-news-thumb img { transition: none; } }
     /* ---------- Live Events ---------- */
     .live-events { --le-c1: #3987e5; --le-c2: #d95926; --le-c3: #199e70; --le-c4: #c98500; --le-c5: #d55181; display: grid; gap: 16px; min-width: 0; }
     :root[data-theme="light"] .live-events { --le-c1: #2a78d6; --le-c2: #eb6834; --le-c3: #1baf7a; --le-c4: #eda100; --le-c5: #e87ba4; }
@@ -5171,7 +5172,7 @@
       news.append(element("h3", "", "Sports news"), newsBody);
       leaders.append(element("h3", "", "Game leaders"), leadersBody);
       upcoming.append(element("h3", "", "Upcoming games"), upcomingBody);
-      left.append(teams, standings, injuries, createChannelNews("sports"));
+      left.append(teams, standings, injuries);
       right.append(news, leaders, upcoming, createRedditWidget("sports"));
       main.append(featured, scoreboard, planner);
       const sideColumn = element("div", "sports-hub-side-column");
@@ -11667,7 +11668,7 @@
       }
 
       if (channel.id === "games") {
-        view.replaceChildren(heading, description, resources, createGamesHub());
+        view.replaceChildren(heading, description, withChannelNews("games", [resources, createGamesHub()]));
         return;
       }
       const isBetting = channel.id === "betting";
@@ -12152,18 +12153,18 @@
       if (channel.id === "kpop") {
         const { left, right, featured } = createKpopSidebars();
         const leftColumn = element("div", "kpop-dashboard-left");
-        leftColumn.append(left, createChannelNews("kpop"), createRedditWidget(channel.id));
+        leftColumn.append(left, createRedditWidget(channel.id));
         const middle = element("div", "kpop-dashboard-main");
         middle.append(featured, kpopCalendar, kpopLookup);
         const dashboard = element("div", "kpop-dashboard");
         dashboard.append(leftColumn, middle, right);
-        view.replaceChildren(heading, description, dashboard);
+        view.replaceChildren(heading, description, withChannelNews("kpop", [dashboard]));
       } else if (channel.id === "sports" && scoreboard) {
-        view.replaceChildren(heading, description, createSportsHub(scoreboard, planner, resources));
+        view.replaceChildren(heading, description, withChannelNews("sports", [createSportsHub(scoreboard, planner, resources)]));
       } else {
         const content = [...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(scoreboard ? [scoreboard] : []), planner];
         const withReddit = redditDefaults[channel.id] ? [withRedditSidebar(channel.id, content)] : content;
-        view.replaceChildren(heading, description, resources, ...(["betting", "movies", "anime"].includes(channel.id) ? [withChannelNews(channel.id, withReddit)] : withReddit));
+        view.replaceChildren(heading, description, ...(["betting", "movies", "anime"].includes(channel.id) ? [withChannelNews(channel.id, [resources, ...withReddit])] : [resources, ...withReddit]));
       }
     }
 

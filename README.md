@@ -208,7 +208,7 @@ Live Events (`#live`) helps you find concerts, follow artists' tours, plan trips
 
 ## News columns
 
-Betting, Movies, Anime, Bowling, Music Lab, Creator Studio and Live Events each have a news column on the left (below the content on narrow screens), Sports and K-Pop have one in their left sidebars, and the Guide has **Top headlines** from every channel.
+Every channel has a news row at the top: cards with each story's picture, the outlet's icon, the headline and a short summary, filters by outlet, and **Show more**. That covers Sports, Betting, K-Pop, Movies, Anime, Video Games, Bowling, Music Lab, Creator Studio and Live Events, plus **Top headlines** from every channel on the Guide (Politics has its own row, described above). Pictures come from the feeds; for feeds without them, the share image on the article page is used (up to 150 pages per run, newest stories first, reusing pictures found on earlier runs). Stories found through Google News have no picture and show the outlet's icon instead.
 
 | Channel | Outlets |
 | --- | --- |

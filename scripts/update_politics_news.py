@@ -251,10 +251,10 @@ def fetch_page(url):
         return response.read(300_000)
 
 
-def add_page_images(items, previous_items, fetcher):
-    """Fill in missing pictures from article pages, reusing ones found on earlier runs; at most PAGE_IMAGE_LIMIT fetches."""
+def add_page_images(items, previous_items, fetcher, budget=PAGE_IMAGE_LIMIT):
+    """Fill in missing pictures from article pages, reusing ones found on earlier runs; at most `budget` page fetches.
+    Returns the fetches left over."""
     known = {item.get("url"): item.get("image") for item in previous_items if item.get("image")}
-    budget = PAGE_IMAGE_LIMIT
     for item in items:
         if item.get("image"):
             continue
@@ -268,6 +268,7 @@ def add_page_images(items, previous_items, fetcher):
             item["image"] = page_image(item["url"], fetcher)
         except Exception as error:  # paywalls, timeouts: the card just shows the outlet's icon instead
             print(f"No page image for {item['url']}: {error}", file=sys.stderr)
+    return budget
 
 
 def build(previous, fetcher=fetch, now=None):

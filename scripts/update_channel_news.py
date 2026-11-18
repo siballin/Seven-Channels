@@ -17,7 +17,7 @@ import re
 import sys
 from urllib.parse import urlparse
 
-from update_politics_news import fetch, google_news, host_ok, parse_feed, plain, when
+from update_politics_news import add_page_images, fetch, fetch_page, google_news, host_ok, parse_feed, plain, when
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "channel-news.json"
@@ -43,6 +43,7 @@ CHANNELS = {
         src("Bleacher Report", "https://bleacherreport.com/", {"bleacherreport.com"}, [], "site:bleacherreport.com"),
     ]},
     "kpop": {"title": "K-pop news", "sources": [
+        src("Soompi", "https://www.soompi.com/", {"soompi.com"}, [("https://www.soompi.com/category/music/feed", None)], "site:soompi.com"),
         src("Allkpop", "https://www.allkpop.com/", {"allkpop.com"}, [("https://www.allkpop.com/feed", None), ("https://www.allkpop.com/rss", None)], "site:allkpop.com"),
         src("The Korea Herald", "https://www.koreaherald.com/list.php?ct=020500000000", {"koreaherald.com"}, [], "site:koreaherald.com K-pop"),
         src("Billboard K-Pop", "https://www.billboard.com/t/k-pop/", {"billboard.com"}, [("https://www.billboard.com/t/k-pop/feed/", None)], "site:billboard.com k-pop"),
@@ -120,6 +121,9 @@ CHANNELS = {
     ]},
 }
 FILTERS = {"betting": BETTING, "tour": TOUR, "creator": CREATOR}
+PAGE_IMAGE_BUDGET = 150  # article pages fetched per run for missing pictures, across all channels (newest stories first)
+GAMES_HOMES = {"IGN": "https://www.ign.com/", "GameSpot": "https://www.gamespot.com/", "Polygon": "https://www.polygon.com/", "Kotaku": "https://kotaku.com/",
+               "VGC": "https://www.videogameschronicle.com/", "PC Gamer": "https://www.pcgamer.com/", "Eurogamer": "https://www.eurogamer.net/"}
 CHANNEL_NAMES = {"sports": "Sports", "movies": "Movies", "anime": "Anime", "bowling": "Bowling", "music": "Music Lab", "live": "Live Events",
                  "betting": "Betting", "creator": "Creator Studio", "politics": "Politics", "games": "Video Games", "kpop": "K-Pop"}
 
@@ -128,7 +132,7 @@ def collect(raw, source, mode, now):
     cutoff = now - timedelta(days=MAX_AGE_DAYS)
     pattern = FILTERS.get(mode or source.get("filter") or "")
     out = []
-    for title, link, published, summary, _categories, _image in parse_feed(raw):
+    for title, link, published, summary, _categories, image in parse_feed(raw):
         title, link = plain(title), (link or "").strip()
         if mode == "google":
             title = re.sub(r"\s+-\s+[^-]+$", "", title)
@@ -142,8 +146,9 @@ def collect(raw, source, mode, now):
         stamp = when(published)
         if not title or (stamp and stamp < cutoff):
             continue
-        out.append({"source": source["name"], "title": title[:300], "url": link[:600],
-                    "published": stamp.isoformat(timespec="seconds") if stamp else "", "summary": plain(summary, 200)})
+        out.append({"source": source["name"], "home": source["home"], "title": title[:300], "url": link[:600],
+                    "published": stamp.isoformat(timespec="seconds") if stamp else "", "summary": plain(summary, 200),
+                    "image": image if mode != "google" else ""})
     out.sort(key=lambda item: item["published"], reverse=True)
     return out[:MAX_PER_SOURCE]
 
@@ -188,17 +193,31 @@ def read_json(path):
         return {}
 
 
+def games_channel():
+    """Video Games' news is collected by update_games_sidebar.py; it's reshaped here so every channel's row works the same way."""
+    games = read_json(ROOT / "data" / "games-sidebar.json").get("news") or {}
+    items = [{"source": item.get("source", ""), "home": GAMES_HOMES.get(item.get("source", ""), ""), "title": item.get("title", ""),
+              "url": item.get("url", ""), "published": item.get("published", ""), "summary": "", "image": item.get("image", "")}
+             for item in games.get("items") or [] if item.get("title") and str(item.get("url", "")).startswith("https://")]
+    names = list(dict.fromkeys(item["source"] for item in items))
+    unavailable = games.get("unavailable") or []
+    sources = [{"name": name, "home": GAMES_HOMES.get(name, ""), "status": "ok", "count": sum(1 for item in items if item["source"] == name), "via": ""} for name in names]
+    sources += [{"name": name, "home": GAMES_HOMES.get(name, ""), "status": "unavailable", "count": 0, "via": ""} for name in unavailable if name not in names]
+    return {"title": "Gaming news", "sources": sources, "items": items}
+
+
 def guide_items(channels, now):
     """The newest few headlines from every channel, for the Guide."""
     pools = {key: value.get("items") or [] for key, value in channels.items()}
-    pools["politics"] = read_json(ROOT / "data" / "politics-news.json").get("items") or []
-    games = read_json(ROOT / "data" / "games-sidebar.json").get("news") or {}
-    pools["games"] = [{"source": item.get("source", ""), "title": item.get("title", ""), "url": item.get("url", ""),
-                       "published": item.get("published", ""), "summary": ""} for item in games.get("items") or []]
+    politics = read_json(ROOT / "data" / "politics-news.json")
+    homes = {source.get("name"): source.get("home", "") for source in politics.get("sources") or []}
+    pools["politics"] = [{**item, "home": homes.get(item.get("source"), "")} for item in politics.get("items") or []]
     kpop = read_json(ROOT / "data" / "kpop-sidebar.json").get("news") or {}
-    pools["kpop"] = [{"source": item.get("source") or urlparse(item.get("url", "")).hostname.removeprefix("www.").split(".")[0].capitalize(), "title": item.get("title", ""), "url": item.get("url", ""),
-                      "published": item.get("published", "") or item.get("date", ""), "summary": ""}
-                     for item in (kpop.get("items") if isinstance(kpop, dict) else kpop) or []]
+    if not pools.get("kpop"):
+        pools["kpop"] = [{"source": item.get("source") or urlparse(item.get("url", "")).hostname.removeprefix("www.").split(".")[0].capitalize(),
+                          "title": item.get("title", ""), "url": item.get("url", ""), "image": item.get("image", ""),
+                          "published": item.get("published", "") or item.get("date", ""), "summary": ""}
+                         for item in (kpop.get("items") if isinstance(kpop, dict) else kpop) or []]
     picked = []
     for key, pool in pools.items():
         fresh = [item for item in pool if item.get("title") and str(item.get("url", "")).startswith("https://")]
@@ -210,7 +229,13 @@ def guide_items(channels, now):
 
 def build(previous, fetcher=fetch, now=None):
     now = now or datetime.now(timezone.utc)
-    channels = {key: build_channel(config, (previous.get("channels") or {}).get(key) or {}, fetcher, now) for key, config in CHANNELS.items()}
+    old_channels = previous.get("channels") or {}
+    channels = {key: build_channel(config, old_channels.get(key) or {}, fetcher, now) for key, config in CHANNELS.items()}
+    # Feeds without pictures: use each article page's share image, within a per-run budget, reusing earlier finds.
+    everything = sorted((item for channel in channels.values() for item in channel["items"]), key=lambda item: item.get("published") or "", reverse=True)
+    earlier = [item for channel in old_channels.values() for item in channel.get("items") or []]
+    add_page_images(everything, earlier, fetch_page if fetcher is fetch else fetcher, PAGE_IMAGE_BUDGET)
+    channels["games"] = games_channel()
     return {"fetchedAt": now.isoformat(timespec="seconds"), "channels": channels, "guide": {"title": "Top headlines", "items": guide_items(channels, now)}}
 
 
