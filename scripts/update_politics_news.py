@@ -232,6 +232,38 @@ def items_from(raw, name, hosts, mode, now):
     return out[:MAX_PER_SOURCE]
 
 
+OG_IMAGE = re.compile(r"<meta[^>]+(?:property|name)=[\"'](?:og:image|twitter:image)(?::src)?[\"'][^>]*content=[\"']([^\"']+)[\"']"
+                      r"|<meta[^>]+content=[\"']([^\"']+)[\"'][^>]*(?:property|name)=[\"'](?:og:image|twitter:image)", re.I)
+PAGE_IMAGE_LIMIT = 30
+
+
+def page_image(url, fetcher):
+    """The share image an article page sets for social media (og:image), for feeds that carry no pictures."""
+    html_text = fetcher(url)[:300_000].decode("utf-8", "replace")
+    match = OG_IMAGE.search(html_text)
+    image = html.unescape((match.group(1) or match.group(2)) if match else "").strip()
+    return image if image.startswith("https://") and len(image) <= 600 else ""
+
+
+def add_page_images(items, previous_items, fetcher):
+    """Fill in missing pictures from article pages, reusing ones found on earlier runs; at most PAGE_IMAGE_LIMIT fetches."""
+    known = {item.get("url"): item.get("image") for item in previous_items if item.get("image")}
+    budget = PAGE_IMAGE_LIMIT
+    for item in items:
+        if item.get("image"):
+            continue
+        if item["url"] in known:
+            item["image"] = known[item["url"]]
+            continue
+        if budget <= 0 or host_ok(item["url"], {"news.google.com"}):
+            continue
+        budget -= 1
+        try:
+            item["image"] = page_image(item["url"], fetcher)
+        except Exception as error:  # paywalls, timeouts: the card just shows the outlet's icon instead
+            print(f"No page image for {item['url']}: {error}", file=sys.stderr)
+
+
 def build(previous, fetcher=fetch, now=None):
     now = now or datetime.now(timezone.utc)
     old_items = previous.get("items") or []
@@ -280,6 +312,7 @@ def build(previous, fetcher=fetch, now=None):
             continue
         seen.add(key)
         unique.append(item)
+    add_page_images(unique, old_items, fetcher)
     return {"fetchedAt": now.isoformat(timespec="seconds"), "sources": sources, "items": unique}
 
 

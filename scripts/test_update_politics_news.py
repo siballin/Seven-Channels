@@ -32,6 +32,22 @@ class ImageTests(unittest.TestCase):
                          ["https://img.example/a.jpg", "https://img.example/b.jpg", "https://img.example/c.png", "https://img.example/d.webp", ""])
 
 
+class PageImageTests(unittest.TestCase):
+    def test_og_image_fallback_and_reuse(self):
+        items = [{"url": "https://rollcall.com/a", "image": ""}, {"url": "https://rollcall.com/b", "image": ""},
+                 {"url": "https://news.google.com/rss/articles/x", "image": ""}, {"url": "https://thehill.com/c", "image": "https://img/c.jpg"}]
+        pages = {"https://rollcall.com/a": b'<html><head><meta property="og:image" content="https://rollcall.com/a.jpg"></head></html>'}
+        fetched = []
+        def fetcher(url):
+            fetched.append(url)
+            if url in pages:
+                return pages[url]
+            raise OSError("paywall")
+        news.add_page_images(items, [{"url": "https://rollcall.com/b", "image": "https://rollcall.com/b-old.jpg"}], fetcher)
+        self.assertEqual([item["image"] for item in items], ["https://rollcall.com/a.jpg", "https://rollcall.com/b-old.jpg", "", "https://img/c.jpg"])
+        self.assertEqual(fetched, ["https://rollcall.com/a"])
+
+
 class BuildTests(unittest.TestCase):
     def test_parses_filters_and_falls_back(self):
         def fetcher(url):
