@@ -1535,6 +1535,9 @@
     .politics-news-filters button { min-height: 34px; padding: 5px 11px; font-size: .78rem; }
     .politics-news-filters button[aria-pressed="true"] { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 18%, var(--surface)); color: var(--ink); }
     .politics-top { align-items: stretch; }
+    /* This Week takes Today in Politics' height and scrolls: "contain: size" keeps its long list from setting the row height. */
+    .politics-week { contain: size; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+    .politics-week h3 { position: sticky; top: -18px; z-index: 1; margin: -18px -18px 12px; padding: 18px 18px 8px; background: inherit; }
     .politics-news-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
     .politics-news-item { overflow: hidden; }
     .politics-news-thumb { display: block; margin: -12px -12px 4px; text-decoration: none; aspect-ratio: 16 / 9; background: var(--surface); overflow: hidden; }
@@ -1557,7 +1560,10 @@
     .politics-news-item p { margin: 0; font-size: .8rem; }
     .politics-news-more { margin-top: 10px; }
     .politics-news-empty { color: var(--muted); }
-    @media (max-width: 760px) { .politics-top, .politics-scores { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) {
+      .politics-top, .politics-scores { grid-template-columns: 1fr; }
+      .politics-week { contain: none; max-height: 420px; }
+    }
     /* Video Games hub */
     .games-hub { display: grid; gap: 16px; min-width: 0; }
     .games-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -11402,6 +11408,9 @@
         const top = element("div", "politics-top");
         const today = panel("Today in Politics");
         const agenda = panel("This Week");
+        agenda.classList.add("politics-week");
+        agenda.tabIndex = 0;
+        agenda.setAttribute("aria-label", "This Week (scrollable)");
         const validStories = Array.isArray(stories) ? stories.filter((s) => s && s.title && s.date && s.source && s.url && s.what && s.affected && s.next) : [];
         if (validStories.length) {
           const story = validStories[0];
