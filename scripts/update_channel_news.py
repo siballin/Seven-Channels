@@ -121,7 +121,7 @@ CHANNELS = {
     ]},
 }
 FILTERS = {"betting": BETTING, "tour": TOUR, "creator": CREATOR}
-PAGE_IMAGE_BUDGET = 60  # article pages fetched per run for missing pictures, across all channels
+PAGE_IMAGE_BUDGET = 150  # article pages fetched per run for missing pictures, across all channels (newest stories first)
 GAMES_HOMES = {"IGN": "https://www.ign.com/", "GameSpot": "https://www.gamespot.com/", "Polygon": "https://www.polygon.com/", "Kotaku": "https://kotaku.com/",
                "VGC": "https://www.videogameschronicle.com/", "PC Gamer": "https://www.pcgamer.com/", "Eurogamer": "https://www.eurogamer.net/"}
 CHANNEL_NAMES = {"sports": "Sports", "movies": "Movies", "anime": "Anime", "bowling": "Bowling", "music": "Music Lab", "live": "Live Events",
@@ -232,10 +232,9 @@ def build(previous, fetcher=fetch, now=None):
     old_channels = previous.get("channels") or {}
     channels = {key: build_channel(config, old_channels.get(key) or {}, fetcher, now) for key, config in CHANNELS.items()}
     # Feeds without pictures: use each article page's share image, within a per-run budget, reusing earlier finds.
-    budget = PAGE_IMAGE_BUDGET
-    for key, channel in channels.items():
-        budget = add_page_images(channel["items"], (old_channels.get(key) or {}).get("items") or [],
-                                 fetch_page if fetcher is fetch else fetcher, budget)
+    everything = sorted((item for channel in channels.values() for item in channel["items"]), key=lambda item: item.get("published") or "", reverse=True)
+    earlier = [item for channel in old_channels.values() for item in channel.get("items") or []]
+    add_page_images(everything, earlier, fetch_page if fetcher is fetch else fetcher, PAGE_IMAGE_BUDGET)
     channels["games"] = games_channel()
     return {"fetchedAt": now.isoformat(timespec="seconds"), "channels": channels, "guide": {"title": "Top headlines", "items": guide_items(channels, now)}}
 
