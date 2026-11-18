@@ -245,6 +245,12 @@ def page_image(url, fetcher):
     return image if image.startswith("https://") and len(image) <= 600 else ""
 
 
+def fetch_page(url):
+    """Article pages get a short timeout so a slow site can't hold up the build."""
+    with urlopen(Request(url, headers={**HEADERS, "Accept": "text/html"}), timeout=8) as response:
+        return response.read(300_000)
+
+
 def add_page_images(items, previous_items, fetcher):
     """Fill in missing pictures from article pages, reusing ones found on earlier runs; at most PAGE_IMAGE_LIMIT fetches."""
     known = {item.get("url"): item.get("image") for item in previous_items if item.get("image")}
@@ -312,7 +318,7 @@ def build(previous, fetcher=fetch, now=None):
             continue
         seen.add(key)
         unique.append(item)
-    add_page_images(unique, old_items, fetcher)
+    add_page_images(unique, old_items, fetch_page if fetcher is fetch else fetcher)
     return {"fetchedAt": now.isoformat(timespec="seconds"), "sources": sources, "items": unique}
 
 
