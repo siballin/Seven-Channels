@@ -1,4 +1,4 @@
-# Temporary: prints how many Politics stories per outlet have a picture. Removed before merging.
+# Temporary: prints how many Politics stories per outlet have a picture (after the page-image fallback). Removed before merging.
 import json
 from collections import Counter
 import update_politics_news as n
