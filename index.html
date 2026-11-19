@@ -150,6 +150,33 @@
     .this-week-text strong { overflow-wrap: anywhere; font-size: .95rem; }
     .this-week-text small { color: var(--muted); font-size: .78rem; }
     .this-week-text .this-week-kind { text-transform: uppercase; letter-spacing: .04em; font-size: .7rem; }
+    .wrapped-banner { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; margin-bottom: 18px; padding: 12px 16px; border-radius: var(--glass-radius, 16px); border: 1px solid var(--glass-edge, var(--line)); color: inherit; text-decoration: none; background: linear-gradient(110deg, color-mix(in srgb, var(--signal) 26%, transparent), color-mix(in srgb, #d6409f 18%, transparent)); }
+    .wrapped-banner strong { font-size: 1.05rem; }
+    .wrapped-banner span { color: var(--muted); font-size: .9rem; }
+    .wrapped-banner:hover strong, .wrapped-banner:focus-visible strong { text-decoration: underline; }
+    .wrapped { display: grid; gap: 16px; min-width: 0; }
+    .wrapped-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between; }
+    .wrapped-head h2 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.4rem); }
+    .wrapped-sub, .wrapped-note, .wrapped-empty, .wrapped-copied { color: var(--muted); margin: 4px 0 0; font-size: .9rem; }
+    .wrapped-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .wrapped-tools select { width: auto; }
+    .wrapped-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+    .wrapped-card { --wrapped-color: var(--signal); display: grid; align-content: start; gap: 8px; padding: 16px 18px; border-radius: var(--glass-radius, 16px); border: 1px solid var(--glass-edge, var(--line)); background: linear-gradient(160deg, color-mix(in srgb, var(--wrapped-color) 22%, transparent), var(--glass-base, var(--panel)) 70%); min-width: 0; }
+    .wrapped-card.live { --wrapped-color: #e5484d; }
+    .wrapped-card.bowling { --wrapped-color: #3e9b4f; }
+    .wrapped-card.movies { --wrapped-color: #f76b15; }
+    .wrapped-card.anime { --wrapped-color: #e93d82; }
+    .wrapped-card.games { --wrapped-color: #0090ff; }
+    .wrapped-card.kpop { --wrapped-color: #8e4ec6; }
+    .wrapped-card.music { --wrapped-color: #12a594; }
+    .wrapped-card.betting { --wrapped-color: #ffc53d; }
+    .wrapped-card.creator { --wrapped-color: #d6409f; }
+    .wrapped-card h3 { margin: 0; font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .wrapped-big { display: flex; align-items: baseline; gap: 8px; margin: 0; }
+    .wrapped-big strong { font-size: 2.6rem; line-height: 1; color: var(--wrapped-color); }
+    .wrapped-big span { color: var(--muted); }
+    .wrapped-card ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: .92rem; overflow-wrap: anywhere; }
+    .wrapped-more { font-size: .85rem; justify-self: start; }
     .guide { display: grid; gap: 3px; }
     .guide-row {
       display: grid;
@@ -3302,6 +3329,7 @@
   <script src="sports-leagues.js"></script>
   <script src="media-hub.js"></script>
   <script src="this-week.js"></script>
+  <script src="year-in-review.js"></script>
   <script src="congress-members.js"></script>
   <script src="election-maps.js"></script>
   <script src="games-hub.js"></script>
@@ -8706,6 +8734,12 @@
     }
 
     function renderGuide() {
+      const wrappedRoute = /^wrapped(?:\/(\d{4}))?$/.exec(location.hash.slice(1));
+      if (wrappedRoute) {
+        view.replaceChildren(createYearInReview(Number(wrappedRoute[1]) || new Date().getFullYear(), entries));
+        scrollTo(0, 0);
+        return;
+      }
       const guide = element("div", "guide");
       const header = element("div", "guide-row guide-head");
       header.setAttribute("aria-hidden", "true");
@@ -8727,7 +8761,10 @@
         }
         guide.append(row);
       }
-      view.replaceChildren(withChannelNews("guide", [createThisWeek(), guide]));
+      const wrappedLink = element("a", "wrapped-banner");
+      wrappedLink.href = `#wrapped/${new Date().getFullYear()}`;
+      wrappedLink.append(element("strong", "", `Your ${new Date().getFullYear()} in review`), element("span", "", "Concerts, bowling, finished games and shows, Music Lab, bets and uploads"));
+      view.replaceChildren(withChannelNews("guide", [createThisWeek(), wrappedLink, guide]));
     }
 
     function renderItem(entry, channel) {

@@ -14,6 +14,10 @@ https://siballin.github.io/Seven-Channels/
 
 The Guide opens with the next seven days across channels, grouped by day: concerts you're planning or have tickets for (Live Events), league nights from the bowling league tracker, planned uploads (Creator Studio), K-pop releases from artists you follow (KPOP OFFICIAL calendar plus the MusicBrainz extras), game releases (your favorites first, then up to five more) and US movie releases from Wikidata. Days with nothing on them are skipped. `this-week.js` reads each channel's saved data, so nothing new is stored.
 
+## Year in review
+
+`#wrapped` (or `#wrapped/2025` for an earlier year; linked from the Guide) sums up a year from what you've logged: concerts from the Live Events journal (best show, most-seen artist, ticket spend), bowling average, high game and series and the first-half vs second-half trend, movies, anime, games and K-Pop moved to the finished column (top rated first), Music Lab producers followed and ratings, the settled-bet record with units and ROI, and published Creator Studio uploads. **Copy summary** puts a short text version on the clipboard. Tests: `node tests/year-in-review.test.js`.
+
 ## Movies and Anime
 
 Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
