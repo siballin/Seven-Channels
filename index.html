@@ -7218,7 +7218,7 @@
       if (/^creator\/.+/.test(route)) return "creator";
       if (/^live\/.+/.test(route)) return "live";
       if (/^politics\/members(\/[A-Z]\d{6})?$/.test(route)) return "politics";
-      if (/^politics\/elections(\/midterms|\/(president|senate|house)(\/\d{4})?)?$/.test(route)) return "politics";
+      if (/^politics\/elections(\/midterms|\/(president|senate|house|governor)(\/\d{4})?)?$/.test(route)) return "politics";
       return route === "guide" || channels.some((channel) => channel.id === route) ? route : "guide";
     }
 

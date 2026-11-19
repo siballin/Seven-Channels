@@ -85,6 +85,8 @@ def summarize(midterm, president):
 def build(elections=ELECTIONS):
     index = json.loads((elections / "index.json").read_text(encoding="utf-8"))
     presidents = json.loads((elections / "president.json").read_text(encoding="utf-8"))["years"]
+    governors_path = elections / "governors.json"
+    governors = json.loads(governors_path.read_text(encoding="utf-8"))["years"] if governors_path.exists() else {}
     years = []
     for year in index["midtermYears"]:
         path = elections / f"midterm-{year}.json"
@@ -92,7 +94,14 @@ def build(elections=ELECTIONS):
             continue
         midterm = json.loads(path.read_text(encoding="utf-8"))
         president = winner_of(presidents.get(str(year - 2), {}))
-        years.append(summarize(midterm, president))
+        entry = summarize(midterm, president)
+        governor = governors.get(str(year))
+        if governor:
+            party = (president or {}).get("party", "")
+            entry["governors"] = {"racesUp": governor["racesUp"], "won": governor["won"], "gains": governor["gains"],
+                                  "presidentPartyChange": governor["gains"].get(party) if party else None, "preliminary": bool(governor.get("preliminary")),
+                                  "flips": [{"state": race["state"], "from": race["previousParty"], "to": race["winner"]} for race in governor["races"] if race["flip"]]}
+        years.append(entry)
     # Swing in the House vote margin (D minus R) from the previous midterm.
     previous = None
     for entry in years:

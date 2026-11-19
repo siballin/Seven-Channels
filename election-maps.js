@@ -4,7 +4,7 @@
 const electionBase = "data/elections/";
 const electionCache = new Map();
 const electionPartyNames = { D: "Democratic", R: "Republican", I: "Independent", L: "Libertarian", G: "Green", O: "Other" };
-const electionRaces = [["president", "Presidential"], ["senate", "Senate"], ["house", "House"]];
+const electionRaces = [["president", "Presidential"], ["senate", "Senate"], ["house", "House"], ["governor", "Governor"]];
 const electionStateNames = {
   AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California", CO: "Colorado", CT: "Connecticut", DE: "Delaware",
   DC: "District of Columbia", FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa",
@@ -23,7 +23,7 @@ let electionPendingFocus = "";
 
 function electionView() {
   if (/^#politics\/elections\/midterms$/.test(location.hash)) return { race: "midterms", year: null };
-  const match = /^#politics\/elections(?:\/(president|senate|house)(?:\/(\d{4}))?)?$/.exec(location.hash);
+  const match = /^#politics\/elections(?:\/(president|senate|house|governor)(?:\/(\d{4}))?)?$/.exec(location.hash);
   if (!match) return null;
   return { race: match[1] || "", year: match[2] ? Number(match[2]) : null };
 }
@@ -167,6 +167,24 @@ function electionPresidentSummary(data) {
   marker.style.left = `${270 / 538 * 100}%`;
   bar.append(marker);
   panel.append(cards, bar, element("p", "politics-meta", `270 electoral votes needed to win. ${electionNumber(data.totalVotes)} votes cast.`));
+  return panel;
+}
+
+// Governor races (data/elections/governors.json, from Wikipedia's race summary tables).
+function electionGovernorSummary(data) {
+  const panel = element("div", "election-summary");
+  const block = data.governor;
+  const won = block.won || {};
+  const cards = element("p", "politics-meta");
+  cards.append(element("strong", "", `${block.racesUp} governor races: `),
+    `Democrats won ${won.D || 0}, Republicans ${won.R || 0}${(won.I || 0) + (won.O || 0) ? `, others ${(won.I || 0) + (won.O || 0)}` : ""}${data.preliminary ? " so far" : ""}.`);
+  panel.append(cards);
+  const gains = ["D", "R"].map((party) => block.gains?.[party] ? `${electionPartyShort(party)} ${electionSigned(block.gains[party])}` : "").filter(Boolean).join(", ");
+  const flips = block.races.filter((item) => item.flip);
+  const list = element("p", "politics-meta election-flips");
+  list.append(element("strong", "", `Governorships changing party${gains ? ` (${gains})` : ""}: `),
+    flips.length ? flips.map((item) => `${electionStateNames[item.state] || item.state} → ${electionPartyNames[item.winner] || "Other"}`).join(", ") : "None");
+  panel.append(list);
   return panel;
 }
 
@@ -317,7 +335,7 @@ function electionDetail(kind, key, result, extra) {
   title.tabIndex = -1;
   panel.append(title);
   if (!result) {
-    panel.append(element("p", "politics-meta", kind === "senate" ? "No Senate race this year." : "No results available."));
+    panel.append(element("p", "politics-meta", kind === "senate" ? "No Senate race this year." : kind === "governor" ? "No governor race this year." : "No results available."));
     return panel;
   }
   const races = Array.isArray(result) ? result : [result];
@@ -409,6 +427,23 @@ function electionControls(race, year) {
   return controls;
 }
 
+function electionGovernorSources(data) {
+  const note = element("div", "election-sources");
+  const text = element("p", "politics-meta", "Governor results from Wikipedia’s race summary table, ");
+  const page = element("a", "", data.governorSource?.title || "Wikipedia");
+  page.href = data.governorSource?.url || "https://en.wikipedia.org/";
+  page.target = "_blank";
+  page.rel = "noopener noreferrer";
+  const license = element("a", "", "CC BY-SA 4.0");
+  license.href = data.license || "https://creativecommons.org/licenses/by-sa/4.0/";
+  license.target = "_blank";
+  license.rel = "noopener noreferrer";
+  text.append(page, " (text available under ", license, "). Vote shares are rounded to one decimal. Some states hold governor elections in odd years, so they don’t appear here.");
+  note.append(text);
+  if (data.preliminary) note.append(element("p", "election-preliminary", "Preliminary: races and vote shares can change until states certify."));
+  return note;
+}
+
 function electionSources(data, race) {
   const note = element("div", "election-sources");
   if (data?.preliminary) {
@@ -495,6 +530,10 @@ function electionMidtermGlance(entry) {
   const senate = entry.senate;
   if (senate.presidentPartyChange !== null && senate.presidentPartyChange !== undefined) {
     fact("President’s party, Senate", `${electionSigned(senate.presidentPartyChange)} seats`, entry.preliminary ? "From seats that changed party so far" : `${senate.racesUp} seats were up`);
+  }
+  const governors = entry.governors;
+  if (governors?.presidentPartyChange !== null && governors?.presidentPartyChange !== undefined) {
+    fact("President’s party, governors", `${electionSigned(governors.presidentPartyChange)}`, `${governors.racesUp} governor races${governors.preliminary ? " · so far" : ""}`);
   }
   if (house.share) {
     fact("House votes", `D ${house.share.D.toFixed(1)}% · R ${house.share.R.toFixed(1)}%`, [electionMarginLabel(house.margin), electionSwingText(house.swing)].filter(Boolean).join(" · "));
@@ -584,11 +623,16 @@ function createElectionMidtermsView(panel, summary) {
     const before = entry.house.before; const after = entry.house.after;
     return (before.D > before.R) !== (after.D > after.R);
   });
-  const lead = element("p", "election-midterm-lead", `The president’s party lost House seats in ${lost.length} of ${final.length} completed midterms${gained.length ? `, gaining only in ${gained.map((entry) => entry.year).join(" and ")}` : ""}. The average change was ${electionSigned(average)} seats, and control of the House changed hands ${flipped.length} times (${flipped.map((entry) => entry.year).join(", ")}).`);
+  const govFinal = final.filter((entry) => entry.governors?.presidentPartyChange !== null && entry.governors?.presidentPartyChange !== undefined);
+  const govLost = govFinal.filter((entry) => entry.governors.presidentPartyChange < 0).length;
+  const lead = element("p", "election-midterm-lead", `The president’s party lost House seats in ${lost.length} of ${final.length} completed midterms${gained.length ? `, gaining only in ${gained.map((entry) => entry.year).join(" and ")}` : ""}. The average change was ${electionSigned(average)} seats, and control of the House changed hands ${flipped.length} times (${flipped.map((entry) => entry.year).join(", ")}).${govFinal.length ? ` The president’s party also lost governorships in ${govLost} of ${govFinal.length}.` : ""}`);
 
   const charts = element("div", "election-change-grid");
   charts.append(electionChangeChart(entries, "house", "House seats gained or lost by the president’s party"),
     electionChangeChart(entries, "senate", "Senate seats gained or lost by the president’s party"));
+  if (entries.some((entry) => entry.governors)) {
+    charts.append(electionChangeChart(entries.map((entry) => ({ ...entry, governors: entry.governors || { presidentPartyChange: null } })), "governors", "Governorships gained or lost by the president’s party"));
+  }
   const legend = element("p", "politics-meta election-change-legend");
   legend.append(element("span", "election-key election-d", ""), " Democratic president ", element("span", "election-key election-r", ""), " Republican president · Faded bars are preliminary.");
 
@@ -596,7 +640,7 @@ function createElectionMidtermsView(panel, summary) {
   const table = element("table", "");
   table.append(element("caption", "", "Midterms side by side"));
   const head = element("tr", "");
-  for (const text of ["Year", "President", "House seats (pres. party)", "House after", "House votes", "Swing", "Senate seats (pres. party)", "Senate after", "Senate flips"]) {
+  for (const text of ["Year", "President", "House seats (pres. party)", "House after", "House votes", "Swing", "Senate seats (pres. party)", "Senate after", "Senate flips", "Governors (pres. party)"]) {
     const cell = element("th", "", text);
     cell.scope = "col";
     head.append(cell);
@@ -623,7 +667,9 @@ function createElectionMidtermsView(panel, summary) {
       element("td", "election-num", h.swing === null || h.swing === undefined ? "—" : `${h.swing > 0 ? "D" : "R"} ${Math.abs(h.swing).toFixed(1)}`),
       element("td", `election-num ${se.presidentPartyChange < 0 ? "is-loss" : se.presidentPartyChange > 0 ? "is-gain" : ""}`, se.presidentPartyChange === null ? "—" : electionSigned(se.presidentPartyChange)),
       element("td", "", se.after ? balance(se.after) : "Not final"),
-      element("td", "election-flip-cell", se.flips.length ? se.flips.map((flip) => `${flip.state}${flip.special ? "*" : ""} ${flip.from || "?"}→${flip.to}`).join(", ") : "None"));
+      element("td", "election-flip-cell", se.flips.length ? se.flips.map((flip) => `${flip.state}${flip.special ? "*" : ""} ${flip.from || "?"}→${flip.to}`).join(", ") : "None"),
+      element("td", `election-num ${entry.governors?.presidentPartyChange < 0 ? "is-loss" : entry.governors?.presidentPartyChange > 0 ? "is-gain" : ""}`,
+        entry.governors?.presidentPartyChange === null || entry.governors?.presidentPartyChange === undefined ? "—" : electionSigned(entry.governors.presidentPartyChange)));
     tbody.append(row);
   }
   table.append(thead, tbody);
@@ -676,26 +722,32 @@ function createElectionMapsView() {
     }
     const isMidterm = race !== "president";
     return Promise.all([
-      electionFetch(isMidterm ? `midterm-${year}.json` : "president.json"),
+      race === "governor" ? electionFetch("governors.json").then((governors) => {
+        const entry = governors.years[String(year)];
+        if (!entry) throw new Error(`No governor results for ${year}.`);
+        // Shaped like a Senate year so the statewide map, table and detail code serve both.
+        return { year, preliminary: entry.preliminary, governor: entry, senate: { races: entry.races }, governorSource: entry.source, license: governors.license };
+      }) : electionFetch(isMidterm ? `midterm-${year}.json` : "president.json"),
       electionFetch(race === "house" ? `map-districts-${year}.json` : "map-states.json"),
       isMidterm ? electionFetch("midterm-summary.json").catch(() => null) : null
     ]).then(([data, shapes, summary]) => ({ race, year, data: isMidterm ? data : data.years[String(year)], shapes,
       glance: summary?.years?.find((entry) => entry.year === year) || null }));
   }).then(({ race, year, data, shapes, glance }) => {
     if (electionRoot !== root) return;
-    const title = element("h3", "", `${year} ${race === "president" ? "presidential election" : race === "senate" ? "Senate elections" : "House elections"}`);
+    const title = element("h3", "", `${year} ${race === "president" ? "presidential election" : race === "senate" ? "Senate elections" : race === "governor" ? "governor elections" : "House elections"}`);
+    const statewide = race === "senate" || race === "governor";
     title.id = "election-title";
     const heading = element("div", "election-heading");
     heading.append(title);
     if (data.preliminary) heading.append(element("span", "election-badge election-badge-warn", "Preliminary"));
     const results = race === "president" ? (key) => data.states[key]
-      : race === "senate" ? (key) => {
+      : statewide ? (key) => {
         const races = data.senate.races.filter((item) => item.state === key);
         if (!races.length) return null;
         return races.find((item) => !item.special) || races[0];
       }
       : (key) => data.house.districts[key];
-    const fullResult = race === "senate" ? (key) => {
+    const fullResult = statewide ? (key) => {
       const races = data.senate.races.filter((item) => item.state === key);
       return races.length ? races : null;
     } : results;
@@ -705,8 +757,9 @@ function createElectionMapsView() {
       if (race === "house") electionZoom = key.split("-")[0];
       electionRefresh("election-detail-title");
     };
-    const svg = electionMapSvg(shapes, race, results, select);
-    const label = race === "president" ? `Map of ${year} presidential results by state` : race === "senate" ? `Map of ${year} Senate races by state` : `Map of ${year} House results by district`;
+    const svg = electionMapSvg(shapes, statewide ? "senate" : race, results, select);
+    const label = race === "president" ? `Map of ${year} presidential results by state` : race === "senate" ? `Map of ${year} Senate races by state`
+      : race === "governor" ? `Map of ${year} governor races by state` : `Map of ${year} House results by district`;
     svg.setAttribute("aria-label", `${label}. Use the results table below the map for the same information.`);
     wrapper.append(svg);
     electionTooltip(wrapper, svg, (key) => {
@@ -717,7 +770,7 @@ function createElectionMapsView() {
         lines.push(element("small", "", electionMarginText(result)));
         if (race === "president" && result.ev) lines.push(element("small", "", `${result.ev} electoral votes`));
       } else {
-        lines.push(element("small", "", race === "senate" ? "No race" : "No results"));
+        lines.push(element("small", "", statewide ? "No race" : "No results"));
       }
       return lines;
     });
@@ -742,20 +795,24 @@ function createElectionMapsView() {
       extra = element("p", "politics-meta", `Electoral votes: ${Object.entries(allocation).map(([who, count]) => `${electionPartyNames[who] ? electionPartyNames[who] : who} ${count}`).join(", ")}`);
     }
     const detail = electionDetail(race, electionSelected, electionSelected ? fullResult(electionSelected) : null, extra);
+    if (race === "governor" && electionSelected) {
+      const current = fullResult(electionSelected);
+      if (current?.[0]?.incumbent) detail.append(element("p", "politics-meta", `Incumbent before the election: ${current[0].incumbent} (${electionPartyNames[current[0].previousParty] || "Other"})`));
+    }
     const entries = race === "president" ? Object.keys(data.states).sort((a, b) => (electionStateNames[a] || a).localeCompare(electionStateNames[b] || b)).map((key) => [key, data.states[key], data.states[key].ev])
-      : race === "senate" ? data.senate.races.map((item) => [item.state, item]).sort((a, b) => (electionStateNames[a[0]] || "").localeCompare(electionStateNames[b[0]] || ""))
+      : statewide ? data.senate.races.map((item) => [item.state, item]).sort((a, b) => (electionStateNames[a[0]] || "").localeCompare(electionStateNames[b[0]] || ""))
       : Object.keys(data.house.districts).sort((a, b) => {
         const [sa, na] = a.split("-"); const [sb, nb] = b.split("-");
         return (electionStateNames[sa] || sa).localeCompare(electionStateNames[sb] || sb) || Number(na) - Number(nb);
       }).filter((key) => !electionZoom || key.startsWith(`${electionZoom}-`)).map((key) => [key, data.house.districts[key]]);
     const layout = element("div", "election-layout");
     const mapColumn = element("div", "election-map-column");
-    mapColumn.append(tools, wrapper, electionLegend(Boolean(data.preliminary), race));
+    mapColumn.append(tools, wrapper, electionLegend(Boolean(data.preliminary), statewide ? "senate" : race));
     layout.append(mapColumn, detail);
     panel.replaceChildren(heading, electionControls(race, year),
       ...(glance ? [electionMidtermGlance(glance)] : []),
-      race === "president" ? electionPresidentSummary(data) : electionMidtermSummary(data, race),
-      layout, electionTable(race, entries, select), electionSources(race === "president" ? null : data, race));
+      race === "president" ? electionPresidentSummary(data) : race === "governor" ? electionGovernorSummary(data) : electionMidtermSummary(data, race),
+      layout, electionTable(race, entries, select), race === "governor" ? electionGovernorSources(data) : electionSources(race === "president" ? null : data, race));
     if (race === "house" && electionZoom) panel.querySelector(".election-table summary").textContent = `Results by district: ${electionStateNames[electionZoom] || electionZoom}`;
     if (electionPendingFocus) {
       document.getElementById(electionPendingFocus)?.focus({ preventScroll: electionPendingFocus !== "election-detail-title" });

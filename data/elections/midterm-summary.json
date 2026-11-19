@@ -77,6 +77,78 @@
      "D": 0,
      "R": 1
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 27,
+     "R": 9,
+     "I": 0,
+     "O": 0
+    },
+    "gains": {
+     "D": 7,
+     "R": -7
+    },
+    "presidentPartyChange": -7,
+    "preliminary": false,
+    "flips": [
+     {
+      "state": "AK",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "AR",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "CA",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "MI",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "MN",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "NE",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "NV",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "NH",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "OH",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "TX",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "WI",
+      "from": "R",
+      "to": "D"
+     }
+    ]
    }
   },
   {
@@ -191,6 +263,93 @@
      "D": 7,
      "R": -7
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 19,
+     "R": 17,
+     "I": 0,
+     "O": 0
+    },
+    "gains": {
+     "D": -8,
+     "R": 8
+    },
+    "presidentPartyChange": 8,
+    "preliminary": false,
+    "flips": [
+     {
+      "state": "AL",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "AZ",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "FL",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "KS",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "ME",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "NE",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "NM",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "OK",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "OR",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "PA",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "SC",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "TN",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "TX",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "WI",
+      "from": "D",
+      "to": "R"
+     }
+    ]
    }
   },
   {
@@ -258,6 +417,98 @@
      "D": 1,
      "R": -1
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 19,
+     "R": 15,
+     "I": 0,
+     "O": 2
+    },
+    "gains": {
+     "D": -1,
+     "R": -1
+    },
+    "presidentPartyChange": -1,
+    "preliminary": false,
+    "flips": [
+     {
+      "state": "AK",
+      "from": "D",
+      "to": "O"
+     },
+     {
+      "state": "AZ",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "CT",
+      "from": "D",
+      "to": "O"
+     },
+     {
+      "state": "FL",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "KS",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "MA",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "MI",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "MN",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "NE",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "NM",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "OH",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "OK",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "RI",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "TX",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "VT",
+      "from": "D",
+      "to": "R"
+     }
+    ]
    }
   },
   {
@@ -368,6 +619,93 @@
      "D": -8,
      "R": 8
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 11,
+     "R": 24,
+     "I": 1,
+     "O": 0
+    },
+    "gains": {
+     "D": -10,
+     "R": 10
+    },
+    "presidentPartyChange": -10,
+    "preliminary": false,
+    "flips": [
+     {
+      "state": "AL",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "AK",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "CT",
+      "from": "O",
+      "to": "R"
+     },
+     {
+      "state": "ID",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "KS",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "ME",
+      "from": "R",
+      "to": "I"
+     },
+     {
+      "state": "NM",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "NY",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "OK",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "PA",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "RI",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "TN",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "TX",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "WY",
+      "from": "D",
+      "to": "R"
+     }
+    ]
    }
   },
   {
@@ -466,6 +804,68 @@
      "D": 0,
      "R": 0
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 11,
+     "R": 23,
+     "I": 1,
+     "O": 1
+    },
+    "gains": {
+     "D": 0,
+     "R": -1
+    },
+    "presidentPartyChange": 0,
+    "preliminary": false,
+    "flips": [
+     {
+      "state": "AL",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "CA",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "CO",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "FL",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "IA",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "MN",
+      "from": "R",
+      "to": "O"
+     },
+     {
+      "state": "NE",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "NV",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "SC",
+      "from": "R",
+      "to": "D"
+     }
+    ]
    }
   },
   {
@@ -553,6 +953,123 @@
      "D": -2,
      "R": 2
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 14,
+     "R": 22,
+     "I": 0,
+     "O": 0
+    },
+    "gains": {
+     "D": 3,
+     "R": -1
+    },
+    "presidentPartyChange": -1,
+    "preliminary": false,
+    "flips": [
+     {
+      "state": "AL",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "AK",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "AZ",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "GA",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "HI",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "IL",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "KS",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "ME",
+      "from": "I",
+      "to": "D"
+     },
+     {
+      "state": "MD",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "MI",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "MN",
+      "from": "O",
+      "to": "R"
+     },
+     {
+      "state": "NH",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "NM",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "OK",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "PA",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "SC",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "TN",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "VT",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "WI",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "WY",
+      "from": "R",
+      "to": "D"
+     }
+    ]
    }
   },
   {
@@ -658,6 +1175,53 @@
      "D": 5,
      "R": -6
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 20,
+     "R": 16,
+     "I": 0,
+     "O": 0
+    },
+    "gains": {
+     "D": 6,
+     "R": -6
+    },
+    "presidentPartyChange": -6,
+    "preliminary": false,
+    "flips": [
+     {
+      "state": "AR",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "CO",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "MD",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "MA",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "NY",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "OH",
+      "from": "R",
+      "to": "D"
+     }
+    ]
    }
   },
   {
@@ -756,6 +1320,113 @@
      "D": -6,
      "R": 6
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 13,
+     "R": 22,
+     "I": 1,
+     "O": 0
+    },
+    "gains": {
+     "D": -6,
+     "R": 6
+    },
+    "presidentPartyChange": -6,
+    "preliminary": false,
+    "flips": [
+     {
+      "state": "CA",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "CT",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "FL",
+      "from": "I",
+      "to": "R"
+     },
+     {
+      "state": "HI",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "IA",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "KS",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "ME",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "MI",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "MN",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "NM",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "OH",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "OK",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "PA",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "RI",
+      "from": "R",
+      "to": "I"
+     },
+     {
+      "state": "TN",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "VT",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "WI",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "WY",
+      "from": "D",
+      "to": "R"
+     }
+    ]
    }
   },
   {
@@ -872,6 +1543,53 @@
      "D": -9,
      "R": 9
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 11,
+     "R": 24,
+     "I": 1,
+     "O": 0
+    },
+    "gains": {
+     "D": -3,
+     "R": 2
+    },
+    "presidentPartyChange": -3,
+    "preliminary": false,
+    "flips": [
+     {
+      "state": "AK",
+      "from": "R",
+      "to": "I"
+     },
+     {
+      "state": "AR",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "IL",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "MD",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "MA",
+      "from": "D",
+      "to": "R"
+     },
+     {
+      "state": "PA",
+      "from": "R",
+      "to": "D"
+     }
+    ]
    }
   },
   {
@@ -970,6 +1688,63 @@
      "D": -2,
      "R": 2
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 16,
+     "R": 20,
+     "I": 0,
+     "O": 0
+    },
+    "gains": {
+     "D": 7,
+     "R": -6
+    },
+    "presidentPartyChange": -6,
+    "preliminary": false,
+    "flips": [
+     {
+      "state": "AK",
+      "from": "I",
+      "to": "R"
+     },
+     {
+      "state": "IL",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "KS",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "ME",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "MI",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "NV",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "NM",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "WI",
+      "from": "R",
+      "to": "D"
+     }
+    ]
    }
   },
   {
@@ -1038,6 +1813,43 @@
      "D": 1,
      "R": -1
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 18,
+     "R": 18,
+     "I": 0,
+     "O": 0
+    },
+    "gains": {
+     "D": 2,
+     "R": -2
+    },
+    "presidentPartyChange": 2,
+    "preliminary": false,
+    "flips": [
+     {
+      "state": "AZ",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "MD",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "MA",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "NV",
+      "from": "D",
+      "to": "R"
+     }
+    ]
    }
   },
   {
@@ -1133,6 +1945,58 @@
      "D": 8,
      "R": -8
     }
+   },
+   "governors": {
+    "racesUp": 36,
+    "won": {
+     "D": 23,
+     "R": 12,
+     "I": 0,
+     "O": 0
+    },
+    "gains": {
+     "D": 7,
+     "R": -6
+    },
+    "presidentPartyChange": -6,
+    "preliminary": true,
+    "flips": [
+     {
+      "state": "AK",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "GA",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "IA",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "MN",
+      "from": "O",
+      "to": "D"
+     },
+     {
+      "state": "NV",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "OH",
+      "from": "R",
+      "to": "D"
+     },
+     {
+      "state": "TX",
+      "from": "R",
+      "to": "D"
+     }
+    ]
    }
   }
  ],
