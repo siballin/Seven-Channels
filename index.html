@@ -2680,6 +2680,53 @@
     .kpop-extra-note { color: var(--muted); font-size: .74rem; }
     .kpop-extra-source { color: var(--muted); }
     .kpop-extra-release a.kpop-album-open { text-decoration: none; }
+    /* Movies and Anime hub (media-hub.js) */
+    .media-hub { display: grid; gap: 12px; margin-bottom: 16px; padding: 16px 18px; border: 1px solid var(--glass-edge, var(--line)); border-radius: var(--glass-radius, 16px); background: var(--glass-base, var(--panel)); box-shadow: var(--glass-shadow, none); min-width: 0; }
+    .media-hub-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .media-hub-tabs button[aria-selected="true"] { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 18%, var(--surface)); color: var(--ink); }
+    .media-hub-panel { display: grid; gap: 10px; min-width: 0; }
+    .media-hub-note { margin: 0; color: var(--muted); font-size: .78rem; }
+    .media-hub-subhead { margin: 8px 0 0; font-size: .95rem; }
+    .media-hub-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+    .media-hub-metric { display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+    .media-hub-metric span { color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .media-hub-metric strong { font: 700 1.35rem/1.15 var(--data); font-variant-numeric: tabular-nums; }
+    .media-hub-metric small { color: var(--muted); font-size: .72rem; }
+    .media-hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+    .media-hub-bars { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+    .media-hub-bars h4 { margin: 0 0 2px; font-size: .82rem; }
+    .media-hub-bar { display: grid; grid-template-columns: minmax(70px, 1fr) minmax(60px, 1.2fr) auto; align-items: center; gap: 8px; font-size: .78rem; }
+    .media-hub-bar > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .media-hub-track { height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--line) 60%, transparent); overflow: hidden; }
+    .media-hub-fill { display: block; height: 100%; background: var(--signal); border-radius: 4px; }
+    .media-hub-ranked { margin: 0; padding-left: 18px; font-size: .8rem; display: grid; gap: 3px; }
+    .media-hub-toggle { display: inline-flex; justify-self: start; align-items: center; gap: 6px; font-size: .8rem; font-weight: 600; cursor: pointer; }
+    .media-hub-toggle input { width: 16px; height: 16px; min-height: 0; margin: 0; padding: 0; accent-color: var(--signal); }
+    .media-hub-week { display: grid; grid-template-columns: repeat(7, minmax(150px, 1fr)); gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+    .media-hub-day { display: grid; align-content: start; gap: 6px; min-width: 0; }
+    .media-hub-day h4 { margin: 0; font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .media-hub-airing { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 7px; align-items: center; padding: 5px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); text-decoration: none; background: var(--panel); }
+    .media-hub-airing.is-mine { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 12%, var(--panel)); }
+    .media-hub-airing span:last-child { display: grid; min-width: 0; }
+    .media-hub-airing strong { font-size: .76rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .media-hub-airing small, .media-hub-season-card small { color: var(--muted); font-size: .68rem; }
+    .media-hub-cover { display: grid; place-items: center; width: 34px; aspect-ratio: 2 / 3; overflow: hidden; border-radius: 4px; background: var(--surface); color: var(--muted); font-weight: 700; }
+    .media-hub-cover img { width: 100%; height: 100%; object-fit: cover; }
+    .media-hub-season { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+    .media-hub-season-card { display: grid; align-content: start; gap: 4px; color: var(--ink); text-decoration: none; min-width: 0; }
+    .media-hub-season-card .media-hub-cover { width: 100%; border-radius: 8px; font-size: 1.6rem; }
+    .media-hub-season-card strong { font-size: .8rem; line-height: 1.25; overflow-wrap: anywhere; }
+    .media-hub-season-card:hover strong { text-decoration: underline; }
+    .media-hub-season-card.is-past { opacity: .7; }
+    .media-hub-season-card.is-mine .media-hub-cover { outline: 2px solid var(--signal); outline-offset: 2px; }
+    .media-hub-watch { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .media-hub-watch li { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 10px; align-items: start; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+    .media-hub-watch li .media-hub-cover { width: 42px; }
+    .media-hub-watch li > div { display: grid; gap: 4px; min-width: 0; }
+    .media-hub-watch small { color: var(--muted); font-size: .74rem; }
+    .media-hub-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .media-hub-chip { padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); font-size: .74rem; font-weight: 700; text-decoration: none; background: var(--surface); }
+    .media-hub-chip:hover { border-color: var(--signal); }
     /* More leagues (sports-leagues.js) */
     .sports-hub .scoreboard.league-scoreboard { display: grid; gap: 8px; grid-column: 1 / -1; grid-row: 2; min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-base); box-shadow: var(--glass-shadow); }
     .league-scoreboard .score-status, .league-scoreboard .score-updated, .league-scoreboard .score-countdown { margin: 0; }
@@ -3230,6 +3277,7 @@
   <script src="channel-news.js"></script>
   <script src="betting-stats.js"></script>
   <script src="sports-leagues.js"></script>
+  <script src="media-hub.js"></script>
   <script src="congress-members.js"></script>
   <script src="election-maps.js"></script>
   <script src="games-hub.js"></script>
@@ -12290,7 +12338,7 @@
       } else if (channel.id === "sports" && scoreboard) {
         view.replaceChildren(heading, description, withChannelNews("sports", [createSportsHub(scoreboard, planner, resources)]));
       } else {
-        const content = [...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(scoreboard ? [scoreboard] : []), planner];
+        const content = [...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(mediaLookupChannels.has(channel.id) ? [createMediaHub(channel.id, entries)] : []), ...(scoreboard ? [scoreboard] : []), planner];
         const withReddit = redditDefaults[channel.id] ? [withRedditSidebar(channel.id, content)] : content;
         view.replaceChildren(heading, description, ...(["betting", "movies", "anime"].includes(channel.id) ? [withChannelNews(channel.id, [resources, ...withReddit])] : [resources, ...withReddit]));
       }

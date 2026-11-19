@@ -10,6 +10,14 @@ The `main` branch workflow in `.github/workflows/pages.yml` publishes the reposi
 
 https://siballin.github.io/Seven-Channels/
 
+## Movies and Anime
+
+Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
+
+- **Your stats:** what you've finished, are watching and plan to watch, your average rating, time watched (movie runtimes, or anime episodes at about 24 minutes each), top genres, top directors (movies) or formats (anime), titles by decade, and your highest rated.
+- **Release calendar / Airing schedule:** Movies shows US releases from two weeks ago to about two months out, from Wikidata release dates for films with an English Wikipedia article, with Wikipedia posters; titles in your list are marked. Anime shows this week's airing schedule from AniList, day by day, with shows in your list highlighted (and an option to show only those), plus next season's most anticipated premieres.
+- **Where to watch:** Anime lists the official streaming services AniList has for each title in your list (Crunchyroll, Netflix, HIDIVE and so on) and when the next episode airs. For movies there's no free service for streaming availability, so each title on your watchlist links to its JustWatch and Reelgood search, which list where it's streaming, renting and buying.
+
 ## Sports leagues
 
 The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
