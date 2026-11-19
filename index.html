@@ -2680,6 +2680,32 @@
     .kpop-extra-note { color: var(--muted); font-size: .74rem; }
     .kpop-extra-source { color: var(--muted); }
     .kpop-extra-release a.kpop-album-open { text-decoration: none; }
+    /* Betting analytics (betting-stats.js) */
+    .betting-analytics { display: grid; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .betting-analytics h3 { margin: 0; }
+    .betting-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 16px; }
+    .betting-controls .field { min-width: 170px; }
+    .betting-bankroll-form { display: flex; align-items: end; gap: 8px; }
+    .betting-metrics { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+    .betting-figure { margin: 0; }
+    .betting-figure figcaption { margin-bottom: 6px; color: var(--muted); font-size: .78rem; font-weight: 700; }
+    .betting-chart { display: block; width: 100%; height: auto; }
+    .betting-grid { stroke: var(--line); }
+    .betting-zero { stroke: var(--muted); stroke-dasharray: 4 4; }
+    .betting-axis { fill: var(--muted); font: 600 11px var(--font-body); }
+    .betting-line { fill: none; stroke: var(--signal); stroke-width: 2.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+    .betting-area { fill: color-mix(in srgb, var(--signal) 14%, transparent); }
+    .betting-dot { fill: var(--muted); stroke: var(--surface); stroke-width: 1; }
+    .betting-dot.is-won { fill: #3fb27f; } .betting-dot.is-lost { fill: #e0645a; }
+    .betting-tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+    .betting-table { overflow-x: auto; }
+    .betting-table table { width: 100%; border-collapse: collapse; font-size: .82rem; font-variant-numeric: tabular-nums; }
+    .betting-table caption { text-align: left; font-weight: 700; margin-bottom: 6px; }
+    .betting-table :is(th, td) { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+    .betting-table thead th { color: var(--muted); font-size: .7rem; }
+    .betting-table .positive { color: #3fb27f; } .betting-table .negative { color: #e0645a; }
+    :root[data-theme="light"] .betting-table .positive, :root[data-theme="light"] .betting-dot.is-won { color: #137a45; fill: #137a45; }
+    :root[data-theme="light"] .betting-table .negative, :root[data-theme="light"] .betting-dot.is-lost { color: #b3261e; fill: #b3261e; }
     /* News row at the top of channels (channel-news.js) */
     .news-stack { display: grid; gap: 16px; min-width: 0; }
     .news-stack > * { min-width: 0; }
@@ -3170,6 +3196,7 @@
   <script src="live-events-data.js"></script>
   <script src="live-events.js"></script>
   <script src="channel-news.js"></script>
+  <script src="betting-stats.js"></script>
   <script src="congress-members.js"></script>
   <script src="election-maps.js"></script>
   <script src="games-hub.js"></script>
@@ -3193,6 +3220,7 @@
     const kpopFollowStorageKey = "seven-channels.kpop-followed-artists.v1";
     const appearanceStorageKey = "seven-channels.appearance.v1";
     const betUnitSizeStorageKey = "seven-channels.bet-unit-size.v1";
+    const betBankrollStorageKey = "seven-channels.bet-bankroll.v1";
     const deletedEntriesStorageKey = "seven-channels.deleted-entry-ids.v1";
     const syncOwnerStorageKey = "seven-channels.sync-owner.v1";
     const syncBackupPrefix = "seven-channels.account-backup.v1.";
@@ -3238,6 +3266,7 @@
     const dial = document.getElementById("dial");
     const notice = document.getElementById("notice");
     let betUnitSize = loadBetUnitSize();
+    let betBankroll = loadBetBankroll();
     const syncPanel = document.getElementById("sync-panel");
     const syncStatus = document.getElementById("sync-status");
     const syncEmail = document.getElementById("sync-email");
@@ -6673,6 +6702,30 @@
       }
     }
 
+    // Optional starting bankroll in dollars (0 = not set), synced like the unit size.
+    function validBetBankroll(setting) {
+      return setting && typeof setting === "object" && Number.isFinite(setting.value) && setting.value >= 0 && setting.value <= 1000000000 &&
+        Number(setting.value.toFixed(2)) === setting.value && typeof setting.updatedAt === "string" &&
+        (setting.updatedAt === "" || Number.isFinite(Date.parse(setting.updatedAt)));
+    }
+
+    function loadBetBankroll() {
+      try {
+        const setting = JSON.parse(localStorage.getItem(betBankrollStorageKey) || "null");
+        return validBetBankroll(setting) ? setting : { value: 0, updatedAt: "" };
+      } catch {
+        return { value: 0, updatedAt: "" };
+      }
+    }
+
+    function mergeBetBankroll(local, remote) {
+      const localValid = validBetBankroll(local);
+      const remoteValid = validBetBankroll(remote);
+      if (!localValid) return remoteValid ? remote : { value: 0, updatedAt: "" };
+      if (!remoteValid) return local;
+      return (Date.parse(remote.updatedAt) || 0) >= (Date.parse(local.updatedAt) || 0) ? remote : local;
+    }
+
     function mergeBetUnitSize(local, remote) {
       const localValid = validBetUnitSize(local);
       const remoteValid = validBetUnitSize(remote);
@@ -6707,6 +6760,7 @@
         kpopArtistFollows,
         deletedEntryIds,
         betUnitSize,
+        betBankroll,
         bowling: bowlingGetState(),
         musicLab: musicLabGetState(),
         creator: creatorGetState(),
@@ -6742,6 +6796,7 @@
         value.appearance && typeof value.appearance === "object" &&
         (value.kpopArtistFollows === undefined || validKpopFollows(value.kpopArtistFollows)) &&
         (value.betUnitSize === undefined || validBetUnitSize(value.betUnitSize)) &&
+        (value.betBankroll === undefined || validBetBankroll(value.betBankroll)) &&
         (value.bowling === undefined || bowlingValidState(value.bowling)) &&
         (value.musicLab === undefined || musicLabValidState(value.musicLab)) &&
         (value.creator === undefined || creatorValidState(value.creator)) &&
@@ -6774,6 +6829,7 @@
         kpopArtistFollows: mergeKpopArtistFollows(localState?.kpopArtistFollows, remoteState?.kpopArtistFollows),
         deletedEntryIds: [...tombstones],
         betUnitSize: mergeBetUnitSize(localState?.betUnitSize, remoteState?.betUnitSize),
+        betBankroll: mergeBetBankroll(localState?.betBankroll, remoteState?.betBankroll),
         bowling: bowlingMergeState(localState?.bowling, remoteState?.bowling),
         musicLab: musicLabMergeState(localState?.musicLab, remoteState?.musicLab),
         creator: creatorMergeState(localState?.creator, remoteState?.creator),
@@ -6789,6 +6845,7 @@
         kpopArtistFollows,
         deletedEntryIds,
         betUnitSize,
+        betBankroll,
         bowling: bowlingGetState(),
         musicLab: musicLabGetState(),
         creator: creatorGetState(),
@@ -6806,6 +6863,7 @@
       );
       kpopArtistFollows = state.kpopArtistFollows || [];
       betUnitSize = state.betUnitSize || { value: 5, updatedAt: "" };
+      betBankroll = state.betBankroll || { value: 0, updatedAt: "" };
       bowlingReplaceState(state.bowling);
       musicLabReplaceState(state.musicLab);
       creatorReplaceState(state.creator);
@@ -6818,6 +6876,7 @@
         localStorage.setItem(kpopFollowStorageKey, JSON.stringify(kpopArtistFollows));
         localStorage.setItem(appearanceStorageKey, JSON.stringify(appearance));
         localStorage.setItem(betUnitSizeStorageKey, JSON.stringify(betUnitSize));
+        localStorage.setItem(betBankrollStorageKey, JSON.stringify(betBankroll));
       } catch (error) {
         console.error("Could not cache the synced account data.", error);
         showNotice("Cloud data loaded, but this browser could not save a local copy.");
@@ -8499,9 +8558,24 @@
         roiMetric.append(element("span", "", "ROI"), element("strong", "", performance.roi === null ? "—" : `${performance.roi > 0 ? "+" : ""}${performance.roi.toFixed(1)}%`));
         metrics.append(netMetric, winMetric, roiMetric);
       }
+      const analyticsSlot = element("div", "betting-analytics-slot");
+      function updateAnalytics() {
+        analyticsSlot.replaceChildren(createBettingAnalytics({
+          entries, unitSize: betUnitSize.value, bankrollSetting: betBankroll, type: filter.value,
+          onBankroll: (value) => {
+            betBankroll = { value, updatedAt: new Date().toISOString() };
+            try { localStorage.setItem(betBankrollStorageKey, JSON.stringify(betBankroll)); } catch (error) { console.error("Could not save the bankroll.", error); }
+            scheduleCloudSync();
+            updateAnalytics();
+            document.getElementById("betting-bankroll")?.focus();
+          }
+        }));
+      }
       filter.addEventListener("change", updateMetrics);
+      filter.addEventListener("change", updateAnalytics);
       updateMetrics();
-      dashboard.append(heading, note, unitForm, metrics);
+      updateAnalytics();
+      dashboard.append(heading, note, unitForm, metrics, analyticsSlot);
       return dashboard;
     }
 
@@ -11728,6 +11802,10 @@
       let stakeInput;
       let oddsField;
       let stakeField;
+      let sportField;
+      let sportInput;
+      let dateField;
+      let dateInput;
       let oddsLabel;
       let oddsHelp;
       let displayedBetType;
@@ -11766,6 +11844,23 @@
         stakeInput.addEventListener("input", () => stakeInput.setCustomValidity(""));
         if (editingBet && validBetRecord(editingBet)) stakeInput.value = String(editingBet.stake);
         stakeField.append(stakeLabel, stakeInput);
+
+        sportField = element("div", "field");
+        const sportLabel = element("label", "", "Sport");
+        sportLabel.htmlFor = "entry-sport";
+        sportInput = document.createElement("select");
+        sportInput.id = "entry-sport";
+        sportInput.append(new Option("Detect from the bet", ""), ...bettingSports.map((name) => new Option(name, name)));
+        sportInput.value = bettingSports.includes(editingBet?.sport) ? editingBet.sport : "";
+        sportField.append(sportLabel, sportInput);
+        dateField = element("div", "field");
+        const dateLabel = element("label", "", "Date placed");
+        dateLabel.htmlFor = "entry-placed-on";
+        dateInput = document.createElement("input");
+        dateInput.id = "entry-placed-on";
+        dateInput.type = "date";
+        dateInput.value = /^\d{4}-\d{2}-\d{2}$/.test(editingBet?.placedOn || "") ? editingBet.placedOn : editingBet ? "" : localDateValue(new Date());
+        dateField.append(dateLabel, dateInput);
       }
       let parlayControls = [];
       function savePropDraft(fields, target) {
@@ -11955,7 +12050,7 @@
       statusField.append(statusLabel, statusInput);
       const addButton = element("button", "", editingBet ? "Save bet" : isBetting ? "Add pick" : "Add to channel");
       addButton.type = "submit";
-      form.append(titleField, noteField, ...(isBetting ? [typeField, oddsField, stakeField, statusField, gameLinkField, addButton, typeDetails] : [statusField, addButton]));
+      form.append(titleField, noteField, ...(isBetting ? [typeField, oddsField, stakeField, sportField, dateField, statusField, gameLinkField, addButton, typeDetails] : [statusField, addButton]));
       if (editingBet) {
         const cancelEdit = element("button", "secondary", "Cancel");
         cancelEdit.type = "button";
@@ -12035,6 +12130,8 @@
           updatedEntry.odds = odds;
           updatedEntry.stake = Math.round(stake * 100) / 100;
           updatedEntry.betType = betTypeInput.value;
+          if (sportInput.value) updatedEntry.sport = sportInput.value; else delete updatedEntry.sport;
+          if (/^\d{4}-\d{2}-\d{2}$/.test(dateInput.value)) updatedEntry.placedOn = dateInput.value; else delete updatedEntry.placedOn;
           const selectedGame = linkedGameSelect.selectedOptions[0];
           if (linkedGameSelect.value && selectedGame) {
             updatedEntry.game = {
