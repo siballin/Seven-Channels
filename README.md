@@ -18,6 +18,10 @@ The Guide opens with the next seven days across channels, grouped by day: concer
 
 `#wrapped` (or `#wrapped/2025` for an earlier year; linked from the Guide) sums up a year from what you've logged: concerts from the Live Events journal (best show, most-seen artist, ticket spend), bowling average, high game and series and the first-half vs second-half trend, movies, anime, games and K-Pop moved to the finished column (top rated first), Music Lab producers followed and ratings, the settled-bet record with units and ROI, and published Creator Studio uploads. **Copy summary** puts a short text version on the clipboard. Tests: `node tests/year-in-review.test.js`.
 
+## Search
+
+The **Search** button in the header (or press `/` or Ctrl+K anywhere) searches your saved items in every channel, bowling sessions, balls and leagues, the concert journal, Live Events plans and followed artists, your Music Lab library and lists, Creator Studio videos, ideas and calendar, plus the Music Lab producer catalog and every headline in the news rows. Every word has to match; accents are ignored. Arrow keys move through results and Enter opens one. Tests: `node tests/search.test.js`.
+
 ## Movies and Anime
 
 Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:

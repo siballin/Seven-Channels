@@ -177,6 +177,21 @@
     .wrapped-big span { color: var(--muted); }
     .wrapped-card ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: .92rem; overflow-wrap: anywhere; }
     .wrapped-more { font-size: .85rem; justify-self: start; }
+    .site-search-button { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .site-search-button kbd { font: inherit; font-size: .75rem; padding: 0 6px; border: 1px solid var(--line); border-radius: 5px; color: var(--muted); }
+    @media (hover: none) { .site-search-button kbd { display: none; } }
+    .site-search { width: min(720px, calc(100vw - 32px)); max-height: min(80vh, 760px); padding: 0; border: 1px solid var(--glass-edge, var(--line)); border-radius: var(--glass-radius, 16px); background: var(--screen); color: var(--ink); overflow: hidden; }
+    .site-search[open] { display: grid; grid-template-rows: auto auto minmax(0, 1fr); }
+    .site-search::backdrop { background: rgb(0 0 0 / .55); backdrop-filter: blur(3px); }
+    .site-search-form { display: flex; gap: 8px; padding: 14px 14px 6px; }
+    .site-search-form input { flex: 1; min-width: 0; font-size: 1.05rem; }
+    .site-search-status { margin: 0; padding: 0 16px 8px; color: var(--muted); font-size: .85rem; }
+    .site-search-results { overflow-y: auto; padding: 0 10px 14px; display: grid; gap: 10px; align-content: start; }
+    .site-search-group h3 { margin: 4px 6px 4px; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .site-search-result { display: grid; gap: 1px; padding: 8px 10px; border-radius: 10px; color: inherit; text-decoration: none; }
+    .site-search-result strong { overflow-wrap: anywhere; }
+    .site-search-result small { color: var(--muted); overflow-wrap: anywhere; }
+    .site-search-result:hover, .site-search-result[aria-selected="true"], .site-search-result:focus-visible { background: color-mix(in srgb, var(--signal) 16%, transparent); }
     .guide { display: grid; gap: 3px; }
     .guide-row {
       display: grid;
@@ -3224,6 +3239,7 @@
           <span id="clock">--:--:--</span>
           <small>YOUR LOCAL TIME</small>
         </div>
+        <button type="button" class="secondary site-search-button" id="site-search-open" aria-keyshortcuts="/ Control+K">Search <kbd aria-hidden="true">/</kbd></button>
         <form id="sync-panel" class="sync-panel" aria-label="Cross-device account" hidden>
           <div class="sync-auth-buttons">
             <button type="button" class="secondary" data-auth-toggle="sign-in" aria-expanded="false" aria-controls="sync-credentials">Sign in <span aria-hidden="true">▾</span></button>
@@ -3330,6 +3346,7 @@
   <script src="media-hub.js"></script>
   <script src="this-week.js"></script>
   <script src="year-in-review.js"></script>
+  <script src="search.js"></script>
   <script src="congress-members.js"></script>
   <script src="election-maps.js"></script>
   <script src="games-hub.js"></script>
@@ -12452,6 +12469,8 @@
       element("span", "", tickerText),
       element("span", "", tickerText)
     );
+    const siteSearch = createSiteSearch({ getEntries: () => entries, channelList: channels });
+    document.getElementById("site-search-open").addEventListener("click", siteSearch.open);
     bowlingOnChange = scheduleCloudSync;
     musicLabOnChange = scheduleCloudSync;
     creatorOnChange = scheduleCloudSync;
