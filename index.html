@@ -211,6 +211,7 @@
       .notify-settings { position: static; }
       .notify-panel { left: 12px; right: 12px; top: auto; width: auto; margin-top: 8px; }
     }
+    .lazy-status { color: var(--muted); }
     .guide { display: grid; gap: 3px; }
     .guide-row {
       display: grid;
@@ -3353,22 +3354,15 @@
   <script src="bowling-stats.js"></script>
   <script src="bowling-leagues.js"></script>
   <script src="music-lab-data.js"></script>
-  <script src="music-lab.js"></script>
   <script src="creator-studio-data.js"></script>
-  <script src="creator-studio.js"></script>
-  <script src="creator-clips.js"></script>
   <script src="live-events-data.js"></script>
-  <script src="live-events.js"></script>
   <script src="channel-news.js"></script>
   <script src="betting-stats.js"></script>
   <script src="sports-leagues.js"></script>
   <script src="media-hub.js"></script>
   <script src="this-week.js"></script>
-  <script src="year-in-review.js"></script>
   <script src="search.js"></script>
   <script src="notifications.js"></script>
-  <script src="congress-members.js"></script>
-  <script src="election-maps.js"></script>
   <script src="games-hub.js"></script>
   <script>
     "use strict";
@@ -7100,17 +7094,17 @@
           const mergedMusicLab = musicLabMergeState(musicLabGetState(), remoteBeforeWrite?.musicLab);
           if (JSON.stringify(mergedMusicLab) !== JSON.stringify(musicLabGetState())) {
             musicLabReplaceState(mergedMusicLab);
-            if (currentRoute() === "music") musicLabRefresh();
+            if (currentRoute() === "music" && typeof musicLabRefresh === "function") musicLabRefresh();
           }
           const mergedCreator = creatorMergeState(creatorGetState(), remoteBeforeWrite?.creator);
           if (JSON.stringify(mergedCreator) !== JSON.stringify(creatorGetState())) {
             creatorReplaceState(mergedCreator);
-            if (currentRoute() === "creator") creatorRefresh();
+            if (currentRoute() === "creator" && typeof creatorRefresh === "function") creatorRefresh();
           }
           const mergedLive = liveMergeState(liveGetState(), remoteBeforeWrite?.live);
           if (JSON.stringify(mergedLive) !== JSON.stringify(liveGetState())) {
             liveReplaceState(mergedLive);
-            if (currentRoute() === "live") liveRefresh();
+            if (currentRoute() === "live" && typeof liveRefresh === "function") liveRefresh();
           }
           const state = { ...currentAccountState(), updatedAt: new Date().toISOString() };
           const { error } = await syncClient.from("seven_channels_state").upsert(
@@ -8773,6 +8767,7 @@
     function renderGuide() {
       const wrappedRoute = /^wrapped(?:\/(\d{4}))?$/.exec(location.hash.slice(1));
       if (wrappedRoute) {
+        if (needsLazy("wrapped")) return;
         view.replaceChildren(createYearInReview(Number(wrappedRoute[1]) || new Date().getFullYear(), entries));
         scrollTo(0, 0);
         return;
@@ -11852,10 +11847,57 @@
       return dashboard;
     }
 
+    // Channel views that aren't needed at startup load on first visit (and in the background once the page is idle).
+    const lazyScripts = {
+      politics: ["congress-members.js", "election-maps.js"],
+      music: ["music-lab.js"],
+      creator: ["creator-studio.js", "creator-clips.js"],
+      live: ["live-events.js"],
+      wrapped: ["year-in-review.js"]
+    };
+    const lazyReady = new Set();
+    const lazyPending = new Map();
+    function loadLazy(key) {
+      if (lazyReady.has(key)) return Promise.resolve();
+      if (!lazyPending.has(key)) {
+        lazyPending.set(key, Promise.all(lazyScripts[key].map((src) => new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.async = false; // run in the listed order
+          script.addEventListener("load", resolve, { once: true });
+          script.addEventListener("error", () => { script.remove(); reject(new Error(`Couldn’t load ${src}.`)); }, { once: true });
+          document.head.append(script);
+        }))).then(() => { lazyReady.add(key); }).finally(() => lazyPending.delete(key)));
+      }
+      return lazyPending.get(key);
+    }
+    // Shows a loading line until the view's scripts arrive, then renders again if the route hasn't changed.
+    function needsLazy(key, ...before) {
+      if (lazyReady.has(key)) return false;
+      const status = element("p", "lazy-status", "Loading…");
+      status.setAttribute("role", "status");
+      view.replaceChildren(...before, status);
+      const hash = location.hash;
+      loadLazy(key).then(() => { if (location.hash === hash) render(); }).catch((error) => {
+        console.error(error);
+        status.textContent = "This view couldn’t load. Check your connection, then ";
+        const retry = element("button", "secondary", "try again");
+        retry.type = "button";
+        retry.addEventListener("click", () => render());
+        status.append(retry);
+      });
+      return true;
+    }
+    function preloadLazy() {
+      const idle = window.requestIdleCallback || ((callback) => setTimeout(callback, 1500));
+      Object.keys(lazyScripts).forEach((key, index) => setTimeout(() => idle(() => loadLazy(key).catch(() => {})), 4000 + index * 800));
+    }
+
     function renderChannel(channel, page = null) {
       const heading = element("div", "channel-heading");
       heading.append(element("span", "number", `CH ${channel.number}`), element("h2", "", channel.name));
       const description = element("p", "lede", channel.description);
+      if (lazyScripts[channel.id] && needsLazy(channel.id, heading, description)) return;
       if (channel.id === "politics") {
         view.replaceChildren(heading, description, ...(congressView() ? [createCongressMembersView()]
           : electionView() ? [createElectionMapsView()] : [congressTabs("overview"), createPoliticsDashboard()]));
@@ -12492,6 +12534,7 @@
     const siteSearch = createSiteSearch({ getEntries: () => entries, channelList: channels });
     document.getElementById("site-search-open").addEventListener("click", siteSearch.open);
     notifyStart();
+    preloadLazy();
     bowlingOnChange = scheduleCloudSync;
     musicLabOnChange = scheduleCloudSync;
     creatorOnChange = scheduleCloudSync;

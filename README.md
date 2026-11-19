@@ -10,6 +10,10 @@ The `main` branch workflow in `.github/workflows/pages.yml` publishes the reposi
 
 https://siballin.github.io/Seven-Channels/
 
+
+### Speed
+
+The published copy is minified: the Pages workflow runs `scripts/build_site.py`, which copies the site into `_site/` and minifies every script plus the inline script and styles in `index.html` with esbuild (top-level names are kept, since the scripts share globals). Source files in the repository stay readable, and a file that can't be minified is published unchanged. The Politics, Music Lab, Creator Studio and Live Events views and the Year in review page load their scripts on first visit, then in the background once the page is idle.
 ## This week (Guide)
 
 The Guide opens with the next seven days across channels, grouped by day: concerts you're planning or have tickets for (Live Events), league nights from the bowling league tracker, planned uploads (Creator Studio), K-pop releases from artists you follow (KPOP OFFICIAL calendar plus the MusicBrainz extras), game releases (your favorites first, then up to five more) and US movie releases from Wikidata. Days with nothing on them are skipped. `this-week.js` reads each channel's saved data, so nothing new is stored.
