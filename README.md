@@ -10,6 +10,38 @@ The `main` branch workflow in `.github/workflows/pages.yml` publishes the reposi
 
 https://siballin.github.io/Seven-Channels/
 
+
+### Speed
+
+The published copy is minified: the Pages workflow runs `scripts/build_site.py`, which copies the site into `_site/` and minifies every script plus the inline script and styles in `index.html` with esbuild (top-level names are kept, since the scripts share globals). Source files in the repository stay readable, and a file that can't be minified is published unchanged. The Politics, Music Lab, Creator Studio and Live Events views and the Year in review page load their scripts on first visit, then in the background once the page is idle.
+## This week (Guide)
+
+The Guide opens with the next seven days across channels, grouped by day: concerts you're planning or have tickets for (Live Events), league nights from the bowling league tracker, planned uploads (Creator Studio), K-pop releases from artists you follow (KPOP OFFICIAL calendar plus the MusicBrainz extras), game releases (your favorites first, then up to five more) and US movie releases from Wikidata. Days with nothing on them are skipped. `this-week.js` reads each channel's saved data, so nothing new is stored.
+
+## Year in review
+
+`#wrapped` (or `#wrapped/2025` for an earlier year; linked from the Guide) sums up a year from what you've logged: concerts from the Live Events journal (best show, most-seen artist, ticket spend), bowling average, high game and series and the first-half vs second-half trend, movies, anime, games and K-Pop moved to the finished column (top rated first), Music Lab producers followed and ratings, the settled-bet record with units and ROI, and published Creator Studio uploads. **Copy summary** puts a short text version on the clipboard. Tests: `node tests/year-in-review.test.js`.
+
+## Search
+
+The **Search** button in the header (or press `/` or Ctrl+K anywhere) searches your saved items in every channel, bowling sessions, balls and leagues, the concert journal, Live Events plans and followed artists, your Music Lab library and lists, Creator Studio videos, ideas and calendar, plus the Music Lab producer catalog and every headline in the news rows. Every word has to match; accents are ignored. Arrow keys move through results and Enter opens one. Tests: `node tests/search.test.js`.
+
+## Notifications
+
+Turn on **🔔 Notifications** in the Guide's This week panel to get browser alerts while Seven Channels is open in a tab (there's no server sending push messages): newly announced shows for artists you follow in Live Events (Ticketmaster key required; limited to your area when a location is set; the first check only records what's already on sale), K-pop releases out today from followed artists, favorite game releases out today, and today's concerts, league night and planned uploads. It checks a minute after the page loads, then every 30 minutes and whenever you come back to the tab. Each alert is sent once, at most five at a time. Some mobile browsers only allow notifications from installed apps. Tests: `node tests/notifications.test.js`.
+
+## Movies and Anime
+
+Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
+
+- **Your stats:** what you've finished, are watching and plan to watch, your average rating, time watched (movie runtimes, or anime episodes at about 24 minutes each), top genres, top directors (movies) or formats (anime), titles by decade, and your highest rated.
+- **Release calendar / Airing schedule:** Movies shows US releases from two weeks ago to about two months out, from Wikidata release dates for films with an English Wikipedia article, with Wikipedia posters; titles in your list are marked. Anime shows this week's airing schedule from AniList, day by day, with shows in your list highlighted (and an option to show only those), plus next season's most anticipated premieres.
+- **Where to watch:** Anime lists the official streaming services AniList has for each title in your list (Crunchyroll, Netflix, HIDIVE and so on) and when the next episode airs. For movies there's no free service for streaming availability, so each title on your watchlist links to its JustWatch and Reelgood search, which list where it's streaming, renting and buying.
+
+## Sports leagues
+
+The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
+
 ## Video Games
 
 **My games** (`#games`) is your game log. Add a game by searching the catalog as you type; picking a result fills in its cover, platforms, release date, genres, critic score and time to beat. Then record your platform, hours played, a rating out of 10, and when you started or finished. Games you add without a catalog match keep whatever you type. Games are listed under Playing, Backlog and Finished, and the backlog can be sorted by shortest to beat or highest critic score. A dashboard totals what you're playing, your backlog with estimated hours, games finished this year, hours played and your average rating. Game entries are saved in the browser and sync to your account like other entries.
@@ -85,6 +117,8 @@ Known gaps: the 1982–1990 maps have no boundary for New York's 33rd District (
 **2026 results are preliminary.** No official or academic compilation exists until states certify, so `scripts/update_election_2026.py` reads Wikipedia's 2026 House and Senate election articles during the daily Pages workflow. The page labels these results as preliminary, credits Wikipedia (CC BY-SA 4.0), and shows races not yet called. Many called races have no vote shares on Wikipedia yet; those use the middle shade. If Wikipedia can't be read, the last saved results stay. Run `python3 -m unittest discover -s scripts -p 'test_build_election_maps.py'` to test the parsers.
 
 The optional editorial list is `data/politics-stories.json`: an array of objects with `title`, `date`, `source`, `url`, `what`, `affected`, and `next`. Only sourced, dated stories with all three context fields are displayed. The file starts empty; the site does not generate editorial claims.
+
+**Governor races:** the **Governor** tab maps every midterm-year governor race since 1982 (36 states each year): winner, margin and every candidate's vote share, the incumbent before the election, and governorships that changed party. Results come from the race summary table in Wikipedia's "<year> United States gubernatorial elections" articles (CC BY-SA 4.0), built by `scripts/build_governors.py` into `data/elections/governors.json`; historical years are committed, and years still being counted are refreshed each time the site is published. States that elect governors in odd years (New Jersey, Virginia, Kentucky, Louisiana, Mississippi) aren't part of these years. The midterm summary and All midterms view include governorships gained or lost by the president's party.
 
 **Midterm detail:** every midterm's House and Senate page opens with a "midterm at a glance" box: the sitting president and party, how many House and Senate seats the president's party gained or lost, House votes by party with the margin and the swing since the previous midterm, and the Senate seats that changed party (special elections marked). **All midterms** (`#politics/elections/midterms`) compares every midterm since 1982 side by side, with charts of the president's party's House and Senate seat changes and a table of results. Everything comes from the same result files as the maps (`scripts/build_midterm_summary.py` writes `data/elections/midterm-summary.json` each time the site is published). House votes are summed from district results, so they're the votes counted in this data rather than an official national popular vote (some states don't report votes for unopposed candidates). 2026 stays marked preliminary: House seats are those called so far and Senate changes come from seats that flipped.
 

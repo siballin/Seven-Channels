@@ -101,6 +101,9 @@ jobs:
       - name: Refresh preliminary 2026 election results
         continue-on-error: true
         run: python scripts/update_election_2026.py
+      - name: Refresh preliminary governor results
+        continue-on-error: true
+        run: python scripts/build_governors.py --preliminary
       - name: Rebuild the midterm comparison
         continue-on-error: true
         run: python scripts/build_midterm_summary.py
@@ -140,12 +143,16 @@ jobs:
         env:
           SETLISTFM_API_KEY: ${{ secrets.SETLISTFM_API_KEY }}
         run: python scripts/update_setlists.py
+      - name: Build minified site
+        # Copies the site into _site/ and minifies JS and CSS; any file that can't be minified is published as is.
+        run: |
+          python scripts/build_site.py || { rm -rf _site && mkdir _site && cp -r index.html *.js assets data docs _site/; }
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload site files
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - name: Deploy site
         id: deployment
         uses: actions/deploy-pages@v4
