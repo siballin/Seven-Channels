@@ -2680,6 +2680,38 @@
     .kpop-extra-note { color: var(--muted); font-size: .74rem; }
     .kpop-extra-source { color: var(--muted); }
     .kpop-extra-release a.kpop-album-open { text-decoration: none; }
+    /* More leagues (sports-leagues.js) */
+    .sports-hub .scoreboard.league-scoreboard { display: grid; gap: 8px; grid-column: 1 / -1; grid-row: 2; min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-base); box-shadow: var(--glass-shadow); }
+    .league-scoreboard .score-status, .league-scoreboard .score-updated, .league-scoreboard .score-countdown { margin: 0; }
+    .league-scoreboard .league-body { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr); gap: 12px; align-items: start; }
+    .league-scoreboard .league-detail-area:not(:empty) { margin-top: 0; }
+    @media (max-width: 900px) { .league-scoreboard .league-body { grid-template-columns: minmax(0, 1fr); } }
+    .sports-score-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .league-games { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+    .league-game { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+    .league-game:hover { border-color: color-mix(in srgb, var(--signal) 50%, var(--line)); }
+    .league-game[aria-pressed="true"] { border-color: var(--signal); box-shadow: 0 0 0 1px var(--signal); }
+    .league-game.is-in .league-game-status strong { color: #e0645a; }
+    .league-game-status { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .72rem; }
+    .league-team { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+    .league-team.is-winner strong, .league-team.is-winner .league-score { color: var(--ink); font-weight: 800; }
+    .league-team:not(.is-winner) .league-score { color: var(--muted); }
+    .league-team-name { display: grid; min-width: 0; }
+    .league-team-name strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .86rem; }
+    .league-team-name small { color: var(--muted); font-size: .68rem; }
+    .league-rank { color: var(--signal); font-weight: 700; }
+    .league-score { font: 700 1.1rem var(--data); font-variant-numeric: tabular-nums; }
+    .league-logo { width: 26px; height: 26px; object-fit: contain; }
+    .league-logo-empty { display: grid; place-items: center; border-radius: 50%; background: var(--surface); color: var(--muted); font-size: .55rem; font-weight: 800; }
+    .league-detail-area:not(:empty) { margin-top: 12px; }
+    .league-detail { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .league-detail h4 { margin: 0; }
+    .league-linescore { border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: .82rem; }
+    .league-linescore :is(th, td) { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: center; }
+    .league-linescore th:first-child { text-align: left; }
+    .league-total { font-weight: 800; }
+    .league-leaders { margin: 0; padding-left: 18px; color: var(--muted); font-size: .8rem; }
+    :root[data-theme="light"] .league-game.is-in .league-game-status strong { color: #b3261e; }
     /* Betting analytics (betting-stats.js) */
     .betting-analytics { display: grid; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
     .betting-analytics h3 { margin: 0; }
@@ -3197,6 +3229,7 @@
   <script src="live-events.js"></script>
   <script src="channel-news.js"></script>
   <script src="betting-stats.js"></script>
+  <script src="sports-leagues.js"></script>
   <script src="congress-members.js"></script>
   <script src="election-maps.js"></script>
   <script src="games-hub.js"></script>
@@ -5233,10 +5266,11 @@
       }
 
       function selectGame(event) {
-        const panel = scoreboard.querySelector(activeSport === "nba" ? ".nba-scoreboard" : ".nfl-scoreboard");
-        const card = [...panel.querySelectorAll(".game-card[data-game-id]")].find((item) => item.dataset.gameId === String(event.id));
-        card?.querySelector(".game-select")?.click();
-        panel.querySelector(".game-detail-area")?.scrollIntoView({ behavior: "auto", block: "start" });
+        const panel = scoreboard.querySelector(`.${activeSport}-scoreboard`);
+        if (!panel) return;
+        const card = [...panel.querySelectorAll("[data-game-id]")].find((item) => item.dataset.gameId === String(event.id));
+        (card?.querySelector(".game-select") || card)?.click();
+        panel.querySelector(".game-detail-area, .league-detail-area")?.scrollIntoView({ behavior: "auto", block: "start" });
       }
 
       function renderTeams() {
@@ -5346,9 +5380,14 @@
 
       function renderLeaders() {
         leadersBody.replaceChildren();
-        const categories = activeSport === "nba"
-          ? [["points", "Points"], ["rebounds", "Rebounds"], ["assists", "Assists"]]
-          : [["passingYards", "Passing yards"], ["rushingYards", "Rushing yards"], ["receivingYards", "Receiving yards"]];
+        // NBA and NFL use fixed stats; other leagues offer the leader categories ESPN reports for that day's games.
+        const reported = new Map();
+        for (const event of schedules.get(activeSport)?.events || []) {
+          for (const team of gameTeams(event)) for (const group of team.leaders || []) if (group.name) reported.set(group.name, group.displayName || group.name);
+        }
+        const categories = activeSport === "nba" ? [["points", "Points"], ["rebounds", "Rebounds"], ["assists", "Assists"]]
+          : activeSport === "nfl" ? [["passingYards", "Passing yards"], ["rushingYards", "Rushing yards"], ["receivingYards", "Receiving yards"]]
+          : reported.size ? [...reported.entries()].slice(0, 6) : [["none", "No leaders reported"]];
         if (!categories.some(([value]) => value === category)) category = categories[0][0];
         const label = element("label", "", "Category");
         const select = document.createElement("select");
@@ -5446,7 +5485,7 @@
       async function loadWidgets() {
         const requestId = ++widgetRequestId;
         const sport = activeSport;
-        const path = sport === "nba" ? "basketball/nba" : "football/nfl";
+        const path = sportsLeague(sport).path;
         const standingsLoading = element("div", "sports-loading");
         standingsLoading.setAttribute("role", "status");
         standingsLoading.setAttribute("aria-label", "Loading standings");
@@ -5485,9 +5524,9 @@
           select.addEventListener("change", draw);
           label.append(select);
           standingBody.replaceChildren(label, list);
-          const link = element("a", "", `Full ${sport.toUpperCase()} standings`);
-          link.href = sport === "nba" ? "#sports-standings" : "https://www.espn.com/nfl/standings";
-          if (sport === "nfl") { link.target = "_blank"; link.rel = "noopener noreferrer"; }
+          const link = element("a", "", `Full ${sportsLeague(sport).label} standings`);
+          link.href = sport === "nba" ? "#sports-standings" : `https://www.espn.com/${sportsLeague(sport).espn}/standings${sportsLeague(sport).soccer ? `/_/league/${sportsLeague(sport).path.split("/")[1]}` : ""}`;
+          if (sport !== "nba") { link.target = "_blank"; link.rel = "noopener noreferrer"; }
           standingBody.append(link);
           draw();
         }).catch((error) => {
@@ -5584,72 +5623,64 @@
       return hub;
     }
 
+    // League tabs: NBA and NFL have their own scoreboards; the rest share createLeagueScoreboard (sports-leagues.js).
     function createSportsScoreboards() {
       const wrapper = element("section", "sports-scoreboards");
       const tabs = element("div", "sports-score-tabs");
       tabs.setAttribute("role", "tablist");
       tabs.setAttribute("aria-label", "Scores by league");
       const panels = element("div", "sports-score-panels");
-      const nbaPanel = element("div", "sports-score-panel");
-      nbaPanel.id = "nba-scores-panel";
-      nbaPanel.setAttribute("role", "tabpanel");
-      const nbaTab = element("button", "secondary sports-score-tab", "NBA Scores");
-      nbaTab.type = "button";
-      nbaTab.id = "nba-scores-tab";
-      nbaTab.setAttribute("role", "tab");
-      nbaTab.setAttribute("aria-controls", nbaPanel.id);
-      nbaTab.setAttribute("aria-selected", "true");
-      nbaTab.tabIndex = 0;
-      nbaPanel.setAttribute("aria-labelledby", nbaTab.id);
-      nbaPanel.append(createNbaScoreboard());
-
-      const nflPanel = element("div", "sports-score-panel");
-      nflPanel.id = "nfl-scores-panel";
-      nflPanel.setAttribute("role", "tabpanel");
-      nflPanel.setAttribute("aria-labelledby", "nfl-scores-tab");
-      nflPanel.hidden = true;
-      const nflTab = element("button", "secondary sports-score-tab", "NFL Scores");
-      nflTab.type = "button";
-      nflTab.id = "nfl-scores-tab";
-      nflTab.setAttribute("role", "tab");
-      nflTab.setAttribute("aria-controls", nflPanel.id);
-      nflTab.setAttribute("aria-selected", "false");
-      nflTab.tabIndex = -1;
-
+      const entries = sportsLeagues.map((league, index) => {
+        const panel = element("div", "sports-score-panel");
+        panel.id = `${league.id}-scores-panel`;
+        panel.setAttribute("role", "tabpanel");
+        panel.setAttribute("aria-labelledby", `${league.id}-scores-tab`);
+        panel.hidden = index !== 0;
+        const tab = element("button", "secondary sports-score-tab", league.label);
+        tab.type = "button";
+        tab.id = `${league.id}-scores-tab`;
+        tab.setAttribute("role", "tab");
+        tab.setAttribute("aria-controls", panel.id);
+        tab.setAttribute("aria-selected", String(index === 0));
+        tab.tabIndex = index === 0 ? 0 : -1;
+        return { league, panel, tab };
+      });
+      const create = (id) => id === "nba" ? createNbaScoreboard() : id === "nfl" ? createNflScoreboard() : createLeagueScoreboard(id);
       const selectSport = (sport) => {
-        const showNba = sport === "nba";
         const changed = wrapper.dataset.activeSport !== sport;
         if (changed) {
           youtubeSearchController?.abort();
           searchSelectedGameHighlights = null;
         }
         wrapper.dataset.activeSport = sport;
-        nbaPanel.hidden = !showNba;
-        nflPanel.hidden = showNba;
-        nbaTab.setAttribute("aria-selected", String(showNba));
-        nflTab.setAttribute("aria-selected", String(!showNba));
-        nbaTab.tabIndex = showNba ? 0 : -1;
-        nflTab.tabIndex = showNba ? -1 : 0;
-        if (!showNba && !nflPanel.firstChild) nflPanel.append(createNflScoreboard());
-        if (changed) document.dispatchEvent(new CustomEvent("sports-league", { detail: sport }));
-        if (changed) {
-          const activePanel = showNba ? nbaPanel : nflPanel;
-          activePanel.querySelector(".game-tabs button[aria-selected='true'][id$='-tab-highlights']")?.click();
+        for (const { league, panel, tab } of entries) {
+          const active = league.id === sport;
+          panel.hidden = !active;
+          tab.setAttribute("aria-selected", String(active));
+          tab.tabIndex = active ? 0 : -1;
+          if (active && !panel.firstChild) panel.append(create(league.id));
         }
+        try { localStorage.setItem("seven-channels.sports-league.v1", sport); } catch { /* remembering the tab is optional */ }
+        if (changed) document.dispatchEvent(new CustomEvent("sports-league", { detail: sport }));
+        if (changed) entries.find((entry) => entry.league.id === sport)?.panel.querySelector(".game-tabs button[aria-selected='true'][id$='-tab-highlights']")?.click();
       };
-      nbaTab.addEventListener("click", () => selectSport("nba"));
-      nflTab.addEventListener("click", () => selectSport("nfl"));
+      for (const { league, tab } of entries) tab.addEventListener("click", () => selectSport(league.id));
       tabs.addEventListener("keydown", (event) => {
         if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
         event.preventDefault();
-        const nextTab = event.target === nbaTab ? nflTab : nbaTab;
-        nextTab.focus();
-        nextTab.click();
+        const index = entries.findIndex((entry) => entry.tab === event.target);
+        const next = entries[(index + (event.key === "ArrowRight" ? 1 : entries.length - 1)) % entries.length];
+        next.tab.focus();
+        next.tab.click();
       });
-      tabs.append(nbaTab, nflTab);
-      panels.append(nbaPanel, nflPanel);
+      tabs.append(...entries.map((entry) => entry.tab));
+      panels.append(...entries.map((entry) => entry.panel));
       wrapper.append(tabs, panels);
+      entries[0].panel.append(createNbaScoreboard());
       wrapper.dataset.activeSport = "nba";
+      let saved = "nba";
+      try { saved = localStorage.getItem("seven-channels.sports-league.v1") || "nba"; } catch { saved = "nba"; }
+      if (saved !== "nba" && entries.some((entry) => entry.league.id === saved)) requestAnimationFrame(() => selectSport(saved));
       return wrapper;
     }
 
@@ -12335,7 +12366,8 @@
     function refreshScoreboard({ sport, scoreboard }) {
       if (scoreboard.dataset.loading === "true") return;
       if (sport === "nfl") loadNflGames(scoreboard, selectedNflDate, { automatic: true });
-      else loadNbaGames(scoreboard, selectedNbaDate, { automatic: true });
+      else if (sport === "nba") loadNbaGames(scoreboard, selectedNbaDate, { automatic: true });
+      else scoreboard.reloadGames?.({ automatic: true });
     }
 
     // Shows when the scores update next, under "Last updated".

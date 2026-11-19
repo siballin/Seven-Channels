@@ -10,6 +10,10 @@ The `main` branch workflow in `.github/workflows/pages.yml` publishes the reposi
 
 https://siballin.github.io/Seven-Channels/
 
+## Sports leagues
+
+The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
+
 ## Video Games
 
 **My games** (`#games`) is your game log. Add a game by searching the catalog as you type; picking a result fills in its cover, platforms, release date, genres, critic score and time to beat. Then record your platform, hours played, a rating out of 10, and when you started or finished. Games you add without a catalog match keep whatever you type. Games are listed under Playing, Backlog and Finished, and the backlog can be sorted by shortest to beat or highest critic score. A dashboard totals what you're playing, your backlog with estimated hours, games finished this year, hours played and your average rating. Game entries are saved in the browser and sync to your account like other entries.
