@@ -24,7 +24,8 @@ jobs:
           import glob
           for f in glob.glob("*.js") + ["index.html"]:
               code = open(f).read(); mini = open("_site/" + f).read()
-              for name in re.findall(r"^\s{0,4}(?:async )?function (\w+)\(", code, re.M):
+              pattern = r"^    (?:async )?function (\w+)\(" if f == "index.html" else r"^(?:async )?function (\w+)\("
+              for name in re.findall(pattern, code, re.M):
                   if not re.search(r"function " + name + r"\(", mini): missing.append(f + ":" + name)
           print("renamed top-level functions:", missing[:20])
           sys.exit(1 if missing else 0)
