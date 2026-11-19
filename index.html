@@ -192,6 +192,25 @@
     .site-search-result strong { overflow-wrap: anywhere; }
     .site-search-result small { color: var(--muted); overflow-wrap: anywhere; }
     .site-search-result:hover, .site-search-result[aria-selected="true"], .site-search-result:focus-visible { background: color-mix(in srgb, var(--signal) 16%, transparent); }
+    .this-week-side { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; justify-content: flex-end; }
+    .notify-settings { position: relative; }
+    .notify-settings summary { cursor: pointer; font-size: .88rem; color: var(--muted); list-style: none; }
+    .notify-settings summary::-webkit-details-marker { display: none; }
+    .notify-settings[open] summary { color: var(--ink); }
+    .notify-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; width: min(360px, calc(100vw - 48px)); display: grid; gap: 10px; padding: 14px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--screen); box-shadow: 0 14px 40px rgb(0 0 0 / .35); }
+    .notify-note, .notify-status { margin: 0; color: var(--muted); font-size: .85rem; }
+    .notify-status:empty { display: none; }
+    .notify-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .notify-types { display: grid; gap: 8px; }
+    .notify-type { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+    .notify-type input { width: 16px; height: 16px; min-height: 0; margin-top: 3px; flex: none; }
+    .notify-type span { display: grid; }
+    .notify-type small { color: var(--muted); font-size: .8rem; }
+    @media (max-width: 560px) {
+      .this-week { position: relative; }
+      .notify-settings { position: static; }
+      .notify-panel { left: 12px; right: 12px; top: auto; width: auto; margin-top: 8px; }
+    }
     .guide { display: grid; gap: 3px; }
     .guide-row {
       display: grid;
@@ -3347,6 +3366,7 @@
   <script src="this-week.js"></script>
   <script src="year-in-review.js"></script>
   <script src="search.js"></script>
+  <script src="notifications.js"></script>
   <script src="congress-members.js"></script>
   <script src="election-maps.js"></script>
   <script src="games-hub.js"></script>
@@ -12471,6 +12491,7 @@
     );
     const siteSearch = createSiteSearch({ getEntries: () => entries, channelList: channels });
     document.getElementById("site-search-open").addEventListener("click", siteSearch.open);
+    notifyStart();
     bowlingOnChange = scheduleCloudSync;
     musicLabOnChange = scheduleCloudSync;
     creatorOnChange = scheduleCloudSync;

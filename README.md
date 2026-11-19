@@ -22,6 +22,10 @@ The Guide opens with the next seven days across channels, grouped by day: concer
 
 The **Search** button in the header (or press `/` or Ctrl+K anywhere) searches your saved items in every channel, bowling sessions, balls and leagues, the concert journal, Live Events plans and followed artists, your Music Lab library and lists, Creator Studio videos, ideas and calendar, plus the Music Lab producer catalog and every headline in the news rows. Every word has to match; accents are ignored. Arrow keys move through results and Enter opens one. Tests: `node tests/search.test.js`.
 
+## Notifications
+
+Turn on **🔔 Notifications** in the Guide's This week panel to get browser alerts while Seven Channels is open in a tab (there's no server sending push messages): newly announced shows for artists you follow in Live Events (Ticketmaster key required; limited to your area when a location is set; the first check only records what's already on sale), K-pop releases out today from followed artists, favorite game releases out today, and today's concerts, league night and planned uploads. It checks a minute after the page loads, then every 30 minutes and whenever you come back to the tab. Each alert is sent once, at most five at a time. Some mobile browsers only allow notifications from installed apps. Tests: `node tests/notifications.test.js`.
+
 ## Movies and Anime
 
 Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:

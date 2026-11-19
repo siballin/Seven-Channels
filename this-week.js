@@ -138,7 +138,10 @@ function createThisWeek({ signal } = {}) {
   title.id = "this-week-title";
   const days = thisWeekRange();
   const range = `${new Date(`${days[0]}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${new Date(`${days[6]}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
-  head.append(title, element("span", "this-week-range", range));
+  const side = element("div", "this-week-side");
+  side.append(element("span", "this-week-range", range));
+  if (typeof createNotifySettings === "function") side.append(createNotifySettings());
+  head.append(title, side);
   const status = element("p", "this-week-status", "Loading releases…");
   status.setAttribute("role", "status");
   const body = element("div", "this-week-days");
