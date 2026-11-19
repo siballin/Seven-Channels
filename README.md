@@ -10,6 +10,10 @@ The `main` branch workflow in `.github/workflows/pages.yml` publishes the reposi
 
 https://siballin.github.io/Seven-Channels/
 
+## This week (Guide)
+
+The Guide opens with the next seven days across channels, grouped by day: concerts you're planning or have tickets for (Live Events), league nights from the bowling league tracker, planned uploads (Creator Studio), K-pop releases from artists you follow (KPOP OFFICIAL calendar plus the MusicBrainz extras), game releases (your favorites first, then up to five more) and US movie releases from Wikidata. Days with nothing on them are skipped. `this-week.js` reads each channel's saved data, so nothing new is stored.
+
 ## Movies and Anime
 
 Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:

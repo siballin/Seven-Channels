@@ -127,6 +127,29 @@
       border: 1px dashed var(--signal);
       color: var(--muted);
     }
+    .this-week { margin-bottom: 18px; padding: 14px 16px; border: 1px solid var(--glass-edge, var(--line)); border-radius: var(--glass-radius, 16px); background: var(--glass-base, var(--panel)); box-shadow: var(--glass-shadow, none); min-width: 0; }
+    .this-week-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .this-week-head h2 { margin: 0; font-size: 1.15rem; }
+    .this-week-range, .this-week-status, .this-week-empty { color: var(--muted); font-size: .9rem; }
+    .this-week-status { margin: 6px 0 0; }
+    .this-week-days { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-top: 10px; }
+    .this-week-day h3 { margin: 0 0 6px; font-size: .82rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+    .this-week-day.is-today h3 { color: var(--signal); }
+    .this-week-day ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+    .this-week-link { display: flex; gap: 9px; align-items: center; padding: 7px 8px; border-radius: 10px; color: inherit; text-decoration: none; background: color-mix(in srgb, var(--ink) 4%, transparent); }
+    a.this-week-link:hover, a.this-week-link:focus-visible { background: color-mix(in srgb, var(--signal) 14%, transparent); }
+    .this-week-image { width: 34px; height: 46px; object-fit: cover; border-radius: 5px; flex: none; }
+    .this-week-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; margin: 0 12px; background: var(--muted); }
+    .this-week-item.concert .this-week-dot { background: #e5484d; }
+    .this-week-item.bowling .this-week-dot { background: #3e9b4f; }
+    .this-week-item.creator .this-week-dot { background: #d6409f; }
+    .this-week-item.kpop .this-week-dot { background: #8e4ec6; }
+    .this-week-item.game .this-week-dot { background: #0090ff; }
+    .this-week-item.movie .this-week-dot { background: #f76b15; }
+    .this-week-text { display: grid; min-width: 0; }
+    .this-week-text strong { overflow-wrap: anywhere; font-size: .95rem; }
+    .this-week-text small { color: var(--muted); font-size: .78rem; }
+    .this-week-text .this-week-kind { text-transform: uppercase; letter-spacing: .04em; font-size: .7rem; }
     .guide { display: grid; gap: 3px; }
     .guide-row {
       display: grid;
@@ -3278,6 +3301,7 @@
   <script src="betting-stats.js"></script>
   <script src="sports-leagues.js"></script>
   <script src="media-hub.js"></script>
+  <script src="this-week.js"></script>
   <script src="congress-members.js"></script>
   <script src="election-maps.js"></script>
   <script src="games-hub.js"></script>
@@ -8703,7 +8727,7 @@
         }
         guide.append(row);
       }
-      view.replaceChildren(withChannelNews("guide", [guide]));
+      view.replaceChildren(withChannelNews("guide", [createThisWeek(), guide]));
     }
 
     function renderItem(entry, channel) {
