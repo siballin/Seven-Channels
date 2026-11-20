@@ -56,9 +56,10 @@ MEMBERS_QUERY = f"""SELECT DISTINCT ?g ?p ?start ?end WHERE {{
   ?p wdt:P31 wd:Q5 .
 }}"""
 # Groups added by name in overrides.json ("includeGroups"), e.g. acts Wikidata doesn't tag as K-pop.
+# Entries are English names, Wikidata ids or MusicBrainz artist ids.
 EXTRA_GROUPS_QUERY = """SELECT DISTINCT ?g WHERE {{
-  VALUES ?name {{ {names} }}
-  ?g rdfs:label ?name ; wdt:P31/wdt:P279* wd:Q215380 .
+  {{ VALUES ?name {{ {names} }} ?g rdfs:label ?name ; wdt:P31/wdt:P279* wd:Q215380 . }}
+  UNION {{ VALUES ?mbid {{ {mbids} }} ?g wdt:P434 ?mbid . }}
 }}"""
 EXTRA_MEMBERS_QUERY = """SELECT DISTINCT ?g ?p ?start ?end WHERE {{
   VALUES ?g {{ {ids} }}
@@ -361,8 +362,12 @@ def build(fetcher=None, limit=None, log=print):
         group_ids.add(memberships[-1]["group"])
     overrides = load_overrides()
     if overrides["includeGroups"]:
-        names = " ".join(json.dumps(name) + "@en" for name in overrides["includeGroups"])
-        extra = {qid_of(row["g"]["value"]) for row in sparql(EXTRA_GROUPS_QUERY.format(names=names), fetcher)} - group_ids
+        wanted = overrides["includeGroups"]
+        mbid = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+        names = " ".join(json.dumps(name) + "@en" for name in wanted if not mbid.fullmatch(name) and not re.fullmatch(r"Q\d+", name)) or '""'
+        mbids = " ".join(json.dumps(name) for name in wanted if mbid.fullmatch(name)) or '""'
+        extra = {qid_of(row["g"]["value"]) for row in sparql(EXTRA_GROUPS_QUERY.format(names=names, mbids=mbids), fetcher)}
+        extra = (extra | {name for name in wanted if re.fullmatch(r"Q\d+", name)}) - group_ids
         if extra:
             for row in sparql(EXTRA_MEMBERS_QUERY.format(ids=" ".join(f"wd:{qid}" for qid in sorted(extra))), fetcher):
                 memberships.append({"group": qid_of(row["g"]["value"]), "person": qid_of(row["p"]["value"]),

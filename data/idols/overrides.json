@@ -1,7 +1,7 @@
 {
-  "_about": "Your additions and fixes. Key by Wikidata id (Q123) or English name (case-insensitive). Any field replaces the source value; common extra fields: positions (list), fandom, mbti, height (cm), note. Groups also take removeMembers (names or ids wrongly listed on Wikidata). includeGroups adds groups by English name that Wikidata doesn't tag as K-pop. Rebuild: python3 scripts/build_idols.py --force",
+  "_about": "Your additions and fixes. Key by Wikidata id (Q123) or English name (case-insensitive). Any field replaces the source value; common extra fields: positions (list), fandom, mbti, height (cm), note. Groups also take removeMembers (names or ids wrongly listed on Wikidata). includeGroups adds groups (English name, Wikidata id or MusicBrainz id; XG is listed by its MusicBrainz id) that Wikidata doesn't tag as K-pop. Rebuild: python3 scripts/build_idols.py --force",
   "includeGroups": [
-    "XG"
+    "8dfe067c-ae90-472e-80f2-fcee9be4e158"
   ],
   "groups": {
     "BTS": {

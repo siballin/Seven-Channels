@@ -52,7 +52,7 @@ def fetcher(url, params):
         query = params["query"]
         g = lambda qid: {"type": "uri", "value": f"http://www.wikidata.org/entity/{qid}"}  # noqa: E731
         if "VALUES ?name" in query:
-            rows = [{"g": g("Q3")}] if '"XG"@en' in query else []
+            rows = [{"g": g("Q3")}] if '"8dfe067c-ae90-472e-80f2-fcee9be4e158"' in query and '"XG"@en' not in query else []
         elif "VALUES ?g" in query:
             rows = [{"g": g("Q3"), "p": g("Q30"), "start": {"value": "2022-01-01T00:00:00Z"}}]
         elif "?start" in query:
@@ -104,7 +104,7 @@ def main():
     with tempfile.TemporaryDirectory() as folder:
         build_idols.OUT = Path(folder)
         build_idols.OVERRIDES = Path(folder) / "overrides.json"
-        build_idols.OVERRIDES.write_text(json.dumps({"includeGroups": ["XG"], "groups": {"AESPA": {"fandom": "MY", "removeMembers": ["former member"]}}, "people": {"Q10": {"positions": ["Leader"], "height": 167}}}))
+        build_idols.OVERRIDES.write_text(json.dumps({"includeGroups": ["8dfe067c-ae90-472e-80f2-fcee9be4e158"], "groups": {"AESPA": {"fandom": "MY", "removeMembers": ["former member"]}}, "people": {"Q10": {"positions": ["Leader"], "height": 167}}}))
         groups, people = build_idols.build(fetcher=fetcher, log=lambda *_: None)
         assert groups["Q1"]["fandom"] == "MY" and groups["Q1"]["edited"] == ["fandom"]
         assert [member["name"] for member in groups["Q1"]["members"]] == ["Karina", "Giselle"]
