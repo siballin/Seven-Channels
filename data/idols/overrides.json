@@ -1,0 +1,84 @@
+{
+  "_about": "Your additions and fixes. Key by Wikidata id (Q123) or English name (case-insensitive). Any field here replaces the source value; common extra fields: positions (list), fandom, mbti, height (cm), note. Rebuild: python3 scripts/build_idols.py --force",
+  "groups": {
+    "BTS": {
+      "fandom": "ARMY"
+    },
+    "Blackpink": {
+      "fandom": "BLINK"
+    },
+    "Twice": {
+      "fandom": "ONCE"
+    },
+    "aespa": {
+      "fandom": "MY"
+    },
+    "Stray Kids": {
+      "fandom": "STAY"
+    },
+    "Seventeen": {
+      "fandom": "CARAT"
+    },
+    "Itzy": {
+      "fandom": "MIDZY"
+    },
+    "Ive": {
+      "fandom": "DIVE"
+    },
+    "Le Sserafim": {
+      "fandom": "FEARNOT"
+    },
+    "NewJeans": {
+      "fandom": "Bunnies"
+    },
+    "Enhypen": {
+      "fandom": "ENGENE"
+    },
+    "Tomorrow X Together": {
+      "fandom": "MOA"
+    },
+    "Ateez": {
+      "fandom": "ATINY"
+    },
+    "Red Velvet": {
+      "fandom": "ReVeluv"
+    },
+    "Exo": {
+      "fandom": "EXO-L"
+    },
+    "Mamamoo": {
+      "fandom": "MooMoo"
+    },
+    "Got7": {
+      "fandom": "Ahgase"
+    },
+    "Monsta X": {
+      "fandom": "Monbebe"
+    },
+    "Big Bang": {
+      "fandom": "VIP"
+    },
+    "Girls' Generation": {
+      "fandom": "SONE"
+    },
+    "NCT": {
+      "fandom": "NCTzen"
+    },
+    "XG": {
+      "fandom": "ALPHAZ"
+    },
+    "Babymonster": {
+      "fandom": "MONSTIEZ"
+    },
+    "Illit": {
+      "fandom": "GLLIT"
+    },
+    "Kiss of Life": {
+      "fandom": "KISSY"
+    },
+    "tripleS": {
+      "fandom": "WAV"
+    }
+  },
+  "people": {}
+}
