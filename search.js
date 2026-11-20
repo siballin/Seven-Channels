@@ -56,8 +56,9 @@ function searchRemoteRecords() {
   searchRemotePromise ||= Promise.allSettled([
     fetch(new URL("data/channel-news.json", location.href)).then((response) => response.ok ? response.json() : null),
     fetch(new URL("data/politics-news.json", location.href)).then((response) => response.ok ? response.json() : null),
-    fetch(new URL("data/music-lab.json", location.href)).then((response) => response.ok ? response.json() : null)
-  ]).then(([news, politics, musicLab]) => {
+    fetch(new URL("data/music-lab.json", location.href)).then((response) => response.ok ? response.json() : null),
+    fetch(new URL("data/idols/index.json", location.href)).then((response) => response.ok ? response.json() : null)
+  ]).then(([news, politics, musicLab, idols]) => {
     const records = [];
     const seen = new Set();
     const headline = (item, channelName) => {
@@ -79,6 +80,18 @@ function searchRemoteRecords() {
         if (!person.name || !/^[0-9a-f-]{36}$/.test(person.mbid || "")) continue;
         records.push({ group: "Music Lab", title: person.name, detail: ["Producer and songwriter", person.area].filter(Boolean).join(" · "), href: `#music/network/${person.mbid}`, external: false,
           text: searchFold([person.name, person.sortName, ...(person.aliases || [])].join(" ")) });
+      }
+    }
+    if (idols.status === "fulfilled" && idols.value) {
+      const groupNames = new Map((idols.value.groups || []).map((group) => [group.id, group.n]));
+      for (const group of idols.value.groups || []) {
+        records.push({ group: "K-pop idols", title: group.n, detail: ["Group", group.k, group.d ? `debut ${group.d.slice(0, 4)}` : "", group.x ? "disbanded" : ""].filter(Boolean).join(" · "),
+          href: `#kpop/group/${group.id}`, external: false, text: searchFold([group.n, group.k, ...(group.a || []), ...(group.ag || [])].join(" ")) });
+      }
+      for (const person of idols.value.people || []) {
+        const groups = (person.g || []).map((id) => groupNames.get(id)).filter(Boolean);
+        records.push({ group: "K-pop idols", title: person.n, detail: [person.k, groups.slice(0, 2).join(", ") || "Soloist"].filter(Boolean).join(" · "),
+          href: `#kpop/idol/${person.id}`, external: false, text: searchFold([person.n, person.k, ...(person.a || []), ...groups].join(" ")) });
       }
     }
     return records;

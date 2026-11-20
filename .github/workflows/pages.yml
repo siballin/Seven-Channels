@@ -61,6 +61,20 @@ jobs:
       - name: Refresh K-pop news and videos
         continue-on-error: true
         run: python scripts/update_kpop_sidebar.py
+      - name: Restore last idol directory
+        uses: actions/cache/restore@v4
+        with:
+          path: data/idols
+          key: idols-${{ github.run_id }}
+          restore-keys: idols-
+      - name: Refresh idol directory from Wikidata, Wikipedia and Commons (weekly, or when overrides change)
+        continue-on-error: true
+        run: python scripts/build_idols.py
+      - name: Cache idol directory
+        uses: actions/cache/save@v4
+        with:
+          path: data/idols
+          key: idols-${{ github.run_id }}
       - name: Refresh Politics news (The Hill, Politico, Punchbowl News, Roll Call, Axios)
         continue-on-error: true
         run: python scripts/update_politics_news.py

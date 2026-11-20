@@ -23,6 +23,7 @@ Usage: python3 scripts/build_idols.py [--force] [--max-age-days 6] [--limit N]
 
 from datetime import datetime, timezone
 import argparse
+import hashlib
 import html
 import json
 from pathlib import Path
@@ -293,6 +294,13 @@ def commons_images(files, fetcher=None):
 
 # ---------- overrides ----------
 
+def overrides_hash():
+    try:
+        return hashlib.sha256(OVERRIDES.read_bytes()).hexdigest()[:16]
+    except OSError:
+        return ""
+
+
 def load_overrides():
     try:
         data = json.loads(OVERRIDES.read_text())
@@ -434,6 +442,7 @@ def write(group_records, person_records, now=None):
             {"name": "Wikimedia Commons", "url": "https://commons.wikimedia.org/", "license": "per photo"},
         ],
         "shards": SHARDS,
+        "overrides": overrides_hash(),
         # Compact rows: n name, k Hangul, a aliases, g group ids, b birth date, p photo, d debut, x disbanded / inactive
         "people": sorted(({
             "id": record["id"], "n": record["name"], "k": record["ko"], "a": record["aliases"][:4],
@@ -462,11 +471,12 @@ def main():
     parser.add_argument("--limit", type=int)
     args = parser.parse_args()
     try:
-        previous = json.loads((OUT / "index.json").read_text()).get("generatedAt", "")
-        age = (datetime.now(timezone.utc) - datetime.fromisoformat(previous)).total_seconds() / 86400
+        previous = json.loads((OUT / "index.json").read_text())
+        age = (datetime.now(timezone.utc) - datetime.fromisoformat(previous.get("generatedAt", ""))).total_seconds() / 86400
+        same_overrides = previous.get("overrides") == overrides_hash()
     except (OSError, ValueError, TypeError):
-        age = None
-    if not args.force and age is not None and age < args.max_age_days:
+        age, same_overrides = None, False
+    if not args.force and age is not None and age < args.max_age_days and same_overrides:
         print(f"Idol data is {age:.1f} days old; skipping (use --force to rebuild).")
         return
     try:

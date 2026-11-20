@@ -30,6 +30,23 @@ The **Search** button in the header (or press `/` or Ctrl+K anywhere) searches y
 
 Turn on **🔔 Notifications** in the Guide's This week panel to get browser alerts while Seven Channels is open in a tab (there's no server sending push messages): newly announced shows for artists you follow in Live Events (Ticketmaster key required; limited to your area when a location is set; the first check only records what's already on sale), K-pop releases out today from followed artists, favorite game releases out today, and today's concerts, league night and planned uploads. It checks a minute after the page loads, then every 30 minutes and whenever you come back to the tab. Each alert is sent once, at most five at a time. Some mobile browsers only allow notifications from installed apps. Tests: `node tests/notifications.test.js`.
 
+## K-pop idol directory
+
+`#kpop/idols` (the **Idol directory** card on the K-Pop channel) is a searchable database of K-pop idols and groups:
+
+- **Directory:** search by English name, Hangul or group; filter by agency, group debut decade, birth month and status; birthdays in the next week.
+- **Idol profiles** (`#kpop/idol/Q…`): photo, Hangul and birth name, birthday and age, birthplace, nationality, height, positions, MBTI, occupations, debut, agency, groups with years, links, the Wikipedia introduction, upcoming releases from the KPOP OFFICIAL calendar, discography from MusicBrainz (each release opens its credits in Music Lab) and bandmates.
+- **Group profiles** (`#kpop/group/Q…`): debut, fandom, agency history, sub-units, current and former members, a lineup-over-time chart, bio, upcoming releases, tour dates (with your Ticketmaster key) and discography. **Follow** uses your existing K-pop follows.
+- Birthdays of idols in groups you follow show in **This week** and, if you turn them on, in notifications. Idols are also in **Search**.
+
+**Data.** `scripts/build_idols.py` builds `data/idols/` from Wikidata (facts, CC0), English Wikipedia (introductions, CC BY-SA 4.0, credited on each page) and Wikimedia Commons (photos, with author and license). It runs in the publish workflow once a week, or right away when `data/idols/overrides.json` changes, and keeps the last good data if a source fails. Profiles are split into 64 files so a page only loads what it needs. Content is limited to public career facts.
+
+**Adding and fixing info.** Open sources rarely have positions, MBTI or fandom names. Add them two ways:
+- On any profile, **Add info or fix something** saves your edit to your account (it syncs between devices) and shows it right away, marked “your edit”.
+- To publish edits for everyone, use **Copy as overrides** at the bottom of the directory and paste the entries into `data/idols/overrides.json`, keyed by Wikidata id (`Q…`) or by English name. Any field there replaces the source value.
+
+Tests: `python3 scripts/test_build_idols.py` and `node tests/idols-data.test.js`.
+
 ## Movies and Anime
 
 Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
