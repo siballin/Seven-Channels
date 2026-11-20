@@ -410,6 +410,15 @@ function idolsEditor(record, kind, onSaved) {
   return box;
 }
 
+// Wikidata lists agencies and overseas record labels together; Korean companies are shown as the agency.
+function idolsAgencies(record) {
+  const current = record.agencies.filter((agency) => !agency.end);
+  const korean = current.filter((agency) => agency.korean);
+  const agencies = (korean.length ? korean : current).map((agency) => agency.name);
+  const labels = korean.length ? current.filter((agency) => !agency.korean).map((agency) => agency.name) : [];
+  return { agencies: agencies.length ? agencies : record.agencies.map((agency) => agency.name).slice(-1), labels };
+}
+
 function idolsBack() {
   const link = element("a", "idol-back", "← Idol directory");
   link.href = "#kpop/idols";
@@ -444,7 +453,7 @@ async function idolsPersonPage(container, id) {
     item.append(link, element("small", "", idolsYears(membership.start, membership.end)));
     groupList.append(item);
   }
-  const agencies = record.agencies.filter((agency) => !agency.end).map((agency) => agency.name);
+  const { agencies, labels } = idolsAgencies(record);
   page.append(idolsFacts([
     ["Birth name", [record.birthName, record.birthNameEn && record.birthNameEn !== record.birthName ? record.birthNameEn : ""].filter(Boolean).join(" · ")],
     ["Born", [idolsDate(record.birth), record.birthplace].filter(Boolean).join(", ")],
@@ -455,7 +464,8 @@ async function idolsPersonPage(container, id) {
     ["MBTI", record.mbti, mine.has("mbti")],
     ["Occupation", record.occupations],
     ["Debut", idolsDate(record.debut)],
-    ["Agency", agencies.length ? agencies : record.agencies.map((agency) => agency.name).slice(-1)],
+    ["Agency", agencies],
+    ["Labels", labels],
     ["Groups", record.groups.length ? groupList : ""],
     ["Your note", record.note, mine.has("note")]
   ]));
@@ -497,7 +507,7 @@ async function idolsGroupPage(container, id) {
     record.disbanded ? `Active ${idolsYears(record.debut, record.disbanded)}` : record.debut ? `Debuted ${idolsDate(record.debut)}` : "",
     current.length ? `${current.length} member${current.length === 1 ? "" : "s"}` : ""
   ], [idolsFollowButton(names)]));
-  const agencies = record.agencies.filter((agency) => !agency.end).map((agency) => agency.name);
+  const { agencies, labels } = idolsAgencies(record);
   const parentLinks = element("span");
   record.parents.forEach((parent, position) => {
     const link = element("a", "", parent.name);
@@ -514,7 +524,8 @@ async function idolsGroupPage(container, id) {
     ["Debut", idolsDate(record.debut)],
     ["Disbanded", idolsDate(record.disbanded)],
     ["Fandom", record.fandom, mine.has("fandom")],
-    ["Agency", agencies.length ? agencies : record.agencies.map((agency) => agency.name).slice(-1)],
+    ["Agency", agencies],
+    ["Labels", labels],
     ["Former agencies", record.agencies.filter((agency) => agency.end).map((agency) => `${agency.name} (${idolsYears(agency.start, agency.end)})`)],
     ["Country", record.country],
     ["Part of", record.parents.length ? parentLinks : ""],

@@ -29,7 +29,7 @@ def entity(qid, en, ko="", claims=None, enwiki="", aliases=()):
 
 ENTITIES = {
     "Q1": entity("Q1", "aespa", "에스파", {
-        "P2031": [date("+2020-11-17T00:00:00Z")], "P264": [{**item("Q90"), "qualifiers": {}}], "P18": [text("Aespa 2024.jpg")],
+        "P2031": [date("+2020-11-17T00:00:00Z")], "P264": [item("Q95"), {**item("Q90"), "qualifiers": {}}], "P18": [text("Aespa 2024.jpg")],
         "P434": [text("dbb3c1a7-0a4c-4e2b-9bcd-7e4e1d6a1a11")], "P2003": [text("aespa_official")], "P495": [item("Q884")]}, "Aespa"),
     "Q2": entity("Q2", "aespa sub-unit", "", {"P361": [item("Q1")]}),
     "Q10": entity("Q10", "Karina", "카리나", {
@@ -37,10 +37,12 @@ ENTITIES = {
         "P19": [item("Q91")], "P27": [item("Q884")], "P106": [item("Q177220"), item("Q5716684")],
         "P2048": [text({"amount": "+168", "unit": "http://www.wikidata.org/entity/Q174728"})],
         "P264": [item("Q90")], "P18": [text("Karina 2024.jpg")], "P463": [item("Q1")]}, "Karina (singer)", aliases=["Yu Ji-min"]),
-    "Q11": entity("Q11", "Giselle", "지젤", {"P569": [date("+2000-10-30T00:00:00Z")], "P27": [item("Q17")]}),
+    "Q11": {**entity("Q11", "", "지젤", {"P569": [date("+2000-10-30T00:00:00Z")], "P27": [item("Q17")]}), "labels": {"ko": {"value": "지젤"}, "mul": {"value": "Giselle\u200e"}}},
+    "Q3": entity("Q3", "XG", "", {}),
+    "Q30": entity("Q30", "", "", {}, "Jurin (singer)"),
     "Q12": entity("Q12", "Former Member", "", {"P569": [date("+1999-00-00T00:00:00Z", 9)]}),
     "Q20": entity("Q20", "IU", "아이유", {"P569": [date("+1993-05-16T00:00:00Z")], "P2031": [date("+2008-09-18T00:00:00Z")]}, "IU (singer)"),
-    "Q90": entity("Q90", "SM Entertainment"), "Q91": entity("Q91", "Anyang"), "Q884": entity("Q884", "South Korea"), "Q17": entity("Q17", "Japan"),
+    "Q90": entity("Q90", "SM Entertainment", claims={"P17": [item("Q884")]}), "Q95": entity("Q95", "Capitol Records", claims={"P17": [item("Q30x")]}), "Q91": entity("Q91", "Anyang"), "Q884": entity("Q884", "South Korea"), "Q17": entity("Q17", "Japan"),
     "Q177220": entity("Q177220", "singer"), "Q5716684": entity("Q5716684", "dancer"),
 }
 
@@ -49,7 +51,11 @@ def fetcher(url, params):
     if url == build_idols.SPARQL:
         query = params["query"]
         g = lambda qid: {"type": "uri", "value": f"http://www.wikidata.org/entity/{qid}"}  # noqa: E731
-        if "?start" in query:
+        if "VALUES ?name" in query:
+            rows = [{"g": g("Q3")}] if '"XG"@en' in query else []
+        elif "VALUES ?g" in query:
+            rows = [{"g": g("Q3"), "p": g("Q30"), "start": {"value": "2022-01-01T00:00:00Z"}}]
+        elif "?start" in query:
             rows = [{"g": g("Q1"), "p": g("Q10"), "start": {"value": "2020-01-01T00:00:00Z"}},
                     {"g": g("Q1"), "p": g("Q11")},
                     {"g": g("Q1"), "p": g("Q12"), "start": {"value": "2019-01-01T00:00:00Z"}, "end": {"value": "2021-01-01T00:00:00Z"}}]
@@ -78,7 +84,9 @@ def main():
     assert aespa["ko"] == "에스파" and aespa["debut"] == "2020-11-17", aespa
     assert [member["name"] for member in aespa["members"]] == ["Karina", "Giselle", "Former Member"], aespa["members"]
     assert aespa["members"][2]["end"] == "2021"
-    assert aespa["agencies"][0]["name"] == "SM Entertainment"
+    assert [agency["name"] for agency in aespa["agencies"]] == ["SM Entertainment", "Capitol Records"], aespa["agencies"]
+    assert aespa["agencies"][0]["korean"] and not aespa["agencies"][1]["korean"]
+    assert people["Q11"]["name"] == "Giselle", people["Q11"]["name"]  # multilingual label, invisible mark removed
     assert aespa["photo"]["author"] == "Photographer" and aespa["photo"]["license"] == "CC BY 4.0"
     assert aespa["bio"]["text"].startswith("Aespa is a South Korean girl group"), aespa["bio"]
     assert aespa["subunits"] == [{"id": "Q2", "name": "aespa sub-unit"}]
@@ -96,13 +104,15 @@ def main():
     with tempfile.TemporaryDirectory() as folder:
         build_idols.OUT = Path(folder)
         build_idols.OVERRIDES = Path(folder) / "overrides.json"
-        build_idols.OVERRIDES.write_text(json.dumps({"groups": {"AESPA": {"fandom": "MY"}}, "people": {"Q10": {"positions": ["Leader"], "height": 167}}}))
+        build_idols.OVERRIDES.write_text(json.dumps({"includeGroups": ["XG"], "groups": {"AESPA": {"fandom": "MY", "removeMembers": ["former member"]}}, "people": {"Q10": {"positions": ["Leader"], "height": 167}}}))
         groups, people = build_idols.build(fetcher=fetcher, log=lambda *_: None)
         assert groups["Q1"]["fandom"] == "MY" and groups["Q1"]["edited"] == ["fandom"]
+        assert [member["name"] for member in groups["Q1"]["members"]] == ["Karina", "Giselle"]
+        assert groups["Q3"]["members"][0]["name"] == "Jurin"  # included by name; English Wikipedia title as the name
         assert people["Q10"]["positions"] == ["Leader"] and people["Q10"]["height"] == 167
         build_idols.write(groups, people, now="2026-11-20T00:00:00+00:00")
         index = json.loads((Path(folder) / "index.json").read_text())
-        assert {row["id"] for row in index["groups"]} == {"Q1", "Q2"}
+        assert {row["id"] for row in index["groups"]} == {"Q1", "Q2", "Q3"}
         karina_row = next(row for row in index["people"] if row["id"] == "Q10")
         assert karina_row["g"] == ["Q1"] and karina_row["k"] == "카리나" and karina_row["p"].startswith("https://upload.wikimedia.org/")
         shard = json.loads((Path(folder) / "people" / f"{10 % 64:02d}.json").read_text())

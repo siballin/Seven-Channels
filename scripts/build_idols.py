@@ -55,6 +55,18 @@ MEMBERS_QUERY = f"""SELECT DISTINCT ?g ?p ?start ?end WHERE {{
   {{ ?g p:P527 ?s . ?s ps:P527 ?p . OPTIONAL {{ ?s pq:P580 ?start }} OPTIONAL {{ ?s pq:P582 ?end }} }}
   ?p wdt:P31 wd:Q5 .
 }}"""
+# Groups added by name in overrides.json ("includeGroups"), e.g. acts Wikidata doesn't tag as K-pop.
+EXTRA_GROUPS_QUERY = """SELECT DISTINCT ?g WHERE {{
+  VALUES ?name {{ {names} }}
+  ?g rdfs:label ?name ; wdt:P31/wdt:P279* wd:Q215380 .
+}}"""
+EXTRA_MEMBERS_QUERY = """SELECT DISTINCT ?g ?p ?start ?end WHERE {{
+  VALUES ?g {{ {ids} }}
+  {{ ?p p:P463 ?s . ?s ps:P463 ?g . OPTIONAL {{ ?s pq:P580 ?start }} OPTIONAL {{ ?s pq:P582 ?end }} }}
+  UNION
+  {{ ?g p:P527 ?s . ?s ps:P527 ?p . OPTIONAL {{ ?s pq:P580 ?start }} OPTIONAL {{ ?s pq:P582 ?end }} }}
+  ?p wdt:P31 wd:Q5 .
+}}"""
 SOLOISTS_QUERY = f"""SELECT DISTINCT ?p WHERE {{
   ?p wdt:P31 wd:Q5 ; wdt:P136 wd:{KPOP} .
 }}"""
@@ -106,7 +118,7 @@ def get_entities(ids, fetcher=None, props="labels|aliases|claims|sitelinks", pau
     out = {}
     for batch in chunks(sorted(qid for qid in set(ids) if re.fullmatch(r"Q\d+", qid or "")), 50):
         params = {"action": "wbgetentities", "ids": "|".join(batch), "props": props,
-                  "languages": "en|ko", "sitefilter": "enwiki|kowiki", "format": "json"}
+                  "languages": "en|ko|mul", "sitefilter": "enwiki|kowiki", "format": "json"}
         for attempt in range(6):
             data = fetch_json(WIKIDATA_API, params, fetcher)
             error = data.get("error")
@@ -180,8 +192,17 @@ def qualifier_date(claim, prop):
     return ""
 
 
+INVISIBLE = re.compile(r"[\u200b-\u200f\u2060\ufeff]")
+
+
 def label(entity, lang="en"):
-    return ((entity.get("labels") or {}).get(lang) or {}).get("value", "")
+    return INVISIBLE.sub("", ((entity.get("labels") or {}).get(lang) or {}).get("value", "")).strip()
+
+
+def display_name(entity):
+    """English label, else the multilingual label, else the English Wikipedia title, else Hangul."""
+    title = re.sub(r"\s*\([^)]*\)$", "", sitelink(entity, "enwiki"))
+    return label(entity) or label(entity, "mul") or INVISIBLE.sub("", title).strip() or label(entity, "ko")
 
 
 def monolingual(entity, prop, lang):
@@ -305,8 +326,9 @@ def load_overrides():
     try:
         data = json.loads(OVERRIDES.read_text())
     except (OSError, ValueError):
-        return {"people": {}, "groups": {}}
-    return {"people": data.get("people") or {}, "groups": data.get("groups") or {}}
+        return {"people": {}, "groups": {}, "includeGroups": []}
+    return {"people": data.get("people") or {}, "groups": data.get("groups") or {},
+            "includeGroups": [name for name in data.get("includeGroups") or [] if isinstance(name, str) and name.strip()]}
 
 
 def apply_override(record, overrides, kind):
@@ -316,10 +338,14 @@ def apply_override(record, overrides, kind):
     if extra is None:
         extra = next((value for key, value in table.items() if not key.startswith("_") and key.lower() == record["name"].lower()), None)
     if isinstance(extra, dict):
+        # removeMembers: ids or names of people wrongly listed in a group on Wikidata.
+        remove = {str(item).lower() for item in extra.get("removeMembers") or []}
+        if remove and "members" in record:
+            record["members"] = [member for member in record["members"] if member["id"].lower() not in remove and member["name"].lower() not in remove]
         for key, value in extra.items():
-            if not key.startswith("_"):
+            if not key.startswith("_") and key != "removeMembers":
                 record[key] = value
-        record["edited"] = sorted(key for key in extra if not key.startswith("_"))
+        record["edited"] = sorted(key for key in extra if not key.startswith("_") and key != "removeMembers")
     return record
 
 
@@ -333,6 +359,15 @@ def build(fetcher=None, limit=None, log=print):
         memberships.append({"group": qid_of(row["g"]["value"]), "person": qid_of(row["p"]["value"]),
                             "start": sparql_date(row.get("start")), "end": sparql_date(row.get("end"))})
         group_ids.add(memberships[-1]["group"])
+    overrides = load_overrides()
+    if overrides["includeGroups"]:
+        names = " ".join(json.dumps(name) + "@en" for name in overrides["includeGroups"])
+        extra = {qid_of(row["g"]["value"]) for row in sparql(EXTRA_GROUPS_QUERY.format(names=names), fetcher)} - group_ids
+        if extra:
+            for row in sparql(EXTRA_MEMBERS_QUERY.format(ids=" ".join(f"wd:{qid}" for qid in sorted(extra))), fetcher):
+                memberships.append({"group": qid_of(row["g"]["value"]), "person": qid_of(row["p"]["value"]),
+                                    "start": sparql_date(row.get("start")), "end": sparql_date(row.get("end"))})
+            group_ids |= extra
     soloist_ids = {qid_of(row["p"]["value"]) for row in sparql(SOLOISTS_QUERY, fetcher)}
     person_ids = {item["person"] for item in memberships} | soloist_ids
     if limit:
@@ -353,8 +388,15 @@ def build(fetcher=None, limit=None, log=print):
             value = value_of(claim)
             if isinstance(value, dict) and value.get("id"):
                 referenced.add(value["id"])
-    labels = {key: label(value) or label(value, "ko") for key, value in get_entities(referenced - set(groups) - set(people), fetcher, props="labels").items()}
-    labels.update({key: label(value) or label(value, "ko") for key, value in {**groups, **people}.items()})
+    labels = {key: display_name(value) for key, value in get_entities(referenced - set(groups) - set(people), fetcher, props="labels").items()}
+    labels.update({key: display_name(value) for key, value in {**groups, **people}.items()})
+    # Agencies vs. overseas record labels: Wikidata lists both under P264; Korean companies (country P17) count as agencies.
+    agency_ids = {item["id"] for entity in list(groups.values()) + list(people.values()) for item in agencies(entity)}
+    korean = {key for key, value in get_entities(agency_ids, fetcher, props="claims").items() if "Q884" in item_ids(value, "P17")}
+
+    def agency_list(entity):
+        found = [{"name": labels.get(item["id"], ""), "korean": item["id"] in korean, **item} for item in agencies(entity) if labels.get(item["id"])]
+        return sorted(found, key=lambda item: not item["korean"])
 
     log("Fetching Wikipedia introductions and Commons photos…")
     titles = [sitelink(entity, "enwiki") for entity in list(groups.values()) + list(people.values()) if sitelink(entity, "enwiki")]
@@ -370,7 +412,6 @@ def build(fetcher=None, limit=None, log=print):
         title = sitelink(entity, "enwiki")
         return {"text": bios[title], "title": title, "url": f"https://en.wikipedia.org/wiki/{quote(title.replace(' ', '_'))}"} if title in bios else None
 
-    overrides = load_overrides()
     by_group = {}
     by_person = {}
     for item in memberships:
@@ -380,19 +421,19 @@ def build(fetcher=None, limit=None, log=print):
 
     group_records = {}
     for qid, entity in groups.items():
-        name = label(entity) or label(entity, "ko")
+        name = display_name(entity)
         if not name:
             continue
         parents = [parent for parent in item_ids(entity, "P361") + item_ids(entity, "P463") if parent in groups and parent != qid]
         members = []
-        for person, item in sorted(by_group.get(qid, {}).items(), key=lambda pair: (bool(pair[1]["end"]), pair[1]["start"] or "9999", label(people[pair[0]]))):
-            members.append({"id": person, "name": label(people[person]) or label(people[person], "ko"), "start": item["start"], "end": item["end"]})
+        for person, item in sorted(by_group.get(qid, {}).items(), key=lambda pair: (bool(pair[1]["end"]), pair[1]["start"] or "9999", display_name(people[pair[0]]))):
+            members.append({"id": person, "name": display_name(people[person]), "start": item["start"], "end": item["end"]})
         record = {
             "id": qid, "name": name, "ko": label(entity, "ko") if label(entity, "ko") != name else "",
             "aliases": english_aliases(entity),
             "debut": first_date(entity, "P2031") or first_date(entity, "P571"),
             "disbanded": first_date(entity, "P2032") or first_date(entity, "P576"),
-            "agencies": [{"name": labels.get(item["id"], ""), **item} for item in agencies(entity) if labels.get(item["id"])],
+            "agencies": agency_list(entity),
             "country": [labels[item] for item in item_ids(entity, "P495") if labels.get(item)],
             "parents": [{"id": parent, "name": labels.get(parent, "")} for parent in parents],
             "members": members, "links": links(entity), "photo": photo(entity), "bio": bio(entity),
@@ -403,7 +444,7 @@ def build(fetcher=None, limit=None, log=print):
 
     person_records = {}
     for qid, entity in people.items():
-        name = label(entity) or label(entity, "ko")
+        name = display_name(entity)
         if not name:
             continue
         memberships_of = [{"id": group, "name": group_records[group]["name"], "start": item["start"], "end": item["end"]}
@@ -420,7 +461,7 @@ def build(fetcher=None, limit=None, log=print):
             "height": height_cm(entity),
             "occupations": [labels[item] for item in item_ids(entity, "P106") if labels.get(item)][:6],
             "debut": first_date(entity, "P2031"),
-            "agencies": [{"name": labels.get(item["id"], ""), **item} for item in agencies(entity) if labels.get(item["id"])],
+            "agencies": agency_list(entity),
             "groups": memberships_of, "links": links(entity), "photo": photo(entity), "bio": bio(entity),
         }
         person_records[qid] = apply_override(record, overrides, "people")
@@ -451,7 +492,7 @@ def write(group_records, person_records, now=None):
         "groups": sorted(({
             "id": record["id"], "n": record["name"], "k": record["ko"], "a": record["aliases"][:4], "d": record["debut"],
             "x": bool(record["disbanded"]), "p": (record["photo"] or {}).get("url", ""),
-            "m": len([member for member in record["members"] if not member["end"]]), "ag": [agency["name"] for agency in record["agencies"] if not agency["end"]][:2],
+            "m": len([member for member in record["members"] if not member["end"]]), "ag": ([agency["name"] for agency in record["agencies"] if not agency["end"] and agency.get("korean")] or [agency["name"] for agency in record["agencies"] if not agency["end"]])[:2],
         } for record in group_records.values()), key=lambda row: row["n"].lower()),
     }
     (OUT / "index.json").write_text(json.dumps(index, ensure_ascii=False, separators=(",", ":")))

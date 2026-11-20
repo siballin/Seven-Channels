@@ -1,5 +1,5 @@
 name: Build idol data (temporary)
-# run 4
+# run 5
 on:
   push:
     branches: [claude/dazzling-hamilton-4jcfnt]
@@ -25,7 +25,7 @@ jobs:
           print("groups", len(index["groups"]), "people", len(index["people"]))
           print("with photo", sum(1 for p in index["people"] if p["p"]), "with birth", sum(1 for p in index["people"] if p["b"]))
           print("fandom matched", sorted(g["name"] for g in groups.values() if g.get("fandom")))
-          for name in ["aespa", "BTS", "Blackpink", "Twice", "Le Sserafim", "XG", "tripleS", "NCT", "Seventeen", "(G)I-dle", "i-dle"]:
+          for name in ["XG", "Stray Kids", "aespa", "BTS", "Blackpink", "Twice", "Le Sserafim", "XG", "tripleS", "NCT", "Seventeen", "(G)I-dle", "i-dle"]:
               hits = [g for g in groups.values() if g["name"].lower() == name.lower()]
               print(name, [(g["id"], g["name"], g["debut"], len(g["members"]), [m["name"] for m in g["members"]][:12]) for g in hits])
           PY

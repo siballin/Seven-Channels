@@ -1,5 +1,8 @@
 {
-  "_about": "Your additions and fixes. Key by Wikidata id (Q123) or English name (case-insensitive). Any field here replaces the source value; common extra fields: positions (list), fandom, mbti, height (cm), note. Rebuild: python3 scripts/build_idols.py --force",
+  "_about": "Your additions and fixes. Key by Wikidata id (Q123) or English name (case-insensitive). Any field replaces the source value; common extra fields: positions (list), fandom, mbti, height (cm), note. Groups also take removeMembers (names or ids wrongly listed on Wikidata). includeGroups adds groups by English name that Wikidata doesn't tag as K-pop. Rebuild: python3 scripts/build_idols.py --force",
+  "includeGroups": [
+    "XG"
+  ],
   "groups": {
     "BTS": {
       "fandom": "ARMY"
@@ -14,7 +17,10 @@
       "fandom": "MY"
     },
     "Stray Kids": {
-      "fandom": "STAY"
+      "fandom": "STAY",
+      "removeMembers": [
+        "Rafa Polinesio"
+      ]
     },
     "Seventeen": {
       "fandom": "CARAT"
