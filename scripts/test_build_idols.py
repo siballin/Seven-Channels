@@ -52,7 +52,9 @@ def fetcher(url, params):
         query = params["query"]
         g = lambda qid: {"type": "uri", "value": f"http://www.wikidata.org/entity/{qid}"}  # noqa: E731
         if "VALUES ?name" in query:
-            rows = [{"g": g("Q3")}] if '"8dfe067c-ae90-472e-80f2-fcee9be4e158"' in query and '"XG"@en' not in query else []
+            rows = []
+        elif "VALUES ?mbid" in query:
+            rows = [{"g": g("Q3")}] if '"8dfe067c-ae90-472e-80f2-fcee9be4e158"' in query else []
         elif "VALUES ?g" in query:
             rows = [{"g": g("Q3"), "p": g("Q30"), "start": {"value": "2022-01-01T00:00:00Z"}}]
         elif "?start" in query:

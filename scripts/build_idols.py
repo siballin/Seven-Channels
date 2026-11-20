@@ -57,9 +57,15 @@ MEMBERS_QUERY = f"""SELECT DISTINCT ?g ?p ?start ?end WHERE {{
 }}"""
 # Groups added by name in overrides.json ("includeGroups"), e.g. acts Wikidata doesn't tag as K-pop.
 # Entries are English names, Wikidata ids or MusicBrainz artist ids.
-EXTRA_GROUPS_QUERY = """SELECT DISTINCT ?g WHERE {{
-  {{ VALUES ?name {{ {names} }} ?g rdfs:label ?name ; wdt:P31/wdt:P279* wd:Q215380 . }}
-  UNION {{ VALUES ?mbid {{ {mbids} }} ?g wdt:P434 ?mbid . }}
+# (Two small queries: one combined query with a subclass path times out.)
+EXTRA_BY_NAME_QUERY = """SELECT DISTINCT ?g WHERE {{
+  VALUES ?name {{ {names} }}
+  VALUES ?type {{ wd:Q215380 wd:Q641066 wd:Q216337 wd:Q2088357 }}
+  ?g rdfs:label ?name ; wdt:P31 ?type .
+}}"""
+EXTRA_BY_MBID_QUERY = """SELECT DISTINCT ?g WHERE {{
+  VALUES ?mbid {{ {mbids} }}
+  ?g wdt:P434 ?mbid .
 }}"""
 EXTRA_MEMBERS_QUERY = """SELECT DISTINCT ?g ?p ?start ?end WHERE {{
   VALUES ?g {{ {ids} }}
@@ -364,9 +370,13 @@ def build(fetcher=None, limit=None, log=print):
     if overrides["includeGroups"]:
         wanted = overrides["includeGroups"]
         mbid = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
-        names = " ".join(json.dumps(name) + "@en" for name in wanted if not mbid.fullmatch(name) and not re.fullmatch(r"Q\d+", name)) or '""'
-        mbids = " ".join(json.dumps(name) for name in wanted if mbid.fullmatch(name)) or '""'
-        extra = {qid_of(row["g"]["value"]) for row in sparql(EXTRA_GROUPS_QUERY.format(names=names, mbids=mbids), fetcher)}
+        names = " ".join(json.dumps(name) + "@en" for name in wanted if not mbid.fullmatch(name) and not re.fullmatch(r"Q\d+", name))
+        mbids = " ".join(json.dumps(name) for name in wanted if mbid.fullmatch(name))
+        extra = set()
+        if names:
+            extra |= {qid_of(row["g"]["value"]) for row in sparql(EXTRA_BY_NAME_QUERY.format(names=names), fetcher)}
+        if mbids:
+            extra |= {qid_of(row["g"]["value"]) for row in sparql(EXTRA_BY_MBID_QUERY.format(mbids=mbids), fetcher)}
         extra = (extra | {name for name in wanted if re.fullmatch(r"Q\d+", name)}) - group_ids
         if extra:
             for row in sparql(EXTRA_MEMBERS_QUERY.format(ids=" ".join(f"wd:{qid}" for qid in sorted(extra))), fetcher):
