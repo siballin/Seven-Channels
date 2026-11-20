@@ -38,7 +38,8 @@ ENTITIES = {
         "P2048": [text({"amount": "+168", "unit": "http://www.wikidata.org/entity/Q174728"})],
         "P264": [item("Q90")], "P18": [text("Karina 2024.jpg")], "P463": [item("Q1")]}, "Karina (singer)", aliases=["Yu Ji-min"]),
     "Q11": {**entity("Q11", "", "지젤", {"P569": [date("+2000-10-30T00:00:00Z")], "P27": [item("Q17")]}), "labels": {"ko": {"value": "지젤"}, "mul": {"value": "Giselle\u200e"}}},
-    "Q3": entity("Q3", "XG", "", {}),
+    "Q3": entity("Q3", "XG", "", {"P527": [{**item("Q31"), "qualifiers": {"P580": [{"datavalue": {"value": {"time": "+2022-03-18T00:00:00Z", "precision": 11}}}]}}]}),
+    "Q31": entity("Q31", "Cocona", "", {}),
     "Q30": entity("Q30", "", "", {}, "Jurin (singer)"),
     "Q12": entity("Q12", "Former Member", "", {"P569": [date("+1999-00-00T00:00:00Z", 9)]}),
     "Q20": entity("Q20", "IU", "아이유", {"P569": [date("+1993-05-16T00:00:00Z")], "P2031": [date("+2008-09-18T00:00:00Z")]}, "IU (singer)"),
@@ -55,8 +56,8 @@ def fetcher(url, params):
             rows = []
         elif "VALUES ?mbid" in query:
             rows = [{"g": g("Q3")}] if '"8dfe067c-ae90-472e-80f2-fcee9be4e158"' in query else []
-        elif "VALUES ?g" in query:
-            rows = [{"g": g("Q3"), "p": g("Q30"), "start": {"value": "2022-01-01T00:00:00Z"}}]
+        elif "ps:P463 wd:Q3 " in query:
+            rows = [{"p": g("Q30"), "start": {"value": "2022-01-01T00:00:00Z"}}]
         elif "?start" in query:
             rows = [{"g": g("Q1"), "p": g("Q10"), "start": {"value": "2020-01-01T00:00:00Z"}},
                     {"g": g("Q1"), "p": g("Q11")},
@@ -110,7 +111,7 @@ def main():
         groups, people = build_idols.build(fetcher=fetcher, log=lambda *_: None)
         assert groups["Q1"]["fandom"] == "MY" and groups["Q1"]["edited"] == ["fandom"]
         assert [member["name"] for member in groups["Q1"]["members"]] == ["Karina", "Giselle"]
-        assert groups["Q3"]["members"][0]["name"] == "Jurin"  # included by name; English Wikipedia title as the name
+        assert [member["name"] for member in groups["Q3"]["members"]] == ["Cocona", "Jurin"], groups["Q3"]["members"]  # English Wikipedia title as a name; P527 members
         assert people["Q10"]["positions"] == ["Leader"] and people["Q10"]["height"] == 167
         build_idols.write(groups, people, now="2026-11-20T00:00:00+00:00")
         index = json.loads((Path(folder) / "index.json").read_text())

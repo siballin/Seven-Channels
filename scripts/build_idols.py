@@ -67,12 +67,11 @@ EXTRA_BY_MBID_QUERY = """SELECT DISTINCT ?g WHERE {{
   VALUES ?mbid {{ {mbids} }}
   ?g wdt:P434 ?mbid .
 }}"""
-EXTRA_MEMBERS_QUERY = """SELECT DISTINCT ?g ?p ?start ?end WHERE {{
-  VALUES ?g {{ {ids} }}
-  {{ ?p p:P463 ?s . ?s ps:P463 ?g . OPTIONAL {{ ?s pq:P580 ?start }} OPTIONAL {{ ?s pq:P582 ?end }} }}
-  UNION
-  {{ ?g p:P527 ?s . ?s ps:P527 ?p . OPTIONAL {{ ?s pq:P580 ?start }} OPTIONAL {{ ?s pq:P582 ?end }} }}
-  ?p wdt:P31 wd:Q5 .
+# One group at a time and no UNION: the planner handles the combined form badly and times out.
+# The group's own "has part" (P527) list is read from its entity instead.
+EXTRA_MEMBERS_QUERY = """SELECT DISTINCT ?p ?start ?end WHERE {{
+  ?p p:P463 ?s . ?s ps:P463 wd:{qid} .
+  OPTIONAL {{ ?s pq:P580 ?start }} OPTIONAL {{ ?s pq:P582 ?end }}
 }}"""
 SOLOISTS_QUERY = f"""SELECT DISTINCT ?p WHERE {{
   ?p wdt:P31 wd:Q5 ; wdt:P136 wd:{KPOP} .
@@ -381,11 +380,15 @@ def build(fetcher=None, limit=None, log=lambda *args: print(*args, flush=True)):
         if mbids:
             extra |= {qid_of(row["g"]["value"]) for row in sparql(EXTRA_BY_MBID_QUERY.format(mbids=mbids), fetcher)}
         extra = (extra | {name for name in wanted if re.fullmatch(r"Q\d+", name)}) - group_ids
-        if extra:
-            for row in sparql(EXTRA_MEMBERS_QUERY.format(ids=" ".join(f"wd:{qid}" for qid in sorted(extra))), fetcher):
-                memberships.append({"group": qid_of(row["g"]["value"]), "person": qid_of(row["p"]["value"]),
+        for qid in sorted(extra):
+            for row in sparql(EXTRA_MEMBERS_QUERY.format(qid=qid), fetcher):
+                memberships.append({"group": qid, "person": qid_of(row["p"]["value"]),
                                     "start": sparql_date(row.get("start")), "end": sparql_date(row.get("end"))})
-            group_ids |= extra
+            for claim in preferred(get_entities([qid], fetcher).get(qid, {}), "P527"):
+                value = value_of(claim)
+                if isinstance(value, dict) and value.get("id"):
+                    memberships.append({"group": qid, "person": value["id"], "start": qualifier_date(claim, "P580")[:4], "end": qualifier_date(claim, "P582")[:4]})
+        group_ids |= extra
     soloist_ids = {qid_of(row["p"]["value"]) for row in sparql(SOLOISTS_QUERY, fetcher)}
     person_ids = {item["person"] for item in memberships} | soloist_ids
     if limit:
