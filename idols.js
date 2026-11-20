@@ -659,9 +659,13 @@ function idolsDirectoryPage(container, index) {
 
   // Birthdays in the next 7 days, for idols in active groups or with a photo (so it isn't a wall of unknowns).
   const groupsById = new Map(index.groups.map((group) => [group.id, group]));
-  const soon = index.people.map((row) => ({ row, days: idolsBirthdayIn(row.b) }))
-    .filter(({ row, days }) => days !== null && days <= 7 && ((row.g || []).some((id) => groupsById.get(id) && !groupsById.get(id).x) || row.p))
-    .sort((a, b) => a.days - b.days || a.row.n.localeCompare(b.row.n)).slice(0, 16);
+  // Members of groups you follow first, then idols with a photo (usually the better-known ones).
+  const fold = (value) => idolsFold(value).replace(/\s*\(.*\)$/, "").trim();
+  const followed = new Set((typeof kpopArtistFollows !== "undefined" ? kpopArtistFollows : []).filter((artist) => artist.followed).map((artist) => fold(artist.name)));
+  const rank = (row) => (row.g || []).some((id) => followed.has(fold(groupsById.get(id)?.n))) || followed.has(fold(row.n)) ? 0 : row.p ? 1 : 2;
+  const soon = index.people.map((row) => ({ row, days: idolsBirthdayIn(row.b), rank: rank(row) }))
+    .filter(({ row, days, rank: level }) => days !== null && days <= 7 && level < 2 && (row.g || []).every((id) => !groupsById.get(id)?.x))
+    .sort((a, b) => a.rank - b.rank || a.days - b.days || a.row.n.localeCompare(b.row.n)).slice(0, 16);
   if (soon.length) {
     const strip = element("section", "idol-birthdays");
     strip.append(element("h3", "", "🎂 Birthdays this week"));
