@@ -103,9 +103,18 @@ def chunks(items, size):
 def get_entities(ids, fetcher=None, props="labels|aliases|claims|sitelinks", pause=0.2):
     """wbgetentities, 50 at a time."""
     out = {}
-    for batch in chunks(sorted(set(ids)), 50):
-        data = fetch_json(WIKIDATA_API, {"action": "wbgetentities", "ids": "|".join(batch), "props": props,
-                                         "languages": "en|ko", "sitefilter": "enwiki|kowiki", "format": "json", "maxlag": "5"}, fetcher)
+    for batch in chunks(sorted(qid for qid in set(ids) if re.fullmatch(r"Q\d+", qid or "")), 50):
+        params = {"action": "wbgetentities", "ids": "|".join(batch), "props": props,
+                  "languages": "en|ko", "sitefilter": "enwiki|kowiki", "format": "json", "maxlag": "5"}
+        for attempt in range(6):
+            data = fetch_json(WIKIDATA_API, params, fetcher)
+            error = data.get("error")
+            if not error:
+                break
+            # Wikidata asks bots to back off while its servers lag; anything else is a real error.
+            if error.get("code") != "maxlag" or attempt == 5:
+                raise RuntimeError(f"Wikidata error: {error.get('code')}: {error.get('info', '')[:200]}")
+            time.sleep(5 * (attempt + 1))
         out.update({key: value for key, value in (data.get("entities") or {}).items() if "missing" not in value})
         if not fetcher:
             time.sleep(pause)
@@ -326,6 +335,7 @@ def build(fetcher=None, limit=None, log=print):
 
     groups = get_entities(group_ids, fetcher)
     people = get_entities(person_ids, fetcher)
+    log(f"  details for {len(groups)} groups and {len(people)} people")
     # Sub-units: groups whose "part of" (P361) or "member of" is another K-pop group.
     referenced = set()
     for entity in list(groups.values()) + list(people.values()):
