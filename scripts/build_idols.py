@@ -105,7 +105,7 @@ def get_entities(ids, fetcher=None, props="labels|aliases|claims|sitelinks", pau
     out = {}
     for batch in chunks(sorted(qid for qid in set(ids) if re.fullmatch(r"Q\d+", qid or "")), 50):
         params = {"action": "wbgetentities", "ids": "|".join(batch), "props": props,
-                  "languages": "en|ko", "sitefilter": "enwiki|kowiki", "format": "json", "maxlag": "5"}
+                  "languages": "en|ko", "sitefilter": "enwiki|kowiki", "format": "json"}
         for attempt in range(6):
             data = fetch_json(WIKIDATA_API, params, fetcher)
             error = data.get("error")
