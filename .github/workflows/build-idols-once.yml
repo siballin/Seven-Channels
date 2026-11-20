@@ -1,5 +1,5 @@
 name: Build idol data (temporary)
-# run 3
+# run 4
 on:
   push:
     branches: [claude/dazzling-hamilton-4jcfnt]
@@ -36,4 +36,4 @@ jobs:
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add data/idols
           git commit -m "Idol data from Wikidata, Wikipedia and Commons" || exit 0
-          git push origin HEAD:claude/dazzling-hamilton-4jcfnt
+          git pull --rebase origin claude/dazzling-hamilton-4jcfnt && git push origin HEAD:claude/dazzling-hamilton-4jcfnt
