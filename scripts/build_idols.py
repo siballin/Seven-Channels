@@ -81,11 +81,11 @@ SOLOISTS_QUERY = f"""SELECT DISTINCT ?p WHERE {{
 
 # ---------- fetching ----------
 
-def fetch_json(url, params=None, fetcher=None, tries=5):
+def fetch_json(url, params=None, fetcher=None, tries=5, first_delay=2):
     if fetcher:
         return fetcher(url, params or {})
     full = f"{url}?{urlencode(params)}" if params else url
-    delay = 2
+    delay = first_delay
     for attempt in range(tries):
         try:
             request = Request(full, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
@@ -94,13 +94,16 @@ def fetch_json(url, params=None, fetcher=None, tries=5):
         except Exception as error:  # rate limits and timeouts: back off and retry
             if attempt == tries - 1:
                 raise
-            print(f"  retry after {error}", file=sys.stderr)
+            print(f"  retry in {delay}s after {error}", file=sys.stderr, flush=True)
             time.sleep(delay)
             delay *= 2
 
 
 def sparql(query, fetcher=None):
-    data = fetch_json(SPARQL, {"query": query, "format": "json"}, fetcher)
+    if not fetcher:
+        print(f"  query: {' '.join(query.split())[:90]}…", flush=True)
+    # The query service is often briefly overloaded (502/504); give it time.
+    data = fetch_json(SPARQL, {"query": query, "format": "json"}, fetcher, tries=6, first_delay=20)
     return data["results"]["bindings"]
 
 
@@ -358,7 +361,7 @@ def apply_override(record, overrides, kind):
 
 # ---------- build ----------
 
-def build(fetcher=None, limit=None, log=print):
+def build(fetcher=None, limit=None, log=lambda *args: print(*args, flush=True)):
     log("Finding K-pop groups and members on Wikidata…")
     group_ids = {qid_of(row["g"]["value"]) for row in sparql(GROUPS_QUERY, fetcher)}
     memberships = []
