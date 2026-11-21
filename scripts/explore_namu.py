@@ -1,6 +1,6 @@
-"""Temporary: inspect the newer Namu Wiki dumps on Hugging Face."""
+"""Temporary: can GitHub Actions read the Kpop Wiki (Fandom) API, and what do idol infoboxes hold?"""
 import json, re
-from urllib.parse import quote
+from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 UA = "SevenChannels/1.0 (personal static site; K-pop idol positions)"
@@ -12,23 +12,18 @@ def get(url):
     except Exception as e:
         return getattr(e, "code", "ERR"), str(e)[:300]
 
-for ds in ["butabutta/namuwiki-dumps", "wseo/namuwiki", "wseo/namuwiki_no_redirects"]:
-    print("\n==", ds)
-    status, body = get(f"https://huggingface.co/api/datasets/{ds}")
-    if status == 200:
-        meta = json.loads(body)
-        print("  modified", meta.get("lastModified"), "gated", meta.get("gated"), "license", (meta.get("cardData") or {}).get("license"))
-    status, body = get(f"https://huggingface.co/api/datasets/{ds}/tree/main?recursive=true")
-    print("  tree", status)
-    if status == 200:
-        for f in json.loads(body)[:40]:
-            print("   ", f.get("type"), f.get("path"), f.get("size"))
-    status, body = get(f"https://huggingface.co/datasets/{ds}/raw/main/README.md")
-    print("  README", status, body[:1200].replace("\n", " | "))
-    status, body = get(f"https://datasets-server.huggingface.co/first-rows?dataset={quote(ds)}&config=default&split=train")
-    print("  first-rows", status)
-    if status == 200:
-        data = json.loads(body)
-        print("   features", [f["name"] for f in data.get("features", [])])
-        for row in data.get("rows", [])[:2]:
-            print("   row", {k: (str(v)[:160]) for k, v in row["row"].items()})
+api = "https://kpop.fandom.com/api.php"
+status, body = get(api + "?" + urlencode({"action": "query", "meta": "siteinfo", "siprop": "rightsinfo|statistics", "format": "json"}))
+print("siteinfo", status, body[:400])
+for title in ["Karina", "Wonyoung", "Hanni", "Wonhee", "Ahyeon", "Jurin", "Felix", "Jimin"]:
+    status, body = get(api + "?" + urlencode({"action": "query", "prop": "revisions", "rvprop": "content", "rvslots": "main", "titles": title, "redirects": "1", "format": "json", "formatversion": "2"}))
+    if status != 200:
+        print(title, status, body[:200]); continue
+    pages = json.loads(body).get("query", {}).get("pages", [])
+    text = pages[0].get("revisions", [{}])[0].get("slots", {}).get("main", {}).get("content", "") if pages else ""
+    print("\n==", title, "->", pages[0].get("title") if pages else None, "len", len(text))
+    for line in text.splitlines():
+        if re.match(r"\s*\|\s*(position|mbti|group|label|agency|birth_?date|height)", line, re.I):
+            print("   ", line[:200])
+    if "mbti" in text.lower():
+        i = text.lower().index("mbti"); print("    mbti context:", text[max(0, i-80):i+120].replace("\n", " "))
