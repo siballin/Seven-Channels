@@ -3,7 +3,7 @@
  "sourceUrl": "https://huggingface.co/datasets/heegyu/namuwiki",
  "license": "CC BY-NC-SA 2.0 KR",
  "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/kr/",
- "importedAt": "2026-11-21T01:51:50+00:00",
+ "importedAt": "2026-11-21T01:54:40+00:00",
  "people": {
   "Q100314749": {
    "positionsKo": "메인보컬",
@@ -13,9 +13,9 @@
    "title": "영서(BAE173)"
   },
   "Q100493495": {
-   "positionsKo": "메인보컬]를 대표하는 메인보컬로서 멋진 활동을 기대합니다.”라고 언급되었다. 링크]",
+   "positionsKo": "메인보컬",
    "positions": [
-    "메인보컬]를 대표하는 메인보컬로서 멋진 활동을 기대합니다.”라고 언급되었다. 링크]"
+    "Main vocalist"
    ],
    "title": "니나(NiziU)"
   },
@@ -97,8 +97,7 @@
    "positionsKo": "서브보컬, 리드댄서 (WEi, 1THE9)",
    "positions": [
     "Sub vocalist",
-    "리드댄서 (WEi",
-    "1THE9)"
+    "Lead dancer"
    ],
    "title": "김준서(WEi)"
   },
@@ -343,7 +342,7 @@
    "positionsKo": "보컬, 댄스",
    "positions": [
     "Vocalist",
-    "댄스"
+    "Dancer"
    ],
    "title": "나고은"
   },
@@ -357,7 +356,7 @@
   "Q107559919": {
    "positionsKo": "댄스, 보컬",
    "positions": [
-    "댄스",
+    "Dancer",
     "Vocalist"
    ],
    "title": "도시(퍼플키스)"
@@ -365,7 +364,7 @@
   "Q107559920": {
    "positionsKo": "댄스, 보컬",
    "positions": [
-    "댄스",
+    "Dancer",
     "Vocalist"
    ],
    "title": "이레(퍼플키스)"
@@ -374,7 +373,7 @@
    "positionsKo": "보컬, 댄스",
    "positions": [
     "Vocalist",
-    "댄스"
+    "Dancer"
    ],
    "title": "채인"
   },
@@ -390,25 +389,25 @@
    "positionsKo": "랩, 댄스",
    "positions": [
     "Rapper",
-    "댄스"
+    "Dancer"
    ],
    "title": "유키(퍼플키스)"
   },
   "Q10775090": {
-   "positionsKo": "센터, 메인댄서, 서브보컬, 서브래퍼]에게 넘어가게 되었다.]",
+   "positionsKo": "센터, 메인댄서, 서브보컬, 서브래퍼",
    "positions": [
     "Center",
     "Main dancer",
     "Sub vocalist",
-    "서브래퍼]에게 넘어가게 되었다.]"
+    "Sub rapper"
    ],
    "mbti": "INFJ",
    "title": "카이(EXO)"
   },
   "Q10802388": {
-   "positionsKo": "리드래퍼]가 랩 파트가 줄고 보컬 파트가 많아지면서 서브래퍼에서 리드래퍼로 변경되었다.], 리드댄서",
+   "positionsKo": "리드래퍼, 리드댄서",
    "positions": [
-    "리드래퍼]가 랩 파트가 줄고 보컬 파트가 많아지면서 서브래퍼에서 리드래퍼로 변경되었다.]",
+    "Lead rapper",
     "Lead dancer"
    ],
    "title": "세훈"
@@ -436,18 +435,18 @@
    "title": "민영(브레이브걸스)"
   },
   "Q108261472": {
-   "positionsKo": "서브보컬, 메인래퍼] 탈퇴 후 유나와 함께 랩을 하게 되었다.]",
+   "positionsKo": "서브보컬, 메인래퍼",
    "positions": [
     "Sub vocalist",
-    "메인래퍼] 탈퇴 후 유나와 함께 랩을 하게 되었다.]"
+    "Main rapper"
    ],
    "title": "은지(브레이브걸스)"
   },
   "Q108261504": {
-   "positionsKo": "리드보컬, 리드래퍼] 탈퇴 후 은지와 함께 랩을 맡게 됨.]",
+   "positionsKo": "리드보컬, 리드래퍼",
    "positions": [
     "Lead vocalist",
-    "리드래퍼] 탈퇴 후 은지와 함께 랩을 맡게 됨.]"
+    "Lead rapper"
    ],
    "mbti": "ESFJ",
    "title": "유나(브레이브걸스)"
@@ -476,10 +475,9 @@
    "title": "피오"
   },
   "Q108935096": {
-   "positionsKo": "보컬] 활동시 센터, 서브보컬]",
+   "positionsKo": "보컬",
    "positions": [
-    "보컬] 활동시 센터",
-    "Sub vocalist"
+    "Vocalist"
    ],
    "title": "그린(레드스퀘어)"
   },
@@ -550,7 +548,7 @@
    "positionsKo": "보컬, 댄스",
    "positions": [
     "Vocalist",
-    "댄스"
+    "Dancer"
    ],
    "title": "종형"
   },
@@ -628,7 +626,7 @@
    "positionsKo": "보컬, 댄스",
    "positions": [
     "Vocalist",
-    "댄스"
+    "Dancer"
    ],
    "title": "종형"
   },
@@ -744,9 +742,9 @@
    "title": "김조한"
   },
   "Q12588834": {
-   "positionsKo": "리더]이가 탈퇴함으로써 리더가 됨.], 리드보컬",
+   "positionsKo": "리더, 리드보컬",
    "positions": [
-    "리더]이가 탈퇴함으로써 리더가 됨.]",
+    "Leader",
     "Lead vocalist"
    ],
    "title": "지훈(TRCNG)"
@@ -850,10 +848,24 @@
    ],
    "title": "유라"
   },
+  "Q12610817": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "이가이"
+  },
+  "Q12615793": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "정시운"
+  },
   "Q12616366": {
    "positionsKo": "바이올린",
    "positions": [
-    "바이올린"
+    "Violin"
    ],
    "title": "제이윤"
   },
@@ -867,7 +879,7 @@
   "Q12618529": {
    "positionsKo": "댄스, 보컬",
    "positions": [
-    "댄스",
+    "Dancer",
     "Vocalist"
    ],
    "mbti": "ENFP",
@@ -906,6 +918,14 @@
     "Lead vocalist"
    ],
    "title": "김동준(제국의아이들)"
+  },
+  "Q13428840": {
+   "positionsKo": "비주얼, 서브보컬",
+   "positions": [
+    "Visual",
+    "Sub vocalist"
+   ],
+   "title": "유지애"
   },
   "Q134315860": {
    "positionsKo": "메인 댄서, 랩, 보컬",
@@ -977,13 +997,11 @@
    "title": "태민"
   },
   "Q153638": {
-   "positionsKo": "리드댄서, 리드보컬, 서브래퍼] 활동 시에는 메인보컬, 리드래퍼, 리드댄서을 맡는다.]",
+   "positionsKo": "리드댄서, 리드보컬, 서브래퍼",
    "positions": [
     "Lead dancer",
     "Lead vocalist",
-    "서브래퍼] 활동 시에는 메인보컬",
-    "Lead rapper",
-    "리드댄서을 맡는다.]"
+    "Sub rapper"
    ],
    "title": "동해(슈퍼주니어)"
   },
@@ -1000,8 +1018,8 @@
    "positions": [
     "Leader",
     "Main vocalist",
-    "기타",
-    "키보드",
+    "Guitar",
+    "Keyboard",
     "Rapper"
    ],
    "title": "정용화"
@@ -1055,10 +1073,10 @@
    "title": "슬기(레드벨벳)"
   },
   "Q16071030": {
-   "positionsKo": "프로듀서, 리드보컬]보다 훨씬 많은 파트를 가져갈 정도이며 Happening은 거의 대부분의 파트를 혼자 부른다.], 메인래퍼",
+   "positionsKo": "프로듀서, 리드보컬, 메인래퍼",
    "positions": [
     "Producer",
-    "리드보컬]보다 훨씬 많은 파트를 가져갈 정도이며 Happening은 거의 대부분의 파트를 혼자 부른다.]",
+    "Lead vocalist",
     "Main rapper"
    ],
    "title": "이찬혁"
@@ -1074,7 +1092,7 @@
    "positionsKo": "서브보컬, 베이스 기타",
    "positions": [
     "Sub vocalist",
-    "베이스 기타"
+    "Bass guitar"
    ],
    "title": "김상혁"
   },
@@ -1126,10 +1144,10 @@
    "title": "박은지(1988)"
   },
   "Q16091523": {
-   "positionsKo": "드럼, 보컬]와 함께 공동으로 부른 곡도 있다. 대표적으로 언리미티드에 수록된 사랑을 쉬지 말아요.]",
+   "positionsKo": "드럼, 보컬",
    "positions": [
-    "드럼",
-    "보컬]와 함께 공동으로 부른 곡도 있다. 대표적으로 언리미티드에 수록된 사랑을 쉬지 말아요.]"
+    "Drums",
+    "Vocalist"
    ],
    "title": "전민혁"
   },
@@ -1149,7 +1167,7 @@
    "positionsKo": "보컬, 기타",
    "positions": [
     "Vocalist",
-    "기타"
+    "Guitar"
    ],
    "title": "이수(가수)"
   },
@@ -1159,7 +1177,7 @@
     "Main dancer",
     "Sub vocalist"
    ],
-   "mbti": "INFP",
+   "mbti": "ESTJ",
    "title": "창조(틴탑)"
   },
   "Q16098027": {
@@ -1225,9 +1243,9 @@
    "title": "베이비소울"
   },
   "Q16183324": {
-   "positionsKo": "리드보컬] 탈퇴 이후 서브보컬에서 리드보컬로 포지션이 변경되었다.], 리드댄서",
+   "positionsKo": "리드보컬, 리드댄서",
    "positions": [
-    "리드보컬] 탈퇴 이후 서브보컬에서 리드보컬로 포지션이 변경되었다.]",
+    "Lead vocalist",
     "Lead dancer"
    ],
    "mbti": "INFJ",
@@ -1258,9 +1276,9 @@
    "title": "서은광"
   },
   "Q16235836": {
-   "positionsKo": "리드래퍼]의 탈퇴로 인해 포지션이 변경되었다.], 메인댄서",
+   "positionsKo": "리드래퍼, 메인댄서",
    "positions": [
-    "리드래퍼]의 탈퇴로 인해 포지션이 변경되었다.]",
+    "Lead rapper",
     "Main dancer"
    ],
    "mbti": "ENFJ",
@@ -1276,9 +1294,9 @@
    "title": "제이홉"
   },
   "Q16323115": {
-   "positionsKo": "메인보컬]와 함께 더블 메인보컬 체제.]",
+   "positionsKo": "메인보컬",
    "positions": [
-    "메인보컬]와 함께 더블 메인보컬 체제.]"
+    "Main vocalist"
    ],
    "mbti": "INFP",
    "title": "방예담"
@@ -1389,10 +1407,9 @@
    "title": "웬디(레드벨벳)"
   },
   "Q17484113": {
-   "positionsKo": "리드래퍼]가 랩을 맡고있고, 현재는 보컬만 맡고있다. 그러나 랩도 종종 한다.], 서브보컬",
+   "positionsKo": "리드래퍼, 서브보컬",
    "positions": [
-    "리드래퍼]가 랩을 맡고있고",
-    "현재는 보컬만 맡고있다. 그러나 랩도 종종 한다.]",
+    "Lead rapper",
     "Sub vocalist"
    ],
    "mbti": "INFP",
@@ -1453,8 +1470,8 @@
     "Leader",
     "Rapper",
     "Vocalist",
-    "기타",
-    "키보드"
+    "Guitar",
+    "Keyboard"
    ],
    "mbti": "ENFP",
    "title": "이승협"
@@ -1462,8 +1479,8 @@
   "Q18230972": {
    "positionsKo": "기타, 코러스",
    "positions": [
-    "기타",
-    "코러스"
+    "Guitar",
+    "Backing vocals"
    ],
    "mbti": "ISFJ",
    "title": "차훈"
@@ -1500,7 +1517,7 @@
   "Q18444053": {
    "positionsKo": "드럼",
    "positions": [
-    "드럼"
+    "Drums"
    ],
    "mbti": "ENFJ",
    "title": "김재현(N.Flying)"
@@ -1562,6 +1579,14 @@
    ],
    "title": "문별"
   },
+  "Q19483969": {
+   "positionsKo": "리더, 보컬",
+   "positions": [
+    "Leader",
+    "Vocalist"
+   ],
+   "title": "솔라"
+  },
   "Q19603912": {
    "positionsKo": "보컬, 랩",
    "positions": [
@@ -1615,7 +1640,7 @@
    "positions": [
     "Leader",
     "Lead vocalist",
-    "댄스"
+    "Dancer"
    ],
    "mbti": "INTJ",
    "title": "이대열"
@@ -1724,6 +1749,14 @@
    ],
    "title": "민재(소나무)"
   },
+  "Q21012418": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "정예인"
+  },
   "Q21057648": {
    "positionsKo": "메인보컬",
    "positions": [
@@ -1796,9 +1829,9 @@
    "title": "신비(여자친구)"
   },
   "Q21710217": {
-   "positionsKo": "보컬]]] ]",
+   "positionsKo": "보컬",
    "positions": [
-    "보컬]]] ]"
+    "Vocalist"
    ],
    "title": "유아(오마이걸)"
   },
@@ -1855,7 +1888,7 @@
    "positionsKo": "총괄리더, 힙합팀 리더, 리드래퍼",
    "positions": [
     "Leader",
-    "힙합팀 리더",
+    "Hip-hop unit leader",
     "Lead rapper"
    ],
    "mbti": "INFP",
@@ -1864,7 +1897,7 @@
   "Q21824990": {
    "positionsKo": "보컬팀 리더, 리드보컬",
    "positions": [
-    "보컬팀 리더",
+    "Vocal unit leader",
     "Lead vocalist"
    ],
    "mbti": "INFJ",
@@ -1879,11 +1912,11 @@
    "title": "조슈아(세븐틴)"
   },
   "Q21825470": {
-   "positionsKo": "퍼포먼스팀 리더, 서브보컬, 메인댄서] 보이그룹 메인 댄서즈(Main Dancers) 특집에 공식적으로 세븐틴의 메인댄서로서 참가했다. #]",
+   "positionsKo": "퍼포먼스팀 리더, 서브보컬, 메인댄서",
    "positions": [
-    "퍼포먼스팀 리더",
+    "Performance unit leader",
     "Sub vocalist",
-    "메인댄서] 보이그룹 메인 댄서즈 특집에 공식적으로 세븐틴의 메인댄서로서 참가했다. #]"
+    "Main dancer"
    ],
    "mbti": "INFP",
    "title": "호시"
@@ -1900,7 +1933,7 @@
   "Q22101239": {
    "positionsKo": "베이스, 보컬, 랩",
    "positions": [
-    "베이스",
+    "Bass",
     "Vocalist",
     "Rapper"
    ],
@@ -2002,7 +2035,11 @@
    "title": "BoA"
   },
   "Q233371": {
-   "mbti": "INFJ",
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
    "title": "태연"
   },
   "Q233385": {
@@ -2093,11 +2130,10 @@
    "title": "엄지(여자친구)"
   },
   "Q24832146": {
-   "positionsKo": "리더, 래퍼] 소속 당시 'WEE WOO' 등에서 보컬 파트가 일부 있어서 서브보컬 포지션도 소화하는 것처럼 보이나, 프로필상 공식적으로는 해당이 없었다.]",
+   "positionsKo": "리더, 래퍼",
    "positions": [
     "Leader",
-    "래퍼] 소속 당시 'WEE WOO' 등에서 보컬 파트가 일부 있어서 서브보컬 포지션도 소화하는 것처럼 보이나",
-    "프로필상 공식적으로는 해당이 없었다.]"
+    "Rapper"
    ],
    "title": "임나영"
   },
@@ -2129,10 +2165,9 @@
    "title": "헤이즈(가수)"
   },
   "Q24855825": {
-   "positionsKo": "없음] 활동당시 리더, 메인보컬]",
+   "positionsKo": "없음",
    "positions": [
-    "없음] 활동당시 리더",
-    "Main vocalist"
+    "없음"
    ],
    "title": "송희진"
   },
@@ -2163,18 +2198,18 @@
    "title": "윤보미"
   },
   "Q24959134": {
-   "positionsKo": "센터]가 있을때에는 그냥 막내 역할만 하였지만 프로듀스 101 출연 후 비주얼 담당과 센터를 담당하고 있다.], 서브보컬",
+   "positionsKo": "센터, 서브보컬",
    "positions": [
-    "센터]가 있을때에는 그냥 막내 역할만 하였지만 프로듀스 101 출연 후 비주얼 담당과 센터를 담당하고 있다.]",
+    "Center",
     "Sub vocalist"
    ],
    "title": "정채연"
   },
   "Q253619": {
-   "positionsKo": "서브보컬, 메인댄서]와 더블 메인댄서 체제.]",
+   "positionsKo": "서브보컬, 메인댄서",
    "positions": [
     "Sub vocalist",
-    "메인댄서]와 더블 메인댄서 체제.]"
+    "Main dancer"
    ],
    "mbti": "ISTJ",
    "title": "효연"
@@ -2245,7 +2280,7 @@
   "Q26220991": {
    "positionsKo": "리드기타, 보컬, 랩",
    "positions": [
-    "리드기타",
+    "Guitar",
     "Vocalist",
     "Rapper"
    ],
@@ -2257,12 +2292,12 @@
    "title": "효민"
   },
   "Q26459163": {
-   "positionsKo": "리더, 메인래퍼, 메인댄서] 보이그룹 메인 댄서즈(Main Dancers) 특집에 공식적으로 NCT 127의 메인댄서로서 참가했다.], 센터]에서 '단골 센터'를 맡고 있음을 밝혔다.] (NCT 127)",
+   "positionsKo": "리더, 메인래퍼, 메인댄서, 센터 (NCT 127)",
    "positions": [
     "Leader",
     "Main rapper",
-    "메인댄서] 보이그룹 메인 댄서즈 특집에 공식적으로 NCT 127의 메인댄서로서 참가했다.]",
-    "센터]에서 '단골 센터'를 맡고 있음을 밝혔다.]"
+    "Main dancer",
+    "Center"
    ],
    "title": "태용"
   },
@@ -2275,13 +2310,11 @@
    "title": "도영"
   },
   "Q26707663": {
-   "positionsKo": "메인댄서, 리드래퍼, 서브보컬]과 Really, Don’t Know What to do, You Never Know에서 보컬을 맡았다.]",
+   "positionsKo": "메인댄서, 리드래퍼, 서브보컬",
    "positions": [
     "Main dancer",
     "Lead rapper",
-    "서브보컬]과 Really",
-    "Don’t Know What to do",
-    "You Never Know에서 보컬을 맡았다.]"
+    "Sub vocalist"
    ],
    "mbti": "ESFJ",
    "title": "리사(BLACKPINK)"
@@ -2336,16 +2369,16 @@
    "title": "재민"
   },
   "Q276158": {
-   "positionsKo": "서브보컬, 메인댄서]과 더블 메인댄서 체제.]",
+   "positionsKo": "서브보컬, 메인댄서",
    "positions": [
     "Sub vocalist",
-    "메인댄서]과 더블 메인댄서 체제.]"
+    "Main dancer"
    ],
    "mbti": "ENFJ",
    "title": "유리(소녀시대)"
   },
   "Q27655344": {
-   "positionsKo": "메인보컬, 리드댄서]]",
+   "positionsKo": "메인보컬, 리드댄서",
    "positions": [
     "Main vocalist",
     "Lead dancer"
@@ -2354,7 +2387,7 @@
    "title": "로제(BLACKPINK)"
   },
   "Q27655361": {
-   "positionsKo": "리드보컬] ]",
+   "positionsKo": "리드보컬",
    "positions": [
     "Lead vocalist"
    ],
@@ -2437,10 +2470,9 @@
    "title": "유권"
   },
   "Q27951527": {
-   "positionsKo": "리더], UNB 둘 다 본인이 리더이다.], 리드래퍼, 메인댄서",
+   "positionsKo": "리더, 리드래퍼, 메인댄서",
    "positions": [
     "Leader",
-    "UNB 둘 다 본인이 리더이다.]",
     "Lead rapper",
     "Main dancer"
    ],
@@ -2681,7 +2713,7 @@
    "title": "아론(뉴이스트)"
   },
   "Q30243794": {
-   "positionsKo": "메인보컬]]",
+   "positionsKo": "메인보컬",
    "positions": [
     "Main vocalist"
    ],
@@ -2747,11 +2779,10 @@
    "title": "하성운"
   },
   "Q30921468": {
-   "positionsKo": "리드보컬, 서브래퍼]의 Darling My Sugar 에서 랩 파트를 맡았고, NEWTRO의 수록곡인 5분만에서도 랩 파트를 맡았다.], 리드댄서]]",
+   "positionsKo": "리드보컬, 서브래퍼, 리드댄서",
    "positions": [
     "Lead vocalist",
-    "서브래퍼]의 Darling My Sugar 에서 랩 파트를 맡았고",
-    "NEWTRO의 수록곡인 5분만에서도 랩 파트를 맡았다.]",
+    "Sub rapper",
     "Lead dancer"
    ],
    "title": "은채"
@@ -2934,7 +2965,7 @@
    "positionsKo": "서브보컬, 댄스",
    "positions": [
     "Sub vocalist",
-    "댄스"
+    "Dancer"
    ],
    "title": "최보민"
   },
@@ -2999,11 +3030,10 @@
    "title": "김남주(Apink)"
   },
   "Q450171": {
-   "positionsKo": "리드보컬, 메인보컬]에서는 리드보컬, jtL에서는 메인보컬을 맡고 있다.], 래퍼",
+   "positionsKo": "리드보컬, 메인보컬, 래퍼",
    "positions": [
     "Lead vocalist",
-    "메인보컬]에서는 리드보컬",
-    "jtL에서는 메인보컬을 맡고 있다.]",
+    "Main vocalist",
     "Rapper"
    ],
    "title": "토니 안"
@@ -3175,12 +3205,11 @@
    "title": "예성(슈퍼주니어)"
   },
   "Q483161": {
-   "positionsKo": "메인댄서, 메인래퍼, 서브보컬] 활동 시에는 메인댄서, 메인래퍼, 리드보컬을 맡는다.]",
+   "positionsKo": "메인댄서, 메인래퍼, 서브보컬",
    "positions": [
     "Main dancer",
     "Main rapper",
-    "서브보컬] 활동 시에는 메인댄서",
-    "리드보컬을 맡는다.]"
+    "Sub vocalist"
    ],
    "mbti": "ENFP",
    "title": "은혁"
@@ -3413,10 +3442,9 @@
    "title": "김규종"
   },
   "Q48852365": {
-   "positionsKo": "리더]가 리더였으나, '예뻐지게' 활동부터 리더 자리를 물려받았다.], 리드보컬, 메인댄서",
+   "positionsKo": "리더, 리드보컬, 메인댄서",
    "positions": [
-    "리더]가 리더였으나",
-    "'예뻐지게' 활동부터 리더 자리를 물려받았다.]",
+    "Leader",
     "Lead vocalist",
     "Main dancer"
    ],
@@ -3494,6 +3522,13 @@
    ],
    "title": "김현중(SS501)"
   },
+  "Q490056": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "옥주현"
+  },
   "Q491278": {
    "positionsKo": "리드보컬",
    "positions": [
@@ -3521,7 +3556,7 @@
    "positionsKo": "리드래퍼, 베이스",
    "positions": [
     "Lead rapper",
-    "베이스"
+    "Bass"
    ],
    "title": "이정신"
   },
@@ -3637,6 +3672,16 @@
    "mbti": "ISTP",
    "title": "은지원"
   },
+  "Q495352": {
+   "positionsKo": "리더, 메인댄서, 메인래퍼, 리드보컬",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Main rapper",
+    "Lead vocalist"
+   ],
+   "title": "유노윤호"
+  },
   "Q495571": {
    "positionsKo": "리드래퍼, 서브보컬",
    "positions": [
@@ -3714,7 +3759,7 @@
   "Q5103936": {
    "positionsKo": "드럼",
    "positions": [
-    "드럼"
+    "Drums"
    ],
    "title": "최민환"
   },
@@ -3726,6 +3771,11 @@
    "title": "임슬옹"
   },
   "Q53316231": {
+   "positionsKo": "리더, 서브보컬",
+   "positions": [
+    "Leader",
+    "Sub vocalist"
+   ],
    "mbti": "ENFP",
    "title": "혜빈"
   },
@@ -3817,6 +3867,15 @@
     "Sub vocalist"
    ],
    "title": "슈화"
+  },
+  "Q55694544": {
+   "positionsKo": "리드보컬, 리드댄서, 래퍼",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer",
+    "Rapper"
+   ],
+   "title": "최예나"
   },
   "Q55694622": {
    "positionsKo": "리드보컬, 리드댄서",
@@ -3918,17 +3977,17 @@
    "title": "윈윈"
   },
   "Q56259927": {
-   "positionsKo": "메인보컬]와 함께 더블 메인보컬 체제이다.참고 영상]",
+   "positionsKo": "메인보컬",
    "positions": [
-    "메인보컬]와 함께 더블 메인보컬 체제이다.참고 영상]"
+    "Main vocalist"
    ],
    "mbti": "ENFP",
    "title": "미연"
   },
   "Q56278318": {
-   "positionsKo": "리드보컬]에서는 메인보컬이다.]",
+   "positionsKo": "리드보컬",
    "positions": [
-    "리드보컬]에서는 메인보컬이다.]"
+    "Lead vocalist"
    ],
    "mbti": "ENTP",
    "title": "윤산하"
@@ -4023,9 +4082,9 @@
    "title": "강승식"
   },
   "Q56761923": {
-   "positionsKo": "메인보컬]과 함께 더블 메인보컬 체제이다.참고 영상]",
+   "positionsKo": "메인보컬",
    "positions": [
-    "메인보컬]과 함께 더블 메인보컬 체제이다.참고 영상]"
+    "Main vocalist"
    ],
    "mbti": "ENFJ",
    "title": "민니"
@@ -4147,7 +4206,7 @@
     "Main rapper",
     "Sub vocalist"
    ],
-   "mbti": "INFJ",
+   "mbti": "ISFJ",
    "title": "다미(드림캐쳐)"
   },
   "Q59313606": {
@@ -4488,10 +4547,9 @@
    "title": "영훈"
   },
   "Q61863639": {
-   "positionsKo": "리드래퍼]의 탈퇴로 리드래퍼가 되었고, 원래 리드래퍼였던 우석은 메인래퍼가 되었다.], 리드댄서",
+   "positionsKo": "리드래퍼, 리드댄서",
    "positions": [
-    "리드래퍼]의 탈퇴로 리드래퍼가 되었고",
-    "원래 리드래퍼였던 우석은 메인래퍼가 되었다.]",
+    "Lead rapper",
     "Lead dancer"
    ],
    "mbti": "INFP",
@@ -4534,9 +4592,9 @@
    "title": "범규"
   },
   "Q62396828": {
-   "positionsKo": "리더]의 유일한 포지션이다.]",
+   "positionsKo": "리더",
    "positions": [
-    "리더]의 유일한 포지션이다.]"
+    "Leader"
    ],
    "mbti": "ISFP",
    "title": "수빈(투모로우바이투게더)"
@@ -4554,9 +4612,9 @@
    "title": "정진운"
   },
   "Q624995": {
-   "positionsKo": "서브보컬]]] 활동 때부터는 자주 후렴구 파트를 맡는 등 리드보컬 못지 않은 포지션을 맡게 되었다.]",
+   "positionsKo": "서브보컬",
    "positions": [
-    "서브보컬]]] 활동 때부터는 자주 후렴구 파트를 맡는 등 리드보컬 못지 않은 포지션을 맡게 되었다.]"
+    "Sub vocalist"
    ],
    "mbti": "INFP",
    "title": "선미"
@@ -4659,21 +4717,20 @@
    "title": "슈(1981)"
   },
   "Q62920133": {
-   "positionsKo": "리더, 메인래퍼, 메인댄서]와 함께 더블 메인댄서 체제.]",
+   "positionsKo": "리더, 메인래퍼, 메인댄서",
    "positions": [
     "Leader",
     "Main rapper",
-    "메인댄서]와 함께 더블 메인댄서 체제.]"
+    "Main dancer"
    ],
    "mbti": "ESFP",
    "title": "이유(에버글로우)"
   },
   "Q62920418": {
-   "positionsKo": "메인보컬, 메인댄서]와 함께 더블 메인댄서 체제.]]를 비롯 수록곡들 및 참여 OST에서 랩 파트도 함께 겸하고 있다.]",
+   "positionsKo": "메인보컬, 메인댄서",
    "positions": [
     "Main vocalist",
-    "메인댄서]와 함께 더블 메인댄서 체제.]]를 비롯 수록곡들",
-    "참여 OST에서 랩 파트도 함께 겸하고 있다.]"
+    "Main dancer"
    ],
    "mbti": "INTP",
    "title": "미아(에버글로우)"
@@ -4995,7 +5052,7 @@
     "회장",
     "Vocalist",
     "Rapper",
-    "댄스",
+    "Dancer",
     "Leader",
     "Main vocalist",
     "Main dancer"
@@ -5012,6 +5069,13 @@
    "mbti": "ENFP",
    "title": "손동표"
   },
+  "Q6756034": {
+   "positionsKo": "리드래퍼",
+   "positions": [
+    "Lead rapper"
+   ],
+   "title": "정희철(제국의아이들)"
+  },
   "Q6763158": {
    "positionsKo": "메인래퍼",
    "positions": [
@@ -5023,7 +5087,7 @@
    "positionsKo": "신디사이저, 키보드, 보컬",
    "positions": [
     "신디사이저",
-    "키보드",
+    "Keyboard",
     "Vocalist"
    ],
    "mbti": "INFJ",
@@ -5482,7 +5546,7 @@
    "title": "예인(멜로디데이)"
   },
   "Q8835339": {
-   "positionsKo": "메인래퍼, 메인댄서, 보컬], 메인댄서]",
+   "positionsKo": "메인래퍼, 메인댄서, 보컬",
    "positions": [
     "Main rapper",
     "Main dancer",
@@ -5517,7 +5581,7 @@
    "positionsKo": "메인보컬, 베이스 기타",
    "positions": [
     "Main vocalist",
-    "베이스 기타"
+    "Bass guitar"
    ],
    "title": "오종혁"
   },
@@ -5602,8 +5666,8 @@
   "Q97208928": {
    "positionsKo": "베이스, 코러스(N.Flying), 리더, 보컬, 베이스(HONEYST)",
    "positions": [
-    "베이스",
-    "코러스",
+    "Bass",
+    "Backing vocals",
     "Leader",
     "Vocalist"
    ],
@@ -5656,9 +5720,9 @@
    "title": "이태승"
   },
   "Q97326265": {
-   "positionsKo": "메인보컬]과 함께 더블 메인보컬 체제.]",
+   "positionsKo": "메인보컬",
    "positions": [
-    "메인보컬]과 함께 더블 메인보컬 체제.]"
+    "Main vocalist"
    ],
    "mbti": "ISFP",
    "title": "박정우(트레저)"
@@ -5683,7 +5747,7 @@
    "positions": [
     "Leader",
     "Vocalist",
-    "댄스"
+    "Dancer"
    ],
    "mbti": "ENTJ",
    "title": "지훈(트레저)"
@@ -5692,7 +5756,7 @@
    "positionsKo": "보컬, 댄스",
    "positions": [
     "Vocalist",
-    "댄스"
+    "Dancer"
    ],
    "mbti": "ENFP",
    "title": "마시호"
@@ -5709,7 +5773,7 @@
    "positionsKo": "보컬, 댄스",
    "positions": [
     "Vocalist",
-    "댄스"
+    "Dancer"
    ],
    "mbti": "ENFP",
    "title": "소정환(트레저)"
@@ -5734,7 +5798,7 @@
    "positionsKo": "보컬, 댄스",
    "positions": [
     "Vocalist",
-    "댄스"
+    "Dancer"
    ],
    "mbti": "INFP",
    "title": "윤재혁"
