@@ -35,3 +35,4 @@ jobs:
           git add data/idols
           git commit -m "Idol positions and MBTI from the Namu Wiki dump" || exit 0
           git pull --rebase origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME"
+# parser v3

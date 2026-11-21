@@ -31,6 +31,7 @@ def main():
     assert namu_parse.parse_page(hoshi)["positions"] == ["Performance unit leader", "Sub vocalist", "Main dancer"], namu_parse.parse_page(hoshi)
     assert namu_parse.translate_positions("리드댄서 (WEi, 1THE9), 서브보컬") == ["Lead dancer", "Sub vocalist"]
     assert namu_parse.translate_positions("기타, 베이스 기타, 드럼") == ["Guitar", "Bass guitar", "Drums"]
+    assert namu_parse.translate_positions("메인래퍼^^^^, 없음, 7단, 前 베이시스트, 캡틴") == ["Main rapper", "Former bassist", "Captain"]
     candidate = {"birth": "2000-04-11"}
     assert namu_parse.accept("카리나(aespa)", PAGE, candidate) and not namu_parse.accept("카리나", "다른 사람 1999년 1월 1일", candidate)
     assert namu_parse.accept("카리나(aespa)", "no date", {"birth": ""}) and not namu_parse.accept("카리나", "no date", {"birth": ""})

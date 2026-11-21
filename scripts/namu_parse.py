@@ -22,7 +22,8 @@ POSITION_TERMS = [
     ("보컬", "Vocalist"), ("래퍼", "Rapper"), ("랩", "Rapper"), ("댄서", "Dancer"), ("퍼포먼스", "Performance"),
     ("퍼포먼스팀 리더", "Performance unit leader"), ("보컬팀 리더", "Vocal unit leader"), ("힙합팀 리더", "Hip-hop unit leader"),
     ("베이스 기타", "Bass guitar"), ("베이스", "Bass"), ("기타", "Guitar"), ("드럼", "Drums"), ("키보드", "Keyboard"),
-    ("바이올린", "Violin"), ("코러스", "Backing vocals"), ("댄스", "Dancer"),
+    ("바이올린", "Violin"), ("코러스", "Backing vocals"), ("댄스", "Dancer"), ("신디사이저", "Synthesizer"), ("베이시스트", "Bassist"),
+    ("캡틴", "Captain"), ("안무", "Choreography"), ("맏언니", "Eldest"), ("맏형", "Eldest"), ("부반장", "Vice class president"), ("반장", "Class president"), ("회장", "President"),
     ("프로듀서", "Producer"), ("프로듀싱", "Producer"), ("작사", "Lyricist"), ("작곡", "Composer"), ("페이스", "Face of the group"),
 ]
 MBTI = re.compile(r"(?<![A-Za-z])([EI][NS][TF][JP])(?:-[AT])?(?![A-Za-z])")
@@ -78,10 +79,16 @@ def translate_positions(value):
     parts = [part.strip() for part in re.split(r"[,/·]|\s및\s", value) if part.strip()]
     out = []
     for part in parts:
-        part = re.sub(r"\(.*?\)", "", part).strip()
+        part = re.sub(r"\(.*?\)|\^\^|,,", "", part).strip()  # ^^superscript^^ and ,,subscript,, markup
+        former = part.startswith("前")
+        part = part.removeprefix("前").strip()
+        if not part or part in ("없음", "-", "?") or re.fullmatch(r"\d+단", part):  # "none", martial-arts ranks
+            continue
         english = next((en for ko, en in POSITION_TERMS if part == ko), None)
         if english is None:
             english = next((en for ko, en in POSITION_TERMS if ko in part and len(part) <= len(ko) + 3), part)
+        if former:
+            english = f"Former {english[0].lower()}{english[1:]}" if english[:1].isascii() else f"前 {english}"
         if english and english not in out:
             out.append(english)
     return out[:8]
