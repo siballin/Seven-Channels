@@ -1,0 +1,5759 @@
+{
+ "source": "Namu Wiki database dump of 2021-03-01",
+ "sourceUrl": "https://huggingface.co/datasets/heegyu/namuwiki",
+ "license": "CC BY-NC-SA 2.0 KR",
+ "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/kr/",
+ "importedAt": "2026-11-21T01:51:50+00:00",
+ "people": {
+  "Q100314749": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "영서(BAE173)"
+  },
+  "Q100493495": {
+   "positionsKo": "메인보컬]를 대표하는 메인보컬로서 멋진 활동을 기대합니다.”라고 언급되었다. 링크]",
+   "positions": [
+    "메인보컬]를 대표하는 메인보컬로서 멋진 활동을 기대합니다.”라고 언급되었다. 링크]"
+   ],
+   "title": "니나(NiziU)"
+  },
+  "Q100794150": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "수담(시크릿넘버)"
+  },
+  "Q100794612": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "진희(시크릿넘버)"
+  },
+  "Q101161002": {
+   "positionsKo": "리더, 메인댄서, 서브래퍼, 서브보컬",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Sub rapper",
+    "Sub vocalist"
+   ],
+   "title": "카리나(aespa)"
+  },
+  "Q101161168": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "지젤(aespa)"
+  },
+  "Q101161289": {
+   "positionsKo": "리드보컬, 리드댄서",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "title": "윈터(aespa)"
+  },
+  "Q101161499": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "닝닝"
+  },
+  "Q104370500": {
+   "positionsKo": "리드래퍼",
+   "positions": [
+    "Lead rapper"
+   ],
+   "mbti": "ESTP",
+   "title": "성찬(NCT)"
+  },
+  "Q104604557": {
+   "positionsKo": "서브래퍼, 메인댄서",
+   "positions": [
+    "Sub rapper",
+    "Main dancer"
+   ],
+   "mbti": "ISFP",
+   "title": "쇼타로(NCT)"
+  },
+  "Q104665815": {
+   "positionsKo": "서브래퍼, 서브보컬",
+   "positions": [
+    "Sub rapper",
+    "Sub vocalist"
+   ],
+   "title": "이태빈"
+  },
+  "Q104723606": {
+   "positionsKo": "서브보컬, 리드댄서 (WEi, 1THE9)",
+   "positions": [
+    "Sub vocalist",
+    "리드댄서 (WEi",
+    "1THE9)"
+   ],
+   "title": "김준서(WEi)"
+  },
+  "Q105463572": {
+   "positionsKo": "리더, 래퍼",
+   "positions": [
+    "Leader",
+    "Rapper"
+   ],
+   "title": "세림"
+  },
+  "Q105706014": {
+   "mbti": "INFJ",
+   "title": "원슈타인"
+  },
+  "Q105706019": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "유민(멜로디데이)"
+  },
+  "Q105717556": {
+   "positionsKo": "리드래퍼 (WEi)",
+   "positions": [
+    "Lead rapper"
+   ],
+   "title": "유용하(WEi)"
+  },
+  "Q105717862": {
+   "mbti": "ENTP",
+   "title": "제이(ENHYPEN)"
+  },
+  "Q105717977": {
+   "positionsKo": "리더",
+   "positions": [
+    "Leader"
+   ],
+   "mbti": "ESTJ",
+   "title": "정원(ENHYPEN)"
+  },
+  "Q105718037": {
+   "mbti": "ISTJ",
+   "title": "제이크(ENHYPEN)"
+  },
+  "Q105718407": {
+   "mbti": "ENFP",
+   "title": "선우(ENHYPEN)"
+  },
+  "Q106518333": {
+   "positionsKo": "리더, 서브보컬, 래퍼",
+   "positions": [
+    "Leader",
+    "Sub vocalist",
+    "Rapper"
+   ],
+   "mbti": "ISFJ",
+   "title": "수민(STAYC)"
+  },
+  "Q106518536": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ESFJ",
+   "title": "아이사(STAYC)"
+  },
+  "Q106518625": {
+   "positionsKo": "서브보컬, 래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Rapper"
+   ],
+   "mbti": "INFJ",
+   "title": "재이(STAYC)"
+  },
+  "Q106518626": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "윤(STAYC)"
+  },
+  "Q106518627": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "세은(STAYC)"
+  },
+  "Q106918546": {
+   "positionsKo": "리더, 메인댄서, 리드보컬, 서브래퍼",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Lead vocalist",
+    "Sub rapper"
+   ],
+   "title": "마코(NiziU)"
+  },
+  "Q106923586": {
+   "positionsKo": "메인댄서, 서브보컬, 서브래퍼",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "title": "리오(NiziU)"
+  },
+  "Q106925309": {
+   "positionsKo": "리드댄서, 서브보컬",
+   "positions": [
+    "Lead dancer",
+    "Sub vocalist"
+   ],
+   "title": "마야(NiziU)"
+  },
+  "Q106926179": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "리쿠(NiziU)"
+  },
+  "Q106926437": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "아야카(NiziU)"
+  },
+  "Q106940477": {
+   "positionsKo": "리드래퍼, 서브보컬",
+   "positions": [
+    "Lead rapper",
+    "Sub vocalist"
+   ],
+   "title": "마유카(NiziU)"
+  },
+  "Q106940564": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "리마(NiziU)"
+  },
+  "Q106940664": {
+   "positionsKo": "리드보컬, 리드댄서",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "title": "미이히"
+  },
+  "Q107109143": {
+   "positionsKo": "리더, 메인래퍼, 메인댄서",
+   "positions": [
+    "Leader",
+    "Main rapper",
+    "Main dancer"
+   ],
+   "title": "동헌"
+  },
+  "Q107109162": {
+   "positionsKo": "서브보컬, 서브래퍼, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper",
+    "Main dancer"
+   ],
+   "title": "무진(BAE173)"
+  },
+  "Q107109290": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "빛(BAE173)"
+  },
+  "Q107109316": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "세영(크로스진)"
+  },
+  "Q107109453": {
+   "positionsKo": "메인보컬, 막내",
+   "positions": [
+    "Main vocalist",
+    "Maknae"
+   ],
+   "title": "용현"
+  },
+  "Q107109459": {
+   "positionsKo": "메인 래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "우영(일급비밀)"
+  },
+  "Q107109485": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "유준(BAE173)"
+  },
+  "Q107109611": {
+   "positionsKo": "서브래퍼, 서브보컬",
+   "positions": [
+    "Sub rapper",
+    "Sub vocalist"
+   ],
+   "title": "인준"
+  },
+  "Q107109704": {
+   "positionsKo": "리드래퍼, 서브보컬, 리드댄서",
+   "positions": [
+    "Lead rapper",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "제이민(BAE173)"
+  },
+  "Q107109745": {
+   "positionsKo": "리더, 리드보컬, 메인댄서",
+   "positions": [
+    "Leader",
+    "Lead vocalist",
+    "Main dancer"
+   ],
+   "mbti": "ESFJ",
+   "title": "준서(BAE173)"
+  },
+  "Q107253228": {
+   "positionsKo": "보컬, 댄스",
+   "positions": [
+    "Vocalist",
+    "댄스"
+   ],
+   "title": "나고은"
+  },
+  "Q107559918": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "박지은(퍼플키스)"
+  },
+  "Q107559919": {
+   "positionsKo": "댄스, 보컬",
+   "positions": [
+    "댄스",
+    "Vocalist"
+   ],
+   "title": "도시(퍼플키스)"
+  },
+  "Q107559920": {
+   "positionsKo": "댄스, 보컬",
+   "positions": [
+    "댄스",
+    "Vocalist"
+   ],
+   "title": "이레(퍼플키스)"
+  },
+  "Q107559921": {
+   "positionsKo": "보컬, 댄스",
+   "positions": [
+    "Vocalist",
+    "댄스"
+   ],
+   "title": "채인"
+  },
+  "Q107559922": {
+   "positionsKo": "보컬, 막내",
+   "positions": [
+    "Vocalist",
+    "Maknae"
+   ],
+   "title": "수안(퍼플키스)"
+  },
+  "Q107559923": {
+   "positionsKo": "랩, 댄스",
+   "positions": [
+    "Rapper",
+    "댄스"
+   ],
+   "title": "유키(퍼플키스)"
+  },
+  "Q10775090": {
+   "positionsKo": "센터, 메인댄서, 서브보컬, 서브래퍼]에게 넘어가게 되었다.]",
+   "positions": [
+    "Center",
+    "Main dancer",
+    "Sub vocalist",
+    "서브래퍼]에게 넘어가게 되었다.]"
+   ],
+   "mbti": "INFJ",
+   "title": "카이(EXO)"
+  },
+  "Q10802388": {
+   "positionsKo": "리드래퍼]가 랩 파트가 줄고 보컬 파트가 많아지면서 서브래퍼에서 리드래퍼로 변경되었다.], 리드댄서",
+   "positions": [
+    "리드래퍼]가 랩 파트가 줄고 보컬 파트가 많아지면서 서브래퍼에서 리드래퍼로 변경되었다.]",
+    "Lead dancer"
+   ],
+   "title": "세훈"
+  },
+  "Q108043218": {
+   "mbti": "ENFJ",
+   "title": "니키(ENHYPEN)"
+  },
+  "Q10822003": {
+   "positionsKo": "리더, 리드보컬",
+   "positions": [
+    "Leader",
+    "Lead vocalist"
+   ],
+   "mbti": "ENFJ",
+   "title": "수호(EXO)"
+  },
+  "Q108261380": {
+   "positionsKo": "메인보컬, 메인댄서",
+   "positions": [
+    "Main vocalist",
+    "Main dancer"
+   ],
+   "mbti": "INTP",
+   "title": "민영(브레이브걸스)"
+  },
+  "Q108261472": {
+   "positionsKo": "서브보컬, 메인래퍼] 탈퇴 후 유나와 함께 랩을 하게 되었다.]",
+   "positions": [
+    "Sub vocalist",
+    "메인래퍼] 탈퇴 후 유나와 함께 랩을 하게 되었다.]"
+   ],
+   "title": "은지(브레이브걸스)"
+  },
+  "Q108261504": {
+   "positionsKo": "리드보컬, 리드래퍼] 탈퇴 후 은지와 함께 랩을 맡게 됨.]",
+   "positions": [
+    "Lead vocalist",
+    "리드래퍼] 탈퇴 후 은지와 함께 랩을 맡게 됨.]"
+   ],
+   "mbti": "ESFJ",
+   "title": "유나(브레이브걸스)"
+  },
+  "Q10834841": {
+   "positionsKo": "서브보컬, 서브래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "title": "시우민"
+  },
+  "Q10846505": {
+   "positionsKo": "메인댄서, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "비범(블락비)"
+  },
+  "Q10852064": {
+   "positionsKo": "서브래퍼",
+   "positions": [
+    "Sub rapper"
+   ],
+   "title": "피오"
+  },
+  "Q108935096": {
+   "positionsKo": "보컬] 활동시 센터, 서브보컬]",
+   "positions": [
+    "보컬] 활동시 센터",
+    "Sub vocalist"
+   ],
+   "title": "그린(레드스퀘어)"
+  },
+  "Q10919869": {
+   "positionsKo": "메인댄서, 리드보컬",
+   "positions": [
+    "Main dancer",
+    "Lead vocalist"
+   ],
+   "title": "이기광"
+  },
+  "Q109456944": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "예현"
+  },
+  "Q109818242": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "예찬(핑크판타지)"
+  },
+  "Q110272735": {
+   "positionsKo": "서브래퍼",
+   "positions": [
+    "Sub rapper"
+   ],
+   "mbti": "ISFJ",
+   "title": "샛별(PIXY)"
+  },
+  "Q11073341": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "혜리"
+  },
+  "Q111466890": {
+   "positionsKo": "리더, 메인보컬, 메인댄서",
+   "positions": [
+    "Leader",
+    "Main vocalist",
+    "Main dancer"
+   ],
+   "mbti": "ENFJ",
+   "title": "손준형"
+  },
+  "Q111693070": {
+   "positionsKo": "메인댄서",
+   "positions": [
+    "Main dancer"
+   ],
+   "mbti": "ESFJ",
+   "title": "유정(OnlyOneOf)"
+  },
+  "Q111693305": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "경윤"
+  },
+  "Q111693306": {
+   "positionsKo": "보컬, 댄스",
+   "positions": [
+    "Vocalist",
+    "댄스"
+   ],
+   "title": "종형"
+  },
+  "Q112020842": {
+   "positionsKo": "래퍼",
+   "positions": [
+    "Rapper"
+   ],
+   "title": "정훈(일급비밀)"
+  },
+  "Q112022592": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "강민(TRCNG)"
+  },
+  "Q112230446": {
+   "mbti": "INTJ",
+   "title": "미아(가수)"
+  },
+  "Q112257711": {
+   "positionsKo": "리더, 보컬, 랩",
+   "positions": [
+    "Leader",
+    "Vocalist",
+    "Rapper"
+   ],
+   "title": "원대(DONGKIZ)"
+  },
+  "Q11242163": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "미르(엠블랙)"
+  },
+  "Q11255149": {
+   "positionsKo": "메인댄서, 서브보컬, 서브래퍼",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "title": "신우(B1A4)"
+  },
+  "Q11259708": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "채은정"
+  },
+  "Q113357150": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "찬(A.C.E)"
+  },
+  "Q11346187": {
+   "mbti": "ISFP",
+   "title": "영민"
+  },
+  "Q114690500": {
+   "positionsKo": "리더, 보컬",
+   "positions": [
+    "Leader",
+    "Vocalist"
+   ],
+   "title": "기호(P1Harmony)"
+  },
+  "Q116705085": {
+   "positionsKo": "보컬, 댄스",
+   "positions": [
+    "Vocalist",
+    "댄스"
+   ],
+   "title": "종형"
+  },
+  "Q120792829": {
+   "positionsKo": "ON팀 리더, 메인보컬",
+   "positions": [
+    "ON팀 리더",
+    "Main vocalist"
+   ],
+   "title": "효진"
+  },
+  "Q120792908": {
+   "positionsKo": "OFF팀 리더, 서브보컬, 서브래퍼, 리드댄서",
+   "positions": [
+    "OFF팀 리더",
+    "Sub vocalist",
+    "Sub rapper",
+    "Lead dancer"
+   ],
+   "title": "제이어스(온앤오프)"
+  },
+  "Q121537762": {
+   "positionsKo": "메인래퍼, 리드댄서",
+   "positions": [
+    "Main rapper",
+    "Lead dancer"
+   ],
+   "title": "윤민"
+  },
+  "Q121579075": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "테오(P1Harmony)"
+  },
+  "Q121579375": {
+   "positionsKo": "래퍼",
+   "positions": [
+    "Rapper"
+   ],
+   "title": "소울(P1Harmony)"
+  },
+  "Q122760771": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "계현"
+  },
+  "Q123701390": {
+   "positionsKo": "센터, 메인댄서, 서브래퍼",
+   "positions": [
+    "Center",
+    "Main dancer",
+    "Sub rapper"
+   ],
+   "title": "전도염"
+  },
+  "Q124791600": {
+   "positionsKo": "메인댄서, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "미레"
+  },
+  "Q124854418": {
+   "positionsKo": "리드래퍼, 서브보컬, 메인댄서",
+   "positions": [
+    "Lead rapper",
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "빅(MCND)"
+  },
+  "Q12485765": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "힘찬"
+  },
+  "Q12494180": {
+   "positionsKo": "메인댄서, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "레이(EXO)"
+  },
+  "Q125473566": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "박제업"
+  },
+  "Q12580794": {
+   "positionsKo": "리더, 래퍼",
+   "positions": [
+    "Leader",
+    "Rapper"
+   ],
+   "mbti": "INFP",
+   "title": "캡(틴탑)"
+  },
+  "Q12588639": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "김조한"
+  },
+  "Q12588834": {
+   "positionsKo": "리더]이가 탈퇴함으로써 리더가 됨.], 리드보컬",
+   "positions": [
+    "리더]이가 탈퇴함으로써 리더가 됨.]",
+    "Lead vocalist"
+   ],
+   "title": "지훈(TRCNG)"
+  },
+  "Q12588889": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ESFP",
+   "title": "김진호(SG워너비)"
+  },
+  "Q12590744": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "니엘"
+  },
+  "Q12594449": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ISTP",
+   "title": "리키(틴탑)"
+  },
+  "Q12594691": {
+   "positionsKo": "리드래퍼",
+   "positions": [
+    "Lead rapper"
+   ],
+   "title": "마이키"
+  },
+  "Q12596240": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "방민아"
+  },
+  "Q12599567": {
+   "positionsKo": "메인래퍼, 리드댄서",
+   "positions": [
+    "Main rapper",
+    "Lead dancer"
+   ],
+   "mbti": "INTJ",
+   "title": "빽가"
+  },
+  "Q12602098": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "이성종"
+  },
+  "Q12602587": {
+   "positionsKo": "리더, 리드보컬",
+   "positions": [
+    "Leader",
+    "Lead vocalist"
+   ],
+   "title": "박소진"
+  },
+  "Q12602709": {
+   "positionsKo": "리드래퍼, 서브보컬, 리드댄서",
+   "positions": [
+    "Lead rapper",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "손성아"
+  },
+  "Q12604475": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "신용재"
+  },
+  "Q12605358": {
+   "positionsKo": "센터, 리더, 메인래퍼, 서브보컬, 리드댄서",
+   "positions": [
+    "Center",
+    "Leader",
+    "Main rapper",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "아이린(레드벨벳)"
+  },
+  "Q12609731": {
+   "positionsKo": "메인래퍼, 서브보컬, 메인댄서",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "유라"
+  },
+  "Q12616366": {
+   "positionsKo": "바이올린",
+   "positions": [
+    "바이올린"
+   ],
+   "title": "제이윤"
+  },
+  "Q12617359": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "김은영(배우)"
+  },
+  "Q12618529": {
+   "positionsKo": "댄스, 보컬",
+   "positions": [
+    "댄스",
+    "Vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "웅기(TOO)"
+  },
+  "Q12618867": {
+   "positionsKo": "부리더, 메인래퍼, 메인댄서",
+   "positions": [
+    "Sub-leader",
+    "Main rapper",
+    "Main dancer"
+   ],
+   "title": "천명훈"
+  },
+  "Q12618970": {
+   "positionsKo": "리드보컬, 비주얼",
+   "positions": [
+    "Lead vocalist",
+    "Visual"
+   ],
+   "mbti": "ISFP",
+   "title": "천지(틴탑)"
+  },
+  "Q126684253": {
+   "positionsKo": "센터, 서브보컬",
+   "positions": [
+    "Center",
+    "Sub vocalist"
+   ],
+   "mbti": "ENTP",
+   "title": "유정(브레이브걸스)"
+  },
+  "Q129484": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "김동준(제국의아이들)"
+  },
+  "Q134315860": {
+   "positionsKo": "메인 댄서, 랩, 보컬",
+   "positions": [
+    "Main dancer",
+    "Rapper",
+    "Vocalist"
+   ],
+   "mbti": "ENTJ",
+   "title": "김병관(A.C.E)"
+  },
+  "Q134315861": {
+   "positionsKo": "메인댄서, 랩, 보컬",
+   "positions": [
+    "Main dancer",
+    "Rapper",
+    "Vocalist"
+   ],
+   "title": "와우(A.C.E)"
+  },
+  "Q134575": {
+   "positionsKo": "서브보컬, 메인래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Main rapper"
+   ],
+   "title": "민호"
+  },
+  "Q13607989": {
+   "positionsKo": "리더, 리드보컬",
+   "positions": [
+    "Leader",
+    "Lead vocalist"
+   ],
+   "title": "승호"
+  },
+  "Q138005079": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "아야카(NiziU)"
+  },
+  "Q140099": {
+   "mbti": "ENFP",
+   "title": "함은정"
+  },
+  "Q15111667": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "디오(EXO)"
+  },
+  "Q15223756": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "조아영(배우)"
+  },
+  "Q153597": {
+   "positionsKo": "메인댄서, 보컬 (샤이니)",
+   "positions": [
+    "Main dancer",
+    "Vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "태민"
+  },
+  "Q153638": {
+   "positionsKo": "리드댄서, 리드보컬, 서브래퍼] 활동 시에는 메인보컬, 리드래퍼, 리드댄서을 맡는다.]",
+   "positions": [
+    "Lead dancer",
+    "Lead vocalist",
+    "서브래퍼] 활동 시에는 메인보컬",
+    "Lead rapper",
+    "리드댄서을 맡는다.]"
+   ],
+   "title": "동해(슈퍼주니어)"
+  },
+  "Q153657": {
+   "positionsKo": "센터, 서브보컬",
+   "positions": [
+    "Center",
+    "Sub vocalist"
+   ],
+   "title": "시원(슈퍼주니어)"
+  },
+  "Q153725": {
+   "positionsKo": "리더, 메인보컬, 기타, 키보드, 랩",
+   "positions": [
+    "Leader",
+    "Main vocalist",
+    "기타",
+    "키보드",
+    "Rapper"
+   ],
+   "title": "정용화"
+  },
+  "Q153773": {
+   "positionsKo": "유닛 리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "mbti": "INTJ",
+   "title": "허영생"
+  },
+  "Q15703515": {
+   "positionsKo": "리더, 리드보컬",
+   "positions": [
+    "Leader",
+    "Lead vocalist"
+   ],
+   "title": "진영(1991)"
+  },
+  "Q15703533": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "산들"
+  },
+  "Q15703547": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "차선우"
+  },
+  "Q15703559": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "공찬"
+  },
+  "Q15934116": {
+   "positionsKo": "메인댄서, 리드보컬",
+   "positions": [
+    "Main dancer",
+    "Lead vocalist"
+   ],
+   "mbti": "ISFP",
+   "title": "슬기(레드벨벳)"
+  },
+  "Q16071030": {
+   "positionsKo": "프로듀서, 리드보컬]보다 훨씬 많은 파트를 가져갈 정도이며 Happening은 거의 대부분의 파트를 혼자 부른다.], 메인래퍼",
+   "positions": [
+    "Producer",
+    "리드보컬]보다 훨씬 많은 파트를 가져갈 정도이며 Happening은 거의 대부분의 파트를 혼자 부른다.]",
+    "Main rapper"
+   ],
+   "title": "이찬혁"
+  },
+  "Q16075083": {
+   "positionsKo": "래퍼",
+   "positions": [
+    "Rapper"
+   ],
+   "title": "마크(GOT7)"
+  },
+  "Q16079873": {
+   "positionsKo": "서브보컬, 베이스 기타",
+   "positions": [
+    "Sub vocalist",
+    "베이스 기타"
+   ],
+   "title": "김상혁"
+  },
+  "Q16080053": {
+   "positionsKo": "센터, 메인보컬, 리드댄서",
+   "positions": [
+    "Center",
+    "Main vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ESTP",
+   "title": "박경리(1990)"
+  },
+  "Q16080337": {
+   "positionsKo": "리더, 보컬",
+   "positions": [
+    "Leader",
+    "Vocalist"
+   ],
+   "title": "김용준(SG워너비)"
+  },
+  "Q16081215": {
+   "positionsKo": "리드보컬, 메인댄서",
+   "positions": [
+    "Lead vocalist",
+    "Main dancer"
+   ],
+   "title": "민희(인터넷 방송인)"
+  },
+  "Q16083607": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "소정"
+  },
+  "Q16090396": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "배우희"
+  },
+  "Q16090686": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "박은지(1988)"
+  },
+  "Q16091523": {
+   "positionsKo": "드럼, 보컬]와 함께 공동으로 부른 곡도 있다. 대표적으로 언리미티드에 수록된 사랑을 쉬지 말아요.]",
+   "positions": [
+    "드럼",
+    "보컬]와 함께 공동으로 부른 곡도 있다. 대표적으로 언리미티드에 수록된 사랑을 쉬지 말아요.]"
+   ],
+   "title": "전민혁"
+  },
+  "Q16092552": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "title": "표혜미"
+  },
+  "Q16097542": {
+   "mbti": "ISFP",
+   "title": "병헌"
+  },
+  "Q16097622": {
+   "positionsKo": "보컬, 기타",
+   "positions": [
+    "Vocalist",
+    "기타"
+   ],
+   "title": "이수(가수)"
+  },
+  "Q16097737": {
+   "positionsKo": "메인댄서, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "창조(틴탑)"
+  },
+  "Q16098027": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "첸(EXO)"
+  },
+  "Q16156921": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "mbti": "INFJ",
+   "title": "렌(뉴이스트)"
+  },
+  "Q16167012": {
+   "positionsKo": "메인보컬, 리더",
+   "positions": [
+    "Main vocalist",
+    "Leader"
+   ],
+   "title": "상도(제노티)"
+  },
+  "Q16171180": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "ENTP",
+   "title": "육성재"
+  },
+  "Q16172073": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "재효"
+  },
+  "Q16173210": {
+   "positionsKo": "센터, 서브보컬, 리드댄서",
+   "positions": [
+    "Center",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "설현"
+  },
+  "Q16179702": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "김태양(가수)"
+  },
+  "Q16181012": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "title": "베이비소울"
+  },
+  "Q16183324": {
+   "positionsKo": "리드보컬] 탈퇴 이후 서브보컬에서 리드보컬로 포지션이 변경되었다.], 리드댄서",
+   "positions": [
+    "리드보컬] 탈퇴 이후 서브보컬에서 리드보컬로 포지션이 변경되었다.]",
+    "Lead dancer"
+   ],
+   "mbti": "INFJ",
+   "title": "혜정"
+  },
+  "Q16183546": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ENFJ",
+   "title": "이창섭(BTOB)"
+  },
+  "Q16184245": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "효은"
+  },
+  "Q16233553": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "mbti": "ESFJ",
+   "title": "서은광"
+  },
+  "Q16235836": {
+   "positionsKo": "리드래퍼]의 탈퇴로 인해 포지션이 변경되었다.], 메인댄서",
+   "positions": [
+    "리드래퍼]의 탈퇴로 인해 포지션이 변경되었다.]",
+    "Main dancer"
+   ],
+   "mbti": "ENFJ",
+   "title": "프니엘"
+  },
+  "Q16236223": {
+   "positionsKo": "서브래퍼, 메인댄서",
+   "positions": [
+    "Sub rapper",
+    "Main dancer"
+   ],
+   "mbti": "ESFJ",
+   "title": "제이홉"
+  },
+  "Q16323115": {
+   "positionsKo": "메인보컬]와 함께 더블 메인보컬 체제.]",
+   "positions": [
+    "메인보컬]와 함께 더블 메인보컬 체제.]"
+   ],
+   "mbti": "INFP",
+   "title": "방예담"
+  },
+  "Q16688282": {
+   "positionsKo": "래퍼",
+   "positions": [
+    "Rapper"
+   ],
+   "title": "뱀뱀"
+  },
+  "Q16746002": {
+   "mbti": "ENFP",
+   "title": "정세운"
+  },
+  "Q16766877": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "래환"
+  },
+  "Q16767590": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "성학"
+  },
+  "Q16767600": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "title": "솔지"
+  },
+  "Q16767663": {
+   "positionsKo": "서브보컬, 리드댄서, 리드래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer",
+    "Lead rapper"
+   ],
+   "title": "엘린(크레용팝)"
+  },
+  "Q16767845": {
+   "mbti": "ENFP",
+   "title": "정민"
+  },
+  "Q16767951": {
+   "positionsKo": "리드보컬, 리드댄서",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "title": "하니(EXID)"
+  },
+  "Q16767981": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "나해령"
+  },
+  "Q16767990": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "혜린"
+  },
+  "Q16865126": {
+   "positionsKo": "리더, 메인댄서, 서브보컬",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "송보람"
+  },
+  "Q16905948": {
+   "positionsKo": "래퍼",
+   "positions": [
+    "Rapper"
+   ],
+   "title": "잭슨(GOT7)"
+  },
+  "Q169717": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "김재중"
+  },
+  "Q17403471": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "달수빈"
+  },
+  "Q17478642": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "웬디(레드벨벳)"
+  },
+  "Q17484113": {
+   "positionsKo": "리드래퍼]가 랩을 맡고있고, 현재는 보컬만 맡고있다. 그러나 랩도 종종 한다.], 서브보컬",
+   "positions": [
+    "리드래퍼]가 랩을 맡고있고",
+    "현재는 보컬만 맡고있다. 그러나 랩도 종종 한다.]",
+    "Sub vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "조이(레드벨벳)"
+  },
+  "Q17500581": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "영재(GOT7)"
+  },
+  "Q17500887": {
+   "positionsKo": "메인댄서, 보컬",
+   "positions": [
+    "Main dancer",
+    "Vocalist"
+   ],
+   "title": "유겸"
+  },
+  "Q17811824": {
+   "positionsKo": "리더, 리드래퍼, 메인댄서",
+   "positions": [
+    "Leader",
+    "Lead rapper",
+    "Main dancer"
+   ],
+   "title": "B.I"
+  },
+  "Q18015644": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "BOBBY"
+  },
+  "Q18116606": {
+   "positionsKo": "센터, 리드보컬, 리드댄서",
+   "positions": [
+    "Center",
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ENFJ",
+   "title": "낸시(모모랜드)"
+  },
+  "Q18229754": {
+   "positionsKo": "前 베이시스트",
+   "positions": [
+    "前 베이시스트"
+   ],
+   "title": "권광진"
+  },
+  "Q18230780": {
+   "positionsKo": "리더, 래퍼, 보컬, 기타, 키보드",
+   "positions": [
+    "Leader",
+    "Rapper",
+    "Vocalist",
+    "기타",
+    "키보드"
+   ],
+   "mbti": "ENFP",
+   "title": "이승협"
+  },
+  "Q18230972": {
+   "positionsKo": "기타, 코러스",
+   "positions": [
+    "기타",
+    "코러스"
+   ],
+   "mbti": "ISFJ",
+   "title": "차훈"
+  },
+  "Q18235331": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "야부키 나코"
+  },
+  "Q18325356": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "주니(레이디스 코드)"
+  },
+  "Q18381209": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "JIN(러블리즈)"
+  },
+  "Q18388296": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "뷔"
+  },
+  "Q18444053": {
+   "positionsKo": "드럼",
+   "positions": [
+    "드럼"
+   ],
+   "mbti": "ENFJ",
+   "title": "김재현(N.Flying)"
+  },
+  "Q18444674": {
+   "mbti": "ENFJ",
+   "title": "이태환"
+  },
+  "Q18531271": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "서지수(러블리즈)"
+  },
+  "Q18550576": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "레오(빅스)"
+  },
+  "Q18551454": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "혁"
+  },
+  "Q186601": {
+   "positionsKo": "리드보컬, 메인댄서",
+   "positions": [
+    "Lead vocalist",
+    "Main dancer"
+   ],
+   "title": "이민우(신화)"
+  },
+  "Q18697707": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "이수현(AKMU)"
+  },
+  "Q194798": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "대성(빅뱅)"
+  },
+  "Q19483782": {
+   "positionsKo": "랩, 퍼포먼스",
+   "positions": [
+    "Rapper",
+    "Performance"
+   ],
+   "title": "문별"
+  },
+  "Q19603912": {
+   "positionsKo": "보컬, 랩",
+   "positions": [
+    "Vocalist",
+    "Rapper"
+   ],
+   "title": "화사"
+  },
+  "Q19603930": {
+   "positionsKo": "보컬, 퍼포먼스",
+   "positions": [
+    "Vocalist",
+    "Performance"
+   ],
+   "title": "휘인"
+  },
+  "Q19657173": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "이금조"
+  },
+  "Q19657310": {
+   "positionsKo": "메인래퍼, 서브보컬, 메인댄서",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "조소진"
+  },
+  "Q19657317": {
+   "positionsKo": "리드래퍼",
+   "positions": [
+    "Lead rapper"
+   ],
+   "title": "송백경"
+  },
+  "Q19657363": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ENFJ",
+   "title": "예린(여자친구)"
+  },
+  "Q19854876": {
+   "positionsKo": "리더, 리드보컬, 댄스",
+   "positions": [
+    "Leader",
+    "Lead vocalist",
+    "댄스"
+   ],
+   "mbti": "INTJ",
+   "title": "이대열"
+  },
+  "Q19940498": {
+   "positionsKo": "서브보컬, 서브래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "mbti": "INFP",
+   "title": "예리"
+  },
+  "Q20145": {
+   "mbti": "INFP",
+   "title": "아이유"
+  },
+  "Q20514446": {
+   "positionsKo": "리더, 메인래퍼",
+   "positions": [
+    "Leader",
+    "Main rapper"
+   ],
+   "mbti": "ENFP",
+   "title": "RM"
+  },
+  "Q20687781": {
+   "positionsKo": "서브보컬, 메인댄서, 메인래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer",
+    "Main rapper"
+   ],
+   "title": "송다혜"
+  },
+  "Q20687896": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "허영주"
+  },
+  "Q20688186": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "mbti": "ISFP",
+   "title": "미나(TWICE)"
+  },
+  "Q20688219": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ISFP",
+   "title": "쯔위"
+  },
+  "Q20774986": {
+   "positionsKo": "前 리더, 서브보컬",
+   "positions": [
+    "Leader",
+    "Sub vocalist"
+   ],
+   "title": "지수민(1994)"
+  },
+  "Q20810724": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "디애나"
+  },
+  "Q20946085": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "류수정"
+  },
+  "Q20947093": {
+   "positionsKo": "리드보컬, 메인댄서",
+   "positions": [
+    "Lead vocalist",
+    "Main dancer"
+   ],
+   "mbti": "ENFJ",
+   "title": "지민"
+  },
+  "Q20972211": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "INFP",
+   "title": "준(세븐틴)"
+  },
+  "Q21006748": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "민재(소나무)"
+  },
+  "Q21057648": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "구준회"
+  },
+  "Q21057681": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "김동혁"
+  },
+  "Q21058800": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "송윤형"
+  },
+  "Q21059878": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "이미주"
+  },
+  "Q21060390": {
+   "positionsKo": "센터, 서브보컬",
+   "positions": [
+    "Center",
+    "Sub vocalist"
+   ],
+   "mbti": "INFJ",
+   "title": "차은우"
+  },
+  "Q21060406": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "김채원(APRIL)"
+  },
+  "Q21075020": {
+   "positionsKo": "리드래퍼",
+   "positions": [
+    "Lead rapper"
+   ],
+   "mbti": "INTP",
+   "title": "슈가(방탄소년단)"
+  },
+  "Q21623339": {
+   "positionsKo": "서브래퍼",
+   "positions": [
+    "Sub rapper"
+   ],
+   "mbti": "INFJ",
+   "title": "원우"
+  },
+  "Q21709909": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "mbti": "ISFJ",
+   "title": "신비(여자친구)"
+  },
+  "Q21710217": {
+   "positionsKo": "보컬]]] ]",
+   "positions": [
+    "보컬]]] ]"
+   ],
+   "title": "유아(오마이걸)"
+  },
+  "Q21710247": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ISTP",
+   "title": "은하(여자친구)"
+  },
+  "Q21824862": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "도겸(세븐틴)"
+  },
+  "Q21824868": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "INFJ",
+   "title": "디에잇"
+  },
+  "Q21824887": {
+   "positionsKo": "서브래퍼",
+   "positions": [
+    "Sub rapper"
+   ],
+   "mbti": "ENFJ",
+   "title": "민규"
+  },
+  "Q21824912": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "mbti": "ISFP",
+   "title": "버논(세븐틴)"
+  },
+  "Q21824947": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "승관"
+  },
+  "Q21824968": {
+   "positionsKo": "총괄리더, 힙합팀 리더, 리드래퍼",
+   "positions": [
+    "Leader",
+    "힙합팀 리더",
+    "Lead rapper"
+   ],
+   "mbti": "INFP",
+   "title": "에스쿱스"
+  },
+  "Q21824990": {
+   "positionsKo": "보컬팀 리더, 리드보컬",
+   "positions": [
+    "보컬팀 리더",
+    "Lead vocalist"
+   ],
+   "mbti": "INFJ",
+   "title": "우지(세븐틴)"
+  },
+  "Q21825065": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "ENFJ",
+   "title": "조슈아(세븐틴)"
+  },
+  "Q21825470": {
+   "positionsKo": "퍼포먼스팀 리더, 서브보컬, 메인댄서] 보이그룹 메인 댄서즈(Main Dancers) 특집에 공식적으로 세븐틴의 메인댄서로서 참가했다. #]",
+   "positions": [
+    "퍼포먼스팀 리더",
+    "Sub vocalist",
+    "메인댄서] 보이그룹 메인 댄서즈 특집에 공식적으로 세븐틴의 메인댄서로서 참가했다. #]"
+   ],
+   "mbti": "INFP",
+   "title": "호시"
+  },
+  "Q22100580": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "mbti": "INFP",
+   "title": "문빈"
+  },
+  "Q22101239": {
+   "positionsKo": "베이스, 보컬, 랩",
+   "positions": [
+    "베이스",
+    "Vocalist",
+    "Rapper"
+   ],
+   "mbti": "ENTP",
+   "title": "Young K"
+  },
+  "Q22338877": {
+   "positionsKo": "메인보컬, 서브래퍼, 리드댄서",
+   "positions": [
+    "Main vocalist",
+    "Sub rapper",
+    "Lead dancer"
+   ],
+   "mbti": "ISFP",
+   "title": "정국(방탄소년단)"
+  },
+  "Q22773776": {
+   "positionsKo": "메인댄서, 서브보컬, 서브래퍼 (NCT 127)",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "title": "유타(NCT)"
+  },
+  "Q22773838": {
+   "positionsKo": "리드래퍼, 서브보컬",
+   "positions": [
+    "Lead rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "ISFJ",
+   "title": "다현(TWICE)"
+  },
+  "Q22774055": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "mbti": "ISFP",
+   "title": "지효"
+  },
+  "Q22804243": {
+   "positionsKo": "센터, 리드보컬, 리드댄서",
+   "positions": [
+    "Center",
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ISTP",
+   "title": "나연(TWICE)"
+  },
+  "Q22911780": {
+   "mbti": "ENTP",
+   "title": "김세정"
+  },
+  "Q22974522": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "예지(FIESTAR)"
+  },
+  "Q22975035": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "차오루"
+  },
+  "Q22975425": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "mbti": "ESFJ",
+   "title": "효정"
+  },
+  "Q23008017": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "주헌"
+  },
+  "Q23012025": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "사나(TWICE)"
+  },
+  "Q232449": {
+   "mbti": "INTJ",
+   "title": "BoA"
+  },
+  "Q233371": {
+   "mbti": "INFJ",
+   "title": "태연"
+  },
+  "Q233385": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ESFP",
+   "title": "수영(소녀시대)"
+  },
+  "Q233717": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "양요섭"
+  },
+  "Q233894": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ISTJ",
+   "title": "써니(소녀시대)"
+  },
+  "Q236355": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ENTJ",
+   "title": "티파니 영"
+  },
+  "Q237673": {
+   "mbti": "INTJ",
+   "title": "구혜선"
+  },
+  "Q23779926": {
+   "positionsKo": "서브보컬, 서브래퍼, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper",
+    "Main dancer"
+   ],
+   "mbti": "INFP",
+   "title": "모모(TWICE)"
+  },
+  "Q240082": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ENTJ",
+   "title": "서현(소녀시대)"
+  },
+  "Q24043625": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "채영(TWICE)"
+  },
+  "Q24276424": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "INTP",
+   "title": "진(방탄소년단)"
+  },
+  "Q24566664": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "ISFJ",
+   "title": "정한"
+  },
+  "Q24572927": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "INFJ",
+   "title": "엄지(여자친구)"
+  },
+  "Q24832146": {
+   "positionsKo": "리더, 래퍼] 소속 당시 'WEE WOO' 등에서 보컬 파트가 일부 있어서 서브보컬 포지션도 소화하는 것처럼 보이나, 프로필상 공식적으로는 해당이 없었다.]",
+   "positions": [
+    "Leader",
+    "래퍼] 소속 당시 'WEE WOO' 등에서 보컬 파트가 일부 있어서 서브보컬 포지션도 소화하는 것처럼 보이나",
+    "프로필상 공식적으로는 해당이 없었다.]"
+   ],
+   "title": "임나영"
+  },
+  "Q24833180": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "결경"
+  },
+  "Q24834621": {
+   "positionsKo": "리더, 메인댄서, 리드보컬",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Lead vocalist"
+   ],
+   "title": "셔누"
+  },
+  "Q24836815": {
+   "positionsKo": "랩",
+   "positions": [
+    "Rapper"
+   ],
+   "title": "캐스퍼(1991)"
+  },
+  "Q24855768": {
+   "mbti": "ISFJ",
+   "title": "헤이즈(가수)"
+  },
+  "Q24855825": {
+   "positionsKo": "없음] 활동당시 리더, 메인보컬]",
+   "positions": [
+    "없음] 활동당시 리더",
+    "Main vocalist"
+   ],
+   "title": "송희진"
+  },
+  "Q24855847": {
+   "positionsKo": "리더, 보컬 (비오브유), 메인보컬 (마이틴)",
+   "positions": [
+    "Leader",
+    "Vocalist",
+    "Main vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "송유빈"
+  },
+  "Q24859531": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "윤채경"
+  },
+  "Q2495400": {
+   "positionsKo": "리드보컬, 메인댄서",
+   "positions": [
+    "Lead vocalist",
+    "Main dancer"
+   ],
+   "mbti": "ISFP",
+   "title": "윤보미"
+  },
+  "Q24959134": {
+   "positionsKo": "센터]가 있을때에는 그냥 막내 역할만 하였지만 프로듀스 101 출연 후 비주얼 담당과 센터를 담당하고 있다.], 서브보컬",
+   "positions": [
+    "센터]가 있을때에는 그냥 막내 역할만 하였지만 프로듀스 101 출연 후 비주얼 담당과 센터를 담당하고 있다.]",
+    "Sub vocalist"
+   ],
+   "title": "정채연"
+  },
+  "Q253619": {
+   "positionsKo": "서브보컬, 메인댄서]와 더블 메인댄서 체제.]",
+   "positions": [
+    "Sub vocalist",
+    "메인댄서]와 더블 메인댄서 체제.]"
+   ],
+   "mbti": "ISTJ",
+   "title": "효연"
+  },
+  "Q25374501": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ISFJ",
+   "title": "정연(TWICE)"
+  },
+  "Q25842416": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "오승희"
+  },
+  "Q25842424": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "소연(라붐)"
+  },
+  "Q25842425": {
+   "positionsKo": "센터, 서브보컬",
+   "positions": [
+    "Center",
+    "Sub vocalist"
+   ],
+   "title": "솔빈"
+  },
+  "Q25842431": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "이진솔"
+  },
+  "Q2591401": {
+   "positionsKo": "센터, 서브보컬, 메인댄서",
+   "positions": [
+    "Center",
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "이기섭"
+  },
+  "Q26162651": {
+   "positionsKo": "리더, 서브보컬",
+   "positions": [
+    "Leader",
+    "Sub vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "소원(여자친구)"
+  },
+  "Q26214034": {
+   "positionsKo": "메인댄서, 리드보컬",
+   "positions": [
+    "Main dancer",
+    "Lead vocalist"
+   ],
+   "title": "청하"
+  },
+  "Q26220991": {
+   "positionsKo": "리드기타, 보컬, 랩",
+   "positions": [
+    "리드기타",
+    "Vocalist",
+    "Rapper"
+   ],
+   "mbti": "INTP",
+   "title": "Jae"
+  },
+  "Q263279": {
+   "mbti": "INFJ",
+   "title": "효민"
+  },
+  "Q26459163": {
+   "positionsKo": "리더, 메인래퍼, 메인댄서] 보이그룹 메인 댄서즈(Main Dancers) 특집에 공식적으로 NCT 127의 메인댄서로서 참가했다.], 센터]에서 '단골 센터'를 맡고 있음을 밝혔다.] (NCT 127)",
+   "positions": [
+    "Leader",
+    "Main rapper",
+    "메인댄서] 보이그룹 메인 댄서즈 특집에 공식적으로 NCT 127의 메인댄서로서 참가했다.]",
+    "센터]에서 '단골 센터'를 맡고 있음을 밝혔다.]"
+   ],
+   "title": "태용"
+  },
+  "Q26689987": {
+   "positionsKo": "메인보컬 (NCT 127)",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ISFJ",
+   "title": "도영"
+  },
+  "Q26707663": {
+   "positionsKo": "메인댄서, 리드래퍼, 서브보컬]과 Really, Don’t Know What to do, You Never Know에서 보컬을 맡았다.]",
+   "positions": [
+    "Main dancer",
+    "Lead rapper",
+    "서브보컬]과 Really",
+    "Don’t Know What to do",
+    "You Never Know에서 보컬을 맡았다.]"
+   ],
+   "mbti": "ESFJ",
+   "title": "리사(BLACKPINK)"
+  },
+  "Q26707915": {
+   "positionsKo": "리더, 메인래퍼",
+   "positions": [
+    "Leader",
+    "Main rapper"
+   ],
+   "mbti": "INTP",
+   "title": "소연((여자)아이들)"
+  },
+  "Q26710973": {
+   "positionsKo": "리드보컬, 리드댄서",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ESFJ",
+   "title": "김도연(위키미키)"
+  },
+  "Q26710983": {
+   "positionsKo": "메인댄서, 메인래퍼, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "ISFP",
+   "title": "최유정(위키미키)"
+  },
+  "Q26919611": {
+   "positionsKo": "리더, 메인래퍼, 서브보컬, 리드댄서",
+   "positions": [
+    "Leader",
+    "Main rapper",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "기희현"
+  },
+  "Q27431345": {
+   "positionsKo": "센터, 리드래퍼, 리드댄서, 서브보컬 (NCT DREAM)",
+   "positions": [
+    "Center",
+    "Lead rapper",
+    "Lead dancer",
+    "Sub vocalist"
+   ],
+   "mbti": "ISFJ",
+   "title": "재민"
+  },
+  "Q276158": {
+   "positionsKo": "서브보컬, 메인댄서]과 더블 메인댄서 체제.]",
+   "positions": [
+    "Sub vocalist",
+    "메인댄서]과 더블 메인댄서 체제.]"
+   ],
+   "mbti": "ENFJ",
+   "title": "유리(소녀시대)"
+  },
+  "Q27655344": {
+   "positionsKo": "메인보컬, 리드댄서]]",
+   "positions": [
+    "Main vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ENFP",
+   "title": "로제(BLACKPINK)"
+  },
+  "Q27655361": {
+   "positionsKo": "리드보컬] ]",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ESTJ",
+   "title": "지수(BLACKPINK)"
+  },
+  "Q27658440": {
+   "positionsKo": "센터, 서브보컬",
+   "positions": [
+    "Center",
+    "Sub vocalist"
+   ],
+   "title": "이나은"
+  },
+  "Q27658442": {
+   "positionsKo": "메인댄서, 리드래퍼, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Lead rapper",
+    "Sub vocalist"
+   ],
+   "title": "양예나"
+  },
+  "Q27748771": {
+   "positionsKo": "7단, 서브보컬",
+   "positions": [
+    "7단",
+    "Sub vocalist"
+   ],
+   "title": "정미미"
+  },
+  "Q27748792": {
+   "positionsKo": "6단, 메인보컬",
+   "positions": [
+    "6단",
+    "Main vocalist"
+   ],
+   "title": "한해빈"
+  },
+  "Q27748793": {
+   "positionsKo": "1단, 리더, 메인댄서, 서브보컬",
+   "positions": [
+    "1단",
+    "Leader",
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "신보라(1993)"
+  },
+  "Q27748795": {
+   "positionsKo": "메인댄서, 리드래퍼",
+   "positions": [
+    "Main dancer",
+    "Lead rapper"
+   ],
+   "title": "류셰닝"
+  },
+  "Q27748796": {
+   "positionsKo": "2단, 메인보컬",
+   "positions": [
+    "2단",
+    "Main vocalist"
+   ],
+   "title": "장소진"
+  },
+  "Q27951483": {
+   "positionsKo": "리더, 서브보컬",
+   "positions": [
+    "Leader",
+    "Sub vocalist"
+   ],
+   "title": "재이"
+  },
+  "Q27951485": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "유권"
+  },
+  "Q27951527": {
+   "positionsKo": "리더], UNB 둘 다 본인이 리더이다.], 리드래퍼, 메인댄서",
+   "positions": [
+    "Leader",
+    "UNB 둘 다 본인이 리더이다.]",
+    "Lead rapper",
+    "Main dancer"
+   ],
+   "title": "필독"
+  },
+  "Q27951584": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "기현"
+  },
+  "Q27951585": {
+   "positionsKo": "리더, 메인래퍼, 메인댄서",
+   "positions": [
+    "Leader",
+    "Main rapper",
+    "Main dancer"
+   ],
+   "mbti": "ISFJ",
+   "title": "JR(뉴이스트)"
+  },
+  "Q27951586": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "린지(FIESTAR)"
+  },
+  "Q27951671": {
+   "positionsKo": "서브래퍼, 서브보컬, 리드댄서",
+   "positions": [
+    "Sub rapper",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "INFP",
+   "title": "루시(위키미키)"
+  },
+  "Q27951936": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "mbti": "ESFJ",
+   "title": "성연"
+  },
+  "Q27952182": {
+   "positionsKo": "리더, 보컬",
+   "positions": [
+    "Leader",
+    "Vocalist"
+   ],
+   "title": "박장현"
+  },
+  "Q27953988": {
+   "positionsKo": "래퍼",
+   "positions": [
+    "Rapper"
+   ],
+   "title": "박시연(2000)"
+  },
+  "Q28063461": {
+   "positionsKo": "메인래퍼, 서브보컬, 리드댄서",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "레이첼(APRIL)"
+  },
+  "Q28549782": {
+   "positionsKo": "리드래퍼",
+   "positions": [
+    "Lead rapper"
+   ],
+   "title": "아이엠"
+  },
+  "Q28549791": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "형원"
+  },
+  "Q28653640": {
+   "positionsKo": "메인보컬 (NCT 127)",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ISFP",
+   "title": "태일(NCT)"
+  },
+  "Q28669460": {
+   "positionsKo": "Color jokeR, 리드보컬, 서브래퍼, 리드댄서",
+   "positions": [
+    "Color jokeR",
+    "Lead vocalist",
+    "Sub rapper",
+    "Lead dancer"
+   ],
+   "title": "전지우"
+  },
+  "Q28698246": {
+   "positionsKo": "센터, 서브보컬",
+   "positions": [
+    "Center",
+    "Sub vocalist"
+   ],
+   "title": "김우석(업텐션)"
+  },
+  "Q28698248": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "선율(업텐션)"
+  },
+  "Q28698250": {
+   "positionsKo": "메인래퍼, 메인댄서",
+   "positions": [
+    "Main rapper",
+    "Main dancer"
+   ],
+   "title": "비토(업텐션)"
+  },
+  "Q28698283": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "최유진(CLC)"
+  },
+  "Q28741579": {
+   "positionsKo": "메인래퍼, 리드댄서, 서브보컬 (NCT DREAM)",
+   "positions": [
+    "Main rapper",
+    "Lead dancer",
+    "Sub vocalist"
+   ],
+   "title": "제노(NCT)"
+  },
+  "Q28790327": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "ISFJ",
+   "title": "다원(SF9)"
+  },
+  "Q28790332": {
+   "positionsKo": "센터, 리드보컬",
+   "positions": [
+    "Center",
+    "Lead vocalist"
+   ],
+   "mbti": "INFJ",
+   "title": "로운"
+  },
+  "Q28819523": {
+   "positionsKo": "4단, 리드보컬",
+   "positions": [
+    "4단",
+    "Lead vocalist"
+   ],
+   "title": "김나영(1995)"
+  },
+  "Q28824304": {
+   "positionsKo": "Ace, 메인래퍼, 리드댄서, 서브보컬",
+   "positions": [
+    "Ace",
+    "Main rapper",
+    "Lead dancer",
+    "Sub vocalist"
+   ],
+   "title": "J.Seph"
+  },
+  "Q28870934": {
+   "positionsKo": "前 리드댄서, 서브보컬",
+   "positions": [
+    "Lead dancer",
+    "Sub vocalist"
+   ],
+   "title": "나현(1995)"
+  },
+  "Q28970744": {
+   "positionsKo": "래퍼",
+   "positions": [
+    "Rapper"
+   ],
+   "title": "카일라"
+  },
+  "Q29876869": {
+   "positionsKo": "랩",
+   "positions": [
+    "Rapper"
+   ],
+   "title": "미미(오마이걸)"
+  },
+  "Q29876894": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "아린(오마이걸)"
+  },
+  "Q29994676": {
+   "mbti": "INFP",
+   "title": "연우"
+  },
+  "Q30006465": {
+   "positionsKo": "래퍼,댄서",
+   "positions": [
+    "Rapper",
+    "Dancer"
+   ],
+   "title": "종섭"
+  },
+  "Q30014912": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ESFJ",
+   "title": "민현"
+  },
+  "Q30014943": {
+   "positionsKo": "래퍼, 보컬",
+   "positions": [
+    "Rapper",
+    "Vocalist"
+   ],
+   "mbti": "ISFP",
+   "title": "아론(뉴이스트)"
+  },
+  "Q30243794": {
+   "positionsKo": "메인보컬]]",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "예빈(DIA)"
+  },
+  "Q30311684": {
+   "positionsKo": "서브래퍼",
+   "positions": [
+    "Sub rapper"
+   ],
+   "title": "라이관린"
+  },
+  "Q30311706": {
+   "positionsKo": "메인래퍼, 메인댄서",
+   "positions": [
+    "Main rapper",
+    "Main dancer"
+   ],
+   "mbti": "ENFJ",
+   "title": "박우진"
+  },
+  "Q30311753": {
+   "positionsKo": "리드보컬, 리드댄서",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ENFP",
+   "title": "옹성우"
+  },
+  "Q30311766": {
+   "positionsKo": "리더, 서브보컬",
+   "positions": [
+    "Leader",
+    "Sub vocalist"
+   ],
+   "title": "윤지성"
+  },
+  "Q30311778": {
+   "positionsKo": "리드보컬, 메인 프로듀서",
+   "positions": [
+    "Lead vocalist",
+    "Producer"
+   ],
+   "mbti": "ESFJ",
+   "title": "이대휘"
+  },
+  "Q30313912": {
+   "positionsKo": "센터, 보컬, 댄서",
+   "positions": [
+    "Center",
+    "Vocalist",
+    "Dancer"
+   ],
+   "mbti": "ESFP",
+   "title": "배진영"
+  },
+  "Q30313948": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "하성운"
+  },
+  "Q30921468": {
+   "positionsKo": "리드보컬, 서브래퍼]의 Darling My Sugar 에서 랩 파트를 맡았고, NEWTRO의 수록곡인 5분만에서도 랩 파트를 맡았다.], 리드댄서]]",
+   "positions": [
+    "Lead vocalist",
+    "서브래퍼]의 Darling My Sugar 에서 랩 파트를 맡았고",
+    "NEWTRO의 수록곡인 5분만에서도 랩 파트를 맡았다.]",
+    "Lead dancer"
+   ],
+   "title": "은채"
+  },
+  "Q30944712": {
+   "positionsKo": "리더, 리드보컬",
+   "positions": [
+    "Leader",
+    "Lead vocalist"
+   ],
+   "title": "유정(라붐)"
+  },
+  "Q30945670": {
+   "positionsKo": "메인보컬 (NCT DREAM)",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "천러"
+  },
+  "Q31177864": {
+   "positionsKo": "서브보컬, 리드래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Lead rapper"
+   ],
+   "title": "임소영"
+  },
+  "Q31179676": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "태일(블락비)"
+  },
+  "Q340123": {
+   "positionsKo": "리더, 메인댄서, 서브보컬",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "빅토리아(f(x))"
+  },
+  "Q34438189": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "ESFJ",
+   "title": "김동현(AB6IX)"
+  },
+  "Q34441900": {
+   "positionsKo": "서브보컬, 메인댄서 (핫샷), 리더, 리드보컬, 메인댄서 (JBJ)",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer",
+    "Leader",
+    "Lead vocalist"
+   ],
+   "title": "노태현"
+  },
+  "Q34442955": {
+   "positionsKo": "메인보컬, 메인댄서",
+   "positions": [
+    "Main vocalist",
+    "Main dancer"
+   ],
+   "title": "켄타(가수)"
+  },
+  "Q3675341": {
+   "positionsKo": "리드래퍼, 리드댄서",
+   "positions": [
+    "Lead rapper",
+    "Lead dancer"
+   ],
+   "mbti": "ENFP",
+   "title": "젤로"
+  },
+  "Q380123": {
+   "positionsKo": "서브보컬, 서브래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "title": "희철"
+  },
+  "Q3809977": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "문종업"
+  },
+  "Q38571183": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "장예은"
+  },
+  "Q38572171": {
+   "positionsKo": "서브래퍼, 서브보컬",
+   "positions": [
+    "Sub rapper",
+    "Sub vocalist"
+   ],
+   "title": "권은빈"
+  },
+  "Q41201062": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "홍석"
+  },
+  "Q41513728": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "지한솔"
+  },
+  "Q41967606": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ISTP",
+   "title": "진호(펜타곤)"
+  },
+  "Q42302579": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "신혜진"
+  },
+  "Q42650401": {
+   "positionsKo": "메인댄서, 리드보컬 (WEi)",
+   "positions": [
+    "Main dancer",
+    "Lead vocalist"
+   ],
+   "title": "김동한(WEi)"
+  },
+  "Q42680244": {
+   "mbti": "INFP",
+   "title": "우원재"
+  },
+  "Q42850795": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "INFJ",
+   "title": "세이(위키미키)"
+  },
+  "Q42907478": {
+   "positionsKo": "센터, 리더 (UNINE), 리드보컬 (UNIQ)",
+   "positions": [
+    "Center",
+    "Leader",
+    "Lead vocalist"
+   ],
+   "title": "리원한"
+  },
+  "Q43073768": {
+   "positionsKo": "리드보컬, 리드댄서",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "title": "인수(마이네임)"
+  },
+  "Q43089334": {
+   "positionsKo": "서브보컬, 댄스",
+   "positions": [
+    "Sub vocalist",
+    "댄스"
+   ],
+   "title": "최보민"
+  },
+  "Q43089410": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "홍주찬"
+  },
+  "Q43089418": {
+   "positionsKo": "리더, 메인보컬, 리드댄서",
+   "positions": [
+    "Leader",
+    "Main vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ISFJ",
+   "title": "후이"
+  },
+  "Q43110976": {
+   "positionsKo": "리드래퍼",
+   "positions": [
+    "Lead rapper"
+   ],
+   "title": "뉴썬"
+  },
+  "Q43111145": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "아인(모모랜드)"
+  },
+  "Q43111227": {
+   "positionsKo": "리더, 메인댄서, 서브보컬",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "의진(소나무)"
+  },
+  "Q43431125": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "mbti": "ISFJ",
+   "title": "지수연(위키미키)"
+  },
+  "Q4460516": {
+   "positionsKo": "리드보컬, 리드댄서",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ESFJ",
+   "title": "김남주(Apink)"
+  },
+  "Q450171": {
+   "positionsKo": "리드보컬, 메인보컬]에서는 리드보컬, jtL에서는 메인보컬을 맡고 있다.], 래퍼",
+   "positions": [
+    "Lead vocalist",
+    "메인보컬]에서는 리드보컬",
+    "jtL에서는 메인보컬을 맡고 있다.]",
+    "Rapper"
+   ],
+   "title": "토니 안"
+  },
+  "Q461117": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "다나(가수)"
+  },
+  "Q464623": {
+   "positionsKo": "센터, 리드보컬",
+   "positions": [
+    "Center",
+    "Lead vocalist"
+   ],
+   "title": "정수정"
+  },
+  "Q466975": {
+   "positionsKo": "센터, 서브보컬, 리드댄서",
+   "positions": [
+    "Center",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ESFP",
+   "title": "윤아"
+  },
+  "Q4688701": {
+   "positionsKo": "메인보컬 (EXO)",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ISFP",
+   "title": "백현"
+  },
+  "Q47460217": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ESFP",
+   "title": "엘리(위키미키)"
+  },
+  "Q47524999": {
+   "positionsKo": "메인래퍼, 리드보컬, 리드댄서",
+   "positions": [
+    "Main rapper",
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ESFP",
+   "title": "주이(모모랜드)"
+  },
+  "Q47664570": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "마히로(Z-GIRLS)"
+  },
+  "Q47665386": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "mbti": "ENFJ",
+   "title": "주호(SF9)"
+  },
+  "Q47669568": {
+   "positionsKo": "리드래퍼, 서브보컬",
+   "positions": [
+    "Lead rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "INTP",
+   "title": "루아(위키미키)"
+  },
+  "Q47672191": {
+   "positionsKo": "없음",
+   "positions": [
+    "없음"
+   ],
+   "title": "최문희"
+  },
+  "Q47687990": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "INFJ",
+   "title": "리나(위키미키)"
+  },
+  "Q47690025": {
+   "positionsKo": "서브보컬, 서브래퍼 (NCT 127)",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "mbti": "ENTP",
+   "title": "쟈니"
+  },
+  "Q47973704": {
+   "positionsKo": "리더, 메인댄서, 리드래퍼",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Lead rapper"
+   ],
+   "title": "유지(써드아이)"
+  },
+  "Q4798670": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "오하영"
+  },
+  "Q482519": {
+   "positionsKo": "서브보컬, 메인래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Main rapper"
+   ],
+   "title": "박유천"
+  },
+  "Q482783": {
+   "positionsKo": "리드보컬, 메인댄서",
+   "positions": [
+    "Lead vocalist",
+    "Main dancer"
+   ],
+   "title": "김준수(JYJ)"
+  },
+  "Q482855": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ESFJ",
+   "title": "려욱"
+  },
+  "Q482991": {
+   "positionsKo": "메인보컬, 메인댄서, 서브래퍼",
+   "positions": [
+    "Main vocalist",
+    "Main dancer",
+    "Sub rapper"
+   ],
+   "title": "태양(빅뱅)"
+  },
+  "Q483041": {
+   "positionsKo": "메인보컬, 리드래퍼, 리드댄서",
+   "positions": [
+    "Main vocalist",
+    "Lead rapper",
+    "Lead dancer"
+   ],
+   "title": "최강창민"
+  },
+  "Q483158": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "예성(슈퍼주니어)"
+  },
+  "Q483161": {
+   "positionsKo": "메인댄서, 메인래퍼, 서브보컬] 활동 시에는 메인댄서, 메인래퍼, 리드보컬을 맡는다.]",
+   "positions": [
+    "Main dancer",
+    "Main rapper",
+    "서브보컬] 활동 시에는 메인댄서",
+    "리드보컬을 맡는다.]"
+   ],
+   "mbti": "ENFP",
+   "title": "은혁"
+  },
+  "Q483171": {
+   "positionsKo": "리드댄서, 서브보컬, 서브래퍼",
+   "positions": [
+    "Lead dancer",
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "title": "신동(슈퍼주니어)"
+  },
+  "Q483288": {
+   "positionsKo": "서브보컬, 리드래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Lead rapper"
+   ],
+   "mbti": "INFJ",
+   "title": "닉쿤"
+  },
+  "Q483363": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "택연"
+  },
+  "Q483571": {
+   "mbti": "ENTJ",
+   "title": "이승기"
+  },
+  "Q483581": {
+   "positionsKo": "리더, 메인댄서, 서브보컬",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "김종민"
+  },
+  "Q483633": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "안소희"
+  },
+  "Q483638": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "핫펠트"
+  },
+  "Q483642": {
+   "positionsKo": "前 리더, 리드보컬",
+   "positions": [
+    "Leader",
+    "Lead vocalist"
+   ],
+   "title": "선예"
+  },
+  "Q483842": {
+   "mbti": "INTJ",
+   "title": "공민지"
+  },
+  "Q483926": {
+   "positionsKo": "리드보컬, 메인래퍼, 메인댄서",
+   "positions": [
+    "Lead vocalist",
+    "Main rapper",
+    "Main dancer"
+   ],
+   "title": "김형준"
+  },
+  "Q484209": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "김태우(god)"
+  },
+  "Q484387": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "데니 안"
+  },
+  "Q484394": {
+   "positionsKo": "리더, 리드래퍼, 메인댄서",
+   "positions": [
+    "Leader",
+    "Lead rapper",
+    "Main dancer"
+   ],
+   "title": "박준형(god)"
+  },
+  "Q484484": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "종현"
+  },
+  "Q484812": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "신혜성"
+  },
+  "Q484834": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "이홍기"
+  },
+  "Q484843": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "박정민(SS501)"
+  },
+  "Q484850": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "윤계상"
+  },
+  "Q484886": {
+   "mbti": "ENFJ",
+   "title": "소연(1987)"
+  },
+  "Q485667": {
+   "positionsKo": "리더, 리드보컬",
+   "positions": [
+    "Leader",
+    "Lead vocalist"
+   ],
+   "title": "조권"
+  },
+  "Q485672": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "가인(브라운 아이드 걸스)"
+  },
+  "Q486196": {
+   "positionsKo": "리드보컬, 리드래퍼",
+   "positions": [
+    "Lead vocalist",
+    "Lead rapper"
+   ],
+   "title": "박수영(1992)"
+  },
+  "Q486478": {
+   "positionsKo": "서브보컬, 리드래퍼, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead rapper",
+    "Lead dancer"
+   ],
+   "title": "전진(신화)"
+  },
+  "Q486536": {
+   "mbti": "INFP",
+   "title": "오연서"
+  },
+  "Q486649": {
+   "positionsKo": "서브래퍼, 리드댄서",
+   "positions": [
+    "Sub rapper",
+    "Lead dancer"
+   ],
+   "title": "앤디(신화)"
+  },
+  "Q487010": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "손동운"
+  },
+  "Q487560": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "INFJ",
+   "title": "성유리"
+  },
+  "Q487831": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "INTP",
+   "title": "정은지"
+  },
+  "Q487897": {
+   "mbti": "ESTP",
+   "title": "큐리"
+  },
+  "Q488344": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "mbti": "ESFP",
+   "title": "우영(2PM)"
+  },
+  "Q488400": {
+   "positionsKo": "서브보컬, 서브래퍼, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper",
+    "Lead dancer"
+   ],
+   "title": "김규종"
+  },
+  "Q48852365": {
+   "positionsKo": "리더]가 리더였으나, '예뻐지게' 활동부터 리더 자리를 물려받았다.], 리드보컬, 메인댄서",
+   "positions": [
+    "리더]가 리더였으나",
+    "'예뻐지게' 활동부터 리더 자리를 물려받았다.]",
+    "Lead vocalist",
+    "Main dancer"
+   ],
+   "title": "장승연"
+  },
+  "Q488600": {
+   "positionsKo": "리더, 리드보컬, 리드댄서, 서브래퍼",
+   "positions": [
+    "Leader",
+    "Lead vocalist",
+    "Lead dancer",
+    "Sub rapper"
+   ],
+   "title": "문희준"
+  },
+  "Q48893617": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "예하나"
+  },
+  "Q489432": {
+   "positionsKo": "메인보컬, 리드댄서",
+   "positions": [
+    "Main vocalist",
+    "Lead dancer"
+   ],
+   "title": "루나(f(x))"
+  },
+  "Q489459": {
+   "positionsKo": "메인보컬, 서브래퍼",
+   "positions": [
+    "Main vocalist",
+    "Sub rapper"
+   ],
+   "title": "조미(슈퍼주니어-M)"
+  },
+  "Q489556": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "엠버(f(x))"
+  },
+  "Q489640": {
+   "mbti": "ESFP",
+   "title": "지석진"
+  },
+  "Q489667": {
+   "positionsKo": "리드보컬, 서브래퍼",
+   "positions": [
+    "Lead vocalist",
+    "Sub rapper"
+   ],
+   "title": "손호영"
+  },
+  "Q489838": {
+   "positionsKo": "리더, 서브보컬, 서브래퍼",
+   "positions": [
+    "Leader",
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "mbti": "ENTJ",
+   "title": "이특"
+  },
+  "Q489854": {
+   "positionsKo": "리더, 서브보컬, 서브래퍼",
+   "positions": [
+    "Leader",
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "title": "김현중(SS501)"
+  },
+  "Q491278": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "나르샤(브라운 아이드 걸스)"
+  },
+  "Q491364": {
+   "positionsKo": "리더, 서브보컬",
+   "positions": [
+    "Leader",
+    "Sub vocalist"
+   ],
+   "title": "윤두준"
+  },
+  "Q491580": {
+   "positionsKo": "리더, 메인래퍼",
+   "positions": [
+    "Leader",
+    "Main rapper"
+   ],
+   "title": "에릭(신화)"
+  },
+  "Q491902": {
+   "positionsKo": "리드래퍼, 베이스",
+   "positions": [
+    "Lead rapper",
+    "베이스"
+   ],
+   "title": "이정신"
+  },
+  "Q492065": {
+   "mbti": "ENTP",
+   "title": "제이미(가수)"
+  },
+  "Q49233458": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "ENFJ",
+   "title": "박서함"
+  },
+  "Q492666": {
+   "positionsKo": "센터, 서브보컬",
+   "positions": [
+    "Center",
+    "Sub vocalist"
+   ],
+   "mbti": "INTJ",
+   "title": "손나은"
+  },
+  "Q492738": {
+   "positionsKo": "리더, 서브보컬",
+   "positions": [
+    "Leader",
+    "Sub vocalist"
+   ],
+   "mbti": "ESFJ",
+   "title": "박초롱"
+  },
+  "Q492767": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "이영"
+  },
+  "Q493514": {
+   "positionsKo": "서브보컬, 래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Rapper"
+   ],
+   "title": "지혁"
+  },
+  "Q493566": {
+   "positionsKo": "메인래퍼, 리드댄서",
+   "positions": [
+    "Main rapper",
+    "Lead dancer"
+   ],
+   "title": "건일"
+  },
+  "Q493731": {
+   "positionsKo": "리드래퍼, 메인댄서",
+   "positions": [
+    "Lead rapper",
+    "Main dancer"
+   ],
+   "title": "광수"
+  },
+  "Q493899": {
+   "positionsKo": "서브보컬, 리드래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Lead rapper"
+   ],
+   "title": "혜림"
+  },
+  "Q494222": {
+   "positionsKo": "리드보컬, 리드댄서",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "title": "성민(슈퍼주니어)"
+  },
+  "Q494692": {
+   "positionsKo": "리더, 리드보컬",
+   "positions": [
+    "Leader",
+    "Lead vocalist"
+   ],
+   "mbti": "ISFP",
+   "title": "온유(샤이니)"
+  },
+  "Q494725": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "윤은혜"
+  },
+  "Q494816": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ESFJ",
+   "title": "규현"
+  },
+  "Q494851": {
+   "positionsKo": "리더, 메인래퍼, 서브보컬",
+   "positions": [
+    "Leader",
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "ISTP",
+   "title": "은지원"
+  },
+  "Q495571": {
+   "positionsKo": "리드래퍼, 서브보컬",
+   "positions": [
+    "Lead rapper",
+    "Sub vocalist"
+   ],
+   "title": "T.O.P"
+  },
+  "Q495577": {
+   "positionsKo": "리더, 메인래퍼, 서브보컬",
+   "positions": [
+    "Leader",
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "G-DRAGON"
+  },
+  "Q496229": {
+   "positionsKo": "리더, 메인래퍼",
+   "positions": [
+    "Leader",
+    "Main rapper"
+   ],
+   "title": "방용국"
+  },
+  "Q496362": {
+   "positionsKo": "서브보컬, 서브래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "mbti": "ENFP",
+   "title": "찬성(2PM)"
+  },
+  "Q496580": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "유빈"
+  },
+  "Q497283": {
+   "positionsKo": "메인래퍼, 메인댄서",
+   "positions": [
+    "Main rapper",
+    "Main dancer"
+   ],
+   "title": "장우혁"
+  },
+  "Q497319": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "김동완(신화)"
+  },
+  "Q497761": {
+   "positionsKo": "메인래퍼, 서브보컬, 리드댄서",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "정하나(시크릿)"
+  },
+  "Q50109116": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "지엔(라붐)"
+  },
+  "Q5103936": {
+   "positionsKo": "드럼",
+   "positions": [
+    "드럼"
+   ],
+   "title": "최민환"
+  },
+  "Q5244665": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "임슬옹"
+  },
+  "Q53316231": {
+   "mbti": "ENFP",
+   "title": "혜빈"
+  },
+  "Q53316644": {
+   "positionsKo": "메인댄서, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "mbti": "ESTJ",
+   "title": "제인(모모랜드)"
+  },
+  "Q53316840": {
+   "positionsKo": "서브보컬, 서브래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "mbti": "ENFP",
+   "title": "나윤"
+  },
+  "Q53334919": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "장규리"
+  },
+  "Q5372469": {
+   "positionsKo": "리더, 서브보컬, 메인래퍼",
+   "positions": [
+    "Leader",
+    "Sub vocalist",
+    "Main rapper"
+   ],
+   "title": "김이지"
+  },
+  "Q541255": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "린아"
+  },
+  "Q54553939": {
+   "positionsKo": "리더, 메인 댄서",
+   "positions": [
+    "Leader",
+    "Main dancer"
+   ],
+   "title": "아인(일급비밀)"
+  },
+  "Q54597211": {
+   "positionsKo": "리드보컬, 막내",
+   "positions": [
+    "Lead vocalist",
+    "Maknae"
+   ],
+   "mbti": "ESTP",
+   "title": "가린"
+  },
+  "Q54598370": {
+   "positionsKo": "캡틴, 서브보컬, 리드댄서",
+   "positions": [
+    "캡틴",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "이새롬"
+  },
+  "Q54598788": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "해인"
+  },
+  "Q5512084": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "지오(엠블랙)"
+  },
+  "Q55287305": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "슈화"
+  },
+  "Q55694622": {
+   "positionsKo": "리드보컬, 리드댄서",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "title": "안유진(IZ*ONE)"
+  },
+  "Q55695609": {
+   "positionsKo": "리드댄서, 서브보컬",
+   "positions": [
+    "Lead dancer",
+    "Sub vocalist"
+   ],
+   "title": "소소(공원소녀)"
+  },
+  "Q55727455": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "고호정"
+  },
+  "Q55729432": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "록현"
+  },
+  "Q55732454": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "우진영"
+  },
+  "Q55735655": {
+   "positionsKo": "메인래퍼^^(빅플로)^^",
+   "positions": [
+    "메인래퍼^^^^"
+   ],
+   "title": "임현태"
+  },
+  "Q55736774": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "김지범"
+  },
+  "Q55736873": {
+   "positionsKo": "보컬, 안무",
+   "positions": [
+    "Vocalist",
+    "안무"
+   ],
+   "title": "박대원"
+  },
+  "Q55737110": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ENTJ",
+   "title": "배승민"
+  },
+  "Q55737161": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "ESFP",
+   "title": "봉재현"
+  },
+  "Q55737695": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "mbti": "ENFP",
+   "title": "이장준"
+  },
+  "Q56259179": {
+   "mbti": "ENTJ",
+   "title": "희진(이달의 소녀)"
+  },
+  "Q56259872": {
+   "positionsKo": "리드댄서, 서브래퍼, 서브보컬",
+   "positions": [
+    "Lead dancer",
+    "Sub rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "INFJ",
+   "title": "윈윈"
+  },
+  "Q56259927": {
+   "positionsKo": "메인보컬]와 함께 더블 메인보컬 체제이다.참고 영상]",
+   "positions": [
+    "메인보컬]와 함께 더블 메인보컬 체제이다.참고 영상]"
+   ],
+   "mbti": "ENFP",
+   "title": "미연"
+  },
+  "Q56278318": {
+   "positionsKo": "리드보컬]에서는 메인보컬이다.]",
+   "positions": [
+    "리드보컬]에서는 메인보컬이다.]"
+   ],
+   "mbti": "ENTP",
+   "title": "윤산하"
+  },
+  "Q56441288": {
+   "positionsKo": "메인댄서, 리드보컬, 서브래퍼",
+   "positions": [
+    "Main dancer",
+    "Lead vocalist",
+    "Sub rapper"
+   ],
+   "title": "이채연(IZ*ONE)"
+  },
+  "Q56476186": {
+   "positionsKo": "센터, 서브보컬, 서브래퍼",
+   "positions": [
+    "Center",
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "title": "장원영(IZ*ONE)"
+  },
+  "Q56479085": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "혼다 히토미"
+  },
+  "Q56505060": {
+   "positionsKo": "리더, 메인댄서, 리드보컬",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Lead vocalist"
+   ],
+   "title": "권은비"
+  },
+  "Q56506824": {
+   "positionsKo": "리드래퍼, 서브보컬",
+   "positions": [
+    "Lead rapper",
+    "Sub vocalist"
+   ],
+   "title": "강혜원"
+  },
+  "Q56660171": {
+   "positionsKo": "서브보컬, 서브래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "title": "김민주(IZ*ONE)"
+  },
+  "Q56660174": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "김채원(IZ*ONE)"
+  },
+  "Q56660176": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "백지헌"
+  },
+  "Q56660256": {
+   "positionsKo": "메인래퍼, 서브보컬, 리드댄서",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "이서연"
+  },
+  "Q56678033": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "조유리"
+  },
+  "Q56690776": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "mbti": "ISFJ",
+   "title": "강승식"
+  },
+  "Q56761923": {
+   "positionsKo": "메인보컬]과 함께 더블 메인보컬 체제이다.참고 영상]",
+   "positions": [
+    "메인보컬]과 함께 더블 메인보컬 체제이다.참고 영상]"
+   ],
+   "mbti": "ENFJ",
+   "title": "민니"
+  },
+  "Q56816418": {
+   "mbti": "ESTP",
+   "title": "김립(이달의 소녀)"
+  },
+  "Q56816551": {
+   "mbti": "ENFP",
+   "title": "츄(이달의 소녀)"
+  },
+  "Q56819291": {
+   "positionsKo": "메인래퍼, 리드댄서",
+   "positions": [
+    "Main rapper",
+    "Lead dancer"
+   ],
+   "mbti": "INTP",
+   "title": "도한세"
+  },
+  "Q56825122": {
+   "mbti": "ISFJ",
+   "title": "진솔(이달의 소녀)"
+  },
+  "Q56826864": {
+   "positionsKo": "리더, 서브보컬",
+   "positions": [
+    "Leader",
+    "Sub vocalist"
+   ],
+   "title": "진권(뉴키드)"
+  },
+  "Q57601775": {
+   "positionsKo": "댄서, 래퍼",
+   "positions": [
+    "Dancer",
+    "Rapper"
+   ],
+   "mbti": "INFP",
+   "title": "현진(Stray Kids)"
+  },
+  "Q58224261": {
+   "mbti": "ENFP",
+   "title": "최리(이달의 소녀)"
+  },
+  "Q58816684": {
+   "positionsKo": "센터, 서브보컬",
+   "positions": [
+    "Center",
+    "Sub vocalist"
+   ],
+   "title": "노지선"
+  },
+  "Q58825704": {
+   "mbti": "INFJ",
+   "title": "이브(이달의 소녀)"
+  },
+  "Q58825794": {
+   "mbti": "INTP",
+   "title": "고원(이달의 소녀)"
+  },
+  "Q5909378": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "mbti": "ISTJ",
+   "title": "엘(인피니트)"
+  },
+  "Q59260597": {
+   "positionsKo": "댄서, 보컬, 래퍼",
+   "positions": [
+    "Dancer",
+    "Vocalist",
+    "Rapper"
+   ],
+   "mbti": "ESFP",
+   "title": "리노(Stray Kids)"
+  },
+  "Q59313184": {
+   "positionsKo": "리더, 서브보컬, 리드댄서",
+   "positions": [
+    "Leader",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ENFP",
+   "title": "지유(드림캐쳐)"
+  },
+  "Q59313270": {
+   "positionsKo": "서브보컬, 서브래퍼, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper",
+    "Main dancer"
+   ],
+   "mbti": "ENFJ",
+   "title": "수아(드림캐쳐)"
+  },
+  "Q59313326": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ENTP",
+   "title": "시연(드림캐쳐)"
+  },
+  "Q59313384": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "한동"
+  },
+  "Q59313527": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "INFJ",
+   "title": "다미(드림캐쳐)"
+  },
+  "Q59313606": {
+   "positionsKo": "서브보컬, 리드래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Lead rapper"
+   ],
+   "mbti": "ISTP",
+   "title": "가현"
+  },
+  "Q59594098": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ISFJ",
+   "title": "규진"
+  },
+  "Q59670293": {
+   "positionsKo": "리더, 프로듀서, 보컬, 래퍼, 댄서",
+   "positions": [
+    "Leader",
+    "Producer",
+    "Vocalist",
+    "Rapper",
+    "Dancer"
+   ],
+   "mbti": "ENFJ",
+   "title": "방찬"
+  },
+  "Q59831589": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "mbti": "ISFJ",
+   "title": "아이엔"
+  },
+  "Q60175319": {
+   "positionsKo": "메인댄서, 리드래퍼",
+   "positions": [
+    "Main dancer",
+    "Lead rapper"
+   ],
+   "title": "미야(공원소녀)"
+  },
+  "Q60229471": {
+   "positionsKo": "메인보컬, 리드댄서 (NCT DREAM)",
+   "positions": [
+    "Main vocalist",
+    "Lead dancer"
+   ],
+   "title": "런쥔"
+  },
+  "Q60233363": {
+   "positionsKo": "(활동 당시)서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "체스카"
+  },
+  "Q60467634": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "승민(Stray Kids)"
+  },
+  "Q60467873": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ENFJ",
+   "title": "유회승"
+  },
+  "Q60529282": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "ISFP",
+   "title": "이도(원어스)"
+  },
+  "Q60529366": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "INTP",
+   "title": "서호"
+  },
+  "Q60529407": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "ESFJ",
+   "title": "시온(원어스)"
+  },
+  "Q60529461": {
+   "positionsKo": "메인댄서, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "mbti": "ISTP",
+   "title": "환웅(원어스)"
+  },
+  "Q60566726": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "해윤"
+  },
+  "Q60566799": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "유주(체리블렛)"
+  },
+  "Q60566856": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "지원(체리블렛)"
+  },
+  "Q60567217": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "정인성"
+  },
+  "Q60608527": {
+   "positionsKo": "리드댄서, 서브보컬",
+   "positions": [
+    "Lead dancer",
+    "Sub vocalist"
+   ],
+   "title": "주학년"
+  },
+  "Q60829936": {
+   "positionsKo": "메인댄서, 서브보컬, 서브래퍼",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "mbti": "INFJ",
+   "title": "채령"
+  },
+  "Q60870265": {
+   "positionsKo": "센터, 메인래퍼, 서브보컬, 리드댄서",
+   "positions": [
+    "Center",
+    "Main rapper",
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "INTJ",
+   "title": "류진(ITZY)"
+  },
+  "Q60870268": {
+   "positionsKo": "리더, 메인댄서, 리드보컬, 서브래퍼",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Lead vocalist",
+    "Sub rapper"
+   ],
+   "mbti": "ESFJ",
+   "title": "예지(ITZY)"
+  },
+  "Q60873617": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "mbti": "ENFJ",
+   "title": "엘라(PIXY)"
+  },
+  "Q60873744": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "보라(체리블렛)"
+  },
+  "Q60874232": {
+   "positionsKo": "메인댄서, 보컬",
+   "positions": [
+    "Main dancer",
+    "Vocalist"
+   ],
+   "title": "레미(체리블렛)"
+  },
+  "Q60874396": {
+   "positionsKo": "메인댄서, 보컬",
+   "positions": [
+    "Main dancer",
+    "Vocalist"
+   ],
+   "title": "채린(체리블렛)"
+  },
+  "Q60874713": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "메이(체리블렛)"
+  },
+  "Q60991220": {
+   "positionsKo": "리드래퍼, 메인댄서",
+   "positions": [
+    "Lead rapper",
+    "Main dancer"
+   ],
+   "title": "라키(아스트로)"
+  },
+  "Q60991892": {
+   "positionsKo": "리더, 메인래퍼",
+   "positions": [
+    "Leader",
+    "Main rapper"
+   ],
+   "mbti": "ENFP",
+   "title": "진진(아스트로)"
+  },
+  "Q60993166": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "mbti": "ENFP",
+   "title": "하루(네이처)"
+  },
+  "Q60994278": {
+   "positionsKo": "래퍼, 프로듀서, 보컬",
+   "positions": [
+    "Rapper",
+    "Producer",
+    "Vocalist"
+   ],
+   "mbti": "INTP",
+   "title": "한(Stray Kids)"
+  },
+  "Q61100151": {
+   "positionsKo": "리드댄서, 서브보컬, 서브래퍼 (더보이즈)",
+   "positions": [
+    "Lead dancer",
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "title": "허현준(2000)"
+  },
+  "Q61100669": {
+   "positionsKo": "래퍼, 프로듀서, 보컬",
+   "positions": [
+    "Rapper",
+    "Producer",
+    "Vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "창빈"
+  },
+  "Q61100678": {
+   "positionsKo": "댄서, 래퍼",
+   "positions": [
+    "Dancer",
+    "Rapper"
+   ],
+   "mbti": "ENFP",
+   "title": "필릭스"
+  },
+  "Q61100807": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "현재(더보이즈)"
+  },
+  "Q61715235": {
+   "mbti": "ESTP",
+   "title": "태현"
+  },
+  "Q61715236": {
+   "mbti": "ENFP",
+   "title": "휴닝카이"
+  },
+  "Q61750285": {
+   "positionsKo": "리드래퍼, 리드댄서, 서브보컬",
+   "positions": [
+    "Lead rapper",
+    "Lead dancer",
+    "Sub vocalist"
+   ],
+   "title": "에릭(더보이즈)"
+  },
+  "Q61770153": {
+   "positionsKo": "센터, 메인래퍼, 서브보컬",
+   "positions": [
+    "Center",
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "도아"
+  },
+  "Q61863055": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "뉴(더보이즈)"
+  },
+  "Q61863254": {
+   "positionsKo": "반장(리더), 메인보컬",
+   "positions": [
+    "반장",
+    "Main vocalist"
+   ],
+   "title": "상연"
+  },
+  "Q61863509": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "영훈"
+  },
+  "Q61863639": {
+   "positionsKo": "리드래퍼]의 탈퇴로 리드래퍼가 되었고, 원래 리드래퍼였던 우석은 메인래퍼가 되었다.], 리드댄서",
+   "positions": [
+    "리드래퍼]의 탈퇴로 리드래퍼가 되었고",
+    "원래 리드래퍼였던 우석은 메인래퍼가 되었다.]",
+    "Lead dancer"
+   ],
+   "mbti": "INFP",
+   "title": "유토(펜타곤)"
+  },
+  "Q61863774": {
+   "positionsKo": "메인댄서, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "주연(더보이즈)"
+  },
+  "Q61863833": {
+   "positionsKo": "메인댄서, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "큐(더보이즈)"
+  },
+  "Q61863841": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "키노(펜타곤)"
+  },
+  "Q62083920": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "조앤(Z-GIRLS)"
+  },
+  "Q62396696": {
+   "mbti": "ENFJ",
+   "title": "범규"
+  },
+  "Q62396828": {
+   "positionsKo": "리더]의 유일한 포지션이다.]",
+   "positions": [
+    "리더]의 유일한 포지션이다.]"
+   ],
+   "mbti": "ISFP",
+   "title": "수빈(투모로우바이투게더)"
+  },
+  "Q62396954": {
+   "mbti": "ENFP",
+   "title": "연준"
+  },
+  "Q624207": {
+   "positionsKo": "서브보컬, 메인래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Main rapper"
+   ],
+   "title": "정진운"
+  },
+  "Q624995": {
+   "positionsKo": "서브보컬]]] 활동 때부터는 자주 후렴구 파트를 맡는 등 리드보컬 못지 않은 포지션을 맡게 되었다.]",
+   "positions": [
+    "서브보컬]]] 활동 때부터는 자주 후렴구 파트를 맡는 등 리드보컬 못지 않은 포지션을 맡게 되었다.]"
+   ],
+   "mbti": "INFP",
+   "title": "선미"
+  },
+  "Q625121": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "이진"
+  },
+  "Q625442": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "심은진"
+  },
+  "Q625527": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "title": "솔비"
+  },
+  "Q625566": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "장수원"
+  },
+  "Q62602942": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "오로라(네이처)"
+  },
+  "Q62602945": {
+   "positionsKo": "서브보컬, 리드래퍼, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead rapper",
+    "Lead dancer"
+   ],
+   "mbti": "INTJ",
+   "title": "새봄"
+  },
+  "Q62602961": {
+   "positionsKo": "리더, 리드보컬",
+   "positions": [
+    "Leader",
+    "Lead vocalist"
+   ],
+   "title": "루(네이처)"
+  },
+  "Q62602972": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ISFJ",
+   "title": "채빈(네이처)"
+  },
+  "Q62603002": {
+   "positionsKo": "메인래퍼, 서브보컬, 메인댄서",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "로하(네이처)"
+  },
+  "Q62613278": {
+   "positionsKo": "센터, 서브보컬, 서브래퍼, 리드댄서",
+   "positions": [
+    "Center",
+    "Sub vocalist",
+    "Sub rapper",
+    "Lead dancer"
+   ],
+   "mbti": "ENFJ",
+   "title": "이런(에버글로우)"
+  },
+  "Q626325": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "title": "제아(브라운 아이드 걸스)"
+  },
+  "Q626827": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "슈(1981)"
+  },
+  "Q62920133": {
+   "positionsKo": "리더, 메인래퍼, 메인댄서]와 함께 더블 메인댄서 체제.]",
+   "positions": [
+    "Leader",
+    "Main rapper",
+    "메인댄서]와 함께 더블 메인댄서 체제.]"
+   ],
+   "mbti": "ESFP",
+   "title": "이유(에버글로우)"
+  },
+  "Q62920418": {
+   "positionsKo": "메인보컬, 메인댄서]와 함께 더블 메인댄서 체제.]]를 비롯 수록곡들 및 참여 OST에서 랩 파트도 함께 겸하고 있다.]",
+   "positions": [
+    "Main vocalist",
+    "메인댄서]와 함께 더블 메인댄서 체제.]]를 비롯 수록곡들",
+    "참여 OST에서 랩 파트도 함께 겸하고 있다.]"
+   ],
+   "mbti": "INTP",
+   "title": "미아(에버글로우)"
+  },
+  "Q62920711": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ENFP",
+   "title": "온다(에버글로우)"
+  },
+  "Q62920953": {
+   "positionsKo": "리드래퍼, 서브보컬",
+   "positions": [
+    "Lead rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "ENTJ",
+   "title": "아샤(에버글로우)"
+  },
+  "Q62984417": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "구선하"
+  },
+  "Q63226265": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "가을(S.I.S)"
+  },
+  "Q63791115": {
+   "positionsKo": "리더, 메인래퍼",
+   "positions": [
+    "Leader",
+    "Main rapper"
+   ],
+   "mbti": "ENFJ",
+   "title": "BX"
+  },
+  "Q63791511": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "보니(드림노트)"
+  },
+  "Q63791514": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "라라(드림노트)"
+  },
+  "Q63791516": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "미소(드림노트)"
+  },
+  "Q63791520": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "은조"
+  },
+  "Q63850969": {
+   "positionsKo": "리더, 래퍼, 댄서",
+   "positions": [
+    "Leader",
+    "Rapper",
+    "Dancer"
+   ],
+   "mbti": "ENFP",
+   "title": "최현석(트레저)"
+  },
+  "Q63922309": {
+   "positionsKo": "센터, 메인래퍼",
+   "positions": [
+    "Center",
+    "Main rapper"
+   ],
+   "title": "조현(베리굿)"
+  },
+  "Q63943139": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "서유리(1997)"
+  },
+  "Q63964483": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ESFJ",
+   "title": "시명(BVNDIT)"
+  },
+  "Q63967134": {
+   "positionsKo": "서브보컬, 리드래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Lead rapper"
+   ],
+   "title": "다예"
+  },
+  "Q63993919": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "문유정(1998)"
+  },
+  "Q64038543": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ISFP",
+   "title": "송희"
+  },
+  "Q64038640": {
+   "positionsKo": "메인댄서, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "승은(BVNDIT)"
+  },
+  "Q64038706": {
+   "positionsKo": "리더, 메인래퍼, 서브보컬",
+   "positions": [
+    "Leader",
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "이연(BVNDIT)"
+  },
+  "Q64039138": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "정우(BVNDIT)"
+  },
+  "Q64039216": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "차희"
+  },
+  "Q6408602": {
+   "mbti": "INFJ",
+   "title": "김이나"
+  },
+  "Q6409458": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "mbti": "ISTJ",
+   "title": "김성규(인피니트)"
+  },
+  "Q64176781": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "title": "서령(공원소녀)"
+  },
+  "Q64176925": {
+   "positionsKo": "메인댄서, 서브보컬, 서브래퍼",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist",
+    "Sub rapper"
+   ],
+   "title": "서경(공원소녀)"
+  },
+  "Q64177448": {
+   "positionsKo": "센터, 리드보컬",
+   "positions": [
+    "Center",
+    "Lead vocalist"
+   ],
+   "title": "레나(공원소녀)"
+  },
+  "Q64604849": {
+   "positionsKo": "리드래퍼 (WayV)",
+   "positions": [
+    "Lead rapper"
+   ],
+   "title": "헨드리"
+  },
+  "Q64684322": {
+   "positionsKo": "메인보컬, 리드댄서",
+   "positions": [
+    "Main vocalist",
+    "Lead dancer"
+   ],
+   "mbti": "ENFP",
+   "title": "전웅"
+  },
+  "Q64785162": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "민이"
+  },
+  "Q64796810": {
+   "positionsKo": "리드래퍼",
+   "positions": [
+    "Lead rapper"
+   ],
+   "title": "이진혁(업텐션)"
+  },
+  "Q65048912": {
+   "positionsKo": "리드보컬, 서브래퍼",
+   "positions": [
+    "Lead vocalist",
+    "Sub rapper"
+   ],
+   "title": "MK(온앤오프)"
+  },
+  "Q65052562": {
+   "positionsKo": "리더, 리드보컬",
+   "positions": [
+    "Leader",
+    "Lead vocalist"
+   ],
+   "title": "루빈(1TEAM)"
+  },
+  "Q65054014": {
+   "positionsKo": "리더, 메인댄서, 메인래퍼",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Main rapper"
+   ],
+   "title": "한겸"
+  },
+  "Q65054605": {
+   "positionsKo": "리드보컬, 메인댄서",
+   "positions": [
+    "Lead vocalist",
+    "Main dancer"
+   ],
+   "mbti": "ESFP",
+   "title": "한결(BAE173)"
+  },
+  "Q65058867": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "형준"
+  },
+  "Q65330332": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "주은(DIA)"
+  },
+  "Q65832560": {
+   "positionsKo": "센터, 리드래퍼 (WEi)",
+   "positions": [
+    "Center",
+    "Lead rapper"
+   ],
+   "title": "김요한(WEi)"
+  },
+  "Q65920400": {
+   "positionsKo": "리더",
+   "positions": [
+    "Leader"
+   ],
+   "mbti": "ENFP",
+   "title": "연희(로켓펀치)"
+  },
+  "Q65920408": {
+   "mbti": "ISFJ",
+   "title": "수윤(로켓펀치)"
+  },
+  "Q65920433": {
+   "mbti": "ISFJ",
+   "title": "윤경"
+  },
+  "Q65920474": {
+   "mbti": "ISFJ",
+   "title": "소희(로켓펀치)"
+  },
+  "Q65926316": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "도현(BAE173)"
+  },
+  "Q66711922": {
+   "positionsKo": "회장, 보컬, 랩, 댄스 (비오브유), 리더, 메인보컬, 메인댄서 (마이틴)",
+   "positions": [
+    "회장",
+    "Vocalist",
+    "Rapper",
+    "댄스",
+    "Leader",
+    "Main vocalist",
+    "Main dancer"
+   ],
+   "mbti": "ISTJ",
+   "title": "김국헌"
+  },
+  "Q66737978": {
+   "positionsKo": "보컬, 댄서",
+   "positions": [
+    "Vocalist",
+    "Dancer"
+   ],
+   "mbti": "ENFP",
+   "title": "손동표"
+  },
+  "Q6763158": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "김태헌(제국의아이들)"
+  },
+  "Q67674869": {
+   "positionsKo": "신디사이저, 키보드, 보컬",
+   "positions": [
+    "신디사이저",
+    "키보드",
+    "Vocalist"
+   ],
+   "mbti": "INFJ",
+   "title": "원필"
+  },
+  "Q6781164": {
+   "positionsKo": "리더, 메인보컬",
+   "positions": [
+    "Leader",
+    "Main vocalist"
+   ],
+   "mbti": "ISFP",
+   "title": "이해리"
+  },
+  "Q6781593": {
+   "positionsKo": "메인보컬, 리드래퍼",
+   "positions": [
+    "Main vocalist",
+    "Lead rapper"
+   ],
+   "title": "이창민"
+  },
+  "Q6790218": {
+   "positionsKo": "서브보컬, 서브래퍼, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Sub rapper",
+    "Lead dancer"
+   ],
+   "title": "하민우"
+  },
+  "Q67934969": {
+   "positionsKo": "리더, 메인래퍼 (WEi)",
+   "positions": [
+    "Leader",
+    "Main rapper"
+   ],
+   "mbti": "ESFJ",
+   "title": "장대현"
+  },
+  "Q67975453": {
+   "positionsKo": "메인보컬 (WayV)",
+   "positions": [
+    "Main vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "샤오쥔"
+  },
+  "Q67975872": {
+   "positionsKo": "메인래퍼, 서브보컬 (WayV)",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "INTJ",
+   "title": "양양(NCT)"
+  },
+  "Q67980868": {
+   "positionsKo": "부반장, 서브래퍼",
+   "positions": [
+    "부반장",
+    "Sub rapper"
+   ],
+   "mbti": "ENFP",
+   "title": "쿤(업텐션)"
+  },
+  "Q67981151": {
+   "positionsKo": "반장, 리드보컬",
+   "positions": [
+    "반장",
+    "Lead vocalist"
+   ],
+   "title": "진후(업텐션)"
+  },
+  "Q67981163": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "환희(업텐션)"
+  },
+  "Q67981192": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ISFP",
+   "title": "고결"
+  },
+  "Q67983211": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "샌디(애플비)"
+  },
+  "Q67983984": {
+   "positionsKo": "메인래퍼, 메인댄서, 막내",
+   "positions": [
+    "Main rapper",
+    "Main dancer",
+    "Maknae"
+   ],
+   "title": "세빈(스누퍼)"
+  },
+  "Q67987045": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "신원(펜타곤)"
+  },
+  "Q67987298": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ISFJ",
+   "title": "여원"
+  },
+  "Q67987751": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "옌안(펜타곤)"
+  },
+  "Q67991392": {
+   "positionsKo": "리드래퍼",
+   "positions": [
+    "Lead rapper"
+   ],
+   "title": "이동원(크나큰)"
+  },
+  "Q67991396": {
+   "positionsKo": "리더, 서브보컬, 메인댄서",
+   "positions": [
+    "Leader",
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "김지훈(크나큰)"
+  },
+  "Q67991401": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "오희준(크나큰)"
+  },
+  "Q6820702": {
+   "mbti": "INFJ",
+   "title": "송은이"
+  },
+  "Q6823994": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "강민경"
+  },
+  "Q6824033": {
+   "positionsKo": "서브래퍼, 메인댄서",
+   "positions": [
+    "Sub rapper",
+    "Main dancer"
+   ],
+   "mbti": "ENFP",
+   "title": "찬희(SF9)"
+  },
+  "Q68480290": {
+   "positionsKo": "리드래퍼, 메인댄서",
+   "positions": [
+    "Lead rapper",
+    "Main dancer"
+   ],
+   "title": "마일로(로미오)"
+  },
+  "Q68480484": {
+   "positionsKo": "서브래퍼",
+   "positions": [
+    "Sub rapper"
+   ],
+   "title": "강민(로미오)"
+  },
+  "Q6854182": {
+   "positionsKo": "리더, 서브보컬",
+   "positions": [
+    "Leader",
+    "Sub vocalist"
+   ],
+   "title": "문준영"
+  },
+  "Q7137681": {
+   "positionsKo": "메인래퍼, 서브보컬",
+   "positions": [
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "mbti": "ENFJ",
+   "title": "찬열"
+  },
+  "Q7265542": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "미료"
+  },
+  "Q73817097": {
+   "positionsKo": "메인래퍼, 메인댄서",
+   "positions": [
+    "Main rapper",
+    "Main dancer"
+   ],
+   "title": "달린"
+  },
+  "Q73817100": {
+   "positionsKo": "메인댄서, 리드보컬",
+   "positions": [
+    "Main dancer",
+    "Lead vocalist"
+   ],
+   "title": "비안"
+  },
+  "Q73817101": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "담이(ANS)"
+  },
+  "Q73817106": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "로연"
+  },
+  "Q73817111": {
+   "positionsKo": "메인댄서, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "라온(ANS)"
+  },
+  "Q7385484": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "류세라"
+  },
+  "Q73920079": {
+   "positionsKo": "메인댄서",
+   "positions": [
+    "Main dancer"
+   ],
+   "title": "예나(그레이시)"
+  },
+  "Q7497232": {
+   "positionsKo": "리더, 서브보컬",
+   "positions": [
+    "Leader",
+    "Sub vocalist"
+   ],
+   "title": "신(크로스진)"
+  },
+  "Q75103455": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "준Q"
+  },
+  "Q7694067": {
+   "positionsKo": "리더, 메인래퍼, 프로듀서",
+   "positions": [
+    "Leader",
+    "Main rapper",
+    "Producer"
+   ],
+   "title": "테디(원타임)"
+  },
+  "Q7696122": {
+   "positionsKo": "리더, 메인래퍼",
+   "positions": [
+    "Leader",
+    "Main rapper"
+   ],
+   "title": "지코"
+  },
+  "Q78116330": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "강석화"
+  },
+  "Q79404278": {
+   "positionsKo": "메인래퍼",
+   "positions": [
+    "Main rapper"
+   ],
+   "title": "지성(TRCNG)"
+  },
+  "Q80126990": {
+   "positionsKo": "서브보컬, 랩, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Rapper",
+    "Main dancer"
+   ],
+   "title": "여리(ARIAZ)"
+  },
+  "Q80126992": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "효경"
+  },
+  "Q80126993": {
+   "positionsKo": "서브보컬, 막내",
+   "positions": [
+    "Sub vocalist",
+    "Maknae"
+   ],
+   "title": "주은(ARIAZ)"
+  },
+  "Q8058611": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "유영재"
+  },
+  "Q81811194": {
+   "positionsKo": "리드래퍼",
+   "positions": [
+    "Lead rapper"
+   ],
+   "title": "제이(ANS)"
+  },
+  "Q81812234": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "해나(ANS)"
+  },
+  "Q8261971": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "엘키"
+  },
+  "Q82788": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "mbti": "ENFJ",
+   "title": "임시완"
+  },
+  "Q84324499": {
+   "positionsKo": "서브보컬",
+   "positions": [
+    "Sub vocalist"
+   ],
+   "title": "채솔"
+  },
+  "Q84324500": {
+   "positionsKo": "센터, 서브보컬",
+   "positions": [
+    "Center",
+    "Sub vocalist"
+   ],
+   "title": "지원(시그니처)"
+  },
+  "Q84324501": {
+   "positionsKo": "메인보컬, 리드댄서",
+   "positions": [
+    "Main vocalist",
+    "Lead dancer"
+   ],
+   "title": "예아(시그니처)"
+  },
+  "Q84324502": {
+   "positionsKo": "메인댄서, 메인래퍼, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Main rapper",
+    "Sub vocalist"
+   ],
+   "title": "선(시그니처)"
+  },
+  "Q84324503": {
+   "positionsKo": "서브보컬, 리드래퍼",
+   "positions": [
+    "Sub vocalist",
+    "Lead rapper"
+   ],
+   "title": "셀린(시그니처)"
+  },
+  "Q84324505": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "벨(시그니처)"
+  },
+  "Q84324506": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "세미(시그니처)"
+  },
+  "Q85870855": {
+   "positionsKo": "메인댄서, 리드보컬 (헤일로)",
+   "positions": [
+    "Main dancer",
+    "Lead vocalist"
+   ],
+   "title": "히쵸"
+  },
+  "Q85878532": {
+   "mbti": "ISFJ",
+   "title": "여상(ATEEZ)"
+  },
+  "Q85879242": {
+   "mbti": "INFP",
+   "title": "산(ATEEZ)"
+  },
+  "Q85881428": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "mbti": "INFP",
+   "title": "유태양"
+  },
+  "Q85982827": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "예인(멜로디데이)"
+  },
+  "Q8835339": {
+   "positionsKo": "메인래퍼, 메인댄서, 보컬], 메인댄서]",
+   "positions": [
+    "Main rapper",
+    "Main dancer",
+    "Vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "장동우"
+  },
+  "Q9013304": {
+   "positionsKo": "리더, 리드보컬, 메인댄서",
+   "positions": [
+    "Leader",
+    "Lead vocalist",
+    "Main dancer"
+   ],
+   "title": "엔(빅스)"
+  },
+  "Q9021940": {
+   "mbti": "INFP",
+   "title": "백예린"
+  },
+  "Q90713611": {
+   "positionsKo": "메인댄서, 서브보컬",
+   "positions": [
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "mbti": "ENFJ",
+   "title": "허찬"
+  },
+  "Q9120056": {
+   "positionsKo": "메인보컬, 베이스 기타",
+   "positions": [
+    "Main vocalist",
+    "베이스 기타"
+   ],
+   "title": "오종혁"
+  },
+  "Q93481484": {
+   "mbti": "ENFP",
+   "title": "나띠"
+  },
+  "Q93969529": {
+   "positionsKo": "메인보컬, 메인댄서, 래퍼",
+   "positions": [
+    "Main vocalist",
+    "Main dancer",
+    "Rapper"
+   ],
+   "title": "먼데이"
+  },
+  "Q93969530": {
+   "positionsKo": "메인댄서, 리드보컬",
+   "positions": [
+    "Main dancer",
+    "Lead vocalist"
+   ],
+   "title": "박소은(Weeekly)"
+  },
+  "Q93969533": {
+   "positionsKo": "래퍼, 서브보컬",
+   "positions": [
+    "Rapper",
+    "Sub vocalist"
+   ],
+   "title": "조아(Weeekly)"
+  },
+  "Q93969535": {
+   "positionsKo": "리더, 메인댄서, 서브보컬",
+   "positions": [
+    "Leader",
+    "Main dancer",
+    "Sub vocalist"
+   ],
+   "title": "이수진(Weeekly)"
+  },
+  "Q93969537": {
+   "positionsKo": "리드보컬, 리드댄서",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "title": "지한(Weeekly)"
+  },
+  "Q93969540": {
+   "positionsKo": "리드보컬, 리드댄서",
+   "positions": [
+    "Lead vocalist",
+    "Lead dancer"
+   ],
+   "title": "신지윤"
+  },
+  "Q93970112": {
+   "positionsKo": "래퍼, 서브보컬",
+   "positions": [
+    "Rapper",
+    "Sub vocalist"
+   ],
+   "title": "이재희(Weeekly)"
+  },
+  "Q95130462": {
+   "positionsKo": "서브보컬, 메인댄서",
+   "positions": [
+    "Sub vocalist",
+    "Main dancer"
+   ],
+   "title": "디타"
+  },
+  "Q96761053": {
+   "positionsKo": "맏언니, 리드보컬",
+   "positions": [
+    "맏언니",
+    "Lead vocalist"
+   ],
+   "title": "레아(시크릿넘버)"
+  },
+  "Q97208928": {
+   "positionsKo": "베이스, 코러스(N.Flying), 리더, 보컬, 베이스(HONEYST)",
+   "positions": [
+    "베이스",
+    "코러스",
+    "Leader",
+    "Vocalist"
+   ],
+   "mbti": "ESFJ",
+   "title": "서동성"
+  },
+  "Q97221041": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "이준용(느와르)"
+  },
+  "Q97239593": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "중희"
+  },
+  "Q97300555": {
+   "positionsKo": "메인보컬",
+   "positions": [
+    "Main vocalist"
+   ],
+   "title": "우빈"
+  },
+  "Q97301190": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "title": "정모(CRAVITY)"
+  },
+  "Q97301241": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "mbti": "ENFP",
+   "title": "원진"
+  },
+  "Q97308624": {
+   "positionsKo": "메인보컬, 댄서",
+   "positions": [
+    "Main vocalist",
+    "Dancer"
+   ],
+   "mbti": "ENFJ",
+   "title": "이태승"
+  },
+  "Q97326265": {
+   "positionsKo": "메인보컬]과 함께 더블 메인보컬 체제.]",
+   "positions": [
+    "메인보컬]과 함께 더블 메인보컬 체제.]"
+   ],
+   "mbti": "ISFP",
+   "title": "박정우(트레저)"
+  },
+  "Q97340017": {
+   "positionsKo": "리드보컬",
+   "positions": [
+    "Lead vocalist"
+   ],
+   "title": "이션"
+  },
+  "Q97352000": {
+   "positionsKo": "보컬",
+   "positions": [
+    "Vocalist"
+   ],
+   "mbti": "INFP",
+   "title": "아사히(트레저)"
+  },
+  "Q97352001": {
+   "positionsKo": "리더, 보컬, 댄스",
+   "positions": [
+    "Leader",
+    "Vocalist",
+    "댄스"
+   ],
+   "mbti": "ENTJ",
+   "title": "지훈(트레저)"
+  },
+  "Q97352002": {
+   "positionsKo": "보컬, 댄스",
+   "positions": [
+    "Vocalist",
+    "댄스"
+   ],
+   "mbti": "ENFP",
+   "title": "마시호"
+  },
+  "Q97352003": {
+   "positionsKo": "랩",
+   "positions": [
+    "Rapper"
+   ],
+   "mbti": "ISFP",
+   "title": "하루토(트레저)"
+  },
+  "Q97352009": {
+   "positionsKo": "보컬, 댄스",
+   "positions": [
+    "Vocalist",
+    "댄스"
+   ],
+   "mbti": "ENFP",
+   "title": "소정환(트레저)"
+  },
+  "Q97704455": {
+   "positionsKo": "리더, 메인래퍼",
+   "positions": [
+    "Leader",
+    "Main rapper"
+   ],
+   "title": "캐슬제이"
+  },
+  "Q97932927": {
+   "positionsKo": "메인보컬, 리드댄서",
+   "positions": [
+    "Main vocalist",
+    "Lead dancer"
+   ],
+   "title": "휘준"
+  },
+  "Q98136886": {
+   "positionsKo": "보컬, 댄스",
+   "positions": [
+    "Vocalist",
+    "댄스"
+   ],
+   "mbti": "INFP",
+   "title": "윤재혁"
+  },
+  "Q98136892": {
+   "positionsKo": "랩",
+   "positions": [
+    "Rapper"
+   ],
+   "mbti": "INFP",
+   "title": "요시(트레저)"
+  },
+  "Q98764427": {
+   "positionsKo": "서브보컬, 리드댄서",
+   "positions": [
+    "Sub vocalist",
+    "Lead dancer"
+   ],
+   "title": "강민(VERIVERY)"
+  }
+ }
+}
