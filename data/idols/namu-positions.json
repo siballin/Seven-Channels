@@ -3,7 +3,7 @@
  "sourceUrl": "https://huggingface.co/datasets/heegyu/namuwiki",
  "license": "CC BY-NC-SA 2.0 KR",
  "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/kr/",
- "importedAt": "2026-11-21T01:54:40+00:00",
+ "importedAt": "2026-11-21T02:01:47+00:00",
  "people": {
   "Q100314749": {
    "positionsKo": "메인보컬",
@@ -1460,7 +1460,7 @@
   "Q18229754": {
    "positionsKo": "前 베이시스트",
    "positions": [
-    "前 베이시스트"
+    "Former bassist"
    ],
    "title": "권광진"
   },
@@ -1705,7 +1705,7 @@
   "Q20774986": {
    "positionsKo": "前 리더, 서브보컬",
    "positions": [
-    "Leader",
+    "Former leader",
     "Sub vocalist"
    ],
    "title": "지수민(1994)"
@@ -2166,9 +2166,7 @@
   },
   "Q24855825": {
    "positionsKo": "없음",
-   "positions": [
-    "없음"
-   ],
+   "positions": [],
    "title": "송희진"
   },
   "Q24855847": {
@@ -2414,7 +2412,6 @@
   "Q27748771": {
    "positionsKo": "7단, 서브보컬",
    "positions": [
-    "7단",
     "Sub vocalist"
    ],
    "title": "정미미"
@@ -2422,7 +2419,6 @@
   "Q27748792": {
    "positionsKo": "6단, 메인보컬",
    "positions": [
-    "6단",
     "Main vocalist"
    ],
    "title": "한해빈"
@@ -2430,7 +2426,6 @@
   "Q27748793": {
    "positionsKo": "1단, 리더, 메인댄서, 서브보컬",
    "positions": [
-    "1단",
     "Leader",
     "Main dancer",
     "Sub vocalist"
@@ -2448,7 +2443,6 @@
   "Q27748796": {
    "positionsKo": "2단, 메인보컬",
    "positions": [
-    "2단",
     "Main vocalist"
    ],
    "title": "장소진"
@@ -2638,7 +2632,6 @@
   "Q28819523": {
    "positionsKo": "4단, 리드보컬",
    "positions": [
-    "4단",
     "Lead vocalist"
    ],
    "title": "김나영(1995)"
@@ -2656,7 +2649,7 @@
   "Q28870934": {
    "positionsKo": "前 리드댄서, 서브보컬",
    "positions": [
-    "Lead dancer",
+    "Former lead dancer",
     "Sub vocalist"
    ],
    "title": "나현(1995)"
@@ -3115,9 +3108,7 @@
   },
   "Q47672191": {
    "positionsKo": "없음",
-   "positions": [
-    "없음"
-   ],
+   "positions": [],
    "title": "최문희"
   },
   "Q47687990": {
@@ -3271,7 +3262,7 @@
   "Q483642": {
    "positionsKo": "前 리더, 리드보컬",
    "positions": [
-    "Leader",
+    "Former leader",
     "Lead vocalist"
    ],
    "title": "선예"
@@ -3840,7 +3831,7 @@
   "Q54598370": {
    "positionsKo": "캡틴, 서브보컬, 리드댄서",
    "positions": [
-    "캡틴",
+    "Captain",
     "Sub vocalist",
     "Lead dancer"
    ],
@@ -3918,7 +3909,7 @@
   "Q55735655": {
    "positionsKo": "메인래퍼^^(빅플로)^^",
    "positions": [
-    "메인래퍼^^^^"
+    "Main rapper"
    ],
    "title": "임현태"
   },
@@ -3934,7 +3925,7 @@
    "positionsKo": "보컬, 안무",
    "positions": [
     "Vocalist",
-    "안무"
+    "Choreography"
    ],
    "title": "박대원"
   },
@@ -4534,7 +4525,7 @@
   "Q61863254": {
    "positionsKo": "반장(리더), 메인보컬",
    "positions": [
-    "반장",
+    "Class president",
     "Main vocalist"
    ],
    "title": "상연"
@@ -5049,7 +5040,7 @@
   "Q66711922": {
    "positionsKo": "회장, 보컬, 랩, 댄스 (비오브유), 리더, 메인보컬, 메인댄서 (마이틴)",
    "positions": [
-    "회장",
+    "President",
     "Vocalist",
     "Rapper",
     "Dancer",
@@ -5086,7 +5077,7 @@
   "Q67674869": {
    "positionsKo": "신디사이저, 키보드, 보컬",
    "positions": [
-    "신디사이저",
+    "Synthesizer",
     "Keyboard",
     "Vocalist"
    ],
@@ -5148,7 +5139,7 @@
   "Q67980868": {
    "positionsKo": "부반장, 서브래퍼",
    "positions": [
-    "부반장",
+    "Vice class president",
     "Sub rapper"
    ],
    "mbti": "ENFP",
@@ -5157,7 +5148,7 @@
   "Q67981151": {
    "positionsKo": "반장, 리드보컬",
    "positions": [
-    "반장",
+    "Class president",
     "Lead vocalist"
    ],
    "title": "진후(업텐션)"
@@ -5658,7 +5649,7 @@
   "Q96761053": {
    "positionsKo": "맏언니, 리드보컬",
    "positions": [
-    "맏언니",
+    "Eldest",
     "Lead vocalist"
    ],
    "title": "레아(시크릿넘버)"
