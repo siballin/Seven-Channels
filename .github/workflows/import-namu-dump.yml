@@ -26,10 +26,12 @@ jobs:
         run: curl -sSL --retry 3 -o "$RUNNER_TEMP/namuwiki.parquet" "https://huggingface.co/datasets/heegyu/namuwiki/resolve/main/namuwiki_20210301.parquet" && ls -la "$RUNNER_TEMP/namuwiki.parquet"
       - name: Extract positions and MBTI
         run: cd scripts && python import_namu_dump.py "$RUNNER_TEMP/namuwiki.parquet"
+      - name: Rebuild idol profiles with the new positions
+        run: python scripts/build_idols.py
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add data/idols/namu-positions.json
+          git add data/idols
           git commit -m "Idol positions and MBTI from the Namu Wiki dump" || exit 0
           git pull --rebase origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME"

@@ -20,14 +20,36 @@ POSITION_TERMS = [
     ("메인 댄서", "Main dancer"), ("리드 댄서", "Lead dancer"), ("서브 댄서", "Sub dancer"),
     ("부리더", "Sub-leader"), ("리더", "Leader"), ("센터", "Center"), ("비주얼", "Visual"), ("막내", "Maknae"),
     ("보컬", "Vocalist"), ("래퍼", "Rapper"), ("랩", "Rapper"), ("댄서", "Dancer"), ("퍼포먼스", "Performance"),
+    ("퍼포먼스팀 리더", "Performance unit leader"), ("보컬팀 리더", "Vocal unit leader"), ("힙합팀 리더", "Hip-hop unit leader"),
+    ("베이스 기타", "Bass guitar"), ("베이스", "Bass"), ("기타", "Guitar"), ("드럼", "Drums"), ("키보드", "Keyboard"),
+    ("바이올린", "Violin"), ("코러스", "Backing vocals"), ("댄스", "Dancer"),
     ("프로듀서", "Producer"), ("프로듀싱", "Producer"), ("작사", "Lyricist"), ("작곡", "Composer"), ("페이스", "Face of the group"),
 ]
 MBTI = re.compile(r"(?<![A-Za-z])([EI][NS][TF][JP])(?:-[AT])?(?![A-Za-z])")
 
 
+def strip_footnotes(text):
+    """Remove [* …] footnotes, which can contain [[links]] and other brackets."""
+    out = []
+    index = 0
+    text = text or ""
+    while index < len(text):
+        if text.startswith("[*", index):
+            depth = 0
+            while index < len(text):
+                depth += {"[": 1, "]": -1}.get(text[index], 0)
+                index += 1
+                if depth == 0:
+                    break
+        else:
+            out.append(text[index])
+            index += 1
+    return "".join(out)
+
+
 def plain(cell):
     """Strip namumark from one table cell."""
-    text = re.sub(r"\[\*[^\]]*\]", "", cell or "")                    # footnotes
+    text = strip_footnotes(cell)
     text = re.sub(r"^\s*(?:<[^>]*>\s*)+", "", text)                    # cell attributes like <-2><bgcolor=…>
     text = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", text)       # links
     text = re.sub(r"\{\{\{(?:#[0-9a-fA-F]{3,6}|[+-]\d|#\w+)?\s*", "", text).replace("}}}", "")  # {{{#color text}}}
@@ -52,7 +74,8 @@ def infobox_value(text, label):
 
 
 def translate_positions(value):
-    parts = [part.strip() for part in re.split(r"[,/·]|\s및\s", value or "") if part.strip()]
+    value = re.sub(r"\([^()]*\)", "", value or "")  # notes like "(WEi, 1THE9)" would otherwise split on the comma
+    parts = [part.strip() for part in re.split(r"[,/·]|\s및\s", value) if part.strip()]
     out = []
     for part in parts:
         part = re.sub(r"\(.*?\)", "", part).strip()

@@ -26,6 +26,11 @@ def main():
     assert namu_parse.redirect_target("#redirect 카리나(aespa)#s-2") == "카리나(aespa)"
     assert namu_parse.translate_positions("메인 보컬 / 비주얼 및 막내") == ["Main vocalist", "Visual", "Maknae"]
     assert namu_parse.translate_positions("올라운더") == ["올라운더"]  # unknown terms stay in Korean
+    # Footnotes with links inside, notes in parentheses, band roles
+    hoshi = "|| '''포지션''' || 퍼포먼스팀 리더, 서브보컬, 메인댄서[* [[Mnet]] 보이그룹 메인 댄서즈(Main Dancers) 특집에 참가했다. [[https://x|#]]] ||"
+    assert namu_parse.parse_page(hoshi)["positions"] == ["Performance unit leader", "Sub vocalist", "Main dancer"], namu_parse.parse_page(hoshi)
+    assert namu_parse.translate_positions("리드댄서 (WEi, 1THE9), 서브보컬") == ["Lead dancer", "Sub vocalist"]
+    assert namu_parse.translate_positions("기타, 베이스 기타, 드럼") == ["Guitar", "Bass guitar", "Drums"]
     candidate = {"birth": "2000-04-11"}
     assert namu_parse.accept("카리나(aespa)", PAGE, candidate) and not namu_parse.accept("카리나", "다른 사람 1999년 1월 1일", candidate)
     assert namu_parse.accept("카리나(aespa)", "no date", {"birth": ""}) and not namu_parse.accept("카리나", "no date", {"birth": ""})
