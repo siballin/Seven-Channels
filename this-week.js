@@ -91,6 +91,27 @@ async function thisWeekKpop(days, signal) {
   return items;
 }
 
+// Birthdays of idols in groups you follow on the K-Pop channel (and followed soloists), from the idol directory.
+async function thisWeekIdolBirthdays(days, signal) {
+  const follows = typeof kpopArtistFollows !== "undefined" ? kpopArtistFollows.filter((artist) => artist.followed) : [];
+  if (!follows.length) return [];
+  const fold = (value) => String(value || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s*\(.*\)$/, "").trim();
+  const wanted = new Set(follows.map((artist) => fold(artist.name)));
+  const index = await thisWeekJson("data/idols/index.json", signal);
+  const groups = new Map((index.groups || []).filter((group) => !group.x && wanted.has(fold(group.n))).map((group) => [group.id, group.n]));
+  const byDay = new Map(days.map((day) => [day.slice(5), day]));
+  const items = [];
+  for (const person of index.people || []) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(person.b || "") || !byDay.has(person.b.slice(5))) continue;
+    const group = (person.g || []).map((id) => groups.get(id)).find(Boolean);
+    if (!group && !wanted.has(fold(person.n))) continue;
+    const date = byDay.get(person.b.slice(5));
+    const age = Number(date.slice(0, 4)) - Number(person.b.slice(0, 4));
+    items.push({ kind: "birthday", label: "Birthday", date, title: `${person.n} turns ${age}`, note: group || "Soloist", href: `#kpop/idol/${person.id}`, image: person.p || "" });
+  }
+  return items;
+}
+
 async function thisWeekGames(days, signal) {
   const data = await thisWeekJson("data/game-releases.json", signal);
   const releases = (data.releases || []).filter((release) => release.date >= days[0] && release.date <= days[days.length - 1] && release.title);
@@ -128,7 +149,7 @@ function thisWeekTime(value) {
   return new Date(2000, 0, 1, Number(match[1]), Number(match[2])).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
-const thisWeekOrder = ["concert", "bowling", "creator", "kpop", "game", "movie"];
+const thisWeekOrder = ["concert", "bowling", "creator", "birthday", "kpop", "game", "movie"];
 
 function createThisWeek({ signal } = {}) {
   const section = element("section", "this-week");
@@ -194,6 +215,7 @@ function createThisWeek({ signal } = {}) {
   render();
   const sources = [
     ["K-pop releases", thisWeekKpop(days, signal).then((list) => ({ items: list, hidden: 0 }))],
+    ["idol birthdays", thisWeekIdolBirthdays(days, signal).then((list) => ({ items: list, hidden: 0 }))],
     ["game releases", thisWeekGames(days, signal)],
     ["movie releases", thisWeekMovies(days, signal)]
   ];

@@ -144,6 +144,8 @@
     .this-week-item.bowling .this-week-dot { background: #3e9b4f; }
     .this-week-item.creator .this-week-dot { background: #d6409f; }
     .this-week-item.kpop .this-week-dot { background: #8e4ec6; }
+    .this-week-item.birthday .this-week-dot { background: #f5a623; }
+    .this-week-item.birthday .this-week-image { border-radius: 50%; width: 40px; height: 40px; object-position: top; }
     .this-week-item.game .this-week-dot { background: #0090ff; }
     .this-week-item.movie .this-week-dot { background: #f76b15; }
     .this-week-text { display: grid; min-width: 0; }
@@ -212,6 +214,83 @@
       .notify-panel { left: 12px; right: 12px; top: auto; width: auto; margin-top: 8px; }
     }
     .lazy-status { color: var(--muted); }
+    .idol-entry { display: grid; gap: 2px; padding: 12px 16px; margin-bottom: 14px; border-radius: var(--glass-radius, 16px); border: 1px solid var(--glass-edge, var(--line)); color: inherit; text-decoration: none; background: linear-gradient(110deg, color-mix(in srgb, var(--signal) 24%, transparent), var(--glass-base, var(--panel)) 75%); }
+    .idol-entry span { color: var(--muted); font-size: .88rem; }
+    .idol-entry:hover strong, .idol-entry:focus-visible strong { text-decoration: underline; }
+    .idols-view { display: grid; gap: 16px; min-width: 0; }
+    .idol-muted { color: var(--muted); font-size: .88rem; margin: 4px 0; }
+    .idol-back { justify-self: start; font-size: .9rem; }
+    .idol-directory, .idol-page { display: grid; gap: 16px; min-width: 0; }
+    .idol-directory-head { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: flex-end; }
+    .idol-directory-head h2 { margin: 0; }
+    .idol-controls { display: grid; grid-template-columns: minmax(200px, 2fr) repeat(5, minmax(120px, 1fr)); gap: 10px; align-items: end; }
+    .idol-controls .field { margin: 0; min-width: 0; }
+    .idol-controls select, .idol-controls input { width: 100%; }
+    .idol-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .idol-card { display: grid; gap: 6px; padding: 8px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); color: inherit; text-decoration: none; height: 100%; box-sizing: border-box; }
+    .idol-card:hover, .idol-card:focus-visible { border-color: var(--signal); }
+    .idol-card-body { display: grid; gap: 1px; min-width: 0; }
+    .idol-card-body strong { overflow-wrap: anywhere; }
+    .idol-card-body small { color: var(--muted); font-size: .78rem; overflow-wrap: anywhere; }
+    .idol-photo { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: top; border-radius: 8px; background: color-mix(in srgb, var(--ink) 8%, transparent); }
+    .idol-initials { display: grid; place-items: center; font-weight: 700; font-size: 1.4rem; color: var(--muted); background: color-mix(in srgb, var(--signal) 14%, transparent); }
+    .idol-photo-small { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: top; flex: none; font-size: .85rem; }
+    .idol-photo-large { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: top; border-radius: 14px; font-size: 2.4rem; }
+    .idol-birthdays h3 { margin: 0 0 8px; font-size: .95rem; }
+    .idol-birthdays ul { list-style: none; margin: 0; padding: 0 0 4px; display: flex; gap: 10px; overflow-x: auto; }
+    .idol-birthdays a { display: flex; gap: 8px; align-items: center; padding: 6px 12px 6px 6px; border-radius: 999px; border: 1px solid var(--glass-edge, var(--line)); color: inherit; text-decoration: none; white-space: nowrap; }
+    .idol-birthdays span { display: grid; }
+    .idol-birthdays small { color: var(--muted); font-size: .75rem; }
+    .idol-hero { display: grid; grid-template-columns: minmax(140px, 240px) 1fr; gap: 20px; align-items: start; }
+    .idol-hero-photo { margin: 0; display: grid; gap: 4px; }
+    .idol-hero-photo figcaption { color: var(--muted); font-size: .72rem; overflow-wrap: anywhere; }
+    .idol-hero-text h2 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.05; }
+    .idol-hangul { margin: 4px 0 0; font-size: 1.2rem; color: var(--muted); }
+    .idol-hangul-small { color: var(--muted); }
+    .idol-subtitle { margin: 8px 0 0; }
+    .idol-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .idol-facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; margin: 0; padding: 14px 16px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); }
+    .idol-facts dt { color: var(--muted); font-size: .85rem; padding-top: 2px; }
+    .idol-facts dd { margin: 0; overflow-wrap: anywhere; }
+    .idol-source { margin-left: 8px; font-size: .72rem; color: var(--muted); }
+    .idol-mine { margin-left: 8px; font-size: .7rem; padding: 1px 6px; border-radius: 999px; background: color-mix(in srgb, var(--signal) 20%, transparent); color: var(--muted); }
+    .idol-timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+    .idol-timeline small { color: var(--muted); margin-left: 8px; }
+    .idol-timeline .is-former a { opacity: .8; }
+    .idol-links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .idol-link { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--glass-edge, var(--line)); text-decoration: none; font-size: .88rem; }
+    .idol-section h3 { margin: 0 0 8px; font-size: 1rem; }
+    .idol-bio { margin: 0; line-height: 1.55; }
+    .idol-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .idol-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+    .idol-list small { color: var(--muted); }
+    .idol-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .idol-discography { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 16px; }
+    .idol-discography li { display: grid; padding: 4px 0; border-bottom: 1px solid color-mix(in srgb, var(--line) 50%, transparent); }
+    .idol-discography small { color: var(--muted); font-size: .78rem; }
+    .idol-lineup { display: grid; gap: 4px; }
+    .idol-lineup-row { display: grid; grid-template-columns: minmax(80px, 140px) 1fr minmax(80px, auto); gap: 10px; align-items: center; font-size: .88rem; }
+    .idol-lineup-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .idol-lineup-row small { color: var(--muted); }
+    .idol-lineup-track { position: relative; height: 12px; border-radius: 6px; background: color-mix(in srgb, var(--ink) 7%, transparent); }
+    .idol-lineup-bar { position: absolute; top: 0; bottom: 0; border-radius: 6px; background: var(--signal); }
+    .idol-lineup-bar.is-former { background: color-mix(in srgb, var(--signal) 45%, transparent); }
+    .idol-lineup-axis { display: flex; justify-content: space-between; color: var(--muted); font-size: .75rem; margin-left: calc(min(140px, 30%) + 10px); }
+    .idol-editor summary { cursor: pointer; color: var(--muted); }
+    .idol-editor-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; align-items: end; }
+    .idol-editor-form .field:has(textarea) { grid-column: 1 / -1; }
+    .idol-editor-form > p { grid-column: 1 / -1; }
+    .idol-credit { border-top: 1px solid color-mix(in srgb, var(--line) 50%, transparent); padding-top: 10px; }
+    @media (max-width: 900px) { .idol-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); } .idol-controls .idol-search { grid-column: 1 / -1; } }
+    @media (max-width: 560px) {
+      .idol-hero { grid-template-columns: 110px 1fr; gap: 14px; }
+      .idol-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .idol-facts { grid-template-columns: 1fr; gap: 2px; }
+      .idol-facts dd { margin-bottom: 6px; }
+      .idol-lineup-row { grid-template-columns: 76px 1fr; }
+      .idol-lineup-row small { display: none; }
+      .idol-lineup-axis { margin-left: 86px; }
+    }
     .guide { display: grid; gap: 3px; }
     .guide-row {
       display: grid;
@@ -3356,6 +3435,7 @@
   <script src="music-lab-data.js"></script>
   <script src="creator-studio-data.js"></script>
   <script src="live-events-data.js"></script>
+  <script src="idols-data.js"></script>
   <script src="channel-news.js"></script>
   <script src="betting-stats.js"></script>
   <script src="sports-leagues.js"></script>
@@ -6926,7 +7006,8 @@
         bowling: bowlingGetState(),
         musicLab: musicLabGetState(),
         creator: creatorGetState(),
-        live: liveGetState()
+        live: liveGetState(),
+        idolEdits: idolEditsGet()
       };
       try {
         localStorage.setItem(`${syncBackupPrefix}${userId}`, JSON.stringify(state));
@@ -6962,7 +7043,8 @@
         (value.bowling === undefined || bowlingValidState(value.bowling)) &&
         (value.musicLab === undefined || musicLabValidState(value.musicLab)) &&
         (value.creator === undefined || creatorValidState(value.creator)) &&
-        (value.live === undefined || liveValidState(value.live));
+        (value.live === undefined || liveValidState(value.live)) &&
+        (value.idolEdits === undefined || idolValidState(value.idolEdits));
     }
 
     function mergeAccountState(localState, remoteState) {
@@ -6995,7 +7077,8 @@
         bowling: bowlingMergeState(localState?.bowling, remoteState?.bowling),
         musicLab: musicLabMergeState(localState?.musicLab, remoteState?.musicLab),
         creator: creatorMergeState(localState?.creator, remoteState?.creator),
-        live: liveMergeState(localState?.live, remoteState?.live)
+        live: liveMergeState(localState?.live, remoteState?.live),
+        idolEdits: idolMergeState(localState?.idolEdits, remoteState?.idolEdits)
       };
     }
 
@@ -7011,7 +7094,8 @@
         bowling: bowlingGetState(),
         musicLab: musicLabGetState(),
         creator: creatorGetState(),
-        live: liveGetState()
+        live: liveGetState(),
+        idolEdits: idolEditsGet()
       };
     }
 
@@ -7030,6 +7114,7 @@
       musicLabReplaceState(state.musicLab);
       creatorReplaceState(state.creator);
       liveReplaceState(state.live);
+      if (state.idolEdits) idolEditsReplace(state.idolEdits);
       Object.assign(appearance, loadAppearanceFromValue(state.appearance));
       try {
         localStorage.setItem(storageKey, JSON.stringify(entries));
@@ -7106,6 +7191,8 @@
             liveReplaceState(mergedLive);
             if (currentRoute() === "live" && typeof liveRefresh === "function") liveRefresh();
           }
+          const mergedIdolEdits = idolMergeState(idolEditsGet(), remoteBeforeWrite?.idolEdits);
+          if (JSON.stringify(mergedIdolEdits) !== JSON.stringify(idolEditsGet())) idolEditsReplace(mergedIdolEdits);
           const state = { ...currentAccountState(), updatedAt: new Date().toISOString() };
           const { error } = await syncClient.from("seven_channels_state").upsert(
             { user_id: userId, data: state, updated_at: state.updatedAt },
@@ -7436,6 +7523,7 @@
       if (/^bowling\/(scorer|stats|balls|releases|leagues)$/.test(route)) return "bowling";
       if (route === "games/releases") return "games";
       if (/^music\/.+/.test(route)) return "music";
+      if (/^kpop\/(idols|idol\/Q\d+|group\/Q\d+)$/.test(route)) return "kpop";
       if (/^creator\/.+/.test(route)) return "creator";
       if (/^live\/.+/.test(route)) return "live";
       if (/^politics\/members(\/[A-Z]\d{6})?$/.test(route)) return "politics";
@@ -11853,7 +11941,8 @@
       music: ["music-lab.js"],
       creator: ["creator-studio.js", "creator-clips.js"],
       live: ["live-events.js"],
-      wrapped: ["year-in-review.js"]
+      wrapped: ["year-in-review.js"],
+      idols: ["idols.js"]
     };
     const lazyReady = new Set();
     const lazyPending = new Map();
@@ -11898,6 +11987,13 @@
       heading.append(element("span", "number", `CH ${channel.number}`), element("h2", "", channel.name));
       const description = element("p", "lede", channel.description);
       if (lazyScripts[channel.id] && needsLazy(channel.id, heading, description)) return;
+      const idolRoute = /^kpop\/(idols|idol\/Q\d+|group\/Q\d+)$/.exec(location.hash.slice(1));
+      if (channel.id === "kpop" && idolRoute) {
+        if (needsLazy("idols", heading, description)) return;
+        view.replaceChildren(heading, description, createIdolsView(idolRoute[1]));
+        if (!idolRoute[1].startsWith("idols")) scrollTo(0, 0);
+        return;
+      }
       if (channel.id === "politics") {
         view.replaceChildren(heading, description, ...(congressView() ? [createCongressMembersView()]
           : electionView() ? [createElectionMapsView()] : [congressTabs("overview"), createPoliticsDashboard()]));
@@ -12471,7 +12567,10 @@
         const leftColumn = element("div", "kpop-dashboard-left");
         leftColumn.append(left, createRedditWidget(channel.id));
         const middle = element("div", "kpop-dashboard-main");
-        middle.append(featured, kpopCalendar, kpopLookup);
+        const idolLink = element("a", "idol-entry");
+        idolLink.href = "#kpop/idols";
+        idolLink.append(element("strong", "", "Idol directory"), element("span", "", "Profiles, members, debuts, birthdays and discographies"));
+        middle.append(idolLink, featured, kpopCalendar, kpopLookup);
         const dashboard = element("div", "kpop-dashboard");
         dashboard.append(leftColumn, middle, right);
         view.replaceChildren(heading, description, withChannelNews("kpop", [dashboard]));
@@ -12539,6 +12638,7 @@
     musicLabOnChange = scheduleCloudSync;
     creatorOnChange = scheduleCloudSync;
     liveOnChange = scheduleCloudSync;
+    idolEditsOnChange = scheduleCloudSync;
     window.addEventListener("hashchange", render);
     const masthead = document.querySelector(".masthead");
     new ResizeObserver(() => {

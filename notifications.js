@@ -7,7 +7,7 @@
 const notifyStorageKey = "seven-channels.notifications.v1";
 const notifyTypes = [
   ["tours", "New shows for artists you follow", "Uses Ticketmaster; near you when a location is set in Live Events."],
-  ["kpop", "K-pop releases out today", "From artists you follow on the K-Pop channel."],
+  ["kpop", "K-pop releases and birthdays today", "From artists you follow on the K-Pop channel."],
   ["games", "Favorite game releases out today", "Games you starred in the release calendar."],
   ["today", "Today’s plans", "Concerts, league night and planned uploads, on the day."]
 ];
@@ -136,6 +136,7 @@ async function notifyCheck({ force = false } = {}) {
     const today = typeof thisWeekDay === "function" ? thisWeekDay(new Date()) : new Date().toISOString().slice(0, 10);
     const safe = (read) => { try { return read() || []; } catch { return []; } };
     const kpop = state.types.kpop && typeof thisWeekKpop === "function" ? await thisWeekKpop([today]).catch(() => []) : [];
+    const birthdays = state.types.kpop && typeof thisWeekIdolBirthdays === "function" ? await thisWeekIdolBirthdays([today]).catch(() => []) : [];
     let games = [];
     if (state.types.games && typeof gamesReadFavorites === "function") {
       try {
@@ -146,6 +147,7 @@ async function notifyCheck({ force = false } = {}) {
     const alerts = notifyTodayAlerts(today, {
       plans: safe(() => liveGetState().plans), leagues: safe(() => bowlingGetState().leagues), schedule: safe(() => creatorGetState().schedule), kpop, games
     });
+    alerts.kpop.push(...birthdays.map((item) => ({ key: `birthday:${item.href}:${today}`, title: `🎂 ${item.title} today`, body: item.note, href: item.href })));
     const list = [...(state.types.today ? alerts.today : []), ...(state.types.kpop ? alerts.kpop : []), ...(state.types.games ? alerts.games : [])];
     if (state.types.tours) list.push(...await notifyTourAlerts(state));
     // Don't flood: at most five at once; the rest are marked sent and summed up.

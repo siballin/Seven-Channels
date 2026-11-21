@@ -1,0 +1,90 @@
+{
+  "_about": "Your additions and fixes. Key by Wikidata id (Q123) or English name (case-insensitive). Any field replaces the source value; common extra fields: positions (list), fandom, mbti, height (cm), note. Groups also take removeMembers (names or ids wrongly listed on Wikidata). includeGroups adds groups (English name, Wikidata id or MusicBrainz id; XG is listed by its MusicBrainz id) that Wikidata doesn't tag as K-pop. Rebuild: python3 scripts/build_idols.py --force",
+  "includeGroups": [
+    "8dfe067c-ae90-472e-80f2-fcee9be4e158"
+  ],
+  "groups": {
+    "BTS": {
+      "fandom": "ARMY"
+    },
+    "Blackpink": {
+      "fandom": "BLINK"
+    },
+    "Twice": {
+      "fandom": "ONCE"
+    },
+    "aespa": {
+      "fandom": "MY"
+    },
+    "Stray Kids": {
+      "fandom": "STAY",
+      "removeMembers": [
+        "Rafa Polinesio"
+      ]
+    },
+    "Seventeen": {
+      "fandom": "CARAT"
+    },
+    "Itzy": {
+      "fandom": "MIDZY"
+    },
+    "Ive": {
+      "fandom": "DIVE"
+    },
+    "Le Sserafim": {
+      "fandom": "FEARNOT"
+    },
+    "NewJeans": {
+      "fandom": "Bunnies"
+    },
+    "Enhypen": {
+      "fandom": "ENGENE"
+    },
+    "Tomorrow X Together": {
+      "fandom": "MOA"
+    },
+    "Ateez": {
+      "fandom": "ATINY"
+    },
+    "Red Velvet": {
+      "fandom": "ReVeluv"
+    },
+    "Exo": {
+      "fandom": "EXO-L"
+    },
+    "Mamamoo": {
+      "fandom": "MooMoo"
+    },
+    "Got7": {
+      "fandom": "Ahgase"
+    },
+    "Monsta X": {
+      "fandom": "Monbebe"
+    },
+    "Big Bang": {
+      "fandom": "VIP"
+    },
+    "Girls' Generation": {
+      "fandom": "SONE"
+    },
+    "NCT": {
+      "fandom": "NCTzen"
+    },
+    "XG": {
+      "fandom": "ALPHAZ"
+    },
+    "Babymonster": {
+      "fandom": "MONSTIEZ"
+    },
+    "Illit": {
+      "fandom": "GLLIT"
+    },
+    "Kiss of Life": {
+      "fandom": "KISSY"
+    },
+    "tripleS": {
+      "fandom": "WAV"
+    }
+  },
+  "people": {}
+}

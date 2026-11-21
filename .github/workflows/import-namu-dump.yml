@@ -1,0 +1,34 @@
+name: Import Namu Wiki dump (positions and MBTI)
+
+# Run by hand (Actions → Import Namu Wiki dump → Run workflow) after the idol directory changes a lot.
+# Downloads the 3 GB March 2021 dump on GitHub's runner (never into the repository), extracts positions
+# and MBTI for idols in data/idols/, and commits data/idols/namu-positions.json to the branch it ran on.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pyarrow
+        run: pip install pyarrow
+      - name: Download the dump
+        run: curl -sSL --retry 3 -o "$RUNNER_TEMP/namuwiki.parquet" "https://huggingface.co/datasets/heegyu/namuwiki/resolve/main/namuwiki_20210301.parquet" && ls -la "$RUNNER_TEMP/namuwiki.parquet"
+      - name: Extract positions and MBTI
+        run: cd scripts && python import_namu_dump.py "$RUNNER_TEMP/namuwiki.parquet"
+      - name: Rebuild idol profiles with the new positions
+        run: python scripts/build_idols.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/idols
+          git commit -m "Idol positions and MBTI from the Namu Wiki dump" || exit 0
+          git pull --rebase origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME"
