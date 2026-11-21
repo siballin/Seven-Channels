@@ -5,9 +5,6 @@ name: Import Namu Wiki dump (positions and MBTI)
 # and MBTI for idols in data/idols/, and commits data/idols/namu-positions.json to the branch it ran on.
 on:
   workflow_dispatch:
-  push:
-    branches: [claude/dazzling-hamilton-4jcfnt]
-    paths: [".github/workflows/import-namu-dump.yml"]
 
 permissions:
   contents: write
@@ -35,4 +32,3 @@ jobs:
           git add data/idols
           git commit -m "Idol positions and MBTI from the Namu Wiki dump" || exit 0
           git pull --rebase origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME"
-# parser v3
