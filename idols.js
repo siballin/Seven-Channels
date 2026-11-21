@@ -288,13 +288,22 @@ function idolsDiscographySection(musicbrainzUrl) {
 
 function idolsFacts(rows) {
   const list = element("dl", "idol-facts");
-  for (const [term, value, mine] of rows) {
+  for (const [term, value, mine, source] of rows) {
     if (value === null || value === undefined || value === "" || (Array.isArray(value) && !value.length)) continue;
     const dt = element("dt", "", term);
     const dd = element("dd");
     if (value instanceof Node) dd.append(value);
     else dd.textContent = Array.isArray(value) ? value.join(", ") : String(value);
     if (mine) dd.append(element("span", "idol-mine", "your edit"));
+    else if (source?.name) {
+      // Where an outside fact came from, with its license (Namu Wiki is CC BY-NC-SA, Kpop Wiki CC BY-SA).
+      const credit = element("a", "idol-source", source.name);
+      credit.href = idolsSafeUrl(source.url, ["namu.wiki", "kpop.fandom.com"]) || idolsSafeUrl(source.licenseUrl) || "#";
+      credit.target = "_blank";
+      credit.rel = "noopener noreferrer";
+      credit.title = `From ${source.name} (${source.license}). Fan-edited; may be out of date.`;
+      dd.append(credit);
+    }
     list.append(dt, dd);
   }
   return list;
@@ -459,9 +468,9 @@ async function idolsPersonPage(container, id) {
     ["Born", [idolsDate(record.birth), record.birthplace].filter(Boolean).join(", ")],
     ["Died", record.death ? idolsDate(record.death) : ""],
     ["Nationality", record.nationality],
-    ["Positions", record.positions, mine.has("positions")],
+    ["Positions", record.positions, mine.has("positions"), record.factSources?.positions],
     ["Height", record.height ? `${record.height} cm` : "", mine.has("height")],
-    ["MBTI", record.mbti, mine.has("mbti")],
+    ["MBTI", record.mbti, mine.has("mbti"), record.factSources?.mbti],
     ["Occupation", record.occupations],
     ["Debut", idolsDate(record.debut)],
     ["Agency", agencies],
@@ -767,7 +776,7 @@ function idolsDirectoryPage(container, index) {
     page.append(box);
   }
   const credit = element("p", "idol-muted idol-credit");
-  credit.textContent = "Facts from Wikidata (CC0), bios from Wikipedia (CC BY-SA 4.0), photos from Wikimedia Commons (credited on each profile). Positions, fandom names and other details can be added on any profile.";
+  credit.textContent = "Facts from Wikidata (CC0), bios from Wikipedia (CC BY-SA 4.0), photos from Wikimedia Commons, positions and MBTI from Namu Wiki (CC BY-NC-SA 2.0 KR) and Kpop Wiki (CC BY-SA), each credited on the profile. Positions and MBTI are fan-edited and can be out of date; fix anything on its profile.";
   page.append(credit);
   container.replaceChildren(page);
 }

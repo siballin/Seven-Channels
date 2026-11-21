@@ -41,6 +41,16 @@ SPARQL = "https://query.wikidata.org/sparql"
 WIKIDATA_API = "https://www.wikidata.org/w/api.php"
 WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
+KPOPWIKI_API = "https://kpop.fandom.com/api.php"
+KPOPWIKI_CACHE = ROOT / "data" / "idols" / "kpopwiki.json"
+NAMU_DUMP = ROOT / "data" / "idols" / "namu-positions.json"
+NAMU_LIVE = ROOT / "data" / "idols" / "namu-live.json"
+MBTI = re.compile(r"(?<![A-Za-z])([EI][NS][TF][JP])(?:-[AT])?(?![A-Za-z])")
+FACT_SOURCES = {
+    "namuDump": {"name": "Namu Wiki (2021 dump)", "license": "CC BY-NC-SA 2.0 KR", "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/kr/", "base": "https://namu.wiki/w/"},
+    "namuLive": {"name": "Namu Wiki", "license": "CC BY-NC-SA 2.0 KR", "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/2.0/kr/", "base": "https://namu.wiki/w/"},
+    "kpopWiki": {"name": "Kpop Wiki", "license": "CC BY-SA", "licenseUrl": "https://www.fandom.com/licensing", "base": "https://kpop.fandom.com/wiki/"},
+}
 SHARDS = 64
 KPOP = "Q213665"
 
@@ -325,10 +335,93 @@ def commons_images(files, fetcher=None):
 # ---------- overrides ----------
 
 def overrides_hash():
+    """Changes to your overrides or the Namu Wiki imports trigger a rebuild."""
+    digest = hashlib.sha256()
+    for path in [OVERRIDES, NAMU_DUMP, NAMU_LIVE]:
+        try:
+            digest.update(path.read_bytes())
+        except OSError:
+            digest.update(b"-")
+    return digest.hexdigest()[:16]
+
+
+# ---------- Kpop Wiki (MBTI from trivia) and Namu Wiki imports ----------
+
+def kpopwiki_pages(titles, fetcher=None):
+    """{requested title: (page title, wikitext)}, 50 titles a request, following redirects."""
+    out = {}
+    for batch in chunks(sorted(set(titles)), 50):
+        data = fetch_json(KPOPWIKI_API, {"action": "query", "prop": "revisions", "rvprop": "content", "rvslots": "main", "redirects": "1",
+                                         "titles": "|".join(batch), "format": "json", "formatversion": "2"}, fetcher)
+        query = data.get("query") or {}
+        back = {}
+        for item in query.get("normalized", []) + query.get("redirects", []):
+            back[item["to"]] = back.get(item["from"], item["from"])
+        for page in query.get("pages", []):
+            text = ((page.get("revisions") or [{}])[0].get("slots") or {}).get("main", {}).get("content", "")
+            if text:
+                out[back.get(page["title"], page["title"])] = (page["title"], text)
+        if not fetcher:
+            time.sleep(0.5)
+    return out
+
+
+def kpopwiki_birth(text):
+    match = re.search(r"\{\{\s*Birth date(?: and age)?\s*\|\s*(\d{4})\s*\|\s*(\d{1,2})\s*\|\s*(\d{1,2})", text or "", re.I)
+    return f"{match[1]}-{int(match[2]):02d}-{int(match[3]):02d}" if match else ""
+
+
+def kpopwiki_mbti_from(text):
+    """The MBTI the trivia states (the last one when it changed), or ''."""
+    found = []
+    for sentence in re.split(r"(?<=[.!?])\s+|\n", text or ""):
+        if "MBTI" in sentence or "personality type" in sentence:
+            found += MBTI.findall(re.sub(r"<ref[^>]*>.*?</ref>|<ref[^>]*/>", "", sentence))
+    return found[-1] if found else ""
+
+
+def kpopwiki_mbti(person_records, fetcher=None):
+    """{qid: {"mbti", "title"}} for idols whose Kpop Wiki page states an MBTI; the page must have the same birth date."""
+    tries = {}
+    for qid, record in person_records.items():
+        titles = [f"{record['name']} ({group['name']})" for group in record["groups"]] + [record["name"]]
+        tries[qid] = list(dict.fromkeys(titles))
+    pages = kpopwiki_pages([title for titles in tries.values() for title in titles], fetcher)
+    out = {}
+    for qid, titles in tries.items():
+        birth = person_records[qid]["birth"]
+        for title in titles:
+            page = pages.get(title)
+            if not page:
+                continue
+            page_birth = kpopwiki_birth(page[1])
+            if (len(birth) == 10 and page_birth == birth) or (len(birth) != 10 and "(" in title):
+                mbti = kpopwiki_mbti_from(page[1])
+                if mbti:
+                    out[qid] = {"mbti": mbti, "title": page[0]}
+                break
+    return out
+
+
+def load_json(path):
     try:
-        return hashlib.sha256(OVERRIDES.read_bytes()).hexdigest()[:16]
-    except OSError:
-        return ""
+        return json.loads(path.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+def apply_facts(record, namu_dump, kpopwiki, namu_live):
+    """Positions and MBTI from the imports, most current source last so it wins. Records where each came from."""
+    sources = {}
+    for key, table in [("namuDump", namu_dump), ("kpopWiki", kpopwiki), ("namuLive", namu_live)]:
+        item = table.get(record["id"]) or {}
+        for field in ["positions", "mbti"]:
+            if item.get(field):
+                record[field] = item[field]
+                sources[field] = {**FACT_SOURCES[key], "url": FACT_SOURCES[key]["base"] + quote(item.get("title", "").replace(" ", "_"))}
+    if sources:
+        record["factSources"] = sources
+    return record
 
 
 def load_overrides():
@@ -485,7 +578,25 @@ def build(fetcher=None, limit=None, log=lambda *args: print(*args, flush=True)):
             "agencies": agency_list(entity),
             "groups": memberships_of, "links": links(entity), "photo": photo(entity), "bio": bio(entity),
         }
-        person_records[qid] = apply_override(record, overrides, "people")
+        person_records[qid] = record
+
+    log("Reading positions and MBTI (Namu Wiki imports, Kpop Wiki)…")
+    try:
+        kpopwiki = kpopwiki_mbti(person_records, fetcher)
+        if not fetcher:
+            KPOPWIKI_CACHE.write_text(json.dumps({"fetchedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"), "people": kpopwiki}, ensure_ascii=False, separators=(",", ":")))
+    except Exception as error:  # Kpop Wiki is optional; reuse last week's answers
+        log(f"  Kpop Wiki unavailable ({error}); using the last saved MBTI list")
+        kpopwiki = load_json(KPOPWIKI_CACHE).get("people", {})
+    namu_dump = load_json(NAMU_DUMP).get("people", {})
+    namu_live = load_json(NAMU_LIVE).get("people", {})
+    log(f"  MBTI from Kpop Wiki for {len(kpopwiki)}; Namu Wiki dump {len(namu_dump)}, live {len(namu_live)}")
+    for qid, record in person_records.items():
+        record = apply_facts(record, namu_dump, kpopwiki, namu_live)
+        record = apply_override(record, overrides, "people")
+        for field in record.get("edited", []):
+            record.get("factSources", {}).pop(field, None)
+        person_records[qid] = record
     return group_records, person_records
 
 

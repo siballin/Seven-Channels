@@ -73,6 +73,13 @@ def fetcher(url, params):
         pages = [{"title": "Aespa", "extract": "Aespa (Korean: 에스파; RR: eseupa) is a South Korean girl group formed by SM Entertainment."},
                  {"title": "Karina (singer)", "extract": "Yu Ji-min (Korean: 유지민; born April 11, 2000), known as Karina, is a South Korean singer."}]
         return {"query": {"pages": [page for page in pages if page["title"] in params["titles"].split("|")]}}
+    if url == build_idols.KPOPWIKI_API:
+        wiki = {
+            "Karina (aespa)": "{{Infobox\n| birth_date = {{Birth date and age|2000|4|11}}\n}}\n== Trivia ==\n* Her MBTI was INFP.<ref>x ENTJ</ref> She later said it is now ENFP.\n",
+            "Giselle (aespa)": "{{Infobox\n| birth_date = {{Birth date and age|1999|1|1}}\n}}\n* Her MBTI is ISTP.\n",
+        }
+        titles = params["titles"].split("|")
+        return {"query": {"pages": [{"title": title, "revisions": [{"slots": {"main": {"content": wiki[title]}}}]} for title in titles if title in wiki]}}
     if url == build_idols.COMMONS_API:
         return {"query": {"pages": [{"title": f"File:{name}", "imageinfo": [{
             "thumburl": f"https://upload.wikimedia.org/thumb/{name}", "descriptionurl": f"https://commons.wikimedia.org/wiki/File:{name}",
@@ -82,7 +89,20 @@ def fetcher(url, params):
 
 
 def main():
+    folder = Path(tempfile.mkdtemp())
+    build_idols.NAMU_DUMP = folder / "namu-dump.json"
+    build_idols.NAMU_LIVE = folder / "namu-live.json"
+    build_idols.KPOPWIKI_CACHE = folder / "kpopwiki.json"
+    build_idols.NAMU_DUMP.write_text(json.dumps({"people": {"Q10": {"positions": ["Leader", "Main dancer"], "mbti": "INFP", "title": "카리나(aespa)"}, "Q11": {"positions": ["Main rapper"], "title": "지젤(aespa)"}}}))
+    build_idols.NAMU_LIVE.write_text(json.dumps({"people": {"Q11": {"positions": ["Main rapper", "Sub vocalist"], "mbti": "ENFJ", "title": "지젤"}}}))
     groups, people = build_idols.build(fetcher=fetcher, log=lambda *_: None)
+    # Source priority: Namu dump < Kpop Wiki < Namu live; the Kpop Wiki page must have the same birth date.
+    assert people["Q10"]["positions"] == ["Leader", "Main dancer"] and people["Q10"]["mbti"] == "ENFP", people["Q10"]
+    assert people["Q10"]["factSources"]["mbti"]["name"] == "Kpop Wiki" and people["Q10"]["factSources"]["positions"]["name"] == "Namu Wiki (2021 dump)"
+    assert people["Q10"]["factSources"]["positions"]["url"].startswith("https://namu.wiki/w/%EC%B9%B4")
+    assert people["Q11"]["positions"] == ["Main rapper", "Sub vocalist"] and people["Q11"]["mbti"] == "ENFJ"  # Giselle's Kpop Wiki birth date differs
+    assert people["Q11"]["factSources"]["mbti"]["name"] == "Namu Wiki"
+    assert build_idols.kpopwiki_mbti_from("* His MBTI personality type is ENFP.<ref>[https://x INTJ]</ref>") == "ENFP"
     aespa = groups["Q1"]
     assert aespa["ko"] == "에스파" and aespa["debut"] == "2020-11-17", aespa
     assert [member["name"] for member in aespa["members"]] == ["Karina", "Giselle", "Former Member"], aespa["members"]
@@ -113,6 +133,7 @@ def main():
         assert [member["name"] for member in groups["Q1"]["members"]] == ["Karina", "Giselle"]
         assert [member["name"] for member in groups["Q3"]["members"]] == ["Cocona", "Jurin"], groups["Q3"]["members"]  # English Wikipedia title as a name; P527 members
         assert people["Q10"]["positions"] == ["Leader"] and people["Q10"]["height"] == 167
+        assert "positions" not in people["Q10"]["factSources"] and people["Q10"]["factSources"]["mbti"]["name"] == "Kpop Wiki"  # your override has no outside source
         build_idols.write(groups, people, now="2026-11-20T00:00:00+00:00")
         index = json.loads((Path(folder) / "index.json").read_text())
         assert {row["id"] for row in index["groups"]} == {"Q1", "Q2", "Q3"}
