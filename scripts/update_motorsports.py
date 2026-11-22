@@ -216,8 +216,10 @@ def build_nascar(year, fetcher=None, previous=None):
             print(f"  NASCAR points {series_id}: {error}", file=sys.stderr)
             points = []
         # Points feeds have no country: take it from the driver's race results.
-        countries = {row["driver"]: row.get("cc", "") for race in rounds for row in race["results"] if row.get("driver")}
-        standings = [{"pos": item.get("position"), "name": item.get("driver_name", ""), "cc": countries.get(item.get("driver_name", ""), ""), "points": item.get("points"), "wins": item.get("wins"),
+        # Names differ slightly between feeds ("Ricky Stenhouse Jr." vs "Ricky Stenhouse Jr"), so match without punctuation.
+        key = lambda name: re.sub(r"[^a-z0-9]", "", (name or "").lower())
+        countries = {key(row["driver"]): row.get("cc", "") for race in rounds for row in race["results"] if row.get("driver")}
+        standings = [{"pos": item.get("position"), "name": item.get("driver_name", ""), "cc": countries.get(key(item.get("driver_name", "")), ""), "points": item.get("points"), "wins": item.get("wins"),
                       "starts": item.get("starts"), "poles": item.get("poles"), "top5": item.get("top_5") if item.get("top_5") is not None else item.get("top5"),
                       "top10": item.get("top_10") if item.get("top_10") is not None else item.get("top10"), "playoff": item.get("playoff_rank") or None}
                      for item in points if isinstance(item, dict) and item.get("driver_name")]
@@ -430,7 +432,8 @@ def parse_class_winners(text):
             for index, name in classes.items():
                 team = rows[0][index] if index < len(rows[0]) else ""
                 drivers = rows[1][index] if len(rows) > 1 and index < len(rows[1]) else ""
-                if team or drivers:
+                # Classes that didn't race that round are listed as "did not participate".
+                if (team or drivers) and not re.search(r"did not (participate|race|compete)|not held|^\W*$", unflag(team), re.I):
                     team_code = FLAG.search(team)
                     winners[name] = {"team": unflag(team).replace("\n", " "), "cc": country_code(team_code.group(1)) if team_code else "", "drivers": people(drivers)}
             out[number] = winners

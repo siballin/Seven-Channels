@@ -27,7 +27,7 @@ de|DEU,GER,FRG,GDR|Germany,West Germany,East Germany|German,East German,West Ger
 dk|DNK,DEN|Denmark|Danish
 ec|ECU|Ecuador|Ecuadorian
 ee|EST|Estonia|Estonian
-es|ESP|Spain|Spanish
+es|ESP,SPA|Spain|Spanish
 fi|FIN|Finland|Finnish
 fr|FRA|France|French
 gb|GBR,ENG,SCO,WAL,NIR,UK|United Kingdom,Great Britain,Britain,England,Scotland,Wales,Northern Ireland|British,English,Scottish,Welsh
@@ -53,7 +53,7 @@ mc|MCO,MON|Monaco|Monegasque,Monacan
 mo|MAC|Macau,Macao|Macanese
 mx|MEX|Mexico|Mexican
 my|MYS,MAS|Malaysia|Malaysian
-nl|NLD,NED|Netherlands,Holland|Dutch
+nl|NLD,NED,NDL|Netherlands,Holland|Dutch
 no|NOR|Norway|Norwegian
 nz|NZL|New Zealand|New Zealander,New Zealand
 om|OMN,OMA|Oman|Omani

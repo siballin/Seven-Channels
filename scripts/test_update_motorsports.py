@@ -177,6 +177,9 @@ def main():
     assert set(imsa[1]) == {"GTP", "LMP2", "GTD Pro", "GTD"}, imsa
     assert imsa[1]["GTP"]["team"] == "#7 Porsche Penske Motorsport" and [d["name"] for d in imsa[1]["GTD"]["drivers"]] == ["Lucas Auer", "Indy Dontje"]
     assert imsa[1]["GTD"]["drivers"][1]["cc"] == "nl"  # {{flagicon|NED}}
+    skipped = ms.parse_class_winners(IMSA_RESULTS.replace("#57 [[Winward Racing]]", "''did not participate''"))
+    assert "GTD" not in skipped[1] and "GTP" in skipped[1]
+    assert ms.country_code("SPA") == "es" and ms.country_code("NDL") == "nl"
     standings = ms.parse_standings(STANDINGS)
     assert standings[0] == {"pos": 1, "drivers": [{"name": "Sébastien Buemi", "cc": "ch"}, {"name": "Brendon Hartley", "cc": "nz"}], "team": "Toyota Racing", "points": 115.0}, standings
     assert standings[1]["drivers"] == [{"name": "René Rast", "cc": "de"}]

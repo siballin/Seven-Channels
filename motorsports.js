@@ -84,10 +84,10 @@ function motorsportsPerson(person, nameKey = "name") {
   return span;
 }
 
-function motorsportsPeople(list) {
-  const span = element("span", "ms-people");
+function motorsportsPeople(list, { stacked = false } = {}) {
+  const span = element("span", stacked ? "ms-people is-stacked" : "ms-people");
   (list || []).forEach((person, index) => {
-    if (index) span.append(", ");
+    if (index && !stacked) span.append(", ");
     span.append(motorsportsPerson(person));
   });
   return span;
@@ -353,7 +353,7 @@ function motorsportsRoundDetail(id, data, group, round) {
       const card = element("div", "ms-class-winner");
       const team = element("strong");
       team.append(motorsportsPerson({ name: item.team, cc: item.cc }));
-      card.append(element("small", "", `${name} winner`), team, motorsportsPeople(item.drivers));
+      card.append(element("small", "", `${name} winner`), team, motorsportsPeople(item.drivers, { stacked: true }));
       grid.append(card);
     }
     page.append(grid, element("p", "ms-muted", "Class winners from Wikipedia; the full classification is on the race report."));
