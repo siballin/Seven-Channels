@@ -1,6 +1,5 @@
-"""Temporary: ESPN coverage of retired players, Wikidata ESPN ids, open NBA datasets."""
+"""Temporary: can ESPN list every player season by season (with ids), back to the 1940s?"""
 import json, time
-from urllib.parse import urlencode, quote
 from urllib.request import Request, urlopen
 
 UA = "SevenChannels/1.0 (personal static site; NBA player directory)"
@@ -12,45 +11,45 @@ def get(url, timeout=60):
     except Exception as e:
         return getattr(e, "code", "ERR"), str(e)[:200]
 
-def sparql(q):
-    return get("https://query.wikidata.org/sparql?" + urlencode({"query": q, "format": "json"}))
-
-# Wikidata properties: which ids do NBA players carry, and how often?
-status, d = sparql("""SELECT ?prop ?label (COUNT(DISTINCT ?p) AS ?n) WHERE {
-  ?p wdt:P3647 [] . ?p ?direct [] . ?prop wikibase:directClaim ?direct ; wikibase:propertyType wikibase:ExternalId ; rdfs:label ?label .
-  FILTER(LANG(?label) = "en")
-} GROUP BY ?prop ?label ORDER BY DESC(?n) LIMIT 40""")
-print("Wikidata external ids on NBA players", status)
-if isinstance(d, dict):
-    for row in d["results"]["bindings"]:
-        print("  ", row["prop"]["value"].split("/")[-1], row["label"]["value"], row["n"]["value"])
-else:
-    print(d)
-
-# ESPN stats for retired legends by known ESPN ids
-for name, espn in [("Michael Jordan", 1035), ("Larry Bird", 1543), ("Magic Johnson", 1600), ("Kobe Bryant", 110), ("Shaquille O'Neal", 614), ("Tim Duncan", 215)]:
-    s, d = get(f"https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/{espn}/stats?region=us&lang=en&contentorigin=espn")
+core = "https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba"
+for year in [2026, 1998, 1985, 1970, 1960, 1950, 1947]:
+    s, d = get(f"{core}/seasons/{year}/athletes?limit=1000")
     if isinstance(d, dict):
-        cats = {c.get("name"): c for c in d.get("categories", [])}
-        avg = cats.get("averages", {})
-        seasons = [row.get("season", {}).get("displayName") for row in avg.get("statistics", [])]
-        print(f"ESPN {name} {espn}: {s} seasons {len(seasons)} {seasons[:1]}..{seasons[-1:]} career PTS avg {(avg.get('totals') or ['?'])[-1]}")
+        refs = [item.get("$ref", "") for item in d.get("items", [])]
+        print(year, s, "count", d.get("count"), "pages", d.get("pageCount"), "sample", refs[:2])
     else:
-        print(f"ESPN {name} {espn}: {s} {d}")
-    s, d = get(f"https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/{espn}?region=us&lang=en&contentorigin=espn")
-    if isinstance(d, dict):
-        a = d.get("athlete", {})
-        print("   ", a.get("displayName"), a.get("displayDraft"), (a.get("position") or {}).get("abbreviation"), a.get("displayDOB"), (a.get("headshot") or {}).get("href"))
-    time.sleep(0.4)
+        print(year, s, d)
+    time.sleep(0.3)
 
-# Older eras: Wilt Chamberlain / Bill Russell / George Mikan ESPN ids via Wikidata (if the property exists)
-status, d = sparql("""SELECT ?p ?pLabel ?espn WHERE { VALUES ?p { wd:Q15711 wd:Q312936 wd:Q311025 wd:Q41421 } OPTIONAL { ?p wdt:P3685 ?espn } SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }""")
-print("\nlegends P3685", status, [(r["pLabel"]["value"], r.get("espn", {}).get("value")) for r in d["results"]["bindings"]] if isinstance(d, dict) else d)
+# A season athlete record (bio for that season)
+s, d = get(f"{core}/seasons/1985/athletes/1035")
+print("\nseason athlete 1985/1035", s, json.dumps({k: d.get(k) for k in ("id", "displayName", "position", "draft", "debutYear", "dateOfBirth", "headshot", "statistics", "team")} if isinstance(d, dict) else d)[:900])
 
-# Open datasets
-for query in ["nba", "basketball"]:
-    s, d = get(f"https://huggingface.co/api/datasets?search={query}&limit=40&sort=downloads")
-    print(f"\nHF datasets '{query}'", s)
-    if isinstance(d, list):
-        for item in d:
-            print("  ", item["id"], item.get("lastModified", "")[:10], "downloads", item.get("downloads"), [t for t in item.get("tags", []) if t.startswith("license:")])
+# Legends by searching the 1985 / 1962 / 1960 rosters
+for year, names in [(1985, ["Larry Bird", "Magic Johnson", "Kareem Abdul-Jabbar"]), (1962, ["Wilt Chamberlain", "Bill Russell"]), (1950, ["George Mikan"])]:
+    s, d = get(f"{core}/seasons/{year}/athletes?limit=1000")
+    if not isinstance(d, dict):
+        print(year, s, d); continue
+    ids = [item["$ref"].split("/athletes/")[1].split("?")[0] for item in d.get("items", [])]
+    found = {}
+    for athlete in ids:
+        s2, a = get(f"{core}/seasons/{year}/athletes/{athlete}")
+        if isinstance(a, dict) and a.get("displayName") in names:
+            found[a["displayName"]] = athlete
+            if len(found) == len(names):
+                break
+    print(year, found, "(scanned", len(ids), ")")
+    for name, athlete in found.items():
+        s3, st = get(f"https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/{athlete}/stats?region=us&lang=en&contentorigin=espn")
+        if isinstance(st, dict):
+            avg = next((c for c in st.get("categories", []) if c.get("name") == "averages"), {})
+            seasons = [row.get("season", {}).get("displayName") for row in avg.get("statistics", [])]
+            print("   ", name, athlete, "seasons", len(seasons), seasons[:1], seasons[-1:], "labels", avg.get("labels"), "career", avg.get("totals"))
+            if avg.get("statistics"):
+                print("     first season row", avg["statistics"][0].get("stats"), "team", avg["statistics"][0].get("teamSlug"), avg["statistics"][0].get("teamId"))
+        else:
+            print("   ", name, athlete, s3, st)
+
+s, d = get("https://huggingface.co/api/datasets/cdechoch/nba-data-archive/tree/main?recursive=true")
+print("\ncdechoch/nba-data-archive", s, [(f.get("path"), f.get("size")) for f in d[:40]] if isinstance(d, list) else d)
+s, d = get("https://huggingface.co/datasets/cdechoch/nba-data-archive/raw/main/README.md")
