@@ -254,11 +254,15 @@ def main():
     assert ms.track_layouts(infobox) == [("Daytona International Speedway 2024.svg", "Tri-Oval (1959–present)"),
                                          ("Daytona International Speedway Road Course 2024.svg", "Sports Car Course (1985–present)")], ms.track_layouts(infobox)
     def track_wiki(url, params):
+        if params.get("prop") == "pageimages":
+            return {"query": {"pages": [{"title": t, "pageimage": f"{t}_2024.svg"} for t in params["titles"].split("|")]}}
         if params.get("action") == "parse":
             return {"parse": {"wikitext": infobox}}
         return {"query": {"pages": [{"title": t, "imageinfo": [{"thumburl": "https://thumb.wikimedia.org/x/" + t.removeprefix("File:")}]} for t in params["titles"].split("|")]}}
-    maps = ms.build_track_maps([{"circuitArticles": {"Daytona": "Daytona International Speedway"}}], fetcher=track_wiki)
-    assert [m["caption"] for m in maps["Daytona"]["maps"]] == ["Tri-Oval (1959–present)", "Sports Car Course (1985–present)"], maps
+    maps = ms.build_track_maps([{"id": "imsa", "circuitArticles": {"Daytona": "Daytona International Speedway"}},
+                                {"id": "f1", "circuitArticles": {"Las Vegas": "Las Vegas Grand Prix#Circuit"}}], fetcher=track_wiki)
+    assert [m["caption"] for m in maps["Daytona"]["maps"]] == ["Tri-Oval (1959–present)", "Sports Car Course (1985–present)"], maps  # infobox for sports-car tracks
+    assert maps["Las Vegas"]["article"] == "Las Vegas Grand Prix" and maps["Las Vegas"]["maps"][0]["url"].endswith("Las Vegas Grand Prix 2024.svg"), maps["Las Vegas"]  # lead image
     assert ms.build_wec(2026, fetcher)["circuitArticles"].get("Circuit de la Sarthe") == "Circuit de la Sarthe", ms.build_wec(2026, fetcher)["circuitArticles"]
     print("update_motorsports tests passed")
 

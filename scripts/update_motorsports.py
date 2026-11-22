@@ -50,8 +50,9 @@ def fetch_json(url, params=None, fetcher=None, tries=4):
         except Exception as error:
             if getattr(error, "code", None) in (403, 404) or attempt == tries - 1:
                 raise
-            print(f"  retry in {delay}s after {error}", file=sys.stderr, flush=True)
-            time.sleep(delay)
+            wait = max(delay, 15) if getattr(error, "code", None) == 429 else delay  # rate limited: back off properly
+            print(f"  retry in {wait}s after {error}", file=sys.stderr, flush=True)
+            time.sleep(wait)
             delay *= 2
 
 
@@ -634,8 +635,13 @@ def build_track_maps(built, previous=None, fetcher=None, now=None):
     now = now or datetime.now(timezone.utc)
     previous = previous or {}
     articles = {}
+    road = set()  # circuits sports cars race on, where an alternate (road course) layout matters
     for data in built:
-        articles.update({name: title for name, title in (data.get("circuitArticles") or {}).items() if name})
+        for name, title in (data.get("circuitArticles") or {}).items():
+            if name:
+                articles[name] = title.split("#")[0].strip()
+                if data.get("id") in ("imsa", "wec"):
+                    road.add(articles[name])
     out, todo = {}, {}
     for name, title in articles.items():
         old = previous.get(name)
@@ -645,21 +651,47 @@ def build_track_maps(built, previous=None, fetcher=None, now=None):
         else:
             todo.setdefault(title, []).append(name)
     layouts = {}
-    for title in sorted(todo):
+    titles = sorted(todo)
+    # The lead image of a circuit article is its infobox layout diagram: 50 circuits a request.
+    for start in range(0, len(titles), 50):
+        batch = titles[start:start + 50]
+        try:
+            data = fetch_json(WIKIPEDIA, {"action": "query", "prop": "pageimages", "piprop": "name", "pilicense": "any", "redirects": "1",
+                                          "titles": "|".join(batch), "format": "json", "formatversion": "2"}, fetcher)
+        except Exception as error:
+            print(f"  track maps: {error}", file=sys.stderr)
+            continue
+        query = data.get("query") or {}
+        back = {}
+        for item in query.get("normalized", []) + query.get("redirects", []):
+            back[item["to"]] = back.get(item["from"], item["from"])
+        for page in query.get("pages", []):
+            image = page.get("pageimage") or ""
+            if re.search(r"\.(svg|png)$", image, re.I) and not re.search(r"logo|aerial|photo", image, re.I):
+                layouts[back.get(page.get("title", ""), page.get("title", ""))] = [(image.replace("_", " "), "")]
+        if not fetcher:
+            time.sleep(1)
+    # Sports-car circuits: read the infobox for every layout with its caption (Daytona: tri-oval and road course).
+    for title in [title for title in titles if title in road]:
         try:
             data = fetch_json(WIKIPEDIA, {"action": "parse", "page": title, "prop": "wikitext", "section": "0", "redirects": "1", "format": "json", "formatversion": "2"}, fetcher)
-            layouts[title] = track_layouts((data.get("parse") or {}).get("wikitext", ""))
+            found = track_layouts((data.get("parse") or {}).get("wikitext", ""))
+            if found:
+                layouts[title] = found
         except Exception as error:
             print(f"  track map for {title}: {error}", file=sys.stderr)
-            layouts[title] = []
         if not fetcher:
-            time.sleep(0.4)
+            time.sleep(1.5)
     files = sorted({file for items in layouts.values() for file, _ in items})
     thumbs = {}
     for start in range(0, len(files), 50):
         batch = files[start:start + 50]
-        data = fetch_json(WIKIPEDIA, {"action": "query", "prop": "imageinfo", "iiprop": "url", "iiurlwidth": "480", "titles": "|".join(f"File:{name}" for name in batch),
-                                      "format": "json", "formatversion": "2"}, fetcher)
+        try:
+            data = fetch_json(WIKIPEDIA, {"action": "query", "prop": "imageinfo", "iiprop": "url", "iiurlwidth": "480", "titles": "|".join(f"File:{name}" for name in batch),
+                                          "format": "json", "formatversion": "2"}, fetcher)
+        except Exception as error:
+            print(f"  track map images: {error}", file=sys.stderr)
+            continue
         query = data.get("query") or {}
         back = {item["to"]: item["from"] for item in query.get("normalized", [])}
         for page in query.get("pages", []):
