@@ -83,6 +83,15 @@ Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
 
 The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
 
+
+### Premier League and MLS
+
+The soccer tabs have **Matches | Table | Stats**:
+- **Matches:** a match centre for the selected game: score and form, a timeline (goals with assists, cards, substitutions), match stats (possession, shots, on target, corners, passes, tackles, saves, fouls, cards), lineups drawn in formation with substitutions, each club's last five results in all competitions, and the part of the table around both clubs.
+- **Table:** the full table (P W D L GF GA GD Pts) with qualification and relegation zones, last-five form, and home-only or away-only tables worked out from this season's results. MLS shows each conference or all clubs together (the Supporters' Shield race).
+- **Stats:** top scorers, assists and goals + assists from ESPN; club numbers worked out from results (most goals, fewest conceded, clean sheets, failed to score, unbeaten runs, biggest wins) and league averages.
+
+The side table orders clubs by the league's ranking and shows points and goal difference; the leaders widget shows season top scorers. `soccer.js`; ESPN responses saved in `tests/fixtures/espn-soccer/` for testing.
 ## Video Games
 
 **My games** (`#games`) is your game log. Add a game by searching the catalog as you type; picking a result fills in its cover, platforms, release date, genres, critic score and time to beat. Then record your platform, hours played, a rating out of 10, and when you started or finished. Games you add without a catalog match keep whatever you type. Games are listed under Playing, Backlog and Finished, and the backlog can be sorted by shortest to beat or highest critic score. A dashboard totals what you're playing, your backlog with estimated hours, games finished this year, hours played and your average rating. Game entries are saved in the browser and sync to your account like other entries.

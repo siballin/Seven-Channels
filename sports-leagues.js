@@ -75,6 +75,7 @@ function sportsLeagueTeamRow(competitor, competition, status) {
 }
 
 function sportsLeagueDetail(event, league) {
+  if (league.soccer && typeof soccerMatchCentre === "function") return soccerMatchCentre(event, league);
   const box = element("section", "league-detail");
   box.setAttribute("aria-live", "polite");
   const competition = event.competitions?.[0] || {};
@@ -167,6 +168,7 @@ function createLeagueScoreboard(leagueId) {
   refresh.addEventListener("click", () => loadLeagueGames(section));
   section.reloadGames = (options) => loadLeagueGames(section, options);
   loadLeagueGames(section);
+  if (league.soccer && typeof soccerEnhance === "function") soccerEnhance(section, league);
   return section;
 }
 
