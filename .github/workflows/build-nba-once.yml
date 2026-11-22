@@ -1,0 +1,42 @@
+name: Build NBA player data (temporary)
+on:
+  push:
+    branches: [claude/dazzling-hamilton-4jcfnt]
+    paths: [".github/workflows/build-nba-once.yml"]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Build
+        run: python scripts/build_nba_players.py --force
+      - name: Report
+        run: |
+          du -sh data/nba
+          python3 - <<'PY'
+          import json, glob
+          from collections import Counter
+          index = json.load(open("data/nba/index.json"))
+          rows = index["players"]
+          print("players", len(rows), "active", sum(r["a"] for r in rows), "with headshot", sum(r["h"] for r in rows))
+          print("by first season decade", sorted(Counter((r["from"] // 10) * 10 for r in rows).items()))
+          for name in ["Michael Jordan", "Larry Bird", "Magic Johnson", "Kareem Abdul-Jabbar", "LeBron James", "Kobe Bryant", "Stephen Curry", "Nikola Jokic", "Victor Wembanyama", "Cooper Flagg"]:
+              print(name, [(r["id"], r["from"], r["to"], r["t"][:4], r["ppg"], r["pts"]) for r in rows if r["n"] == name])
+          rec = json.load(open("data/nba/records.json"))
+          print("career pts", rec["career"]["pts"][:5])
+          print("season pts", rec["season"]["pts"][:5])
+          print("career ast", rec["career"]["ast"][:3], "td3", rec["career"]["td3"][:3])
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/nba
+          git commit -m "NBA player data from ESPN" || exit 0
+          git pull --rebase origin claude/dazzling-hamilton-4jcfnt && git push origin HEAD:claude/dazzling-hamilton-4jcfnt
