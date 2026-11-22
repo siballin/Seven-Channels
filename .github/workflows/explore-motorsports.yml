@@ -1,0 +1,14 @@
+name: Explore motorsports sources (temporary)
+on:
+  push:
+    branches: [claude/dazzling-hamilton-4jcfnt]
+    paths: [".github/workflows/explore-motorsports.yml", "scripts/explore_motorsports.py"]
+jobs:
+  explore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: python scripts/explore_motorsports.py
