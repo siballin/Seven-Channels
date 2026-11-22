@@ -75,6 +75,20 @@ jobs:
         with:
           path: data/idols
           key: idols-${{ github.run_id }}
+      - name: Restore last NBA player database
+        uses: actions/cache/restore@v4
+        with:
+          path: data/nba
+          key: nba-players-${{ github.run_id }}
+          restore-keys: nba-players-
+      - name: Refresh NBA player database from ESPN (weekly; retired players are kept)
+        continue-on-error: true
+        run: python scripts/build_nba_players.py
+      - name: Cache NBA player database
+        uses: actions/cache/save@v4
+        with:
+          path: data/nba
+          key: nba-players-${{ github.run_id }}
       - name: Refresh Politics news (The Hill, Politico, Punchbowl News, Roll Call, Axios)
         continue-on-error: true
         run: python scripts/update_politics_news.py

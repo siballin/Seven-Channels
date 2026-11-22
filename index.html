@@ -291,6 +291,78 @@
       .idol-lineup-row small { display: none; }
       .idol-lineup-axis { margin-left: 86px; }
     }
+    .nba-db-view, .nba-db { display: grid; gap: 14px; min-width: 0; }
+    .nba-db h2 { margin: 0; }
+    .nba-db h3 { margin: 6px 0 0; font-size: 1rem; }
+    .nba-db-muted { color: var(--muted); font-size: .88rem; margin: 0; }
+    .nba-db-credit { border-top: 1px solid color-mix(in srgb, var(--line) 50%, transparent); padding-top: 10px; }
+    .nba-db-nav { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .nba-db-nav a { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--glass-edge, var(--line)); text-decoration: none; font-size: .9rem; color: inherit; }
+    .nba-db-nav a.is-active { background: color-mix(in srgb, var(--signal) 22%, transparent); border-color: var(--signal); }
+    .nba-db-nav .nba-db-back { margin-left: auto; border: 0; color: var(--muted); }
+    .nba-db-controls { display: grid; grid-template-columns: minmax(180px, 2fr) repeat(5, minmax(110px, 1fr)); gap: 10px; align-items: end; }
+    .nba-db-controls .field { margin: 0; min-width: 0; }
+    .nba-db-controls select, .nba-db-controls input { width: 100%; }
+    .nba-db-scroll { overflow-x: auto; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); }
+    .nba-db-table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+    .nba-db-table th, .nba-db-table td { padding: 7px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid color-mix(in srgb, var(--line) 40%, transparent); }
+    .nba-db-table thead th { position: sticky; top: 0; background: var(--screen); color: var(--muted); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; }
+    .nba-db-table th:first-child, .nba-db-table td:nth-child(2), .nba-db-table thead th:nth-child(2), .nba-db-table .nba-db-teams { text-align: left; }
+    .nba-db-compare thead th:nth-child(2) { text-align: right; }
+    .nba-db-table tbody th { font-weight: 500; }
+    .nba-db-player-link { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+    .nba-db-player-link span { display: grid; text-align: left; }
+    .nba-db-player-link small { color: var(--muted); font-size: .75rem; }
+    .nba-db-player-link:hover strong, .nba-db-player-link:focus-visible strong { text-decoration: underline; }
+    .nba-db-thumb { width: 44px; height: 32px; object-fit: cover; border-radius: 6px; flex: none; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+    .nba-db-initials { display: inline-grid; place-items: center; font-weight: 700; color: var(--muted); background: color-mix(in srgb, var(--signal) 14%, transparent); font-size: .75rem; }
+    .nba-db-teams { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+    .nba-db-hero { display: grid; grid-template-columns: minmax(150px, 260px) 1fr; gap: 20px; align-items: start; }
+    .nba-db-photo-large { width: 100%; aspect-ratio: 1.37; object-fit: cover; border-radius: 14px; background: color-mix(in srgb, var(--ink) 6%, transparent); font-size: 2.4rem; }
+    .nba-db-hero h2 { font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.05; }
+    .nba-db-subtitle { margin: 6px 0 10px; color: var(--muted); }
+    .nba-db-facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; }
+    .nba-db-facts dt { color: var(--muted); font-size: .85rem; }
+    .nba-db-facts dd { margin: 0; overflow-wrap: anywhere; }
+    .nba-db-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; align-items: center; }
+    .nba-db-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+    .nba-db-tile { display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); }
+    .nba-db-tile strong { font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+    .nba-db-tile span { color: var(--muted); font-size: .78rem; }
+    .nba-db-ranks { margin: 0; padding: 10px 14px; border-radius: var(--glass-radius-small, 12px); background: color-mix(in srgb, var(--signal) 12%, transparent); }
+    .nba-db-chart-wrap { margin: 0; display: grid; gap: 6px; }
+    .nba-db-chart { width: 100%; height: auto; max-height: 260px; }
+    .nba-db-chart text { fill: var(--muted); font-size: 11px; }
+    .nba-db-grid { stroke: color-mix(in srgb, var(--line) 50%, transparent); stroke-width: 1; }
+    .nba-db-line { fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+    .nba-db-line.series-0, .nba-db-legend .series-0 i { stroke: var(--signal); background: var(--signal); }
+    .nba-db-line.series-1, .nba-db-legend .series-1 i { stroke: #f5a623; background: #f5a623; }
+    .nba-db-line.series-2, .nba-db-legend .series-2 i { stroke: #12a594; background: #12a594; }
+    .nba-db-legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: .85rem; }
+    .nba-db-legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+    .nba-db-table-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .nba-db-toggle { display: flex; gap: 6px; }
+    .nba-db-seasons tr.is-split td, .nba-db-seasons tr.is-split th { color: var(--muted); font-size: .85rem; }
+    .nba-db-seasons tr.is-total th, .nba-db-seasons tr.is-total td { font-weight: 600; }
+    .nba-db-table td.is-best { color: var(--signal); font-weight: 700; }
+    .nba-db-record-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+    .nba-db-record { padding: 12px 14px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); }
+    .nba-db-record h4 { margin: 0 0 6px; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .nba-db-record ol { margin: 0; padding-left: 22px; display: grid; gap: 3px; font-size: .9rem; }
+    .nba-db-record li small { color: var(--muted); margin-left: 4px; }
+    .nba-db-record li strong { float: right; font-variant-numeric: tabular-nums; }
+    .nba-db-picker { display: grid; gap: 4px; max-width: 420px; }
+    .nba-db-suggestions { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+    .nba-db-suggestions a { display: block; padding: 6px 10px; border-radius: 8px; text-decoration: none; }
+    .nba-db-suggestions a:hover, .nba-db-suggestions a:focus-visible { background: color-mix(in srgb, var(--signal) 14%, transparent); }
+    .nba-db-compare th .nba-db-player-link { justify-content: flex-end; }
+    .nba-db-remove { display: block; font-size: .75rem; color: var(--muted); margin-top: 2px; }
+    @media (max-width: 900px) { .nba-db-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nba-db-controls .nba-db-search { grid-column: 1 / -1; } }
+    @media (max-width: 560px) {
+      .nba-db-hero { grid-template-columns: 1fr; }
+      .nba-db-photo-large { max-width: 260px; }
+      .nba-db-nav .nba-db-back { margin-left: 0; }
+    }
     .guide { display: grid; gap: 3px; }
     .guide-row {
       display: grid;
@@ -5447,7 +5519,10 @@
       upcoming.append(element("h3", "", "Upcoming games"), upcomingBody);
       left.append(teams, standings, injuries);
       right.append(news, leaders, upcoming, createRedditWidget("sports"));
-      main.append(featured, scoreboard, planner);
+      const playerDbLink = element("a", "idol-entry nba-db-entry");
+      playerDbLink.href = "#sports/players";
+      playerDbLink.append(element("strong", "", "NBA player database"), element("span", "", "Every player’s season-by-season stats, all-time leaders and side-by-side comparisons"));
+      main.append(playerDbLink, featured, scoreboard, planner);
       const sideColumn = element("div", "sports-hub-side-column");
       sideColumn.append(left, right);
       hub.append(sideColumn, main, resources);
@@ -7524,6 +7599,7 @@
       if (route === "games/releases") return "games";
       if (/^music\/.+/.test(route)) return "music";
       if (/^kpop\/(idols|idol\/Q\d+|group\/Q\d+)$/.test(route)) return "kpop";
+      if (/^sports\/players(\/(\d+|records|compare(\/[\d,]*)?))?$/.test(route)) return "sports";
       if (/^creator\/.+/.test(route)) return "creator";
       if (/^live\/.+/.test(route)) return "live";
       if (/^politics\/members(\/[A-Z]\d{6})?$/.test(route)) return "politics";
@@ -11942,7 +12018,8 @@
       creator: ["creator-studio.js", "creator-clips.js"],
       live: ["live-events.js"],
       wrapped: ["year-in-review.js"],
-      idols: ["idols.js"]
+      idols: ["idols.js"],
+      nbaPlayers: ["nba-players.js"]
     };
     const lazyReady = new Set();
     const lazyPending = new Map();
@@ -11987,6 +12064,13 @@
       heading.append(element("span", "number", `CH ${channel.number}`), element("h2", "", channel.name));
       const description = element("p", "lede", channel.description);
       if (lazyScripts[channel.id] && needsLazy(channel.id, heading, description)) return;
+      const playerDbRoute = /^sports\/players(?:\/(\d+|records|compare(?:\/[\d,]*)?))?$/.exec(location.hash.slice(1));
+      if (channel.id === "sports" && playerDbRoute) {
+        if (needsLazy("nbaPlayers", heading, description)) return;
+        view.replaceChildren(heading, description, createNbaPlayersView(playerDbRoute[1] || ""));
+        scrollTo(0, 0);
+        return;
+      }
       const idolRoute = /^kpop\/(idols|idol\/Q\d+|group\/Q\d+)$/.exec(location.hash.slice(1));
       if (channel.id === "kpop" && idolRoute) {
         if (needsLazy("idols", heading, description)) return;

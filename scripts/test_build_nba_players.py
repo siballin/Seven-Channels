@@ -81,6 +81,7 @@ def main():
     first = mj["seasons"][0]
     assert first[columns["season"]] == "1984-85" and first[columns["team"]] == "CHI" and first[columns["pts"]] == 28.2
     assert first[columns["fgm"]] == 837 and first[columns["fga"]] == 1625 and first[columns["dd2"]] == 40
+    assert first[columns["tpts"]] == 2313 and first[columns["treb"]] == 534 and first[columns["tast"]] == 481
     assert mj["career"]["pts"] == 30.1 and mj["career"]["totals"]["pts"] == 32292 and mj["career"]["totals"]["td3"] == 28
     traded = [row[columns["team"]] for row in players["2000"]["seasons"]]
     assert traded == ["LAL", "BOS", "TOT"], traded  # per-team rows, then the combined row

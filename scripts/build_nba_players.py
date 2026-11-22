@@ -45,7 +45,8 @@ REFRESH_DAYS = 6
 
 # Per-season columns stored for each player (compact rows; names listed once in each shard).
 SEASON_COLUMNS = ["year", "season", "team", "gp", "gs", "min", "pts", "reb", "ast", "stl", "blk", "tov", "pf", "oreb", "dreb",
-                  "fgm", "fga", "fgp", "fg3m", "fg3a", "fg3p", "ftm", "fta", "ftp", "dd2", "td3"]
+                  "fgm", "fga", "fgp", "fg3m", "fg3a", "fg3p", "ftm", "fta", "ftp", "dd2", "td3",
+                  "tpts", "treb", "tast", "tstl", "tblk", "ttov"]  # season totals
 
 
 # ---------- fetching ----------
@@ -158,6 +159,8 @@ def parse_stats(data, team_abbr):
             "tov": number(avg.get("TO")), "pf": number(avg.get("PF")), "oreb": number(avg.get("OR")), "dreb": number(avg.get("DR")),
             "fgm": fgm, "fga": fga, "fgp": number(avg.get("FG%")), "fg3m": fg3m, "fg3a": fg3a, "fg3p": number(avg.get("3P%")),
             "ftm": ftm, "fta": fta, "ftp": number(avg.get("FT%")), "dd2": number(mis.get("DD2")), "td3": number(mis.get("TD3")),
+            "tpts": number(tot.get("PTS")), "treb": number(tot.get("REB")), "tast": number(tot.get("AST")),
+            "tstl": number(tot.get("STL")), "tblk": number(tot.get("BLK")), "ttov": number(tot.get("TO")),
         }
         seasons.append([values[column] for column in SEASON_COLUMNS])
     seasons.sort(key=lambda row: (row[0], row[2] == "TOT"))

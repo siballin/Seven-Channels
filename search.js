@@ -57,8 +57,9 @@ function searchRemoteRecords() {
     fetch(new URL("data/channel-news.json", location.href)).then((response) => response.ok ? response.json() : null),
     fetch(new URL("data/politics-news.json", location.href)).then((response) => response.ok ? response.json() : null),
     fetch(new URL("data/music-lab.json", location.href)).then((response) => response.ok ? response.json() : null),
-    fetch(new URL("data/idols/index.json", location.href)).then((response) => response.ok ? response.json() : null)
-  ]).then(([news, politics, musicLab, idols]) => {
+    fetch(new URL("data/idols/index.json", location.href)).then((response) => response.ok ? response.json() : null),
+    fetch(new URL("data/nba/index.json", location.href)).then((response) => response.ok ? response.json() : null)
+  ]).then(([news, politics, musicLab, idols, nbaPlayers]) => {
     const records = [];
     const seen = new Set();
     const headline = (item, channelName) => {
@@ -92,6 +93,13 @@ function searchRemoteRecords() {
         const groups = (person.g || []).map((id) => groupNames.get(id)).filter(Boolean);
         records.push({ group: "K-pop idols", title: person.n, detail: [person.k, groups.slice(0, 2).join(", ") || "Soloist"].filter(Boolean).join(" · "),
           href: `#kpop/idol/${person.id}`, external: false, text: searchFold([person.n, person.k, ...(person.a || []), ...groups].join(" ")) });
+      }
+    }
+    if (nbaPlayers.status === "fulfilled" && nbaPlayers.value) {
+      for (const player of nbaPlayers.value.players || []) {
+        const years = player.a ? `${player.from - 1}–now` : `${player.from - 1}–${player.to}`;
+        records.push({ group: "NBA players", title: player.n, detail: [player.pos, years, (player.t || []).slice(0, 3).join(", "), player.ppg != null ? `${player.ppg} PPG` : ""].filter(Boolean).join(" · "),
+          href: `#sports/players/${player.id}`, external: false, text: searchFold([player.n, player.c, ...(player.t || [])].join(" ")) });
       }
     }
     return records;

@@ -60,6 +60,17 @@ Namu Wiki is CC BY-NC-SA 2.0 KR (credit, non-commercial, share-alike), so keep t
 
 Tests: `python3 scripts/test_build_idols.py`, `python3 scripts/test_namu_parse.py` and `node tests/idols-data.test.js`.
 
+## NBA player database
+
+`#sports/players` (the **NBA player database** card on the Sports channel) covers every player with regular-season stats on ESPN:
+
+- **Players:** search by name or college; filter by team, position, era and active or retired; sort by career points, per-game averages, games or most recent.
+- **Player pages** (`#sports/players/<ESPN id>`): photo, position, team, born, height and weight, college, draft, every team; career averages and totals; where they rank all-time in the database; a points/rebounds/assists chart by season; and a season-by-season table (per game or totals, traded seasons split by team, career highs highlighted).
+- **All-time leaders** (`#sports/players/records`): career totals, career per-game (400+ games) and best single seasons (58+ games).
+- **Compare** (`#sports/players/compare/<id>,<id>`): up to three players side by side, with points per game by season of career.
+
+**Data.** `scripts/build_nba_players.py` finds players in ESPN's season stats lists (complete from 1996-97, partial through the 1980s) and fetches each one's bio and full career from ESPN, which can reach back before the lists (Michael Jordan from 1984-85). It writes `data/nba/index.json`, `records.json` and 64 profile shards. Retired players are fetched once and kept; players from the last two seasons refresh weekly in the publish workflow. Players who retired before the 1980s aren't in ESPN's lists; add their ESPN ids to `data/nba/extra-players.json` (`{"players": [{"id": "…", "name": "…"}]}`) to include them if ESPN has their stats. Tests: `python3 scripts/test_build_nba_players.py`.
+
 ## Movies and Anime
 
 Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
