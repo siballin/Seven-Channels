@@ -3,6 +3,8 @@ on:
   push:
     branches: [claude/dazzling-hamilton-4jcfnt]
     paths: [".github/workflows/explore-motorsports.yml", "scripts/explore_motorsports.py"]
+permissions:
+  contents: write
 jobs:
   explore:
     runs-on: ubuntu-latest
@@ -12,3 +14,10 @@ jobs:
         with:
           python-version: "3.x"
       - run: python scripts/explore_motorsports.py
+      - name: Save soccer fixtures
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add tests/fixtures/espn-soccer
+          git commit -m "Test fixtures: ESPN Premier League and MLS responses" || exit 0
+          git pull --rebase origin claude/dazzling-hamilton-4jcfnt && git push origin HEAD:claude/dazzling-hamilton-4jcfnt
