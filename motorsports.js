@@ -159,7 +159,7 @@ function motorsportsPerson(person, nameKey = "name") {
   const name = typeof person === "string" ? person : person?.[nameKey] || person?.name || "";
   const head = motorsportsHeads[name]?.url || "";
   if (/^https:\/\/(upload|thumb)\.wikimedia\.org\//.test(head)) {
-    const image = element("img", "ms-head");
+    const image = element("img", "ms-face");
     image.src = head;
     image.alt = "";
     image.loading = "lazy";
