@@ -107,6 +107,7 @@ def main():
     assert nba.parse_stats(data, {})[0][0][columns["team"]] == "TOT"
     old = {"seasons": [[2026, "2025-26", "2025-26 TOTALS"] + [1] * 23], "pos": "NA"}
     cleaned = nba.clean(old, nba.SEASON_COLUMNS[:26])
+    assert nba.season_label(1987, "1987") == "1986-87" and nba.season_label(2026, "2025-26") == "2025-26"
     assert cleaned["seasons"][0][2] == "TOT" and len(cleaned["seasons"][0]) == len(nba.SEASON_COLUMNS) and cleaned["pos"] == ""
 
     nba.write(players, teams, now="2026-11-22T00:00:00+00:00")

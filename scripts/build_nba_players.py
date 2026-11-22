@@ -189,7 +189,7 @@ def parse_stats(data, team_abbr):
         fg3m, fg3a = made_attempted(tot.get("3PT"))
         ftm, fta = made_attempted(tot.get("FT"))
         values = {
-            "year": year, "season": season.get("displayName") or str(year),
+            "year": year, "season": season_label(year, season.get("displayName")),
             "team": "TOT" if combined else team_abbr.get(team_id) or (row.get("teamSlug") or "").upper()[:16] or team_id,
             "gp": number(avg.get("GP")), "gs": number(avg.get("GS")), "min": number(avg.get("MIN")), "pts": number(avg.get("PTS")),
             "reb": number(avg.get("REB")), "ast": number(avg.get("AST")), "stl": number(avg.get("STL")), "blk": number(avg.get("BLK")),
@@ -219,6 +219,12 @@ def parse_stats(data, team_abbr):
                    "dd2": number(misc_career.get("DD2")), "td3": number(misc_career.get("TD3"))},
     } if avg_career else {}
     return seasons, career
+
+
+def season_label(year, display=""):
+    """ESPN names some older seasons by their last year only ("1987"); show them as "1986-87"."""
+    text = str(display or "")
+    return text if re.fullmatch(r"\d{4}-\d{2}", text) else f"{year - 1}-{str(year)[2:]}"
 
 
 def parse_draft(text):
@@ -264,6 +270,7 @@ def clean(player, columns):
     rows = []
     for row in player.get("seasons") or []:
         row = list(row) + [None] * (len(SEASON_COLUMNS) - len(row))
+        row[1] = season_label(row[0], row[1])
         if re.search(r"total", str(row[team]), re.I):
             row[team] = "TOT"
         rows.append(row)
