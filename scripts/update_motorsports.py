@@ -133,6 +133,8 @@ def build_f1(year, fetcher=None):
     return {
         "id": "f1", "name": "Formula 1", "season": year, "complete": complete, "source": {"name": "Jolpica F1 API", "url": "https://jolpi.ca/"},
         "teamArticles": articles,
+        "circuitArticles": {race.get("Circuit", {}).get("circuitName", ""): unquote(race["Circuit"]["url"].split("/wiki/", 1)[1]).replace("_", " ")
+                            for race in schedule if "/wiki/" in race.get("Circuit", {}).get("url", "")},
         "rounds": rounds,
         "standings": [
             {"title": "Drivers", "rows": [{"pos": int(row["position"]) if str(row.get("position", "")).isdigit() else None,
@@ -237,6 +239,7 @@ def build_nascar(year, fetcher=None, previous=None):
     teams = sorted({row["team"] for series in out for race in series["rounds"] for row in race["results"] if row.get("team")})
     return {"id": "nascar", "name": "NASCAR", "season": year, "source": {"name": "NASCAR", "url": "https://www.nascar.com/"}, "series": out,
             "teamArticles": {team: team for team in teams},
+            "circuitArticles": {race["track"]: race["track"] for series in out for race in series["rounds"] if race.get("track")},
             "complete": out[0]["complete"], "timesNote": "Race times are US Eastern."}
 
 
@@ -502,8 +505,14 @@ def build_wiki_series(series_id, name, title, calendar_heading, results_heading,
         match = next((target for target, label in links if label and (label == bare or (len(label) > 3 and label in bare))), None)
         if match:
             articles[team] = match
+    calendar_links = [(target.strip(), strip_markup(label or target).strip()) for target, label in re.findall(r"\[\[([^|\]#]+)(?:\|([^\]]*))?\]\]", section(text, calendar_heading))]
+    circuits = {}
+    for entry in rounds:
+        match = next((target for target, label in calendar_links if label and unflag(label) == entry.get("circuit")), None)
+        if match:
+            circuits[entry["circuit"]] = match
     return {"id": series_id, "name": name, "season": year, "rounds": rounds, "standings": standings, "complete": all(entry["results"] for entry in rounds),
-            "teamArticles": articles,
+            "teamArticles": articles, "circuitArticles": circuits,
             "source": {"name": f"Wikipedia: {title.replace('_', ' ')}", "url": wiki_url(title), "license": "CC BY-SA 4.0"}}
 
 
@@ -602,6 +611,72 @@ def build_logos(built, previous=None, fetcher=None, now=None):
     return out
 
 
+# ---------- track maps (Wikipedia) ----------
+
+MAP_FIELDS = re.compile(r"^\s*\|\s*(image\d*|track_map\d*|map\d*)\s*=\s*(.*)$", re.I | re.M)
+
+
+def track_layouts(wikitext):
+    """[(file, caption)] for the layout diagrams in a circuit infobox: image, image2…, track_map…, skipping logos and photos."""
+    out = []
+    for field, value in MAP_FIELDS.findall(wikitext or ""):
+        match = re.search(r"(?:File:|Image:)?([^|\]\[{}=\n]+\.(?:svg|png))", value, re.I)
+        if not match or re.search(r"logo|aerial|photo", match.group(1), re.I):
+            continue
+        caption_field = re.search(rf"^\s*\|\s*{re.escape(field)}_caption\s*=\s*(.*)$", wikitext, re.I | re.M)
+        caption = unflag(strip_markup(caption_field.group(1))) if caption_field else ""
+        out.append((match.group(1).strip(), caption))
+    return out
+
+
+def build_track_maps(built, previous=None, fetcher=None, now=None):
+    """{circuit name: {"article", "maps": [{"url", "caption"}]}} from each circuit's Wikipedia infobox; cached like logos."""
+    now = now or datetime.now(timezone.utc)
+    previous = previous or {}
+    articles = {}
+    for data in built:
+        articles.update({name: title for name, title in (data.get("circuitArticles") or {}).items() if name})
+    out, todo = {}, {}
+    for name, title in articles.items():
+        old = previous.get(name)
+        fresh = old and (old.get("maps") or (now - datetime.fromisoformat(old.get("checkedAt", "2000-01-01T00:00:00+00:00"))).days < 30)
+        if fresh and old.get("article") == title:
+            out[name] = old
+        else:
+            todo.setdefault(title, []).append(name)
+    layouts = {}
+    for title in sorted(todo):
+        try:
+            data = fetch_json(WIKIPEDIA, {"action": "parse", "page": title, "prop": "wikitext", "section": "0", "redirects": "1", "format": "json", "formatversion": "2"}, fetcher)
+            layouts[title] = track_layouts((data.get("parse") or {}).get("wikitext", ""))
+        except Exception as error:
+            print(f"  track map for {title}: {error}", file=sys.stderr)
+            layouts[title] = []
+        if not fetcher:
+            time.sleep(0.4)
+    files = sorted({file for items in layouts.values() for file, _ in items})
+    thumbs = {}
+    for start in range(0, len(files), 50):
+        batch = files[start:start + 50]
+        data = fetch_json(WIKIPEDIA, {"action": "query", "prop": "imageinfo", "iiprop": "url", "iiurlwidth": "480", "titles": "|".join(f"File:{name}" for name in batch),
+                                      "format": "json", "formatversion": "2"}, fetcher)
+        query = data.get("query") or {}
+        back = {item["to"]: item["from"] for item in query.get("normalized", [])}
+        for page in query.get("pages", []):
+            info = (page.get("imageinfo") or [{}])[0]
+            url = info.get("thumburl") or info.get("url") or ""
+            if re.match(r"https://(upload|thumb)\.wikimedia\.org/", url):
+                thumbs[back.get(page["title"], page["title"]).removeprefix("File:").replace("_", " ")] = url.split("?")[0]
+        if not fetcher:
+            time.sleep(0.5)
+    checked = now.isoformat(timespec="seconds")
+    for title, names in todo.items():
+        maps = [{"url": thumbs[file.replace("_", " ")], "caption": caption} for file, caption in layouts.get(title, []) if thumbs.get(file.replace("_", " "))]
+        for name in names:
+            out[name] = {"article": title, "maps": maps, "checkedAt": checked}
+    return out
+
+
 # ---------- summary ----------
 
 def summarize(series_list, now=None):
@@ -674,6 +749,13 @@ def main():
         print(f"logos: {sum(1 for item in logos.values() if item.get('url'))} of {len(logos)} teams")
     except Exception as error:
         print(f"Team logos failed, keeping the previous file: {error}", file=sys.stderr)
+    try:
+        maps = build_track_maps(built, load_previous("tracks").get("circuits"))
+        (OUT / "tracks.json").write_text(json.dumps({"generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"), "source": "Wikipedia / Wikimedia Commons",
+                                                     "circuits": dict(sorted(maps.items()))}, ensure_ascii=False, separators=(",", ":")))
+        print(f"track maps: {sum(1 for item in maps.values() if item.get('maps'))} of {len(maps)} circuits")
+    except Exception as error:
+        print(f"Track maps failed, keeping the previous file: {error}", file=sys.stderr)
 
 
 if __name__ == "__main__":

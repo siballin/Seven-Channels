@@ -85,6 +85,44 @@ function motorsportsLoadLogos() {
   return motorsportsLogosRequest;
 }
 
+// Track maps from each circuit's Wikipedia infobox (data/motorsports/tracks.json).
+let motorsportsTracks = {};
+let motorsportsTracksRequest = null;
+function motorsportsLoadTracks() {
+  motorsportsTracksRequest ||= fetch(new URL("data/motorsports/tracks.json", location.href))
+    .then((response) => (response.ok ? response.json() : { circuits: {} }))
+    .then((data) => { motorsportsTracks = data.circuits || {}; })
+    .catch(() => { motorsportsTracksRequest = null; });
+  return motorsportsTracksRequest;
+}
+
+// The layout used by this series: sports cars race road courses (Daytona's road course, not the tri-oval).
+function motorsportsTrackMap(seriesId, circuit, { small = false } = {}) {
+  const entry = motorsportsTracks[circuit];
+  const maps = (entry?.maps || []).filter((item) => /^https:\/\/(upload|thumb)\.wikimedia\.org\//.test(item.url));
+  if (!maps.length) return null;
+  const roadCourse = maps.find((item) => /sports ?car|road|grand prix|circuit/i.test(item.caption) && !/oval|motorcycle|kart/i.test(item.caption));
+  const chosen = (["imsa", "wec", "f1"].includes(seriesId) && roadCourse) || maps[0];
+  const figure = element("figure", small ? "ms-track is-small" : "ms-track");
+  const image = element("img");
+  image.src = chosen.url;
+  image.alt = `Track map of ${circuit}${chosen.caption ? `, ${chosen.caption}` : ""}`;
+  image.loading = "lazy";
+  image.addEventListener("error", () => figure.remove(), { once: true });
+  figure.append(image);
+  if (!small) {
+    const caption = element("figcaption");
+    if (chosen.caption) caption.append(`${chosen.caption} · `);
+    const link = element("a", "", "Wikimedia");
+    link.href = `https://en.wikipedia.org/wiki/${encodeURIComponent((entry.article || circuit).replaceAll(" ", "_"))}`;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    caption.append("Map: ", link);
+    figure.append(caption);
+  }
+  return figure;
+}
+
 // A team name with its logo (or its flag when there's no logo).
 function motorsportsTeam(name, cc = "") {
   const span = element("span", "ms-person ms-team");
@@ -319,6 +357,8 @@ function motorsportsRoundRow(id, round, nextRound) {
   else if (round === nextRound) what.append(element("span", "ms-round-next", `Next up · ${motorsportsCountdown(round.start) || motorsportsDate(round.start)}`));
   link.append(when, what);
   item.append(link);
+  const thumb = round === nextRound ? motorsportsTrackMap(id, round.circuit || round.track, { small: true }) : null;
+  if (thumb) item.append(thumb);
   if (round === nextRound && round.sessions?.length) {
     const sessions = element("ul", "ms-sessions");
     for (const session of round.sessions) {
@@ -356,6 +396,7 @@ function motorsportsRoundDetail(id, data, group, round) {
   const back = element("a", "ms-back", `← ${data.name} calendar`);
   back.href = `#motorsports/${id}`;
   page.append(back, element("h3", "", round.name), element("p", "ms-muted", [round.circuit || round.track, round.location, motorsportsDate(round.start)].filter(Boolean).join(" · ")));
+  const top = element("div", "ms-round-top");
   if (round.sessions?.length) {
     const sessions = element("ul", "ms-sessions");
     for (const session of round.sessions) {
@@ -363,8 +404,11 @@ function motorsportsRoundDetail(id, data, group, round) {
       li.append(element("span", "", session.name), element("strong", "", motorsportsDate(session.start)));
       sessions.append(li);
     }
-    page.append(sessions);
+    top.append(sessions);
   }
+  const map = motorsportsTrackMap(id, round.circuit || round.track);
+  if (map) top.append(map);
+  if (top.childElementCount) page.append(top);
   if (id === "f1" && round.results?.length) {
     for (const [title, rows] of [["Race", round.results], ["Sprint", round.sprint || []]]) {
       if (!rows.length) continue;
@@ -396,7 +440,7 @@ function motorsportsRoundDetail(id, data, group, round) {
 }
 
 async function motorsportsSeriesPage(container, id, roundNumber) {
-  const [data] = await Promise.all([motorsportsLoad(id), motorsportsLoadLogos()]);
+  const [data] = await Promise.all([motorsportsLoad(id), motorsportsLoadLogos(), motorsportsLoadTracks()]);
   const page = element("section", "ms-page");
   page.append(motorsportsNav(id));
   const head = element("div", "ms-head");

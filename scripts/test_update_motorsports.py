@@ -243,6 +243,23 @@ def main():
     assert again == logos
     wec_full = ms.build_wec(2026, fetcher)
     assert wec_full["teamArticles"].get("No. 8 Toyota Racing") == "Toyota Racing GmbH", wec_full["teamArticles"]
+    infobox = """{{Infobox motor racing venue
+| logo              = [[File:Daytona International Speedway logo.png|frameless]]
+| image             = [[File:Daytona International Speedway 2024.svg|class=skin-invert|250px]]
+| image_caption     = Tri-Oval (1959–present)
+| track_map         = [[File:Daytona International Speedway Road Course 2024.svg|class=skin-invert|250px|]]
+| track_map_caption = Sports Car Course (1985–present)
+| layout            = NASCAR [[Tri-oval|Tri-Oval]]
+}}"""
+    assert ms.track_layouts(infobox) == [("Daytona International Speedway 2024.svg", "Tri-Oval (1959–present)"),
+                                         ("Daytona International Speedway Road Course 2024.svg", "Sports Car Course (1985–present)")], ms.track_layouts(infobox)
+    def track_wiki(url, params):
+        if params.get("action") == "parse":
+            return {"parse": {"wikitext": infobox}}
+        return {"query": {"pages": [{"title": t, "imageinfo": [{"thumburl": "https://thumb.wikimedia.org/x/" + t.removeprefix("File:")}]} for t in params["titles"].split("|")]}}
+    maps = ms.build_track_maps([{"circuitArticles": {"Daytona": "Daytona International Speedway"}}], fetcher=track_wiki)
+    assert [m["caption"] for m in maps["Daytona"]["maps"]] == ["Tri-Oval (1959–present)", "Sports Car Course (1985–present)"], maps
+    assert ms.build_wec(2026, fetcher)["circuitArticles"].get("Circuit de la Sarthe") == "Circuit de la Sarthe", ms.build_wec(2026, fetcher)["circuitArticles"]
     print("update_motorsports tests passed")
 
 
