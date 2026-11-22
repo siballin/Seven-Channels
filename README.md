@@ -96,10 +96,10 @@ Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
 
 ## Sports leagues
 
-The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
+The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League, La Liga and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
 
 
-### Premier League and MLS
+### Premier League, La Liga and MLS
 
 The soccer tabs have **Matches | Table | Stats**:
 - **Matches:** a match centre for the selected game: score and form, a timeline (goals with assists, cards, substitutions), match stats (possession, shots, on target, corners, passes, tackles, saves, fouls, cards), lineups drawn in formation with substitutions, each club's last five results in all competitions, and the part of the table around both clubs.
