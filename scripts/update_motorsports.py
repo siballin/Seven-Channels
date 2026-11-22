@@ -759,6 +759,31 @@ def build_headshots(built, previous=None, fetcher=None, now=None):
                 found[back.get(page.get("title", ""), page.get("title", ""))] = thumb.split("?")[0]
         if not fetcher:
             time.sleep(1)
+    # Plain names often lead to a disambiguation page ("William Byron"); try "<name> (racing driver)" for the misses.
+    retry = {f"{title} (racing driver)": title for title in titles if title not in found and "(" not in title}
+    keys = sorted(retry)
+    for start in range(0, len(keys), 50):
+        batch = keys[start:start + 50]
+        try:
+            data = fetch_json(WIKIPEDIA, {"action": "query", "prop": "pageimages|description", "piprop": "thumbnail|name", "pithumbsize": "120",
+                                          "pilicense": "any", "redirects": "1", "titles": "|".join(batch), "format": "json", "formatversion": "2"}, fetcher)
+        except Exception as error:
+            print(f"  headshots: {error}", file=sys.stderr)
+            continue
+        query = data.get("query") or {}
+        back = {}
+        for item in query.get("normalized", []) + query.get("redirects", []):
+            back[item["to"]] = back.get(item["from"], item["from"])
+        for page in query.get("pages", []):
+            thumb = (page.get("thumbnail") or {}).get("source", "")
+            image = page.get("pageimage", "")
+            original = retry.get(back.get(page.get("title", ""), page.get("title", "")))
+            if (original and re.search(r"driver|racer|racing|motorsport|nascar", page.get("description", ""), re.I)
+                    and re.match(r"https://(upload|thumb)\.wikimedia\.org/", thumb) and re.search(r"\.(jpe?g|png|webp)$", image, re.I)
+                    and not re.search(r"logo|flag|signature|helmet|map", image, re.I)):
+                found[original] = thumb.split("?")[0]
+        if not fetcher:
+            time.sleep(1)
     checked = now.isoformat(timespec="seconds")
     for title, names in todo.items():
         for name in names:

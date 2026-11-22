@@ -267,9 +267,12 @@ def main():
     def head_wiki(url, params):
         pages = [{"title": "Lando Norris", "description": "British racing driver (born 1999)", "pageimage": "Norris_2024.jpg", "thumbnail": {"source": "https://thumb.wikimedia.org/n.jpg"}},
                  {"title": "John Smith", "description": "English explorer", "pageimage": "Smith.jpg", "thumbnail": {"source": "https://thumb.wikimedia.org/s.jpg"}},
-                 {"title": "Max Verstappen", "description": "Dutch racing driver", "pageimage": "Verstappen_helmet.png", "thumbnail": {"source": "https://thumb.wikimedia.org/h.png"}}]
+                 {"title": "Max Verstappen", "description": "Dutch racing driver", "pageimage": "Verstappen_helmet.png", "thumbnail": {"source": "https://thumb.wikimedia.org/h.png"}},
+                 {"title": "William Byron", "description": "Topics referred to by the same term"},
+                 {"title": "William Byron (racing driver)", "description": "American racing driver", "pageimage": "Byron.jpg", "thumbnail": {"source": "https://thumb.wikimedia.org/b.jpg"}}]
         return {"query": {"pages": [page for page in pages if page["title"] in params["titles"].split("|")]}}
-    heads = ms.build_headshots([{"driverArticles": {"Lando Norris": "Lando Norris", "John Smith": "John Smith", "Max Verstappen": "Max Verstappen"}}], fetcher=head_wiki)
+    heads = ms.build_headshots([{"driverArticles": {"Lando Norris": "Lando Norris", "John Smith": "John Smith", "Max Verstappen": "Max Verstappen", "William Byron": "William Byron"}}], fetcher=head_wiki)
+    assert heads["William Byron"]["url"] == "https://thumb.wikimedia.org/b.jpg", heads["William Byron"]
     assert heads["Lando Norris"]["url"] == "https://thumb.wikimedia.org/n.jpg" and heads["John Smith"]["url"] == "" and heads["Max Verstappen"]["url"] == "", heads
     assert ms.build_f1(2026, fetcher)["driverArticles"] == {} or True
     print("update_motorsports tests passed")
