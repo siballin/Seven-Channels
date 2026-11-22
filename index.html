@@ -3573,6 +3573,30 @@
       .dial ul { gap: 3px; }
       .dial a, .dial a[data-channel] { padding: 6px 7px; gap: 5px; font-size: .8rem; }
     }
+    /* Soccer lineups: headshots and match ratings */
+    .soccer-pitch-line { flex-wrap: nowrap; gap: 2px; }
+    .soccer-pitch-line li { gap: 2px; flex: 1 1 0; max-width: 76px; min-width: 0; }
+    .soccer-subs-used { flex-wrap: wrap; }
+    .soccer-subs-used li { flex: 0 0 64px; }
+    .soccer-avatar-wrap { position: relative; display: inline-grid; place-items: center; }
+    .soccer-avatar { display: inline-grid; place-items: center; position: relative; }
+    .soccer-avatar .soccer-jersey { width: 32px; height: 32px; font-size: .78rem; }
+    .soccer-face { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: top; background: var(--screen); border: 1px solid var(--line); }
+    .soccer-avatar-number { position: absolute; left: -4px; bottom: -2px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 8px; background: var(--screen); border: 1px solid var(--line); font-size: .58rem; font-weight: 700; line-height: 13px; text-align: center; }
+    .soccer-rating { position: absolute; left: calc(100% - 4px); top: -6px; padding: 1px 4px; border-radius: 6px; font: 700 .62rem/1.3 var(--data, inherit); color: #fff; background: #8a8f98; }
+    .soccer-rating.is-poor { background: #d9534f; }
+    .soccer-rating.is-ok { background: #d98a1f; }
+    .soccer-rating.is-good { background: #2e9e57; }
+    .soccer-rating.is-great { background: #2f6fd6; }
+    .soccer-rating.is-best::before { content: "★ "; }
+    .soccer-rating { white-space: nowrap; z-index: 1; }
+    .soccer-lineup .soccer-pitch { padding: 12px 18px 10px 8px; }
+    .soccer-player-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; font-size: .68rem; }
+    .soccer-subs-used { justify-content: flex-start; gap: 8px 6px; padding: 4px 6px 0; }
+    .soccer-list li .soccer-avatar-wrap { margin-right: 14px; }
+    .soccer-rating-note { margin: -2px 0 8px; font-size: .75rem; }
+    .soccer-centre-main, .soccer-centre-side { grid-template-columns: minmax(0, 1fr); }
+    .soccer-section { min-width: 0; }
   </style>
 </head>
 <body>

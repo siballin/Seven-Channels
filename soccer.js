@@ -479,8 +479,61 @@ function soccerStatBars(summary, homeId) {
   return list.childElementCount ? section : null;
 }
 
+// Match rating (an estimate on the usual 0–10 scale; about 6.5 is an ordinary game) from ESPN's per-player match stats:
+// goals, assists, shots, saves, goals conceded while on the pitch, cards, fouls, offsides and the result.
+// FotMob and SofaScore ratings have no open API, so this is worked out here.
+function soccerPlayerRating(player, result) {
+  const stats = Object.fromEntries((player.stats || []).map((stat) => [stat.name, Number(stat.value) || 0]));
+  if (!(player.starter || player.subbedIn) || !stats.appearances) return null;
+  const role = /^G/.test(player.position?.abbreviation || "") ? "G" : /defender|back/i.test(player.position?.name || "") ? "D" : /midfield/i.test(player.position?.name || "") ? "M" : "F";
+  const goals = stats.totalGoals || 0;
+  const conceded = stats.goalsConceded || 0;
+  let rating = 6.4
+    + goals * 1.0 + (stats.goalAssists || 0) * 0.7 - (stats.ownGoals || 0) * 0.8
+    + Math.max(0, (stats.shotsOnTarget || 0) - goals) * 0.2 + Math.max(0, (stats.totalShots || 0) - (stats.shotsOnTarget || 0)) * 0.05
+    + (stats.foulsSuffered || 0) * 0.05 - (stats.foulsCommitted || 0) * 0.05 - (stats.offsides || 0) * 0.05
+    - (stats.yellowCards || 0) * 0.25 - (stats.redCards || 0) * 1.5
+    + (result === "W" ? 0.3 : result === "L" ? -0.2 : 0);
+  if (role === "G") rating += (stats.saves || 0) * 0.3 - conceded * 0.3 + (conceded ? 0 : 0.7);
+  else if (role === "D") rating += -conceded * 0.15 + (conceded ? 0 : 0.4);
+  else if (role === "M") rating += conceded ? 0 : 0.15;
+  if (!player.starter) rating = 6.4 + (rating - 6.4) * 0.8; // less time on the pitch
+  return Math.round(Math.min(10, Math.max(3, rating)) * 10) / 10;
+}
+
+function soccerRatingClass(rating) {
+  return rating >= 8 ? "is-great" : rating >= 7 ? "is-good" : rating >= 6 ? "is-ok" : "is-poor";
+}
+
+function soccerPlayerTitle(player, rating) {
+  const stats = Object.fromEntries((player.stats || []).map((stat) => [stat.name, Number(stat.value) || 0]));
+  const parts = [["totalGoals", "goal"], ["goalAssists", "assist"], ["totalShots", "shot"], ["shotsOnTarget", "on target"], ["saves", "save"],
+    ["yellowCards", "yellow"], ["redCards", "red"], ["foulsCommitted", "foul"]].filter(([key]) => stats[key])
+    .map(([key, label]) => `${stats[key]} ${label}${stats[key] > 1 && !/target/.test(label) ? "s" : ""}`);
+  return [player.athlete?.displayName, player.position?.displayName !== "Substitute" ? player.position?.displayName : "", rating != null ? `Rating ${rating.toFixed(1)}` : "", parts.join(", ")].filter(Boolean).join(" · ");
+}
+
+function soccerAvatar(player) {
+  const wrap = element("span", "soccer-avatar");
+  const jersey = () => element("span", "soccer-jersey", player.jersey || "");
+  const url = player.athlete?.headshot?.href || "";
+  if (/^https:\/\/a\.espncdn\.com\//.test(url)) {
+    const image = element("img", "soccer-face");
+    image.src = url.replace(/^https:\/\/a\.espncdn\.com\/i\//, "https://a.espncdn.com/combiner/i?img=/i/") + (/combiner/.test(url) ? "" : "&w=96&h=96");
+    image.alt = "";
+    image.loading = "lazy";
+    image.addEventListener("error", () => { image.replaceWith(jersey()); wrap.classList.remove("has-face"); }, { once: true });
+    wrap.classList.add("has-face");
+    wrap.append(image, element("span", "soccer-avatar-number", player.jersey || ""));
+  } else {
+    wrap.append(jersey());
+  }
+  return wrap;
+}
+
 // Formation rows from ESPN's formation ("4-2-3-1") and formationPlace (1 = goalkeeper, then outfield order).
-function soccerLineup(roster) {
+// context: { result: "W" | "D" | "L" | "", rated: whether the match has started }.
+function soccerLineup(roster, context = {}) {
   const card = element("div", "soccer-lineup");
   const title = element("h6");
   title.append(soccerLogo(roster.team, 18), `${roster.team?.shortDisplayName || roster.team?.displayName || ""}${roster.formation ? ` · ${roster.formation}` : ""}`);
@@ -488,11 +541,19 @@ function soccerLineup(roster) {
   const starters = (roster.roster || []).filter((player) => player.starter).sort((a, b) => (a.formationPlace || 99) - (b.formationPlace || 99));
   const subs = (roster.roster || []).filter((player) => !player.starter);
   const shape = /^\d(-\d)+$/.test(roster.formation || "") ? roster.formation.split("-").map(Number) : null;
+  const ratings = new Map(context.rated ? (roster.roster || []).map((player) => [player, soccerPlayerRating(player, context.result)]).filter(([, rating]) => rating != null) : []);
+  const best = Math.max(...ratings.values(), 0);
   const name = (player) => {
     const item = element("li", player.subbedOut ? "is-off" : player.subbedIn ? "is-on" : "");
-    item.append(element("span", "soccer-jersey", player.jersey || ""), element("span", "", player.athlete?.shortName || player.athlete?.displayName || ""));
-    if (player.subbedOut) item.append(element("span", "soccer-sub-mark", "↓"));
-    if (player.subbedIn) item.append(element("span", "soccer-sub-mark", "↑"));
+    const rating = ratings.get(player);
+    item.title = soccerPlayerTitle(player, rating);
+    const top = element("span", "soccer-avatar-wrap");
+    top.append(soccerAvatar(player));
+    if (rating != null) top.append(element("span", `soccer-rating ${soccerRatingClass(rating)}${rating === best && context.best === rating ? " is-best" : ""}`, rating.toFixed(1)));
+    const label = element("span", "soccer-player-name", player.athlete?.shortName || player.athlete?.displayName || "");
+    if (player.subbedOut) label.append(element("span", "soccer-sub-mark", " ↓"));
+    if (player.subbedIn) label.append(element("span", "soccer-sub-mark", " ↑"));
+    item.append(top, label);
     return item;
   };
   if (shape && starters.length === 11 && shape.reduce((sum, count) => sum + count, 0) === 10) {
@@ -511,9 +572,16 @@ function soccerLineup(roster) {
     card.append(list);
   }
   const used = subs.filter((player) => player.subbedIn);
-  if (subs.length) {
+  const unused = subs.filter((player) => !player.subbedIn);
+  if (used.length) {
+    const row = element("ul", "soccer-pitch-line soccer-subs-used");
+    row.setAttribute("aria-label", "Substitutes who came on");
+    used.forEach((player) => row.append(name(player)));
+    card.append(element("p", "soccer-muted soccer-bench", "Came on"), row);
+  }
+  if (unused.length) {
     const bench = element("p", "soccer-muted soccer-bench");
-    bench.textContent = `Bench: ${subs.map((player) => `${player.athlete?.shortName || player.athlete?.displayName}${player.subbedIn ? " ↑" : ""}`).join(", ")}`;
+    bench.textContent = `${used.length ? "Unused" : "Bench"}: ${unused.map((player) => player.athlete?.shortName || player.athlete?.displayName).join(", ")}`;
     card.append(bench);
   }
   return starters.length ? card : null;
@@ -587,10 +655,23 @@ function soccerMatchCentre(event, league) {
       const left = element("div", "soccer-centre-main");
       const right = element("div", "soccer-centre-side");
       for (const part of [soccerTimeline(summary, homeId), soccerStatBars(summary, homeId)]) if (part) left.append(part);
-      const rosters = (summary.rosters || []).sort((a) => (String(a.team?.id) === homeId ? -1 : 1)).map(soccerLineup).filter(Boolean);
+      const headerTeams = summary.header?.competitions?.[0]?.competitors || competition.competitors || [];
+      const scoreOf = (id) => Number(headerTeams.find((team) => String(team.id ?? team.team?.id) === id)?.score);
+      const rated = status.state !== "pre" && (summary.rosters || []).some((roster) => (roster.roster || []).some((player) => (player.stats || []).length));
+      const resultFor = (id) => {
+        const mine = scoreOf(id);
+        const theirs = scoreOf(id === homeId ? awayId : homeId);
+        return !Number.isFinite(mine) || !Number.isFinite(theirs) ? "" : mine > theirs ? "W" : mine < theirs ? "L" : "D";
+      };
+      const contexts = (summary.rosters || []).map((roster) => ({ result: resultFor(String(roster.team?.id || "")), rated }));
+      // Player of the match: the highest rating on either side.
+      const best = rated ? Math.max(0, ...(summary.rosters || []).flatMap((roster, index) => (roster.roster || []).map((player) => soccerPlayerRating(player, contexts[index].result) ?? 0))) : 0;
+      const rosters = (summary.rosters || []).map((roster, index) => ({ roster, context: { ...contexts[index], best } }))
+        .sort((a) => (String(a.roster.team?.id) === homeId ? -1 : 1)).map(({ roster, context }) => soccerLineup(roster, context)).filter(Boolean);
       if (rosters.length) {
         const lineups = element("section", "soccer-section");
         lineups.append(element("h5", "", "Lineups"));
+        if (rated) lineups.append(element("p", "soccer-muted soccer-rating-note", `${status.state === "in" ? "Live ratings" : "Ratings"} are estimates from ESPN's match stats (goals, assists, shots, saves, goals conceded, cards, fouls and the result); ★ marks the best of the match. Hover over a player for their numbers.`));
         const grid = element("div", "soccer-lineups");
         rosters.forEach((card) => grid.append(card));
         lineups.append(grid);

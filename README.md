@@ -102,9 +102,11 @@ The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FB
 ### Premier League, La Liga and MLS
 
 The soccer tabs have **Matches | Table | Stats**:
-- **Matches:** a match centre for the selected game: score and form, a timeline (goals with assists, cards, substitutions), match stats (possession, shots, on target, corners, passes, tackles, saves, fouls, cards), lineups drawn in formation with substitutions, each club's last five results in all competitions, and the part of the table around both clubs.
+- **Matches:** a match centre for the selected game: score and form, a timeline (goals with assists, cards, substitutions), match stats (possession, shots, on target, corners, passes, tackles, saves, fouls, cards), lineups drawn in formation with substitutions, player headshots (where ESPN has one; otherwise the shirt number) and match ratings, each club's last five results in all competitions, and the part of the table around both clubs.
 - **Table:** the full table (P W D L GF GA GD Pts) with qualification and relegation zones, last-five form, and home-only or away-only tables worked out from this season's results. MLS shows each conference or all clubs together (the Supporters' Shield race).
 - **Stats:** top scorers, assists and goals + assists from ESPN; club numbers worked out from results (most goals, fewest conceded, clean sheets, failed to score, unbeaten runs, biggest wins) and league averages.
+
+**Match ratings** are this site's own estimate, because FotMob and SofaScore ratings have no open API. A rating starts at 6.4 and is worked out from ESPN's per-player match stats: goals, assists, shots and shots on target, saves, goals conceded while on the pitch (clean sheets count for keepers and defenders), cards, fouls, offsides and the result. Substitutes' scores are pulled toward 6.4. Ratings are colour-coded (under 6 red, 6–6.9 orange, 7–7.9 green, 8+ blue), ★ marks the best of the match, and they update during live games. Hovering over a player shows their numbers.
 
 The side table orders clubs by the league's ranking and shows points and goal difference; the leaders widget shows season top scorers. `soccer.js`; ESPN responses saved in `tests/fixtures/espn-soccer/` for testing.
 ## Video Games
