@@ -1,0 +1,14 @@
+name: Explore NBA sources (temporary)
+on:
+  push:
+    branches: [claude/dazzling-hamilton-4jcfnt]
+    paths: [".github/workflows/explore-nba.yml", "scripts/explore_nba.py"]
+jobs:
+  explore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: python scripts/explore_nba.py
