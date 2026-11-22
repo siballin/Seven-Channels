@@ -184,12 +184,13 @@ def parse_stats(data, team_abbr):
         tot = total_rows.get(key(row), {})
         mis = misc_rows.get(key(row), {})
         team_id = str(row.get("teamId", ""))
+        combined = team_id == "0" or "total" in str(row.get("teamSlug", "")).lower()
         fgm, fga = made_attempted(tot.get("FG"))
         fg3m, fg3a = made_attempted(tot.get("3PT"))
         ftm, fta = made_attempted(tot.get("FT"))
         values = {
             "year": year, "season": season.get("displayName") or str(year),
-            "team": "TOT" if team_id == "0" else team_abbr.get(team_id) or (row.get("teamSlug") or "").upper()[:16] or team_id,
+            "team": "TOT" if combined else team_abbr.get(team_id) or (row.get("teamSlug") or "").upper()[:16] or team_id,
             "gp": number(avg.get("GP")), "gs": number(avg.get("GS")), "min": number(avg.get("MIN")), "pts": number(avg.get("PTS")),
             "reb": number(avg.get("REB")), "ast": number(avg.get("AST")), "stl": number(avg.get("STL")), "blk": number(avg.get("BLK")),
             "tov": number(avg.get("TO")), "pf": number(avg.get("PF")), "oreb": number(avg.get("OR")), "dreb": number(avg.get("DR")),
@@ -237,7 +238,7 @@ def parse_bio(data):
     return {
         "name": athlete.get("displayName") or athlete.get("fullName") or "",
         "position": (athlete.get("position") or {}).get("displayName") or "",
-        "pos": (athlete.get("position") or {}).get("abbreviation") or "",
+        "pos": "" if (athlete.get("position") or {}).get("abbreviation") in (None, "NA") else athlete["position"]["abbreviation"],
         "height": athlete.get("displayHeight") or "", "weight": athlete.get("displayWeight") or "",
         "birth": birth, "birthplace": athlete.get("displayBirthPlace") or "",
         "college": (athlete.get("college") or {}).get("name") or (athlete.get("collegeTeam") or {}).get("displayName") or "",
@@ -256,13 +257,31 @@ def shard(espn_id):
     return f"{int(espn_id) % SHARDS:02d}"
 
 
+def clean(player, columns):
+    """Fixes for records saved by earlier versions: combined rows labelled "2021-22 TOTALS", "NA" positions,
+    and season rows from before the totals columns were added (padded so every row has every column)."""
+    team = columns.index("team")
+    rows = []
+    for row in player.get("seasons") or []:
+        row = list(row) + [None] * (len(SEASON_COLUMNS) - len(row))
+        if re.search(r"total", str(row[team]), re.I):
+            row[team] = "TOT"
+        rows.append(row)
+    player["seasons"] = sorted(rows, key=lambda row: (row[0], row[team] == "TOT"))
+    if player.get("pos") == "NA":
+        player["pos"] = ""
+    return player
+
+
 def load_existing():
     players = {}
     for path in sorted((OUT / "players").glob("*.json")):
         try:
-            players.update(json.loads(path.read_text()).get("players") or {})
+            data = json.loads(path.read_text())
         except (OSError, ValueError):
             continue
+        columns = data.get("seasonColumns") or SEASON_COLUMNS
+        players.update({key: clean(value, columns) for key, value in (data.get("players") or {}).items()})
     return players
 
 
@@ -424,7 +443,13 @@ def main():
     parser.add_argument("--force", action="store_true", help="refetch every player")
     parser.add_argument("--first-season", type=int, default=1980)
     parser.add_argument("--limit", type=int)
+    parser.add_argument("--rewrite", action="store_true", help="don't fetch; clean saved players and rewrite the outputs")
     args = parser.parse_args()
+    if args.rewrite:
+        players = load_existing()
+        write(players, json.loads((OUT / "index.json").read_text()).get("teams") or {})
+        print(f"Rewrote {len(players)} players.")
+        return
     try:
         previous = json.loads((OUT / "index.json").read_text())
         age = (datetime.now(timezone.utc) - datetime.fromisoformat(previous["generatedAt"])).total_seconds() / 86400

@@ -102,6 +102,12 @@ def main():
     assert mj["career"]["pts"] == 30.1 and mj["career"]["totals"]["pts"] == 32292 and mj["career"]["totals"]["td3"] == 28
     traded = [row[columns["team"]] for row in players["2000"]["seasons"]]
     assert traded == ["LAL", "BOS", "TOT"], traded  # per-team rows, then the combined row
+    # ESPN sometimes marks the combined row with a "2025-26 TOTALS" slug instead of team id 0
+    data = {"categories": [{"name": "averages", "labels": ["GP", "PTS"], "statistics": [{"season": {"year": 2026, "displayName": "2025-26"}, "teamId": "-1", "teamSlug": "2025-26 TOTALS", "stats": ["10", "5.0"]}]}]}
+    assert nba.parse_stats(data, {})[0][0][columns["team"]] == "TOT"
+    old = {"seasons": [[2026, "2025-26", "2025-26 TOTALS"] + [1] * 23], "pos": "NA"}
+    cleaned = nba.clean(old, nba.SEASON_COLUMNS[:26])
+    assert cleaned["seasons"][0][2] == "TOT" and len(cleaned["seasons"][0]) == len(nba.SEASON_COLUMNS) and cleaned["pos"] == ""
 
     nba.write(players, teams, now="2026-11-22T00:00:00+00:00")
     index = json.loads((folder / "index.json").read_text())
