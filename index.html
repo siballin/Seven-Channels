@@ -145,6 +145,7 @@
     .this-week-item.creator .this-week-dot { background: #d6409f; }
     .this-week-item.kpop .this-week-dot { background: #8e4ec6; }
     .this-week-item.birthday .this-week-dot { background: #f5a623; }
+    .this-week-item.race .this-week-dot { background: #ff4f4f; }
     .this-week-item.birthday .this-week-image { border-radius: 50%; width: 40px; height: 40px; object-position: top; }
     .this-week-item.game .this-week-dot { background: #0090ff; }
     .this-week-item.movie .this-week-dot { background: #f76b15; }
@@ -456,6 +457,63 @@
       .soccer-club-abbr { display: inline; }
       .soccer-table th, .soccer-table td { padding: 6px 5px; }
     }
+    .ms-view, .ms-page { display: grid; gap: 14px; min-width: 0; grid-template-columns: minmax(0, 1fr); }
+    .ms-muted { color: var(--muted); font-size: .86rem; margin: 0; }
+    .ms-credit { border-top: 1px solid color-mix(in srgb, var(--line) 50%, transparent); padding-top: 10px; }
+    .ms-nav { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ms-nav a { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--glass-edge, var(--line)); color: inherit; text-decoration: none; font-weight: 600; font-size: .9rem; }
+    .ms-nav a.is-active { background: color-mix(in srgb, var(--signal) 22%, transparent); border-color: var(--signal); }
+    .ms-head { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; justify-content: space-between; }
+    .ms-head h2 { margin: 0; }
+    .ms-head .field { margin: 0; }
+    .ms-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+    .ms-card { display: grid; gap: 8px; align-content: start; padding: 16px; border-radius: var(--glass-radius, 16px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); color: inherit; text-decoration: none; }
+    .ms-card:hover, .ms-card:focus-visible { border-color: var(--signal); }
+    .ms-card h3 { margin: 0; font-size: 1.05rem; }
+    .ms-card-next, .ms-card-last { display: grid; gap: 1px; }
+    .ms-card-next small, .ms-card-last small { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+    .ms-card-next strong { font-size: 1.1rem; }
+    .ms-card-done { margin: 0; font-weight: 600; color: var(--signal); }
+    .ms-card-leader { margin: 0; font-size: .88rem; }
+    .ms-live { padding: 14px 16px; border-radius: var(--glass-radius, 16px); border: 1px solid #e5484d; background: color-mix(in srgb, #e5484d 10%, var(--glass-base, var(--panel))); }
+    .ms-live h3 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+    .ms-live-dot { width: 10px; height: 10px; border-radius: 50%; background: #e5484d; animation: ms-pulse 1.4s ease-in-out infinite; }
+    @keyframes ms-pulse { 50% { opacity: .35; } }
+    @media (prefers-reduced-motion: reduce) { .ms-live-dot { animation: none; } }
+    .ms-live-order { margin: 8px 0; padding-left: 26px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 3px 16px; font-size: .9rem; }
+    .ms-live-order small { color: var(--muted); margin-left: 6px; }
+    .ms-layout { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 18px; align-items: start; }
+    .ms-section h3, .ms-section h4 { margin: 0 0 8px; }
+    .ms-section h4 { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-top: 6px; }
+    .ms-rounds { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+    .ms-round-link { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; padding: 10px 12px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); color: inherit; text-decoration: none; }
+    .ms-round-link:hover, .ms-round-link:focus-visible { border-color: var(--signal); }
+    .ms-round.is-next .ms-round-link { border-color: var(--signal); box-shadow: inset 4px 0 0 var(--signal); }
+    .ms-round.is-done .ms-round-date strong { color: var(--muted); }
+    .ms-round-date, .ms-round-body { display: grid; gap: 1px; min-width: 0; }
+    .ms-round-date small, .ms-round-body small { color: var(--muted); font-size: .78rem; }
+    .ms-round-body strong { overflow-wrap: anywhere; }
+    .ms-round-winner { font-size: .85rem; overflow-wrap: anywhere; }
+    .ms-round-next { font-size: .85rem; color: var(--signal); font-weight: 600; }
+    .ms-sessions { list-style: none; margin: 6px 0 4px; padding: 0 12px; display: grid; gap: 3px; font-size: .86rem; }
+    .ms-sessions li { display: flex; justify-content: space-between; gap: 12px; }
+    .ms-sessions li.is-past { color: var(--muted); }
+    .ms-scroll { overflow-x: auto; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); }
+    .ms-table { width: 100%; border-collapse: collapse; font-size: .88rem; font-variant-numeric: tabular-nums; }
+    .ms-table th, .ms-table td { padding: 6px 9px; text-align: left; white-space: nowrap; border-bottom: 1px solid color-mix(in srgb, var(--line) 35%, transparent); }
+    .ms-table td { white-space: normal; }
+    .ms-table thead th { color: var(--muted); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
+    .ms-table tr.is-first td { font-weight: 600; }
+    .ms-standings { display: grid; gap: 14px; }
+    .ms-round-detail { display: grid; gap: 10px; }
+    .ms-round-detail h3 { margin: 0; font-size: 1.3rem; }
+    .ms-back { justify-self: start; font-size: .9rem; }
+    .ms-facts { margin: 0; padding: 10px 12px; border-radius: var(--glass-radius-small, 12px); background: color-mix(in srgb, var(--signal) 10%, transparent); font-size: .9rem; }
+    .ms-class-winners { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    .ms-class-winner { display: grid; gap: 3px; padding: 12px 14px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); }
+    .ms-class-winner small { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+    @media (max-width: 900px) { .ms-layout { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 560px) { .ms-round-link { grid-template-columns: 74px minmax(0, 1fr); gap: 8px; } }
     .guide { display: grid; gap: 3px; }
     .guide-row {
       display: grid;
@@ -3425,6 +3483,7 @@
     .dial a[data-channel="music"] { --chan: #e08aff; }
     .dial a[data-channel="creator"] { --chan: #bde56f; }
     .dial a[data-channel="live"] { --chan: #3fdcc8; }
+    .dial a[data-channel="motorsports"] { --chan: #ff4f4f; }
     :root[data-theme="light"] .dial a[data-channel="guide"] { --chan: #4e5770; }
     :root[data-theme="light"] .dial a[data-channel="sports"] { --chan: #c0352a; }
     :root[data-theme="light"] .dial a[data-channel="betting"] { --chan: #137a45; }
@@ -3437,6 +3496,7 @@
     :root[data-theme="light"] .dial a[data-channel="music"] { --chan: #8f2bb3; }
     :root[data-theme="light"] .dial a[data-channel="creator"] { --chan: #4f7a00; }
     :root[data-theme="light"] .dial a[data-channel="live"] { --chan: #0b7a6b; }
+    :root[data-theme="light"] .dial a[data-channel="motorsports"] { --chan: #b3141c; }
     .dial a[data-channel] b { color: var(--chan); }
     .dial-dot { width: 7px; height: 7px; flex: none; align-self: center; border-radius: 50%; background: var(--chan, var(--signal)); box-shadow: 0 0 6px color-mix(in srgb, var(--chan, var(--signal)) 70%, transparent); }
     .dial a[data-channel] { gap: 5px; padding-inline: 9px; }
@@ -3464,6 +3524,7 @@
     :root[data-channel="music"] { --channel-color: #e08aff; }
     :root[data-channel="creator"] { --channel-color: #bde56f; }
     :root[data-channel="live"] { --channel-color: #3fdcc8; }
+    :root[data-channel="motorsports"] { --channel-color: #ff4f4f; }
     :root[data-theme="light"][data-channel="guide"] { --channel-color: #4e5770; }
     :root[data-theme="light"][data-channel="sports"] { --channel-color: #c0352a; }
     :root[data-theme="light"][data-channel="betting"] { --channel-color: #137a45; }
@@ -3476,6 +3537,7 @@
     :root[data-theme="light"][data-channel="music"] { --channel-color: #8f2bb3; }
     :root[data-theme="light"][data-channel="creator"] { --channel-color: #4f7a00; }
     :root[data-theme="light"][data-channel="live"] { --channel-color: #0b7a6b; }
+    :root[data-theme="light"][data-channel="motorsports"] { --channel-color: #b3141c; }
     .channel-heading .number, .channel-heading h2 { color: var(--channel-color, var(--glass-accent-ink)); }
     /* Guide headlines: each channel label in its channel color. */
     .channel-news-channel[data-channel="sports"] { color: #ff7a6b; } :root[data-theme="light"] .channel-news-channel[data-channel="sports"] { color: #c0352a; }
@@ -3489,6 +3551,12 @@
     .channel-news-channel[data-channel="music"] { color: #e08aff; } :root[data-theme="light"] .channel-news-channel[data-channel="music"] { color: #8f2bb3; }
     .channel-news-channel[data-channel="creator"] { color: #bde56f; } :root[data-theme="light"] .channel-news-channel[data-channel="creator"] { color: #4f7a00; }
     .channel-news-channel[data-channel="live"] { color: #3fdcc8; } :root[data-theme="light"] .channel-news-channel[data-channel="live"] { color: #0b7a6b; }
+    .channel-news-channel[data-channel="motorsports"] { color: #ff4f4f; } :root[data-theme="light"] .channel-news-channel[data-channel="motorsports"] { color: #b3141c; }
+    /* Thirteen channels: keep the desktop channel bar on one row from 1280px up. */
+    @media (min-width: 761px) {
+      .dial ul { gap: 3px; }
+      .dial a, .dial a[data-channel] { padding: 6px 7px; gap: 5px; font-size: .8rem; }
+    }
   </style>
 </head>
 <body>
@@ -3601,6 +3669,7 @@
   <script src="creator-studio-data.js"></script>
   <script src="live-events-data.js"></script>
   <script src="idols-data.js"></script>
+  <script src="motorsports-data.js"></script>
   <script src="channel-news.js"></script>
   <script src="betting-stats.js"></script>
   <script src="sports-leagues.js"></script>
@@ -3623,7 +3692,8 @@
       { id: "bowling", number: "09", name: "Bowling", description: "Log league nights, track your arsenal, and look back at which ball changes and lane moves worked.", labels: ["Last session", "Average", "High game"], hints: ["Session", "Notes"], links: [] },
       { id: "music", number: "10", name: "Music Lab", description: "Dig into who wrote, produced and engineered the songs you love, follow their collaborations, and keep your own ratings and notes.", labels: ["Following", "Last rated", "Saved"], hints: ["Song or album", "Notes"], links: [] },
       { id: "creator", number: "11", name: "Creator Studio", description: "Plan, film, clip and track your YouTube channel: uploads, reaction clips, the content calendar and your ideas.", labels: ["Next post", "In production", "Ideas"], hints: ["Video", "Notes"], links: [] },
-      { id: "live", number: "12", name: "Live Events", description: "Find concerts, follow your artists’ tours, plan trips, and keep a journal of every show you’ve seen.", labels: ["Next concert", "Following", "Seen live"], hints: ["Concert", "Notes"], links: [] }
+      { id: "live", number: "12", name: "Live Events", description: "Find concerts, follow your artists’ tours, plan trips, and keep a journal of every show you’ve seen.", labels: ["Next concert", "Following", "Seen live"], hints: ["Concert", "Notes"], links: [] },
+      { id: "motorsports", number: "13", name: "Motorsports", description: "F1, NASCAR, IMSA and WEC: race weekends in your time zone, results, championship standings and live running order.", labels: ["Race weekend", "Up next", "Last winner"], hints: ["Race or series", "Notes"], links: [] }
     ];
     const storageKey = "seven-channels.entries.v1";
     const nbaFollowStorageKey = "seven-channels.nba-followed-teams.v1";
@@ -4014,7 +4084,7 @@
     const channelAccents = {
       sports: ["#ff7a6b", "#c0352a"], betting: ["#45d98c", "#137a45"], kpop: ["#ff7fb5", "#b8286b"], movies: ["#ffd166", "#8a6000"],
       anime: ["#ae95ff", "#6142d0"], games: ["#4fcdf2", "#0a6f86"], politics: ["#7f9bff", "#2f55c9"], bowling: ["#ffa24a", "#a84f00"],
-      music: ["#e08aff", "#8f2bb3"], creator: ["#bde56f", "#4f7a00"], live: ["#3fdcc8", "#0b7a6b"]
+      music: ["#e08aff", "#8f2bb3"], creator: ["#bde56f", "#4f7a00"], live: ["#3fdcc8", "#0b7a6b"], motorsports: ["#ff4f4f", "#b3141c"]
     };
 
     function applyAccent() {
@@ -7747,6 +7817,7 @@
       if (/^sports\/players(\/(\d+|records|compare(\/[\d,]*)?))?$/.test(route)) return "sports";
       if (/^creator\/.+/.test(route)) return "creator";
       if (/^live\/.+/.test(route)) return "live";
+      if (/^motorsports\/(f1|nascar|imsa|wec)(\/[\w-]+)?$/.test(route)) return "motorsports";
       if (/^politics\/members(\/[A-Z]\d{6})?$/.test(route)) return "politics";
       if (/^politics\/elections(\/midterms|\/(president|senate|house|governor)(\/\d{4})?)?$/.test(route)) return "politics";
       return route === "guide" || channels.some((channel) => channel.id === route) ? route : "guide";
@@ -9093,8 +9164,8 @@
         const title = element("div", "channel-cell");
         title.append(element("span", "number", `CH ${channel.number}`), element("span", "name", channel.name));
         row.append(title);
-        if (["bowling", "music", "creator", "live"].includes(channel.id)) {
-          ({ bowling: bowlingGuideCells, music: musicLabGuideCells, creator: creatorGuideCells, live: liveGuideCells })[channel.id]().forEach((summary, index) => addSummaryCell(row, channel.labels[index], summary));
+        if (["bowling", "music", "creator", "live", "motorsports"].includes(channel.id)) {
+          ({ bowling: bowlingGuideCells, music: musicLabGuideCells, creator: creatorGuideCells, live: liveGuideCells, motorsports: motorsportsGuideCells })[channel.id]().forEach((summary, index) => addSummaryCell(row, channel.labels[index], summary));
         } else {
           addListingCell(row, channel, "now", channel.labels[0]);
           addListingCell(row, channel, "next", channel.labels[1]);
@@ -12162,6 +12233,7 @@
       music: ["music-lab.js"],
       creator: ["creator-studio.js", "creator-clips.js"],
       live: ["live-events.js"],
+      motorsports: ["motorsports.js"],
       wrapped: ["year-in-review.js"],
       idols: ["idols.js"],
       nbaPlayers: ["nba-players.js"]
@@ -12238,6 +12310,10 @@
       }
       if (channel.id === "creator") {
         view.replaceChildren(heading, description, withChannelNews(channel.id, [createCreatorStudio()]));
+        return;
+      }
+      if (channel.id === "motorsports") {
+        view.replaceChildren(heading, description, withChannelNews(channel.id, [createMotorsports(location.hash.slice(1).replace(/^motorsports\/?/, ""))]));
         return;
       }
       if (channel.id === "live") {

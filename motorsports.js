@@ -1,0 +1,345 @@
+// Motorsports channel (#motorsports, #motorsports/<f1|nascar|imsa|wec>, #motorsports/<series>/<round>): overview,
+// calendars with sessions in your time zone, results, standings, and a live running order for F1 and NASCAR from ESPN.
+// Data: data/motorsports/*.json from scripts/update_motorsports.py. Loaded on first visit; element() comes from the app.
+
+const motorsportsCache = new Map();
+function motorsportsLoad(id) {
+  if (!motorsportsCache.has(id)) {
+    motorsportsCache.set(id, fetch(new URL(`data/motorsports/${id}.json`, location.href)).then((response) => {
+      if (!response.ok) throw new Error(`${id} data unavailable (${response.status}).`);
+      return response.json();
+    }).catch((error) => { motorsportsCache.delete(id); throw error; }));
+  }
+  return motorsportsCache.get(id);
+}
+
+const motorsportsLabels = { f1: "F1", nascar: "NASCAR", imsa: "IMSA", wec: "WEC" };
+const motorsportsEspn = { f1: "f1", nascar: "nascar-premier" };
+const motorsportsNascarSeries = new Map(); // remembered NASCAR series (1 Cup, 2 O'Reilly, 3 Truck)
+
+function motorsportsDate(start, withTime = true) {
+  if (!start) return "";
+  if (!/T/.test(start)) return new Date(`${start}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  return new Date(start).toLocaleString(undefined, withTime ? { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" } : { weekday: "short", month: "short", day: "numeric" });
+}
+
+function motorsportsCountdown(start) {
+  if (!start) return "";
+  const target = /T/.test(start) ? new Date(start) : new Date(`${start}T12:00:00`);
+  const diff = target - Date.now();
+  if (diff <= 0) return diff > -4 * 3600000 ? "Under way" : "";
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  if (days > 13) return `in ${Math.round(days / 7)} weeks`;
+  if (days > 0) return `in ${days} day${days === 1 ? "" : "s"}${hours ? ` ${hours} h` : ""}`;
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  return `in ${hours ? `${hours} h ` : ""}${minutes} min`;
+}
+
+function motorsportsDone(round) {
+  return Array.isArray(round.results) ? round.results.length > 0 : Boolean(round.results);
+}
+
+function motorsportsTime(start) {
+  if (!start) return null;
+  return /T/.test(start) ? new Date(start) : new Date(`${start}T23:59:59Z`);
+}
+
+// The first round without results that hasn't started more than a few hours ago.
+function motorsportsNext(rounds) {
+  return rounds.find((round) => !motorsportsDone(round) && (!round.start || motorsportsTime(round.start) > Date.now() - 6 * 3600000)) || null;
+}
+
+function motorsportsGroup(data) {
+  // NASCAR holds several series; the others are one series.
+  if (!data.series) return data;
+  const wanted = motorsportsNascarSeries.get("nascar") || data.series[0]?.id;
+  return data.series.find((item) => String(item.id) === String(wanted)) || data.series[0];
+}
+
+function motorsportsWinnerText(round) {
+  if (Array.isArray(round.results) && round.results.length) {
+    const first = round.results.find((row) => row.pos === 1) || round.results[0];
+    return `${first.driver}${first.team ? ` · ${first.team}` : ""}`;
+  }
+  if (round.winner) return round.winner;
+  if (round.winners && Object.keys(round.winners).length) return Object.entries(round.winners).map(([name, item]) => `${name}: ${item.team}`).join(" · ");
+  return "";
+}
+
+function motorsportsNav(active) {
+  const nav = element("nav", "ms-nav");
+  nav.setAttribute("aria-label", "Series");
+  for (const [id, label] of [["", "Overview"], ...Object.entries(motorsportsLabels)]) {
+    const link = element("a", id === active ? "is-active" : "", label);
+    link.href = id ? `#motorsports/${id}` : "#motorsports";
+    if (id === active) link.setAttribute("aria-current", "page");
+    nav.append(link);
+  }
+  return nav;
+}
+
+function motorsportsTable(columns, rows) {
+  const scroll = element("div", "ms-scroll");
+  const table = element("table", "ms-table");
+  const head = element("thead");
+  const headRow = element("tr");
+  for (const [label] of columns) headRow.append(element("th", "", label));
+  head.append(headRow);
+  const body = element("tbody");
+  for (const row of rows) {
+    const tr = element("tr", row.pos === 1 ? "is-first" : "");
+    for (const [, read] of columns) {
+      const value = read(row);
+      const td = element("td");
+      if (value instanceof Node) td.append(value);
+      else td.textContent = value == null || value === "" ? "—" : String(value);
+      tr.append(td);
+    }
+    body.append(tr);
+  }
+  table.append(head, body);
+  scroll.append(table);
+  return scroll;
+}
+
+function motorsportsCredit(data) {
+  const credit = element("p", "ms-muted ms-credit");
+  const link = element("a", "", data.source?.name || "Source");
+  link.href = data.source?.url || "#";
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  credit.append("Data: ", link, data.source?.license ? ` (${data.source.license})` : "", data.timesNote ? `. ${data.timesNote.replace("are US Eastern", "are shown in your time zone")}` : "",
+    data.generatedAt ? `. Updated ${new Date(data.generatedAt).toLocaleDateString()}.` : ".");
+  return credit;
+}
+
+// ---------- live (ESPN) ----------
+
+async function motorsportsLive(id, box) {
+  const slug = motorsportsEspn[id];
+  if (!slug) return;
+  try {
+    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/racing/${slug}/scoreboard`);
+    if (!response.ok) return;
+    const data = await response.json();
+    for (const event of data.events || []) {
+      const session = (event.competitions || []).find((competition) => competition.status?.type?.state === "in");
+      if (!session) continue;
+      const order = [...(session.competitors || [])].sort((a, b) => (a.order ?? 99) - (b.order ?? 99)).slice(0, 20);
+      const card = element("section", "ms-live");
+      const title = element("h3");
+      title.append(element("span", "ms-live-dot"), `Live: ${event.shortName || event.name} · ${session.type?.text || session.type?.abbreviation || "Session"}`);
+      card.append(title, element("p", "ms-muted", session.status?.type?.detail || session.status?.type?.shortDetail || ""));
+      const list = element("ol", "ms-live-order");
+      for (const competitor of order) {
+        const item = element("li");
+        item.append(element("strong", "", competitor.athlete?.displayName || competitor.athlete?.shortName || ""),
+          element("small", "", [competitor.vehicle?.number ? `#${competitor.vehicle.number}` : "", competitor.vehicle?.manufacturer || competitor.team?.displayName || ""].filter(Boolean).join(" · ")));
+        list.append(item);
+      }
+      card.append(list, element("p", "ms-muted", "Running order from ESPN; refreshes every 30 seconds."));
+      box.replaceChildren(card);
+      setTimeout(() => { if (box.isConnected) motorsportsLive(id, box); }, 30000);
+      return;
+    }
+    box.replaceChildren();
+  } catch {
+    // Live order is optional.
+  }
+}
+
+// ---------- overview ----------
+
+async function motorsportsOverview(container) {
+  const page = element("section", "ms-page");
+  page.append(motorsportsNav(""));
+  const live = element("div", "ms-live-area");
+  page.append(live);
+  const grid = element("div", "ms-cards");
+  page.append(grid);
+  container.replaceChildren(page);
+  for (const id of Object.keys(motorsportsEspn)) {
+    const slot = element("div");
+    live.append(slot);
+    motorsportsLive(id, slot);
+  }
+  const summary = typeof loadMotorsportsSummary === "function" ? await loadMotorsportsSummary() : [];
+  if (!summary.length) throw new Error("No motorsports summary yet.");
+  for (const id of Object.keys(motorsportsLabels)) {
+    const item = summary.find((entry) => entry.id === id);
+    const card = element("a", `ms-card series-${id}`);
+    card.href = `#motorsports/${id}`;
+    if (!item) {
+      card.append(element("h3", "", motorsportsLabels[id]), element("p", "ms-muted", "Data isn’t available yet."));
+      grid.append(card);
+      continue;
+    }
+    card.append(element("h3", "", item.name), element("p", "ms-muted", String(item.season || "")));
+    if (item.next) {
+      const block = element("div", "ms-card-next");
+      block.append(element("small", "", "Next"), element("strong", "", item.next.name),
+        element("span", "", `${motorsportsDate(item.next.start)}${motorsportsCountdown(item.next.start) ? ` · ${motorsportsCountdown(item.next.start)}` : ""}`));
+      if (item.next.track) block.append(element("small", "", item.next.track));
+      card.append(block);
+    } else {
+      card.append(element("p", "ms-card-done", `${item.season} season complete`));
+    }
+    if (item.last) {
+      const block = element("div", "ms-card-last");
+      block.append(element("small", "", `Last: ${item.last.name}`), element("span", "", `🏁 ${item.last.winner || "Result pending"}`));
+      card.append(block);
+    }
+    if (item.leader?.name) {
+      const scope = item.leader.title && item.leader.title !== "Drivers" ? ` (${item.leader.title.replace(/ drivers$/, "")})` : "";
+      card.append(element("p", "ms-card-leader", `${item.next ? "Points leader" : "Champion"}${scope}: ${item.leader.name} · ${item.leader.points.toLocaleString()} pts`));
+    }
+    grid.append(card);
+  }
+}
+
+// ---------- series ----------
+
+function motorsportsRoundRow(id, round, nextRound) {
+  const item = element("li", `ms-round${round === nextRound ? " is-next" : ""}${motorsportsDone(round) ? " is-done" : ""}`);
+  const link = element("a", "ms-round-link");
+  link.href = `#motorsports/${id}/${round.round}`;
+  const when = element("span", "ms-round-date");
+  when.append(element("strong", "", motorsportsDate(round.start, false)), element("small", "", `Round ${round.round}`));
+  const what = element("span", "ms-round-body");
+  what.append(element("strong", "", round.name), element("small", "", [round.circuit || round.track, round.location].filter(Boolean).join(" · ")));
+  const winner = motorsportsWinnerText(round);
+  if (winner) what.append(element("span", "ms-round-winner", `🏁 ${winner}`));
+  else if (round === nextRound) what.append(element("span", "ms-round-next", `Next up · ${motorsportsCountdown(round.start) || motorsportsDate(round.start)}`));
+  link.append(when, what);
+  item.append(link);
+  if (round === nextRound && round.sessions?.length) {
+    const sessions = element("ul", "ms-sessions");
+    for (const session of round.sessions) {
+      const li = element("li", new Date(session.start) < Date.now() ? "is-past" : "");
+      li.append(element("span", "", session.name), element("strong", "", motorsportsDate(session.start)));
+      sessions.append(li);
+    }
+    item.append(sessions);
+  }
+  return item;
+}
+
+function motorsportsStandings(group) {
+  const wrap = element("div", "ms-standings");
+  for (const table of group.standings || []) {
+    const section = element("section", "ms-section");
+    section.append(element("h4", "", table.title));
+    const rows = table.rows || [];
+    const columns = [["Pos", (row) => row.pos], ["", (row) => row.name || (row.drivers || []).join(", ")]];
+    if (rows.some((row) => row.team)) columns.push(["Team", (row) => row.team]);
+    columns.push(["Pts", (row) => row.points]);
+    if (rows.some((row) => row.wins != null)) columns.push(["Wins", (row) => row.wins]);
+    if (rows.some((row) => row.top5 != null)) columns.push(["Top 5", (row) => row.top5], ["Top 10", (row) => row.top10]);
+    columns[1][0] = /drivers/i.test(table.title) || table.title === "Drivers" ? "Driver" : "Team";
+    section.append(motorsportsTable(columns, rows));
+    wrap.append(section);
+  }
+  if (!wrap.childElementCount) wrap.append(element("p", "ms-muted", "Standings aren’t available yet."));
+  return wrap;
+}
+
+function motorsportsRoundDetail(id, data, group, round) {
+  const page = element("section", "ms-round-detail");
+  const back = element("a", "ms-back", `← ${data.name} calendar`);
+  back.href = `#motorsports/${id}`;
+  page.append(back, element("h3", "", round.name), element("p", "ms-muted", [round.circuit || round.track, round.location, motorsportsDate(round.start)].filter(Boolean).join(" · ")));
+  if (round.sessions?.length) {
+    const sessions = element("ul", "ms-sessions");
+    for (const session of round.sessions) {
+      const li = element("li", new Date(session.start) < Date.now() ? "is-past" : "");
+      li.append(element("span", "", session.name), element("strong", "", motorsportsDate(session.start)));
+      sessions.append(li);
+    }
+    page.append(sessions);
+  }
+  if (id === "f1" && round.results?.length) {
+    for (const [title, rows] of [["Race", round.results], ["Sprint", round.sprint || []]]) {
+      if (!rows.length) continue;
+      page.append(element("h4", "", title), motorsportsTable([["Pos", (row) => row.pos ?? "—"], ["No", (row) => row.number], ["Driver", (row) => row.driver],
+        ["Team", (row) => row.team], ["Grid", (row) => row.grid || "Pit"], ["Laps", (row) => row.laps], ["Time / status", (row) => `${row.time}${row.fastest ? " ⏱" : ""}`], ["Pts", (row) => row.points || ""]], rows));
+    }
+    if (round.results.some((row) => row.fastest)) page.append(element("p", "ms-muted", "⏱ fastest lap"));
+  } else if (id === "nascar" && round.results?.length) {
+    const facts = [round.stageWinners?.length ? `Stage winners: ${round.stageWinners.map((item) => `${item.stage}: ${item.driver}`).join(", ")}` : "",
+      round.cautions != null ? `${round.cautions} cautions` : "", round.leadChanges != null ? `${round.leadChanges} lead changes among ${round.leaders} drivers` : "",
+      round.margin ? `Margin ${round.margin} s` : "", round.averageSpeed ? `Average ${round.averageSpeed} mph` : ""].filter(Boolean);
+    if (facts.length) page.append(element("p", "ms-facts", facts.join(" · ")));
+    page.append(motorsportsTable([["Pos", (row) => row.pos], ["Start", (row) => row.start], ["#", (row) => row.car], ["Driver", (row) => row.driver], ["Team", (row) => row.team],
+      ["Make", (row) => row.make], ["Laps", (row) => row.laps], ["Led", (row) => row.led || ""], ["Status", (row) => row.status], ["Pts", (row) => row.points]], round.results));
+  } else if (round.winners && Object.keys(round.winners).length) {
+    const grid = element("div", "ms-class-winners");
+    for (const [name, item] of Object.entries(round.winners)) {
+      const card = element("div", "ms-class-winner");
+      card.append(element("small", "", `${name} winner`), element("strong", "", item.team), element("span", "", (item.drivers || []).join(", ")));
+      grid.append(card);
+    }
+    page.append(grid, element("p", "ms-muted", "Class winners from Wikipedia; the full classification is on the race report."));
+  } else {
+    page.append(element("p", "ms-muted", "Results appear here after the race."));
+  }
+  return page;
+}
+
+async function motorsportsSeriesPage(container, id, roundNumber) {
+  const data = await motorsportsLoad(id);
+  const page = element("section", "ms-page");
+  page.append(motorsportsNav(id));
+  const head = element("div", "ms-head");
+  head.append(element("h2", "", `${data.name} ${data.season}`));
+  if (data.series?.length > 1) {
+    const label = element("label", "field", "Series");
+    const select = element("select");
+    const current = String(motorsportsGroup(data).id);
+    for (const series of data.series) {
+      const option = element("option", "", series.name);
+      option.value = String(series.id);
+      option.selected = String(series.id) === current;
+      select.append(option);
+    }
+    select.addEventListener("change", () => { motorsportsNascarSeries.set(id, select.value); motorsportsSeriesPage(container, id, roundNumber); });
+    label.append(select);
+    head.append(label);
+  }
+  page.append(head);
+  const group = motorsportsGroup(data);
+  const rounds = group.rounds || [];
+  const live = element("div", "ms-live-area");
+  page.append(live);
+  motorsportsLive(id, live);
+  const round = roundNumber ? rounds.find((item) => String(item.round) === String(roundNumber)) : null;
+  if (round) {
+    page.append(motorsportsRoundDetail(id, data, group, round));
+  } else {
+    const next = motorsportsNext(rounds);
+    const layout = element("div", "ms-layout");
+    const calendar = element("section", "ms-section");
+    calendar.append(element("h3", "", "Calendar"));
+    if (!next) calendar.append(element("p", "ms-card-done", `${data.season} season complete. Next season’s calendar will appear when it’s published.`));
+    const list = element("ol", "ms-rounds");
+    rounds.forEach((item) => list.append(motorsportsRoundRow(id, item, next)));
+    calendar.append(list);
+    const standings = element("section", "ms-section");
+    standings.append(element("h3", "", "Standings"), motorsportsStandings(group));
+    layout.append(calendar, standings);
+    page.append(layout);
+  }
+  page.append(motorsportsCredit(data));
+  container.replaceChildren(page);
+}
+
+function createMotorsports(route = "") {
+  const container = element("div", "ms-view");
+  container.append(element("p", "ms-muted", "Loading…"));
+  const match = /^(f1|nascar|imsa|wec)(?:\/(\d+))?$/.exec(route);
+  (match ? motorsportsSeriesPage(container, match[1], match[2]) : motorsportsOverview(container)).catch((error) => {
+    console.error("Could not load motorsports data.", error);
+    container.replaceChildren(motorsportsNav(match?.[1] || ""), element("p", "", "Motorsports data isn’t available yet. It’s built when the site is published."));
+  });
+  return container;
+}

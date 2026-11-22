@@ -60,6 +60,17 @@ Namu Wiki is CC BY-NC-SA 2.0 KR (credit, non-commercial, share-alike), so keep t
 
 Tests: `python3 scripts/test_build_idols.py`, `python3 scripts/test_namu_parse.py` and `node tests/idols-data.test.js`.
 
+## Motorsports
+
+Channel 13 covers **F1, NASCAR, IMSA and WEC** (`#motorsports`, `#motorsports/<f1|nascar|imsa|wec>`, `#motorsports/<series>/<round>`):
+
+- **Overview:** each series' next race with a countdown in your time zone, the last winner and the championship leader (or champion once a season ends). During an F1 or NASCAR session, ESPN's live running order appears at the top and refreshes every 30 seconds.
+- **Series pages:** the full calendar (the next round shows every session in your time zone; finished rounds show the winner), and standings: F1 drivers and constructors; NASCAR drivers for the Cup, O'Reilly Auto Parts and Truck series (with wins, top 5s and top 10s); IMSA GTP, LMP2, GTD Pro and GTD drivers; WEC Hypercar and LMGT3 drivers.
+- **Rounds:** F1 race and sprint classification (grid, laps, time, points, fastest lap); NASCAR full finishing order (start, laps led, status, points) with stage winners, cautions, lead changes and margin; IMSA and WEC class winners with their drivers.
+- Race weekends show in the Guide's Motorsports row and in **This week**, and race days can trigger a notification.
+
+**Data.** `scripts/update_motorsports.py` runs in the publish workflow and writes `data/motorsports/`: F1 from the Jolpica F1 API (the open successor to Ergast), NASCAR from NASCAR's public feeds (times converted from US Eastern), IMSA and WEC from their Wikipedia season articles (CC BY-SA 4.0; the timing sites don't offer a usable index). A series that fails keeps its previous file, and finished NASCAR races aren't refetched. News comes from The Race, RACER, Motorsport.com, Autosport, Formula 1, Sportscar365 and Jayski. Tests: `python3 scripts/test_update_motorsports.py`.
+
 ## NBA player database
 
 `#sports/players` (the **NBA player database** card on the Sports channel) covers every player with regular-season stats on ESPN:

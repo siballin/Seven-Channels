@@ -176,6 +176,11 @@ def main():
     standings = ms.parse_standings(STANDINGS)
     assert standings[0] == {"pos": 1, "drivers": ["Sébastien Buemi", "Brendon Hartley"], "team": "Toyota Racing", "points": 115.0}, standings
     assert standings[1]["drivers"] == ["René Rast"]
+    shared = STANDINGS.replace("[[René Rast]]", "[[René Rast]]<br>[[Robin Frijns]]")
+    assert ms.parse_standings(shared)[1]["drivers"] == ["René Rast", "Robin Frijns"]
+    sessions = ms.nascar_sessions({"schedule": [{"event_name": "Haulers Enter", "start_time_utc": "2026-02-10T21:00:00"}, {"event_name": "Practice 1", "start_time_utc": "2026-02-11T15:00:00"},
+                                               {"event_name": "Garage Hours", "start_time_utc": "2026-02-11T11:00:00"}, {"event_name": "Qualifying (Impound)", "start_time_utc": "2026-02-12T15:00:00"}]})
+    assert [item["name"] for item in sessions] == ["Practice 1", "Qualifying (Impound)"], sessions
     calendar = ms.parse_calendar(CALENDAR, 2026)
     assert calendar[1] == {"round": 2, "name": "24 Hours of Le Mans", "circuit": "Circuit de la Sarthe", "location": "Le Mans, France", "start": "2026-06-13", "dateText": "13-14 June"}, calendar[1]
     assert ms.section(CALENDAR + WEC_RESULTS, "Race results").strip().startswith("{|")
@@ -210,7 +215,7 @@ def main():
     assert by_id["f1"]["next"]["name"] == "Chinese Grand Prix" and by_id["f1"]["last"]["winner"] == "Lando Norris"
     assert by_id["nascar"]["next"]["name"] == "Summer race" and by_id["nascar"]["last"]["winner"] == "William Byron"
     assert by_id["wec"]["last"]["winner"] == "No. 10 Garage 59" or by_id["wec"]["last"]["winner"].startswith("No.")
-    assert by_id["f1"]["leader"] == {"name": "Lando Norris", "points": 25.0}
+    assert by_id["f1"]["leader"] == {"name": "Lando Norris", "points": 25.0, "title": "Drivers"}
     print("update_motorsports tests passed")
 
 

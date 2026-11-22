@@ -9,7 +9,7 @@ const notifyTypes = [
   ["tours", "New shows for artists you follow", "Uses Ticketmaster; near you when a location is set in Live Events."],
   ["kpop", "K-pop releases and birthdays today", "From artists you follow on the K-Pop channel."],
   ["games", "Favorite game releases out today", "Games you starred in the release calendar."],
-  ["today", "Today’s plans", "Concerts, league night and planned uploads, on the day."]
+  ["today", "Today’s plans", "Concerts, league night, planned uploads and race days, on the day."]
 ];
 const notifyInterval = 30 * 60000;
 
@@ -148,6 +148,11 @@ async function notifyCheck({ force = false } = {}) {
       plans: safe(() => liveGetState().plans), leagues: safe(() => bowlingGetState().leagues), schedule: safe(() => creatorGetState().schedule), kpop, games
     });
     alerts.kpop.push(...birthdays.map((item) => ({ key: `birthday:${item.href}:${today}`, title: `🎂 ${item.title} today`, body: item.note, href: item.href })));
+    if (state.types.today && typeof motorsportsThisWeek === "function") {
+      const races = await motorsportsThisWeek([today]).catch(() => []);
+      alerts.today.push(...races.map((race) => ({ key: `race:${race.label}:${race.title}:${today}`, title: `Race day: ${race.label} ${race.title}`,
+        body: [race.note, race.time ? `Starts ${notifyTime(race.time)}` : ""].filter(Boolean).join(" · "), href: race.href })));
+    }
     const list = [...(state.types.today ? alerts.today : []), ...(state.types.kpop ? alerts.kpop : []), ...(state.types.games ? alerts.games : [])];
     if (state.types.tours) list.push(...await notifyTourAlerts(state));
     // Don't flood: at most five at once; the rest are marked sent and summed up.

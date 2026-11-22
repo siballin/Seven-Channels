@@ -149,7 +149,7 @@ function thisWeekTime(value) {
   return new Date(2000, 0, 1, Number(match[1]), Number(match[2])).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
-const thisWeekOrder = ["concert", "bowling", "creator", "birthday", "kpop", "game", "movie"];
+const thisWeekOrder = ["concert", "race", "bowling", "creator", "birthday", "kpop", "game", "movie"];
 
 function createThisWeek({ signal } = {}) {
   const section = element("section", "this-week");
@@ -216,6 +216,7 @@ function createThisWeek({ signal } = {}) {
   const sources = [
     ["K-pop releases", thisWeekKpop(days, signal).then((list) => ({ items: list, hidden: 0 }))],
     ["idol birthdays", thisWeekIdolBirthdays(days, signal).then((list) => ({ items: list, hidden: 0 }))],
+    ["races", (typeof motorsportsThisWeek === "function" ? motorsportsThisWeek(days) : Promise.resolve([])).then((list) => ({ items: list, hidden: 0 }))],
     ["game releases", thisWeekGames(days, signal)],
     ["movie releases", thisWeekMovies(days, signal)]
   ];

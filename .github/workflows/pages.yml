@@ -75,6 +75,9 @@ jobs:
         with:
           path: data/idols
           key: idols-${{ github.run_id }}
+      - name: Refresh motorsports (F1, NASCAR, IMSA, WEC)
+        continue-on-error: true
+        run: python scripts/update_motorsports.py
       - name: Restore last NBA player database
         uses: actions/cache/restore@v4
         with:

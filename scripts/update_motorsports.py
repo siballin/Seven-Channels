@@ -151,7 +151,8 @@ def nascar_sessions(race):
         name = item.get("event_name") or item.get("name") or ""
         utc = item.get("start_time_utc") or ""
         start = utc[:19] + "Z" if re.match(r"\d{4}-\d{2}-\d{2}T", utc) else nascar_time(item.get("start_time") or "")
-        if name and start:
+        # On-track sessions only; the feed also lists hauler parking, garage hours and meetings.
+        if name and start and re.search(r"practice|qualif|race|duel|heat|clash", name, re.I) and not re.search(r"garage|hauler|meeting|access|drawing|showcase|briefing|parade|inspection|report|introduction|ceremon", name, re.I):
             sessions.append({"name": name, "start": start})
     return sorted(sessions, key=lambda item: item["start"])
 
@@ -421,10 +422,11 @@ def parse_standings(text, limit=10):
             if len(row) <= max(pos, driver, points) or not re.fullmatch(r"\d+", row[pos].strip()):
                 continue
             key = (row[pos], row[points], row[team] if team is not None and team < len(row) else "")
+            names = [name.strip() for name in row[driver].split("\n") if name.strip()]  # co-drivers can share one cell
             if entries and entries[-1]["key"] == key:
-                entries[-1]["drivers"].append(row[driver])
+                entries[-1]["drivers"] += names
             else:
-                entries.append({"key": key, "pos": int(row[pos]), "drivers": [row[driver]], "team": key[2].replace("\n", " "),
+                entries.append({"key": key, "pos": int(row[pos]), "drivers": names, "team": key[2].replace("\n", " "),
                                 "points": float(re.sub(r"[^\d.]", "", row[points]) or 0)})
         if entries:
             return [{k: v for k, v in entry.items() if k != "key"} for entry in entries[:limit]]
@@ -492,12 +494,13 @@ def summarize(series_list, now=None):
                 elif last.get("winners"):
                     first_class = next(iter(last["winners"].values()))
                     winner = f"{first_class.get('team', '')}".strip()
-            leader = ((group.get("standings") or data.get("standings") or [{}])[0].get("rows") or [{}])[0]
+            table = (group.get("standings") or data.get("standings") or [{}])[0]
+            leader = (table.get("rows") or [{}])[0]
             out.append({"id": data["id"], "name": data["name"], "season": data.get("season"),
                         "next": {"name": upcoming[0]["name"], "start": upcoming[0].get("start", ""), "round": upcoming[0].get("round"),
                                  "track": upcoming[0].get("circuit") or upcoming[0].get("track", "")} if upcoming else None,
                         "last": {"name": last["name"], "winner": winner, "start": last.get("start", "")} if last else None,
-                        "leader": {"name": leader.get("name") or ", ".join(leader.get("drivers", [])), "points": leader.get("points")} if leader else None,
+                        "leader": {"name": leader.get("name") or ", ".join(leader.get("drivers", [])), "points": leader.get("points"), "title": table.get("title", "")} if leader else None,
                         "complete": bool(data.get("complete"))})
     return out
 
