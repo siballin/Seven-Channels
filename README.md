@@ -98,6 +98,8 @@ Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
 
 The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League, La Liga and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
 
+**Team following** works in every league: tap ☆ under a team on any game card to follow it. Followed teams' games move to the top of the list and get a highlighted edge, the featured matchup prefers them, and they're starred in the standings. **My teams** shows the selected league's teams with their record and that day's game. It also lists teams you follow in other leagues, and tapping one switches to that league. Follows are saved on this device and sync to your account; NBA teams you already followed carry over.
+
 
 ### Premier League, La Liga and MLS
 
