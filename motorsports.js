@@ -89,7 +89,7 @@ function motorsportsLoadLogos() {
 function motorsportsTeam(name, cc = "") {
   const span = element("span", "ms-person ms-team");
   const url = motorsportsLogos[name]?.url || "";
-  if (/^https:\/\/upload\.wikimedia\.org\//.test(url)) {
+  if (/^https:\/\/(upload|thumb)\.wikimedia\.org\//.test(url)) {
     const logo = element("img", "ms-logo");
     logo.src = url;
     logo.alt = "";

@@ -590,7 +590,7 @@ def build_logos(built, previous=None, fetcher=None, now=None):
         for page in query.get("pages", []):
             info = (page.get("imageinfo") or [{}])[0]
             url = info.get("thumburl") or info.get("url") or ""
-            if url.startswith("https://upload.wikimedia.org/"):
+            if re.match(r"https://(upload|thumb)\.wikimedia\.org/", url):
                 thumbs[back.get(page["title"], page["title"]).removeprefix("File:")] = url.split("?")[0]
         if not fetcher:
             time.sleep(0.5)

@@ -233,7 +233,7 @@ def main():
         if params.get("action") == "parse":
             return {"parse": {"wikitext": "{{Infobox racing team\n| logo = Team Penske logo.png\n| image = Car.jpg\n}}"}} if params["page"] == "Team Penske" else {"parse": {"wikitext": ""}}
         if params.get("prop") == "imageinfo":
-            return {"query": {"pages": [{"title": f"File:{name}", "imageinfo": [{"thumburl": f"https://upload.wikimedia.org/thumb/{name}"}]} for name in [t.removeprefix("File:") for t in params["titles"].split("|")]]}}
+            return {"query": {"pages": [{"title": f"File:{name}", "imageinfo": [{"thumburl": f"https://thumb.wikimedia.org/thumb/{name}?utm_source=x"}]} for name in [t.removeprefix("File:") for t in params["titles"].split("|")]]}}
         raise AssertionError(params)
     built = [{"teamArticles": {"Mercedes": "Mercedes-Benz in Formula One"}}, {"teamArticles": {"Team Penske": "Team Penske", "Unknown Racing": "Unknown Racing"}}]
     logos = ms.build_logos(built, fetcher=wiki, now=datetime(2026, 11, 22, tzinfo=timezone.utc))
