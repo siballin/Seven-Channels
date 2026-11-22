@@ -671,8 +671,9 @@ def build_track_maps(built, previous=None, fetcher=None, now=None):
                 layouts[back.get(page.get("title", ""), page.get("title", ""))] = [(image.replace("_", " "), "")]
         if not fetcher:
             time.sleep(1)
-    # Sports-car circuits: read the infobox for every layout with its caption (Daytona: tri-oval and road course).
-    for title in [title for title in titles if title in road]:
+    # Sports-car circuits: read the infobox for every layout with its caption (Daytona: tri-oval and road course)...
+    # ...and any circuit whose lead image was a photo rather than a diagram (a dozen or so).
+    for title in [title for title in titles if title in road or title not in layouts]:
         try:
             data = fetch_json(WIKIPEDIA, {"action": "parse", "page": title, "prop": "wikitext", "section": "0", "redirects": "1", "format": "json", "formatversion": "2"}, fetcher)
             found = track_layouts((data.get("parse") or {}).get("wikitext", ""))
