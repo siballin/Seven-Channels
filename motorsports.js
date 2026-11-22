@@ -142,10 +142,30 @@ function motorsportsTeam(name, cc = "") {
   return span;
 }
 
-// "Name" with its flag; accepts {name, cc}, a row with driver/name + cc, or a plain string.
+// Driver headshots from Wikipedia (data/motorsports/headshots.json).
+let motorsportsHeads = {};
+let motorsportsHeadsRequest = null;
+function motorsportsLoadHeads() {
+  motorsportsHeadsRequest ||= fetch(new URL("data/motorsports/headshots.json", location.href))
+    .then((response) => (response.ok ? response.json() : { drivers: {} }))
+    .then((data) => { motorsportsHeads = data.drivers || {}; })
+    .catch(() => { motorsportsHeadsRequest = null; });
+  return motorsportsHeadsRequest;
+}
+
+// "Name" with headshot and flag; accepts {name, cc}, a row with driver/name + cc, or a plain string.
 function motorsportsPerson(person, nameKey = "name") {
   const span = element("span", "ms-person");
   const name = typeof person === "string" ? person : person?.[nameKey] || person?.name || "";
+  const head = motorsportsHeads[name]?.url || "";
+  if (/^https:\/\/(upload|thumb)\.wikimedia\.org\//.test(head)) {
+    const image = element("img", "ms-head");
+    image.src = head;
+    image.alt = "";
+    image.loading = "lazy";
+    image.addEventListener("error", () => image.remove(), { once: true });
+    span.append(image);
+  }
   const flag = typeof person === "string" ? null : motorsportsFlag(person?.cc);
   if (flag) span.append(flag);
   span.append(name);
@@ -300,7 +320,7 @@ async function motorsportsOverview(container) {
     live.append(slot);
     motorsportsLive(id, slot);
   }
-  const summary = typeof loadMotorsportsSummary === "function" ? await loadMotorsportsSummary() : [];
+  const [summary] = await Promise.all([typeof loadMotorsportsSummary === "function" ? loadMotorsportsSummary() : [], motorsportsLoadHeads()]);
   if (!summary.length) throw new Error("No motorsports summary yet.");
   for (const id of Object.keys(motorsportsLabels)) {
     const item = summary.find((entry) => entry.id === id);
@@ -440,7 +460,7 @@ function motorsportsRoundDetail(id, data, group, round) {
 }
 
 async function motorsportsSeriesPage(container, id, roundNumber) {
-  const [data] = await Promise.all([motorsportsLoad(id), motorsportsLoadLogos(), motorsportsLoadTracks()]);
+  const [data] = await Promise.all([motorsportsLoad(id), motorsportsLoadLogos(), motorsportsLoadTracks(), motorsportsLoadHeads()]);
   const page = element("section", "ms-page");
   page.append(motorsportsNav(id));
   const head = element("div", "ms-head");

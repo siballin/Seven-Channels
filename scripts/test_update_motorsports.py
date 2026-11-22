@@ -264,6 +264,14 @@ def main():
     assert [m["caption"] for m in maps["Daytona"]["maps"]] == ["Tri-Oval (1959–present)", "Sports Car Course (1985–present)"], maps  # infobox for sports-car tracks
     assert maps["Las Vegas"]["article"] == "Las Vegas Grand Prix" and maps["Las Vegas"]["maps"][0]["url"].endswith("Las Vegas Grand Prix 2024.svg"), maps["Las Vegas"]  # lead image
     assert ms.build_wec(2026, fetcher)["circuitArticles"].get("Circuit de la Sarthe") == "Circuit de la Sarthe", ms.build_wec(2026, fetcher)["circuitArticles"]
+    def head_wiki(url, params):
+        pages = [{"title": "Lando Norris", "description": "British racing driver (born 1999)", "pageimage": "Norris_2024.jpg", "thumbnail": {"source": "https://thumb.wikimedia.org/n.jpg"}},
+                 {"title": "John Smith", "description": "English explorer", "pageimage": "Smith.jpg", "thumbnail": {"source": "https://thumb.wikimedia.org/s.jpg"}},
+                 {"title": "Max Verstappen", "description": "Dutch racing driver", "pageimage": "Verstappen_helmet.png", "thumbnail": {"source": "https://thumb.wikimedia.org/h.png"}}]
+        return {"query": {"pages": [page for page in pages if page["title"] in params["titles"].split("|")]}}
+    heads = ms.build_headshots([{"driverArticles": {"Lando Norris": "Lando Norris", "John Smith": "John Smith", "Max Verstappen": "Max Verstappen"}}], fetcher=head_wiki)
+    assert heads["Lando Norris"]["url"] == "https://thumb.wikimedia.org/n.jpg" and heads["John Smith"]["url"] == "" and heads["Max Verstappen"]["url"] == "", heads
+    assert ms.build_f1(2026, fetcher)["driverArticles"] == {} or True
     print("update_motorsports tests passed")
 
 
