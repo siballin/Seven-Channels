@@ -40,6 +40,7 @@ EXTRA = OUT / "extra-players.json"
 USER_AGENT = "SevenChannels/1.0 (personal static site; NBA player directory)"
 WEB = "https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba"
 TEAMS_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams?limit=100"
+WIKIDATA_API = "https://www.wikidata.org/w/api.php"
 SHARDS = 64
 REFRESH_DAYS = 6
 
@@ -97,6 +98,41 @@ def discover(first, last, fetcher=None, log=print):
         if not fetcher:
             time.sleep(0.3)
     return found
+
+
+def wikidata_espn_ids(fetcher=None, log=print):
+    """{ESPN id: name} for every Wikidata item with an ESPN NBA player id. Uses the regular Wikidata API
+    (property lookup, haswbstatement search, entity data), not the query service, which is often overloaded.
+    This is how players from before ESPN's season lists (Larry Bird, Kareem Abdul-Jabbar, …) are found."""
+    found = fetch_json(WIKIDATA_API, {"action": "wbsearchentities", "type": "property", "language": "en", "search": "ESPN NBA player ID", "format": "json"}, fetcher)
+    prop = next((item["id"] for item in found.get("search") or [] if re.search(r"ESPN.*NBA.*player", item.get("label", ""), re.I)), "")
+    if not prop:
+        log("  Wikidata: no ESPN NBA player id property found")
+        return {}
+    titles = []
+    offset = 0
+    while offset < 10000:
+        data = fetch_json(WIKIDATA_API, {"action": "query", "list": "search", "srsearch": f"haswbstatement:{prop}", "srnamespace": "0",
+                                         "srlimit": "500", "sroffset": str(offset), "srprop": "", "format": "json"}, fetcher)
+        titles += [item["title"] for item in (data.get("query") or {}).get("search") or [] if re.fullmatch(r"Q\d+", item.get("title", ""))]
+        if "continue" not in data:
+            break
+        offset = int(data["continue"].get("sroffset", offset + 500))
+        if not fetcher:
+            time.sleep(0.5)
+    out = {}
+    for start in range(0, len(titles), 50):
+        data = fetch_json(WIKIDATA_API, {"action": "wbgetentities", "ids": "|".join(titles[start:start + 50]), "props": "claims|labels",
+                                         "languages": "en", "format": "json"}, fetcher)
+        for entity in (data.get("entities") or {}).values():
+            for claim in (entity.get("claims") or {}).get(prop, []):
+                value = ((claim.get("mainsnak") or {}).get("datavalue") or {}).get("value")
+                if isinstance(value, str) and re.fullmatch(r"\d+", value):
+                    out[value] = ((entity.get("labels") or {}).get("en") or {}).get("value", "")
+        if not fetcher:
+            time.sleep(0.5)
+    log(f"  Wikidata ({prop}): {len(out)} players with ESPN ids")
+    return out
 
 
 # ---------- parsing ----------
@@ -263,12 +299,21 @@ def build(fetcher=None, force=False, first_season=1980, limit=None, now=None, lo
     for item in extra:
         if re.fullmatch(r"\d+", str(item.get("id", ""))):
             found.setdefault(str(item["id"]), {"name": item.get("name", ""), "seasons": set()})
+    try:
+        for espn_id, name in wikidata_espn_ids(fetcher, log).items():
+            found.setdefault(espn_id, {"name": name, "seasons": set(), "wikidata": True})
+    except Exception as error:  # optional: the season lists still cover 1985 on
+        log(f"  Wikidata unavailable ({error}); using ESPN's season lists only")
     ids = sorted(set(found) | set(existing), key=int)
     if limit:
         ids = ids[:limit]
     teams = team_abbreviations(fetcher)
     recent = {last, last - 1}
-    todo = [espn_id for espn_id in ids if needs_refresh(existing.get(espn_id), recent, now, force)]
+    try:
+        no_stats = set(json.loads((OUT / "no-stats.json").read_text()).get("ids") or []) if not force else set()
+    except (OSError, ValueError):
+        no_stats = set()
+    todo = [espn_id for espn_id in ids if espn_id not in no_stats and needs_refresh(existing.get(espn_id), recent, now, force)]
     log(f"  {len(ids)} players; fetching {len(todo)} (new or active), keeping {len(ids) - len(todo)}")
     players = {espn_id: existing[espn_id] for espn_id in ids if espn_id in existing}
 
@@ -296,12 +341,16 @@ def build(fetcher=None, force=False, first_season=1980, limit=None, now=None, lo
                     raise RuntimeError(f"Too many failures ({failures}); stopping") from error
                 continue
             bio, seasons, career = result
+            if not seasons:
+                no_stats.add(espn_id)
             if seasons:
                 players[espn_id] = {"id": espn_id, **bio, "name": bio["name"] or found.get(espn_id, {}).get("name", ""),
                                     "seasons": seasons, "career": career, "fetchedAt": now.isoformat(timespec="seconds")}
             if number_done % 250 == 0:
                 log(f"  {number_done}/{len(todo)}")
-    log(f"  done: {len(players)} players, {failures} failed")
+    log(f"  done: {len(players)} players, {failures} failed, {len(no_stats)} without ESPN stats")
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / "no-stats.json").write_text(json.dumps({"ids": sorted(no_stats, key=int)}))
     return players, teams
 
 

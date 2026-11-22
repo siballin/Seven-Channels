@@ -45,7 +45,23 @@ PLAYERS = {
 SEASON_LISTS = {1985: ["1035"], 1988: ["1035"], 2026: ["2000"], 2027: []}
 
 
+WIKIDATA = {"Q1": ("1543", "Larry Bird"), "Q2": ("999", "No Stats Guy"), "Q3": ("1035", "Michael Jordan")}
+PLAYERS_EXTRA = {"1543": {"bio": {"displayName": "Larry Bird", "position": {"displayName": "Forward", "abbreviation": "F"}, "active": False, "displayDraft": "1978: Rd 1, Pk 6 (BOS)"},
+                          "seasons": [season(1980, "2", ["82", "82", "36.0", "8.5-17.8", "47.4", "0.7-1.7", "40.6", "3.7-4.2", "83.6", "2.6", "7.8", "10.4", "4.5", "0.6", "1.7", "3.4", "3.2", "21.3"],
+                                             ["693-1463", "47.4", "58-143", "40.6", "301-360", "83.6", "216", "636", "852", "370", "53", "143", "279", "263", "1745"], ["50", "2"])],
+                          "career": (["897", "870", "38.4", "9.6-19.3", "49.6", "0.7-1.9", "37.6", "4.4-5.0", "88.6", "2.0", "8.0", "10.0", "6.3", "0.8", "1.7", "2.5", "3.1", "24.3"],
+                                     ["8591-17334", "49.6", "649-1727", "37.6", "3960-4471", "88.6", "1757", "7217", "8974", "5695", "755", "1556", "2279", "2816", "21791"], ["300", "59"])},
+                 "999": {"bio": {"displayName": "No Stats Guy"}, "seasons": [], "career": ([], [], [])}}
+
+
 def fetcher(url, params):
+    if url == nba.WIKIDATA_API:
+        if params["action"] == "wbsearchentities":
+            return {"search": [{"id": "P3685", "label": "ESPN NBA player ID"}]}
+        if params["action"] == "query":
+            return {"query": {"search": [{"title": qid} for qid in WIKIDATA]}}
+        return {"entities": {qid: {"labels": {"en": {"value": WIKIDATA[qid][1]}}, "claims": {"P3685": [{"mainsnak": {"datavalue": {"value": WIKIDATA[qid][0]}}}]}}
+                             for qid in params["ids"].split("|")}}
     if url.endswith("/statistics/byathlete"):
         ids = SEASON_LISTS.get(int(params["season"]), [])
         return {"athletes": [{"athlete": {"id": espn_id, "displayName": PLAYERS[espn_id]["bio"]["displayName"]}} for espn_id in ids]}
@@ -53,7 +69,7 @@ def fetcher(url, params):
         return {"sports": [{"leagues": [{"teams": [{"team": {"id": "4", "abbreviation": "CHI"}}, {"team": {"id": "13", "abbreviation": "LAL"}},
                                                      {"team": {"id": "2", "abbreviation": "BOS"}}]}]}]}
     espn_id = url.split("/athletes/")[1].split("/")[0]
-    player = PLAYERS[espn_id]
+    player = {**PLAYERS, **PLAYERS_EXTRA}[espn_id]
     if url.endswith("/stats"):
         def cat(name, labels, part, career):
             return {"name": name, "labels": labels, "totals": career,
@@ -74,7 +90,8 @@ def main():
     nba.EXTRA = folder / "extra-players.json"
     now = datetime(2026, 11, 22, tzinfo=timezone.utc)
     players, teams = nba.build(fetcher=fetcher, first_season=1985, now=now, log=lambda *_: None)
-    assert set(players) == {"1035", "2000"}
+    assert set(players) == {"1035", "2000", "1543"}, set(players)  # Larry Bird found through Wikidata; no-stats ids dropped
+    assert players["1543"]["seasons"][0][1] == "1979-80" and players["1543"]["career"]["totals"]["pts"] == 21791
     mj = players["1035"]
     columns = {name: index for index, name in enumerate(nba.SEASON_COLUMNS)}
     assert mj["birth"] == "1963-02-17" and mj["draft"]["pick"] == 3 and mj["college"] == "North Carolina" and mj["pos"] == "G"
@@ -105,7 +122,7 @@ def main():
         calls.append(url)
         return fetcher(url, params)
     players2, _ = nba.build(fetcher=counting, first_season=1985, now=now, log=lambda *_: None)
-    assert set(players2) == {"1035", "2000"} and not [url for url in calls if "/athletes/" in url], calls
+    assert set(players2) == {"1035", "2000", "1543"} and not [url for url in calls if "/athletes/" in url], calls
     # A week later only the active player is refetched.
     calls.clear()
     nba.build(fetcher=counting, first_season=1985, now=datetime(2026, 11, 30, tzinfo=timezone.utc), log=lambda *_: None)
