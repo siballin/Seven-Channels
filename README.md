@@ -62,7 +62,7 @@ Tests: `python3 scripts/test_build_idols.py`, `python3 scripts/test_namu_parse.p
 
 ## Motorsports
 
-Channel 13 covers **F1, NASCAR, IMSA and WEC** (`#motorsports`, `#motorsports/<f1|nascar|imsa|wec>`, `#motorsports/<series>/<round>`):
+Channel 03 covers **F1, NASCAR, IMSA and WEC** (`#motorsports`, `#motorsports/<f1|nascar|imsa|wec>`, `#motorsports/<series>/<round>`):
 
 - **Overview:** each series' next race with a countdown in your time zone, the last winner and the championship leader (or champion once a season ends). During an F1 or NASCAR session, ESPN's live running order appears at the top and refreshes every 30 seconds.
 - **Series pages:** the full calendar (the next round shows every session in your time zone; finished rounds show the winner), and standings: F1 drivers and constructors; NASCAR drivers for the Cup, O'Reilly Auto Parts and Truck series (with wins, top 5s and top 10s); IMSA GTP, LMP2, GTD Pro and GTD drivers; WEC Hypercar and LMGT3 drivers.
