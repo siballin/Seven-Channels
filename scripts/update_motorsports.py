@@ -26,6 +26,9 @@ from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from countries import country_code  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "motorsports"
 USER_AGENT = "SevenChannels/1.0 (personal static site; motorsports channel)"
@@ -92,6 +95,7 @@ def f1_row(item):
     driver = item.get("Driver", {})
     return {"pos": int(item["position"]) if str(item.get("position", "")).isdigit() else None, "number": item.get("number", ""),
             "driver": f"{driver.get('givenName', '')} {driver.get('familyName', '')}".strip(), "code": driver.get("code", ""),
+            "cc": country_code(driver.get("nationality")),
             "team": item.get("Constructor", {}).get("name", ""), "grid": int(item["grid"]) if str(item.get("grid", "")).isdigit() else None,
             "laps": int(item["laps"]) if str(item.get("laps", "")).isdigit() else None,
             "time": (item.get("Time") or {}).get("time") or item.get("status", ""), "status": item.get("status", ""),
@@ -127,9 +131,11 @@ def build_f1(year, fetcher=None):
         "standings": [
             {"title": "Drivers", "rows": [{"pos": int(row["position"]) if str(row.get("position", "")).isdigit() else None,
                                            "name": f"{row['Driver'].get('givenName', '')} {row['Driver'].get('familyName', '')}".strip(),
+                                           "cc": country_code(row["Driver"].get("nationality")),
                                            "team": ", ".join(team.get("name", "") for team in row.get("Constructors", [])),
                                            "points": float(row.get("points") or 0), "wins": int(row.get("wins") or 0)} for row in standing.get("DriverStandings", [])]},
             {"title": "Constructors", "rows": [{"pos": int(row["position"]) if str(row.get("position", "")).isdigit() else None, "name": row["Constructor"].get("name", ""),
+                                                "cc": country_code(row["Constructor"].get("nationality")),
                                                 "points": float(row.get("points") or 0), "wins": int(row.get("wins") or 0)} for row in team_standing.get("ConstructorStandings", [])]},
         ],
     }
@@ -162,7 +168,7 @@ def build_nascar(year, fetcher=None, previous=None):
     previous_results = {}
     for series in (previous or {}).get("series", []):
         for race in series.get("rounds", []):
-            if race.get("results"):
+            if race.get("results") and all("cc" in row for row in race["results"]):
                 previous_results[race["id"]] = race
     out = []
     for series_id, label in NASCAR_SERIES.items():
@@ -185,7 +191,8 @@ def build_nascar(year, fetcher=None, previous=None):
                         weekend = fetch_json(f"{NASCAR}/{year}/{series_id}/{race['race_id']}/weekend-feed.json", None, fetcher)
                         detail = (weekend.get("weekend_race") or [{}])[0]
                         entry["results"] = [{"pos": item.get("finishing_position"), "start": item.get("starting_position"), "car": item.get("car_number", ""),
-                                             "driver": item.get("driver_fullname", ""), "team": item.get("team_name", ""), "make": item.get("car_make", ""),
+                                             "driver": item.get("driver_fullname", ""), "cc": country_code(item.get("hometown_country")),
+                                             "team": item.get("team_name", ""), "make": item.get("car_make", ""),
                                              "laps": item.get("laps_completed"), "led": item.get("laps_led"), "status": item.get("finishing_status", ""),
                                              "points": item.get("points_earned"), "playoffPoints": item.get("playoff_points_earned")}
                                             for item in sorted(detail.get("results") or [], key=lambda item: item.get("finishing_position") or 99)]
@@ -208,7 +215,9 @@ def build_nascar(year, fetcher=None, previous=None):
         except Exception as error:
             print(f"  NASCAR points {series_id}: {error}", file=sys.stderr)
             points = []
-        standings = [{"pos": item.get("position"), "name": item.get("driver_name", ""), "points": item.get("points"), "wins": item.get("wins"),
+        # Points feeds have no country: take it from the driver's race results.
+        countries = {row["driver"]: row.get("cc", "") for race in rounds for row in race["results"] if row.get("driver")}
+        standings = [{"pos": item.get("position"), "name": item.get("driver_name", ""), "cc": countries.get(item.get("driver_name", ""), ""), "points": item.get("points"), "wins": item.get("wins"),
                       "starts": item.get("starts"), "poles": item.get("poles"), "top5": item.get("top_5") if item.get("top_5") is not None else item.get("top5"),
                       "top10": item.get("top_10") if item.get("top_10") is not None else item.get("top10"), "playoff": item.get("playoff_rank") or None}
                      for item in points if isinstance(item, dict) and item.get("driver_name")]
@@ -223,10 +232,30 @@ def build_nascar(year, fetcher=None, previous=None):
 
 # ---------- Wikipedia tables (IMSA, WEC) ----------
 
+FLAG = re.compile("\x01([^\x02]*)\x02")
+
+
+def unflag(text):
+    """Remove the flag markers strip_markup leaves in cells."""
+    return FLAG.sub("", text or "").strip()
+
+
+def people(text):
+    """A cell listing drivers, one per line, each led by a flag → [{"name", "cc"}]."""
+    out = []
+    for line in (text or "").split("\n"):
+        name = unflag(line)
+        if name:
+            code = FLAG.search(line)
+            out.append({"name": name, "cc": country_code(code.group(1)) if code else ""})
+    return out
+
+
 def strip_markup(text):
-    """Wikitext → plain text: links, flag icons, bold, refs, simple templates; <br> becomes a newline."""
+    """Wikitext → plain text: links, bold, refs, simple templates; <br> becomes a newline. {{flagicon|XXX}} becomes a
+    marker (\x01XXX\x02) so driver cells keep their nationality; unflag() removes markers from other cells."""
     text = re.sub(r"<ref[^>]*/>|<ref[^>]*>.*?</ref>", "", text or "", flags=re.S)
-    text = re.sub(r"\{\{(?:flagicon|flagdeco|flag icon)[^{}]*\}\}", "", text, flags=re.I)
+    text = re.sub(r"\{\{(?:flagicon|flagdeco|flag icon)\|([^{}|]*)(?:\|[^{}]*)?\}\}", lambda match: f"\x01{match.group(1).strip()}\x02", text, flags=re.I)
     text = re.sub(r"\{\{(?:nowrap|small|nobr|abbr|tooltip|sortname|sort)\|([^{}|]*)(?:\|[^{}]*)?\}\}", r"\1", text, flags=re.I)
     text = re.sub(r"\{\{[^{}]*\}\}", "", text)
     text = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", text)
@@ -346,7 +375,7 @@ def parse_date(text, year):
 
 def column(header, *names):
     for index, value in enumerate(header):
-        if any(name.lower() in value.lower() for name in names):
+        if any(name.lower() in unflag(value).lower() for name in names):
             return index
     return None
 
@@ -364,6 +393,7 @@ def parse_calendar(text, year):
         for row in table[1:]:
             if len(row) <= max(i for i in [rnd, date, race, circuit] if i is not None) or not re.fullmatch(r"\d+", row[rnd].strip()):
                 continue
+            row = [unflag(cell) for cell in row]
             start, date_text = parse_date(row[date], year)
             location = column(header, "Location")
             rounds.append({"round": int(row[rnd]), "name": (row[race] if race is not None else row[circuit]).replace("\n", " "),
@@ -385,7 +415,7 @@ def parse_class_winners(text):
         rnd = column(header, "Rnd", "Round")
         classes = {}
         for index, value in enumerate(header):
-            match = re.match(r"(.+?)\s+(?:Winning Team|winners|Winning Teams|Winner)$", value.strip(), re.I)
+            match = re.match(r"(.+?)\s+(?:Winning Team|winners|Winning Teams|Winner)$", unflag(value), re.I)
             if match:
                 classes[index] = match.group(1).strip()
         if not classes:
@@ -401,7 +431,8 @@ def parse_class_winners(text):
                 team = rows[0][index] if index < len(rows[0]) else ""
                 drivers = rows[1][index] if len(rows) > 1 and index < len(rows[1]) else ""
                 if team or drivers:
-                    winners[name] = {"team": team.replace("\n", " "), "drivers": [line for line in drivers.split("\n") if line]}
+                    team_code = FLAG.search(team)
+                    winners[name] = {"team": unflag(team).replace("\n", " "), "cc": country_code(team_code.group(1)) if team_code else "", "drivers": people(drivers)}
             out[number] = winners
         if out:
             return out
@@ -421,13 +452,13 @@ def parse_standings(text, limit=10):
         for row in table[1:]:
             if len(row) <= max(pos, driver, points) or not re.fullmatch(r"\d+", row[pos].strip()):
                 continue
-            key = (row[pos], row[points], row[team] if team is not None and team < len(row) else "")
-            names = [name.strip() for name in row[driver].split("\n") if name.strip()]  # co-drivers can share one cell
+            key = (row[pos], unflag(row[points]), unflag(row[team]) if team is not None and team < len(row) else "")
+            names = people(row[driver])  # co-drivers can share one cell
             if entries and entries[-1]["key"] == key:
                 entries[-1]["drivers"] += names
             else:
                 entries.append({"key": key, "pos": int(row[pos]), "drivers": names, "team": key[2].replace("\n", " "),
-                                "points": float(re.sub(r"[^\d.]", "", row[points]) or 0)})
+                                "points": float(re.sub(r"[^\d.]", "", unflag(row[points])) or 0)})
         if entries:
             return [{k: v for k, v in entry.items() if k != "key"} for entry in entries[:limit]]
     return []
@@ -488,19 +519,24 @@ def summarize(series_list, now=None):
             done = [entry for entry in rounds if entry.get("results")]
             last = done[-1] if done else None
             winner = ""
+            winner_cc = ""
             if last:
                 if isinstance(last.get("results"), list) and last["results"]:
                     winner = last["results"][0].get("driver", "")
+                    winner_cc = last["results"][0].get("cc", "")
                 elif last.get("winners"):
                     first_class = next(iter(last["winners"].values()))
                     winner = f"{first_class.get('team', '')}".strip()
+                    winner_cc = first_class.get("cc", "")
             table = (group.get("standings") or data.get("standings") or [{}])[0]
             leader = (table.get("rows") or [{}])[0]
             out.append({"id": data["id"], "name": data["name"], "season": data.get("season"),
                         "next": {"name": upcoming[0]["name"], "start": upcoming[0].get("start", ""), "round": upcoming[0].get("round"),
                                  "track": upcoming[0].get("circuit") or upcoming[0].get("track", "")} if upcoming else None,
-                        "last": {"name": last["name"], "winner": winner, "start": last.get("start", "")} if last else None,
-                        "leader": {"name": leader.get("name") or ", ".join(leader.get("drivers", [])), "points": leader.get("points"), "title": table.get("title", "")} if leader else None,
+                        "last": {"name": last["name"], "winner": winner, "cc": winner_cc, "start": last.get("start", "")} if last else None,
+                        "leader": {"name": leader.get("name") or ", ".join(item["name"] if isinstance(item, dict) else item for item in leader.get("drivers", [])),
+                                   "cc": leader.get("cc") or next((item.get("cc", "") for item in leader.get("drivers", []) if isinstance(item, dict)), ""),
+                                   "points": leader.get("points"), "title": table.get("title", "")} if leader else None,
                         "complete": bool(data.get("complete"))})
     return out
 

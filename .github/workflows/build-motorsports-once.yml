@@ -1,0 +1,42 @@
+name: Build motorsports data (temporary)
+on:
+  push:
+    branches: [claude/dazzling-hamilton-4jcfnt]
+    paths: [".github/workflows/build-motorsports-once.yml"]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Build
+        run: python scripts/update_motorsports.py
+      - name: Report
+        run: |
+          python3 - <<'PY'
+          import json
+          from collections import Counter
+          for name in ["f1", "nascar", "imsa", "wec"]:
+              d = json.load(open(f"data/motorsports/{name}.json"))
+              for g in d.get("series") or [d]:
+                  rows = [r for r in g["rounds"] if isinstance(r.get("results"), list) for r in r["results"]]
+                  people = [p for r in g["rounds"] for w in (r.get("winners") or {}).values() for p in w.get("drivers", [])]
+                  st = [p for t in g.get("standings", []) for row in t["rows"] for p in (row.get("drivers") or [row])]
+                  print(name, g.get("name"), "result rows", len(rows), "with cc", sum(1 for r in rows if r.get("cc")), Counter(r.get("cc") for r in rows).most_common(6),
+                        "| winner drivers", len(people), "with cc", sum(1 for p in people if isinstance(p, dict) and p.get("cc")),
+                        "| standings", len(st), "with cc", sum(1 for p in st if isinstance(p, dict) and p.get("cc")))
+                  missing = sorted({p["name"] for p in people + st if isinstance(p, dict) and not p.get("cc")})[:15]
+                  if missing: print("   missing:", missing)
+          print(json.load(open("data/motorsports/summary.json")))
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/motorsports
+          git commit -m "Motorsports data with driver countries" || exit 0
+          git pull --rebase origin claude/dazzling-hamilton-4jcfnt && git push origin HEAD:claude/dazzling-hamilton-4jcfnt

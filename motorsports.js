@@ -57,6 +57,61 @@ function motorsportsGroup(data) {
   return data.series.find((item) => String(item.id) === String(wanted)) || data.series[0];
 }
 
+// A small flag before a driver's name (country code from the data; images from flagcdn.com).
+const motorsportsRegionNames = typeof Intl.DisplayNames === "function" ? new Intl.DisplayNames(undefined, { type: "region" }) : null;
+function motorsportsFlag(cc) {
+  if (!/^[a-z]{2}$/.test(cc || "")) return null;
+  const image = element("img", "ms-flag");
+  image.src = `https://flagcdn.com/w40/${cc}.png`;
+  image.width = 20;
+  image.height = 15;
+  image.loading = "lazy";
+  let country = cc.toUpperCase();
+  try { country = motorsportsRegionNames?.of(country) || country; } catch { /* keep the code */ }
+  image.alt = country;
+  image.title = country;
+  image.addEventListener("error", () => image.remove(), { once: true });
+  return image;
+}
+
+// "Name" with its flag; accepts {name, cc}, a row with driver/name + cc, or a plain string.
+function motorsportsPerson(person, nameKey = "name") {
+  const span = element("span", "ms-person");
+  const name = typeof person === "string" ? person : person?.[nameKey] || person?.name || "";
+  const flag = typeof person === "string" ? null : motorsportsFlag(person?.cc);
+  if (flag) span.append(flag);
+  span.append(name);
+  return span;
+}
+
+function motorsportsPeople(list) {
+  const span = element("span", "ms-people");
+  (list || []).forEach((person, index) => {
+    if (index) span.append(", ");
+    span.append(motorsportsPerson(person));
+  });
+  return span;
+}
+
+// Winner line for a calendar row: driver (with flag) · team, or each class's team.
+function motorsportsWinnerNode(round) {
+  if (Array.isArray(round.results) && round.results.length) {
+    const first = round.results.find((row) => row.pos === 1) || round.results[0];
+    const span = element("span");
+    span.append(motorsportsPerson(first, "driver"), first.team ? ` · ${first.team}` : "");
+    return span;
+  }
+  if (round.winners && Object.keys(round.winners).length) {
+    const span = element("span");
+    Object.entries(round.winners).forEach(([name, item], index) => {
+      if (index) span.append(" · ");
+      span.append(`${name}: `, motorsportsPerson({ name: item.team, cc: item.cc }));
+    });
+    return span;
+  }
+  return null;
+}
+
 function motorsportsWinnerText(round) {
   if (Array.isArray(round.results) && round.results.length) {
     const first = round.results.find((row) => row.pos === 1) || round.results[0];
@@ -134,7 +189,19 @@ async function motorsportsLive(id, box) {
       const list = element("ol", "ms-live-order");
       for (const competitor of order) {
         const item = element("li");
-        item.append(element("strong", "", competitor.athlete?.displayName || competitor.athlete?.shortName || ""),
+        const name = element("strong", "ms-person");
+        const flagHref = competitor.athlete?.flag?.href || "";
+        if (/^https:\/\/a\.espncdn\.com\//.test(flagHref)) {
+          const flag = element("img", "ms-flag");
+          flag.src = flagHref;
+          flag.alt = competitor.athlete.flag.alt || "";
+          flag.title = competitor.athlete.flag.alt || "";
+          flag.width = 20;
+          flag.height = 15;
+          name.append(flag);
+        }
+        name.append(competitor.athlete?.displayName || competitor.athlete?.shortName || "");
+        item.append(name,
           element("small", "", [competitor.vehicle?.number ? `#${competitor.vehicle.number}` : "", competitor.vehicle?.manufacturer || competitor.team?.displayName || ""].filter(Boolean).join(" · ")));
         list.append(item);
       }
@@ -187,12 +254,16 @@ async function motorsportsOverview(container) {
     }
     if (item.last) {
       const block = element("div", "ms-card-last");
-      block.append(element("small", "", `Last: ${item.last.name}`), element("span", "", `🏁 ${item.last.winner || "Result pending"}`));
+      const winner = element("span", "", "🏁 ");
+      winner.append(item.last.winner ? motorsportsPerson({ name: item.last.winner, cc: item.last.cc }) : "Result pending");
+      block.append(element("small", "", `Last: ${item.last.name}`), winner);
       card.append(block);
     }
     if (item.leader?.name) {
       const scope = item.leader.title && item.leader.title !== "Drivers" ? ` (${item.leader.title.replace(/ drivers$/, "")})` : "";
-      card.append(element("p", "ms-card-leader", `${item.next ? "Points leader" : "Champion"}${scope}: ${item.leader.name} · ${item.leader.points.toLocaleString()} pts`));
+      const line = element("p", "ms-card-leader", `${item.next ? "Points leader" : "Champion"}${scope}: `);
+      line.append(motorsportsPerson({ name: item.leader.name, cc: item.leader.cc }), ` · ${item.leader.points.toLocaleString()} pts`);
+      card.append(line);
     }
     grid.append(card);
   }
@@ -208,8 +279,12 @@ function motorsportsRoundRow(id, round, nextRound) {
   when.append(element("strong", "", motorsportsDate(round.start, false)), element("small", "", `Round ${round.round}`));
   const what = element("span", "ms-round-body");
   what.append(element("strong", "", round.name), element("small", "", [round.circuit || round.track, round.location].filter(Boolean).join(" · ")));
-  const winner = motorsportsWinnerText(round);
-  if (winner) what.append(element("span", "ms-round-winner", `🏁 ${winner}`));
+  const winner = motorsportsWinnerNode(round) || (round.winner ? document.createTextNode(round.winner) : null);
+  if (winner) {
+    const line = element("span", "ms-round-winner", "🏁 ");
+    line.append(winner);
+    what.append(line);
+  }
   else if (round === nextRound) what.append(element("span", "ms-round-next", `Next up · ${motorsportsCountdown(round.start) || motorsportsDate(round.start)}`));
   link.append(when, what);
   item.append(link);
@@ -231,7 +306,7 @@ function motorsportsStandings(group) {
     const section = element("section", "ms-section");
     section.append(element("h4", "", table.title));
     const rows = table.rows || [];
-    const columns = [["Pos", (row) => row.pos], ["", (row) => row.name || (row.drivers || []).join(", ")]];
+    const columns = [["Pos", (row) => row.pos], ["", (row) => (row.drivers ? motorsportsPeople(row.drivers) : motorsportsPerson(row))]];
     if (rows.some((row) => row.team)) columns.push(["Team", (row) => row.team]);
     columns.push(["Pts", (row) => row.points]);
     if (rows.some((row) => row.wins != null)) columns.push(["Wins", (row) => row.wins]);
@@ -261,7 +336,7 @@ function motorsportsRoundDetail(id, data, group, round) {
   if (id === "f1" && round.results?.length) {
     for (const [title, rows] of [["Race", round.results], ["Sprint", round.sprint || []]]) {
       if (!rows.length) continue;
-      page.append(element("h4", "", title), motorsportsTable([["Pos", (row) => row.pos ?? "—"], ["No", (row) => row.number], ["Driver", (row) => row.driver],
+      page.append(element("h4", "", title), motorsportsTable([["Pos", (row) => row.pos ?? "—"], ["No", (row) => row.number], ["Driver", (row) => motorsportsPerson(row, "driver")],
         ["Team", (row) => row.team], ["Grid", (row) => row.grid || "Pit"], ["Laps", (row) => row.laps], ["Time / status", (row) => `${row.time}${row.fastest ? " ⏱" : ""}`], ["Pts", (row) => row.points || ""]], rows));
     }
     if (round.results.some((row) => row.fastest)) page.append(element("p", "ms-muted", "⏱ fastest lap"));
@@ -270,13 +345,15 @@ function motorsportsRoundDetail(id, data, group, round) {
       round.cautions != null ? `${round.cautions} cautions` : "", round.leadChanges != null ? `${round.leadChanges} lead changes among ${round.leaders} drivers` : "",
       round.margin ? `Margin ${round.margin} s` : "", round.averageSpeed ? `Average ${round.averageSpeed} mph` : ""].filter(Boolean);
     if (facts.length) page.append(element("p", "ms-facts", facts.join(" · ")));
-    page.append(motorsportsTable([["Pos", (row) => row.pos], ["Start", (row) => row.start], ["#", (row) => row.car], ["Driver", (row) => row.driver], ["Team", (row) => row.team],
+    page.append(motorsportsTable([["Pos", (row) => row.pos], ["Start", (row) => row.start], ["#", (row) => row.car], ["Driver", (row) => motorsportsPerson(row, "driver")], ["Team", (row) => row.team],
       ["Make", (row) => row.make], ["Laps", (row) => row.laps], ["Led", (row) => row.led || ""], ["Status", (row) => row.status], ["Pts", (row) => row.points]], round.results));
   } else if (round.winners && Object.keys(round.winners).length) {
     const grid = element("div", "ms-class-winners");
     for (const [name, item] of Object.entries(round.winners)) {
       const card = element("div", "ms-class-winner");
-      card.append(element("small", "", `${name} winner`), element("strong", "", item.team), element("span", "", (item.drivers || []).join(", ")));
+      const team = element("strong");
+      team.append(motorsportsPerson({ name: item.team, cc: item.cc }));
+      card.append(element("small", "", `${name} winner`), team, motorsportsPeople(item.drivers));
       grid.append(card);
     }
     page.append(grid, element("p", "ms-muted", "Class winners from Wikipedia; the full classification is on the race report."));

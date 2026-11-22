@@ -134,14 +134,14 @@ def fetcher(url, params):
         if path == "2026/results.json":
             # Two pages; round 1's results split across them.
             row = lambda pos, given, family, team: {"position": str(pos), "number": str(pos), "points": str(26 - pos), "grid": str(pos), "laps": "58", "status": "Finished",
-                                                    "Driver": {"givenName": given, "familyName": family, "code": family[:3].upper()}, "Constructor": {"name": team}}
+                                                    "Driver": {"givenName": given, "familyName": family, "code": family[:3].upper(), "nationality": "British" if family == "Norris" else "Dutch"}, "Constructor": {"name": team}}
             if params["offset"] == "0":
                 return {"MRData": {"limit": "1", "total": "2", "RaceTable": {"Races": [{"round": "1", "Results": [row(1, "Lando", "Norris", "McLaren")]}]}}}
             return {"MRData": {"limit": "1", "total": "2", "RaceTable": {"Races": [{"round": "1", "Results": [row(2, "Max", "Verstappen", "Red Bull")]}]}}}
         if path == "2026/sprint.json":
             return {"MRData": {"limit": "100", "total": "0", "RaceTable": {"Races": []}}}
         if path == "2026/driverstandings.json":
-            return {"MRData": {"StandingsTable": {"StandingsLists": [{"DriverStandings": [{"position": "1", "points": "25", "wins": "1", "Driver": {"givenName": "Lando", "familyName": "Norris"}, "Constructors": [{"name": "McLaren"}]}]}]}}}
+            return {"MRData": {"StandingsTable": {"StandingsLists": [{"DriverStandings": [{"position": "1", "points": "25", "wins": "1", "Driver": {"givenName": "Lando", "familyName": "Norris", "nationality": "British"}, "Constructors": [{"name": "McLaren"}]}]}]}}}
         if path == "2026/constructorstandings.json":
             return {"MRData": {"StandingsTable": {"StandingsLists": [{"ConstructorStandings": [{"position": "1", "points": "43", "wins": "1", "Constructor": {"name": "McLaren"}}]}]}}}
     if url.endswith("race_list_basic.json"):
@@ -151,7 +151,7 @@ def fetcher(url, params):
             {"race_id": 2, "race_name": "Clash", "track_name": "Bowman Gray", "date_scheduled": "2026-02-01T20:00:00", "race_type_id": 2},
             {"race_id": 3, "race_name": "Summer race", "track_name": "Pocono", "date_scheduled": "2026-07-01T15:00:00", "race_type_id": 1}]}
     if url.endswith("/1/weekend-feed.json"):
-        return {"weekend_race": [{"results": [{"finishing_position": 2, "driver_fullname": "Second Guy"}, {"finishing_position": 1, "driver_fullname": "William Byron", "laps_led": 40}],
+        return {"weekend_race": [{"results": [{"finishing_position": 2, "driver_fullname": "Second Guy"}, {"finishing_position": 1, "driver_fullname": "William Byron", "laps_led": 40, "hometown_country": "United States"}],
                                   "stage_results": [{"stage_number": 1, "results": [{"driver_fullname": "Stage Winner"}]}], "margin_of_victory": "0.1"}]}
     if url.endswith("points-feed.json"):
         return [{"position": 1, "driver_name": "William Byron", "points": 60, "wins": 1}]
@@ -161,23 +161,27 @@ def fetcher(url, params):
 
 
 def main():
-    assert ms.strip_markup("{{flagicon|JPN}} No. 8 [[Toyota Racing GmbH|Toyota Racing]]<ref>x</ref>") == "No. 8 Toyota Racing"
+    assert ms.unflag(ms.strip_markup("{{flagicon|JPN}} No. 8 [[Toyota Racing GmbH|Toyota Racing]]<ref>x</ref>")) == "No. 8 Toyota Racing"
+    assert ms.people(ms.strip_markup("{{flagicon|CHE}} [[Sébastien Buemi]]<br>{{flagicon|NZL}} [[Brendon Hartley]]<br>[[No Flag]]")) == [
+        {"name": "Sébastien Buemi", "cc": "ch"}, {"name": "Brendon Hartley", "cc": "nz"}, {"name": "No Flag", "cc": ""}]
     assert ms.parse_date("13–14 June", 2026) == ("2026-06-13", "13-14 June")
     assert ms.parse_date("January 24–25", 2026)[0] == "2026-01-24"
     assert ms.nascar_time("2026-02-15T14:30:00") == "2026-02-15T19:30:00Z"  # EST
     assert ms.nascar_time("2026-07-01T15:00:00") == "2026-07-01T19:00:00Z"  # EDT
 
     winners = ms.parse_class_winners(WEC_RESULTS)
-    assert winners[1]["Hypercar"] == {"team": "No. 8 Toyota Racing", "drivers": ["Sébastien Buemi", "Brendon Hartley", "Ryō Hirakawa"]}, winners[1]
-    assert winners[2]["LMGT3"]["drivers"] == ["Antares Au"]
+    assert winners[1]["Hypercar"] == {"team": "No. 8 Toyota Racing", "cc": "jp", "drivers": [{"name": "Sébastien Buemi", "cc": "ch"}, {"name": "Brendon Hartley", "cc": "nz"}, {"name": "Ryō Hirakawa", "cc": "jp"}]}, winners[1]
+    assert winners[2]["LMGT3"]["drivers"] == [{"name": "Antares Au", "cc": "hk"}]
+    assert winners[2]["Hypercar"]["drivers"][0] == {"name": "René Rast", "cc": "de"}  # {{flagicon|GER}}
     imsa = ms.parse_class_winners(IMSA_RESULTS)
     assert set(imsa[1]) == {"GTP", "LMP2", "GTD Pro", "GTD"}, imsa
-    assert imsa[1]["GTP"]["team"] == "#7 Porsche Penske Motorsport" and imsa[1]["GTD"]["drivers"] == ["Lucas Auer", "Indy Dontje"]
+    assert imsa[1]["GTP"]["team"] == "#7 Porsche Penske Motorsport" and [d["name"] for d in imsa[1]["GTD"]["drivers"]] == ["Lucas Auer", "Indy Dontje"]
+    assert imsa[1]["GTD"]["drivers"][1]["cc"] == "nl"  # {{flagicon|NED}}
     standings = ms.parse_standings(STANDINGS)
-    assert standings[0] == {"pos": 1, "drivers": ["Sébastien Buemi", "Brendon Hartley"], "team": "Toyota Racing", "points": 115.0}, standings
-    assert standings[1]["drivers"] == ["René Rast"]
+    assert standings[0] == {"pos": 1, "drivers": [{"name": "Sébastien Buemi", "cc": "ch"}, {"name": "Brendon Hartley", "cc": "nz"}], "team": "Toyota Racing", "points": 115.0}, standings
+    assert standings[1]["drivers"] == [{"name": "René Rast", "cc": "de"}]
     shared = STANDINGS.replace("[[René Rast]]", "[[René Rast]]<br>[[Robin Frijns]]")
-    assert ms.parse_standings(shared)[1]["drivers"] == ["René Rast", "Robin Frijns"]
+    assert [d["name"] for d in ms.parse_standings(shared)[1]["drivers"]] == ["René Rast", "Robin Frijns"]
     sessions = ms.nascar_sessions({"schedule": [{"event_name": "Haulers Enter", "start_time_utc": "2026-02-10T21:00:00"}, {"event_name": "Practice 1", "start_time_utc": "2026-02-11T15:00:00"},
                                                {"event_name": "Garage Hours", "start_time_utc": "2026-02-11T11:00:00"}, {"event_name": "Qualifying (Impound)", "start_time_utc": "2026-02-12T15:00:00"}]})
     assert [item["name"] for item in sessions] == ["Practice 1", "Qualifying (Impound)"], sessions
@@ -188,6 +192,7 @@ def main():
     f1 = ms.build_f1(2026, fetcher)
     assert [r["name"] for r in f1["rounds"]] == ["Australian Grand Prix", "Chinese Grand Prix"]
     assert [row["driver"] for row in f1["rounds"][0]["results"]] == ["Lando Norris", "Max Verstappen"]  # pages merged
+    assert [row["cc"] for row in f1["rounds"][0]["results"]] == ["gb", "nl"] and f1["standings"][0]["rows"][0]["cc"] == "gb"
     assert [s["name"] for s in f1["rounds"][0]["sessions"]] == ["Practice 1", "Qualifying", "Race"]
     assert f1["rounds"][1]["sessions"][0]["name"] == "Sprint" and not f1["complete"]
     assert f1["standings"][0]["rows"][0]["name"] == "Lando Norris" and f1["standings"][1]["rows"][0]["points"] == 43
@@ -197,7 +202,8 @@ def main():
     assert [r["name"] for r in cup["rounds"]] == ["Daytona 500", "Summer race"]  # the exhibition is skipped
     assert cup["rounds"][0]["winner"] == "William Byron" and cup["rounds"][0]["results"][0]["led"] == 40
     assert cup["rounds"][0]["stageWinners"] == [{"stage": 1, "driver": "Stage Winner"}] and cup["rounds"][0]["sessions"][0]["start"] == "2026-02-15T19:30:00Z"
-    assert cup["standings"][0]["rows"][0]["name"] == "William Byron"
+    assert cup["standings"][0]["rows"][0]["name"] == "William Byron" and cup["standings"][0]["rows"][0]["cc"] == "us"
+    assert cup["rounds"][0]["results"][0]["cc"] == "us"
     # Finished races are reused from the previous file instead of refetched.
     calls = []
     def counting(url, params):
@@ -215,7 +221,8 @@ def main():
     assert by_id["f1"]["next"]["name"] == "Chinese Grand Prix" and by_id["f1"]["last"]["winner"] == "Lando Norris"
     assert by_id["nascar"]["next"]["name"] == "Summer race" and by_id["nascar"]["last"]["winner"] == "William Byron"
     assert by_id["wec"]["last"]["winner"] == "No. 10 Garage 59" or by_id["wec"]["last"]["winner"].startswith("No.")
-    assert by_id["f1"]["leader"] == {"name": "Lando Norris", "points": 25.0, "title": "Drivers"}
+    assert by_id["f1"]["leader"] == {"name": "Lando Norris", "cc": "gb", "points": 25.0, "title": "Drivers"}
+    assert by_id["f1"]["last"]["cc"] == "gb" and by_id["wec"]["leader"]["cc"] == "ch"
     print("update_motorsports tests passed")
 
 
