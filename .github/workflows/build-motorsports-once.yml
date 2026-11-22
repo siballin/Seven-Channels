@@ -1,0 +1,48 @@
+name: Build motorsports data (temporary)
+on:
+  push:
+    branches: [claude/dazzling-hamilton-4jcfnt]
+    paths: [".github/workflows/build-motorsports-once.yml"]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Build
+        run: python scripts/update_motorsports.py
+      - name: Report and save ESPN racing fixtures
+        run: |
+          mkdir -p tests/fixtures/espn-racing
+          for slug in f1 nascar-premier; do curl -s "https://site.api.espn.com/apis/site/v2/sports/racing/$slug/scoreboard" -o "tests/fixtures/espn-racing/$slug-scoreboard.json"; done
+          python3 - <<'PY'
+          import json
+          for name in ["f1", "nascar", "imsa", "wec"]:
+              d = json.load(open(f"data/motorsports/{name}.json"))
+              groups = d.get("series") or [d]
+              for g in groups:
+                  rounds = g["rounds"]
+                  print(name, g.get("name"), "rounds", len(rounds), "with results", sum(1 for r in rounds if r.get("results")), "standings", [(s["title"], len(s["rows"])) for s in g.get("standings", [])], "complete", g.get("complete"))
+                  for r in rounds[:2] + rounds[-2:]:
+                      print("   ", r.get("round"), r.get("name"), r.get("start"), r.get("circuit") or r.get("track"), "| sessions", [(s["name"], s["start"]) for s in r.get("sessions", [])][:6], "| winners", (r.get("winners") or (r.get("results") or [{}])[0].get("driver") if isinstance(r.get("results"), list) and r.get("results") else r.get("winners")))
+                  for s in g.get("standings", [])[:2]:
+                      print("    top", s["title"], s["rows"][:3])
+          print(json.load(open("data/motorsports/summary.json")))
+          s = json.load(open("tests/fixtures/espn-racing/f1-scoreboard.json"))
+          ev = (s.get("events") or [{}])[0]
+          print("ESPN f1 event", ev.get("name"), ev.get("date"), [(c.get("type", {}).get("abbreviation"), c.get("status", {}).get("type", {}).get("state"), len(c.get("competitors", []))) for c in ev.get("competitions", [])])
+          comp = next((c for c in ev.get("competitions", []) if c.get("competitors")), {})
+          print(" competitor", json.dumps((comp.get("competitors") or [{}])[0])[:600])
+          PY
+          du -sh data/motorsports
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/motorsports tests/fixtures/espn-racing
+          git commit -m "Motorsports data (F1, NASCAR, IMSA, WEC) and ESPN racing fixtures" || exit 0
+          git pull --rebase origin claude/dazzling-hamilton-4jcfnt && git push origin HEAD:claude/dazzling-hamilton-4jcfnt
