@@ -1,0 +1,35 @@
+name: Build motorsports data (temporary)
+on:
+  push:
+    branches: [claude/dazzling-hamilton-4jcfnt]
+    paths: [".github/workflows/build-motorsports-once.yml"]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Build
+        run: python scripts/update_motorsports.py
+      - name: Report
+        run: |
+          python3 - <<'PY'
+          import json
+          logos = json.load(open("data/motorsports/logos.json"))["teams"]
+          for name in ["f1", "nascar", "imsa", "wec"]:
+              d = json.load(open(f"data/motorsports/{name}.json"))
+              teams = list(d.get("teamArticles", {}))
+              hits = [t for t in teams if logos.get(t, {}).get("url")]
+              print(name, len(hits), "of", len(teams), "| no logo:", [(t, logos.get(t, {}).get("article")) for t in teams if t not in hits][:20])
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/motorsports
+          git commit -m "Motorsports data with team logos" || exit 0
+          git pull --rebase origin claude/dazzling-hamilton-4jcfnt && git push origin HEAD:claude/dazzling-hamilton-4jcfnt

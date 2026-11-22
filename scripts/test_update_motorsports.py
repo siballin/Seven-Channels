@@ -226,6 +226,23 @@ def main():
     assert by_id["wec"]["last"]["winner"] == "No. 10 Garage 59" or by_id["wec"]["last"]["winner"].startswith("No.")
     assert by_id["f1"]["leader"] == {"name": "Lando Norris", "cc": "gb", "points": 25.0, "title": "Drivers"}
     assert by_id["f1"]["last"]["cc"] == "gb" and by_id["wec"]["leader"]["cc"] == "ch"
+    # Team logos: lead image when it's a logo, else the infobox logo; teams looked up before are kept.
+    def wiki(url, params):
+        if params.get("prop") == "pageimages":
+            return {"query": {"pages": [{"title": "Team Penske", "pageimage": "Penske_car_2026.jpg"}, {"title": "Mercedes-Benz in Formula One", "pageimage": "Mercedes_F1_logo.svg"}]}}
+        if params.get("action") == "parse":
+            return {"parse": {"wikitext": "{{Infobox racing team\n| logo = Team Penske logo.png\n| image = Car.jpg\n}}"}} if params["page"] == "Team Penske" else {"parse": {"wikitext": ""}}
+        if params.get("prop") == "imageinfo":
+            return {"query": {"pages": [{"title": f"File:{name}", "imageinfo": [{"thumburl": f"https://upload.wikimedia.org/thumb/{name}"}]} for name in [t.removeprefix("File:") for t in params["titles"].split("|")]]}}
+        raise AssertionError(params)
+    built = [{"teamArticles": {"Mercedes": "Mercedes-Benz in Formula One"}}, {"teamArticles": {"Team Penske": "Team Penske", "Unknown Racing": "Unknown Racing"}}]
+    logos = ms.build_logos(built, fetcher=wiki, now=datetime(2026, 11, 22, tzinfo=timezone.utc))
+    assert logos["Mercedes"]["url"].endswith("Mercedes_F1_logo.svg") and logos["Team Penske"]["url"].endswith("Team Penske logo.png"), logos
+    assert logos["Unknown Racing"]["url"] == ""
+    again = ms.build_logos(built, previous=logos, fetcher=lambda *a: (_ for _ in ()).throw(AssertionError("refetched")), now=datetime(2026, 11, 30, tzinfo=timezone.utc))
+    assert again == logos
+    wec_full = ms.build_wec(2026, fetcher)
+    assert wec_full["teamArticles"].get("No. 8 Toyota Racing") == "Toyota Racing GmbH", wec_full["teamArticles"]
     print("update_motorsports tests passed")
 
 

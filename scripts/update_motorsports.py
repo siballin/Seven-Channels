@@ -22,7 +22,7 @@ from pathlib import Path
 import re
 import sys
 import time
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, unquote, urlencode
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
@@ -124,9 +124,15 @@ def build_f1(year, fetcher=None):
         })
     standing = drivers[0] if drivers else {}
     team_standing = teams[0] if teams else {}
+    articles = {}
+    for row in team_standing.get("ConstructorStandings", []):
+        url = row["Constructor"].get("url", "")
+        if "/wiki/" in url:
+            articles[row["Constructor"].get("name", "")] = unquote(url.split("/wiki/", 1)[1]).replace("_", " ")
     complete = all(item["results"] for item in rounds)
     return {
         "id": "f1", "name": "Formula 1", "season": year, "complete": complete, "source": {"name": "Jolpica F1 API", "url": "https://jolpi.ca/"},
+        "teamArticles": articles,
         "rounds": rounds,
         "standings": [
             {"title": "Drivers", "rows": [{"pos": int(row["position"]) if str(row.get("position", "")).isdigit() else None,
@@ -228,7 +234,9 @@ def build_nascar(year, fetcher=None, previous=None):
                         "complete": all(item.get("winnerId") for item in rounds)})
     if not out:
         raise RuntimeError(f"No NASCAR races for {year}")
+    teams = sorted({row["team"] for series in out for race in series["rounds"] for row in race["results"] if row.get("team")})
     return {"id": "nascar", "name": "NASCAR", "season": year, "source": {"name": "NASCAR", "url": "https://www.nascar.com/"}, "series": out,
+            "teamArticles": {team: team for team in teams},
             "complete": out[0]["complete"], "timesNote": "Race times are US Eastern."}
 
 
@@ -485,7 +493,17 @@ def build_wiki_series(series_id, name, title, calendar_heading, results_heading,
             standings.append({"title": f"{class_name} drivers", "rows": rows})
     if not rounds:
         raise RuntimeError(f"No calendar parsed from {title}")
+    # Team cells link to the team's article ([[Team Penske|Porsche Penske Motorsport]]): match each team name to a link.
+    links = [(target.strip(), strip_markup(label or target).strip()) for target, label in re.findall(r"\[\[([^|\]#]+)(?:\|([^\]]*))?\]\]", text)]
+    team_names = {item["team"] for entry in rounds for item in entry["winners"].values()} | {row["team"] for table in standings for row in table["rows"] if row.get("team")}
+    articles = {}
+    for team in team_names:
+        bare = re.sub(r"^(?:No\.\s*|#)\d+\s*", "", team).strip()
+        match = next((target for target, label in links if label and (label == bare or (len(label) > 3 and label in bare))), None)
+        if match:
+            articles[team] = match
     return {"id": series_id, "name": name, "season": year, "rounds": rounds, "standings": standings, "complete": all(entry["results"] for entry in rounds),
+            "teamArticles": articles,
             "source": {"name": f"Wikipedia: {title.replace('_', ' ')}", "url": wiki_url(title), "license": "CC BY-SA 4.0"}}
 
 
@@ -498,6 +516,90 @@ def build_imsa(year, fetcher=None):
 def build_wec(year, fetcher=None):
     return build_wiki_series("wec", "FIA World Endurance Championship", f"{year}_FIA_World_Endurance_Championship", "Calendar", "Race results",
                              [("Hypercar", "Hypercar World Endurance Drivers' Championship"), ("LMGT3", "FIA Endurance Trophy for LMGT3 Drivers")], year, fetcher)
+
+
+# ---------- team logos (Wikipedia) ----------
+
+LOGO_NAME = re.compile(r"logo|emblem|badge|crest|wordmark|\.svg$", re.I)
+
+
+def logo_from_infobox(title, fetcher=None):
+    """The 'logo' (or 'image' when it's clearly a logo) file named in an article's infobox."""
+    data = fetch_json(WIKIPEDIA, {"action": "parse", "page": title, "prop": "wikitext", "section": "0", "redirects": "1", "format": "json", "formatversion": "2"}, fetcher)
+    text = (data.get("parse") or {}).get("wikitext", "")
+    for field in ("logo", "image"):
+        match = re.search(rf"^\s*\|\s*{field}\s*=\s*(?:\[\[(?:File|Image):)?([^\n|\]{{}}]+\.(?:svg|png|jpe?g|gif))", text, re.I | re.M)
+        if match and (field == "logo" or LOGO_NAME.search(match.group(1))):
+            return match.group(1).strip()
+    return ""
+
+
+def build_logos(built, previous=None, fetcher=None, now=None):
+    """{team name: {"url": thumbnail, "article": title}} for every team, from the article's lead image when it's a logo,
+    else the infobox's logo. Teams already looked up are kept; misses are retried after 30 days."""
+    now = now or datetime.now(timezone.utc)
+    previous = previous or {}
+    articles = {}
+    for data in built:
+        articles.update(data.get("teamArticles") or {})
+    out = {}
+    todo = {}
+    for team, title in articles.items():
+        old = previous.get(team)
+        fresh = old and (old.get("url") or (now - datetime.fromisoformat(old.get("checkedAt", "2000-01-01T00:00:00+00:00"))).days < 30)
+        if fresh and old.get("article") == title:
+            out[team] = old
+        else:
+            todo.setdefault(title, []).append(team)
+    titles = sorted(todo)
+    files = {}
+    for start in range(0, len(titles), 50):
+        batch = titles[start:start + 50]
+        data = fetch_json(WIKIPEDIA, {"action": "query", "prop": "pageimages", "piprop": "name", "pilicense": "any", "redirects": "1",
+                                      "titles": "|".join(batch), "format": "json", "formatversion": "2"}, fetcher)
+        query = data.get("query") or {}
+        back = {}
+        for item in query.get("normalized", []) + query.get("redirects", []):
+            back[item["to"]] = back.get(item["from"], item["from"])
+        for page in query.get("pages", []):
+            original = back.get(page.get("title", ""), page.get("title", ""))
+            if page.get("pageimage") and LOGO_NAME.search(page["pageimage"]):
+                files[original] = page["pageimage"]
+        if not fetcher:
+            time.sleep(0.5)
+    for title in titles:
+        if title in files:
+            continue
+        try:
+            found = logo_from_infobox(title, fetcher)
+        except Exception as error:
+            print(f"  logo for {title}: {error}", file=sys.stderr)
+            found = ""
+        if found:
+            files[title] = found
+        if not fetcher:
+            time.sleep(0.4)
+    thumbs = {}
+    names = sorted(set(files.values()))
+    for start in range(0, len(names), 50):
+        batch = names[start:start + 50]
+        data = fetch_json(WIKIPEDIA, {"action": "query", "prop": "imageinfo", "iiprop": "url", "iiurlwidth": "96", "titles": "|".join(f"File:{name}" for name in batch),
+                                      "format": "json", "formatversion": "2"}, fetcher)
+        query = data.get("query") or {}
+        back = {item["to"]: item["from"] for item in query.get("normalized", [])}
+        for page in query.get("pages", []):
+            info = (page.get("imageinfo") or [{}])[0]
+            url = info.get("thumburl") or info.get("url") or ""
+            if url.startswith("https://upload.wikimedia.org/"):
+                thumbs[back.get(page["title"], page["title"]).removeprefix("File:")] = url.split("?")[0]
+        if not fetcher:
+            time.sleep(0.5)
+    checked = now.isoformat(timespec="seconds")
+    for title, teams in todo.items():
+        url = thumbs.get(files.get(title, "").replace("_", " ")) or thumbs.get(files.get(title, ""), "")
+        for team in teams:
+            out[team] = {"url": url, "article": title, "checkedAt": checked}
+    return out
 
 
 # ---------- summary ----------
@@ -565,6 +667,13 @@ def main():
                 built.append(previous)
     (OUT / "summary.json").write_text(json.dumps({"generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"), "series": summarize(built)},
                                                  ensure_ascii=False, separators=(",", ":")))
+    try:
+        logos = build_logos(built, load_previous("logos").get("teams"))
+        (OUT / "logos.json").write_text(json.dumps({"generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"), "source": "Wikipedia",
+                                                    "teams": dict(sorted(logos.items()))}, ensure_ascii=False, separators=(",", ":")))
+        print(f"logos: {sum(1 for item in logos.values() if item.get('url'))} of {len(logos)} teams")
+    except Exception as error:
+        print(f"Team logos failed, keeping the previous file: {error}", file=sys.stderr)
 
 
 if __name__ == "__main__":

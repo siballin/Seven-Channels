@@ -74,6 +74,36 @@ function motorsportsFlag(cc) {
   return image;
 }
 
+// Team logos from Wikipedia (data/motorsports/logos.json), loaded once before a series page draws.
+let motorsportsLogos = {};
+let motorsportsLogosRequest = null;
+function motorsportsLoadLogos() {
+  motorsportsLogosRequest ||= fetch(new URL("data/motorsports/logos.json", location.href))
+    .then((response) => (response.ok ? response.json() : { teams: {} }))
+    .then((data) => { motorsportsLogos = data.teams || {}; })
+    .catch(() => { motorsportsLogosRequest = null; });
+  return motorsportsLogosRequest;
+}
+
+// A team name with its logo (or its flag when there's no logo).
+function motorsportsTeam(name, cc = "") {
+  const span = element("span", "ms-person ms-team");
+  const url = motorsportsLogos[name]?.url || "";
+  if (/^https:\/\/upload\.wikimedia\.org\//.test(url)) {
+    const logo = element("img", "ms-logo");
+    logo.src = url;
+    logo.alt = "";
+    logo.loading = "lazy";
+    logo.addEventListener("error", () => logo.remove(), { once: true });
+    span.append(logo);
+  } else {
+    const flag = motorsportsFlag(cc);
+    if (flag) span.append(flag);
+  }
+  span.append(name || "");
+  return span;
+}
+
 // "Name" with its flag; accepts {name, cc}, a row with driver/name + cc, or a plain string.
 function motorsportsPerson(person, nameKey = "name") {
   const span = element("span", "ms-person");
@@ -98,14 +128,15 @@ function motorsportsWinnerNode(round) {
   if (Array.isArray(round.results) && round.results.length) {
     const first = round.results.find((row) => row.pos === 1) || round.results[0];
     const span = element("span");
-    span.append(motorsportsPerson(first, "driver"), first.team ? ` · ${first.team}` : "");
+    span.append(motorsportsPerson(first, "driver"));
+    if (first.team) span.append(" · ", motorsportsTeam(first.team));
     return span;
   }
   if (round.winners && Object.keys(round.winners).length) {
     const span = element("span");
     Object.entries(round.winners).forEach(([name, item], index) => {
       if (index) span.append(" · ");
-      span.append(`${name}: `, motorsportsPerson({ name: item.team, cc: item.cc }));
+      span.append(`${name}: `, motorsportsTeam(item.team, item.cc));
     });
     return span;
   }
@@ -306,8 +337,9 @@ function motorsportsStandings(group) {
     const section = element("section", "ms-section");
     section.append(element("h4", "", table.title));
     const rows = table.rows || [];
-    const columns = [["Pos", (row) => row.pos], ["", (row) => (row.drivers ? motorsportsPeople(row.drivers) : motorsportsPerson(row))]];
-    if (rows.some((row) => row.team)) columns.push(["Team", (row) => row.team]);
+    const teamsTable = !/driver/i.test(table.title);
+    const columns = [["Pos", (row) => row.pos], ["", (row) => (row.drivers ? motorsportsPeople(row.drivers) : teamsTable ? motorsportsTeam(row.name, row.cc) : motorsportsPerson(row))]];
+    if (rows.some((row) => row.team)) columns.push(["Team", (row) => (row.team ? motorsportsTeam(row.team.split(", ")[0]) : "")]);
     columns.push(["Pts", (row) => row.points]);
     if (rows.some((row) => row.wins != null)) columns.push(["Wins", (row) => row.wins]);
     if (rows.some((row) => row.top5 != null)) columns.push(["Top 5", (row) => row.top5], ["Top 10", (row) => row.top10]);
@@ -337,7 +369,7 @@ function motorsportsRoundDetail(id, data, group, round) {
     for (const [title, rows] of [["Race", round.results], ["Sprint", round.sprint || []]]) {
       if (!rows.length) continue;
       page.append(element("h4", "", title), motorsportsTable([["Pos", (row) => row.pos ?? "—"], ["No", (row) => row.number], ["Driver", (row) => motorsportsPerson(row, "driver")],
-        ["Team", (row) => row.team], ["Grid", (row) => row.grid || "Pit"], ["Laps", (row) => row.laps], ["Time / status", (row) => `${row.time}${row.fastest ? " ⏱" : ""}`], ["Pts", (row) => row.points || ""]], rows));
+        ["Team", (row) => motorsportsTeam(row.team)], ["Grid", (row) => row.grid || "Pit"], ["Laps", (row) => row.laps], ["Time / status", (row) => `${row.time}${row.fastest ? " ⏱" : ""}`], ["Pts", (row) => row.points || ""]], rows));
     }
     if (round.results.some((row) => row.fastest)) page.append(element("p", "ms-muted", "⏱ fastest lap"));
   } else if (id === "nascar" && round.results?.length) {
@@ -345,14 +377,14 @@ function motorsportsRoundDetail(id, data, group, round) {
       round.cautions != null ? `${round.cautions} cautions` : "", round.leadChanges != null ? `${round.leadChanges} lead changes among ${round.leaders} drivers` : "",
       round.margin ? `Margin ${round.margin} s` : "", round.averageSpeed ? `Average ${round.averageSpeed} mph` : ""].filter(Boolean);
     if (facts.length) page.append(element("p", "ms-facts", facts.join(" · ")));
-    page.append(motorsportsTable([["Pos", (row) => row.pos], ["Start", (row) => row.start], ["#", (row) => row.car], ["Driver", (row) => motorsportsPerson(row, "driver")], ["Team", (row) => row.team],
+    page.append(motorsportsTable([["Pos", (row) => row.pos], ["Start", (row) => row.start], ["#", (row) => row.car], ["Driver", (row) => motorsportsPerson(row, "driver")], ["Team", (row) => motorsportsTeam(row.team)],
       ["Make", (row) => row.make], ["Laps", (row) => row.laps], ["Led", (row) => row.led || ""], ["Status", (row) => row.status], ["Pts", (row) => row.points]], round.results));
   } else if (round.winners && Object.keys(round.winners).length) {
     const grid = element("div", "ms-class-winners");
     for (const [name, item] of Object.entries(round.winners)) {
       const card = element("div", "ms-class-winner");
       const team = element("strong");
-      team.append(motorsportsPerson({ name: item.team, cc: item.cc }));
+      team.append(motorsportsTeam(item.team, item.cc));
       card.append(element("small", "", `${name} winner`), team, motorsportsPeople(item.drivers, { stacked: true }));
       grid.append(card);
     }
@@ -364,7 +396,7 @@ function motorsportsRoundDetail(id, data, group, round) {
 }
 
 async function motorsportsSeriesPage(container, id, roundNumber) {
-  const data = await motorsportsLoad(id);
+  const [data] = await Promise.all([motorsportsLoad(id), motorsportsLoadLogos()]);
   const page = element("section", "ms-page");
   page.append(motorsportsNav(id));
   const head = element("div", "ms-head");
