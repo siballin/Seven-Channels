@@ -1,66 +1,56 @@
-"""Temporary: what historical NBA player data can GitHub Actions reach?"""
+"""Temporary: ESPN coverage of retired players, Wikidata ESPN ids, open NBA datasets."""
 import json, time
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 from urllib.request import Request, urlopen
 
 UA = "SevenChannels/1.0 (personal static site; NBA player directory)"
 
-def get(url, headers=None, timeout=40):
+def get(url, timeout=60):
     try:
-        with urlopen(Request(url, headers={"User-Agent": UA, "Accept": "application/json", **(headers or {})}), timeout=timeout) as r:
+        with urlopen(Request(url, headers={"User-Agent": UA, "Accept": "application/json"}), timeout=timeout) as r:
             return r.status, json.loads(r.read())
     except Exception as e:
         return getattr(e, "code", "ERR"), str(e)[:200]
 
-# 1. ESPN core athletes list (does it include retired players?)
-status, data = get("https://sports.core.api.espn.com/v3/sports/basketball/nba/athletes?limit=1000&page=1")
-print("ESPN v3 athletes", status, {k: data[k] for k in ("count", "pageIndex", "pageSize", "pageCount")} if isinstance(data, dict) else data)
-if isinstance(data, dict):
-    items = data.get("items", [])
-    print(" sample", json.dumps(items[:2])[:700])
-    print(" keys", sorted({k for i in items for k in i}))
-    print(" active", sum(1 for i in items if i.get("active")), "of", len(items))
-legends = {}
-if isinstance(data, dict):
-    pages = data.get("pageCount", 1)
-    every = list(data.get("items", []))
-    for page in range(2, min(pages, 25) + 1):
-        s, d = get(f"https://sports.core.api.espn.com/v3/sports/basketball/nba/athletes?limit=1000&page={page}")
-        if isinstance(d, dict):
-            every += d.get("items", [])
-    print(" total fetched", len(every), "active", sum(1 for i in every if i.get("active")))
-    for name in ["Michael Jordan", "Wilt Chamberlain", "Bill Russell", "Kareem Abdul-Jabbar", "George Mikan", "Larry Bird", "Kobe Bryant", "LeBron James", "Victor Wembanyama", "Cooper Flagg"]:
-        hit = [i for i in every if (i.get("displayName") or i.get("fullName")) == name]
-        print("  ", name, [(i.get("id"), i.get("active")) for i in hit])
-        if hit:
-            legends[name] = hit[0]["id"]
+def sparql(q):
+    return get("https://query.wikidata.org/sparql?" + urlencode({"query": q, "format": "json"}))
 
-# 2. ESPN career stats for retired players
-for name, athlete in list(legends.items())[:6]:
-    s, d = get(f"https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/{athlete}/stats?region=us&lang=en&contentorigin=espn")
-    if not isinstance(d, dict):
-        print("stats", name, s, d); continue
-    print(f"\nstats {name} ({athlete}) {s}")
-    for cat in d.get("categories", []):
-        seasons = [row.get("season", {}).get("displayName") for row in cat.get("statistics", [])]
-        print("  cat", cat.get("name"), "labels", cat.get("labels"), "seasons", len(seasons), seasons[:2], seasons[-1:], "totals", cat.get("totals"))
-    s, d = get(f"https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/{athlete}?region=us&lang=en&contentorigin=espn")
-    if isinstance(d, dict):
-        a = d.get("athlete", {})
-        print("  bio keys", sorted(a.keys())[:60])
-        print("  draft", a.get("draft"), "| headshot", (a.get("headshot") or {}).get("href"), "| position", (a.get("position") or {}).get("abbreviation"), "| awards", str(a.get("awards"))[:200])
-    time.sleep(0.5)
-
-# 3. Wikidata NBA players
-q = """SELECT (COUNT(DISTINCT ?p) AS ?n) WHERE { ?p wdt:P3647 ?nba . }"""
-print("\nWikidata NBA.com ID", get("https://query.wikidata.org/sparql?" + urlencode({"query": q, "format": "json"}))[1])
-q = """SELECT ?prop ?label WHERE { ?prop a wikibase:Property ; rdfs:label ?label . FILTER(LANG(?label) = "en" && CONTAINS(LCASE(?label), "espn")) }"""
-status, d = get("https://query.wikidata.org/sparql?" + urlencode({"query": q, "format": "json"}))
+# Wikidata properties: which ids do NBA players carry, and how often?
+status, d = sparql("""SELECT ?prop ?label (COUNT(DISTINCT ?p) AS ?n) WHERE {
+  ?p wdt:P3647 [] . ?p ?direct [] . ?prop wikibase:directClaim ?direct ; wikibase:propertyType wikibase:ExternalId ; rdfs:label ?label .
+  FILTER(LANG(?label) = "en")
+} GROUP BY ?prop ?label ORDER BY DESC(?n) LIMIT 40""")
+print("Wikidata external ids on NBA players", status)
 if isinstance(d, dict):
     for row in d["results"]["bindings"]:
-        print("  ", row["prop"]["value"].split("/")[-1], row["label"]["value"])
+        print("  ", row["prop"]["value"].split("/")[-1], row["label"]["value"], row["n"]["value"])
+else:
+    print(d)
 
-# 4. NBA.com stats API
-status, d = get("https://stats.nba.com/stats/commonallplayers?" + urlencode({"LeagueID": "00", "Season": "2025-26", "IsOnlyCurrentSeason": "0"}),
-                {"Referer": "https://www.nba.com/", "Origin": "https://www.nba.com", "x-nba-stats-origin": "stats", "x-nba-stats-token": "true"}, timeout=25)
-print("\nstats.nba.com", status, (str(d)[:300] if not isinstance(d, dict) else [len(r["rowSet"]) for r in d.get("resultSets", [])]))
+# ESPN stats for retired legends by known ESPN ids
+for name, espn in [("Michael Jordan", 1035), ("Larry Bird", 1543), ("Magic Johnson", 1600), ("Kobe Bryant", 110), ("Shaquille O'Neal", 614), ("Tim Duncan", 215)]:
+    s, d = get(f"https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/{espn}/stats?region=us&lang=en&contentorigin=espn")
+    if isinstance(d, dict):
+        cats = {c.get("name"): c for c in d.get("categories", [])}
+        avg = cats.get("averages", {})
+        seasons = [row.get("season", {}).get("displayName") for row in avg.get("statistics", [])]
+        print(f"ESPN {name} {espn}: {s} seasons {len(seasons)} {seasons[:1]}..{seasons[-1:]} career PTS avg {(avg.get('totals') or ['?'])[-1]}")
+    else:
+        print(f"ESPN {name} {espn}: {s} {d}")
+    s, d = get(f"https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/{espn}?region=us&lang=en&contentorigin=espn")
+    if isinstance(d, dict):
+        a = d.get("athlete", {})
+        print("   ", a.get("displayName"), a.get("displayDraft"), (a.get("position") or {}).get("abbreviation"), a.get("displayDOB"), (a.get("headshot") or {}).get("href"))
+    time.sleep(0.4)
+
+# Older eras: Wilt Chamberlain / Bill Russell / George Mikan ESPN ids via Wikidata (if the property exists)
+status, d = sparql("""SELECT ?p ?pLabel ?espn WHERE { VALUES ?p { wd:Q15711 wd:Q312936 wd:Q311025 wd:Q41421 } OPTIONAL { ?p wdt:P3685 ?espn } SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }""")
+print("\nlegends P3685", status, [(r["pLabel"]["value"], r.get("espn", {}).get("value")) for r in d["results"]["bindings"]] if isinstance(d, dict) else d)
+
+# Open datasets
+for query in ["nba", "basketball"]:
+    s, d = get(f"https://huggingface.co/api/datasets?search={query}&limit=40&sort=downloads")
+    print(f"\nHF datasets '{query}'", s)
+    if isinstance(d, list):
+        for item in d:
+            print("  ", item["id"], item.get("lastModified", "")[:10], "downloads", item.get("downloads"), [t for t in item.get("tags", []) if t.startswith("license:")])
