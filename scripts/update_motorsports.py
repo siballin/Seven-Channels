@@ -134,6 +134,9 @@ def build_f1(year, fetcher=None):
     return {
         "id": "f1", "name": "Formula 1", "season": year, "complete": complete, "source": {"name": "Jolpica F1 API", "url": "https://jolpi.ca/"},
         "teamArticles": articles,
+        "driverArticles": {f"{item['Driver'].get('givenName', '')} {item['Driver'].get('familyName', '')}".strip(): unquote(item["Driver"]["url"].split("/wiki/", 1)[1]).replace("_", " ")
+                           for race in list(results.values()) + [{"Results": standing.get("DriverStandings", [])}] for item in race.get("Results", [])
+                           if "/wiki/" in (item.get("Driver") or {}).get("url", "")},
         "circuitArticles": {race.get("Circuit", {}).get("circuitName", ""): unquote(race["Circuit"]["url"].split("/wiki/", 1)[1]).replace("_", " ")
                             for race in schedule if "/wiki/" in race.get("Circuit", {}).get("url", "")},
         "rounds": rounds,
@@ -241,6 +244,7 @@ def build_nascar(year, fetcher=None, previous=None):
     return {"id": "nascar", "name": "NASCAR", "season": year, "source": {"name": "NASCAR", "url": "https://www.nascar.com/"}, "series": out,
             "teamArticles": {team: team for team in teams},
             "circuitArticles": {race["track"]: race["track"] for series in out for race in series["rounds"] if race.get("track")},
+            "driverArticles": {row["driver"]: row["driver"] for series in out for race in series["rounds"] for row in race["results"] if row.get("driver")},
             "complete": out[0]["complete"], "timesNote": "Race times are US Eastern."}
 
 
@@ -514,6 +518,10 @@ def build_wiki_series(series_id, name, title, calendar_heading, results_heading,
             circuits[entry["circuit"]] = match
     return {"id": series_id, "name": name, "season": year, "rounds": rounds, "standings": standings, "complete": all(entry["results"] for entry in rounds),
             "teamArticles": articles, "circuitArticles": circuits,
+            "driverArticles": {person["name"]: next((target for target, label in links if label == person["name"]), person["name"])
+                               for entry in rounds for item in entry["winners"].values() for person in item["drivers"]} |
+                              {person["name"]: next((target for target, label in links if label == person["name"]), person["name"])
+                               for table in standings for row in table["rows"] for person in row["drivers"]},
             "source": {"name": f"Wikipedia: {title.replace('_', ' ')}", "url": wiki_url(title), "license": "CC BY-SA 4.0"}}
 
 
@@ -710,6 +718,79 @@ def build_track_maps(built, previous=None, fetcher=None, now=None):
     return out
 
 
+# ---------- driver headshots (Wikipedia) ----------
+
+def build_headshots(built, previous=None, fetcher=None, now=None):
+    """{driver name: {"url", "article"}} from the lead photo of each driver's Wikipedia article, kept only when the
+    article's short description says racing driver (so a namesake's photo isn't used). Cached; misses retried monthly."""
+    now = now or datetime.now(timezone.utc)
+    previous = previous or {}
+    articles = {}
+    for data in built:
+        articles.update({name: title.split("#")[0].strip() for name, title in (data.get("driverArticles") or {}).items() if name and title})
+    out, todo = {}, {}
+    for name, title in articles.items():
+        old = previous.get(name)
+        fresh = old and (old.get("url") or (now - datetime.fromisoformat(old.get("checkedAt", "2000-01-01T00:00:00+00:00"))).days < 30)
+        if fresh and old.get("article") == title:
+            out[name] = old
+        else:
+            todo.setdefault(title, []).append(name)
+    titles = sorted(todo)
+    found = {}
+    for start in range(0, len(titles), 50):
+        batch = titles[start:start + 50]
+        try:
+            data = fetch_json(WIKIPEDIA, {"action": "query", "prop": "pageimages|description", "piprop": "thumbnail|name", "pithumbsize": "120",
+                                          "pilicense": "any", "redirects": "1", "titles": "|".join(batch), "format": "json", "formatversion": "2"}, fetcher)
+        except Exception as error:
+            print(f"  headshots: {error}", file=sys.stderr)
+            continue
+        query = data.get("query") or {}
+        back = {}
+        for item in query.get("normalized", []) + query.get("redirects", []):
+            back[item["to"]] = back.get(item["from"], item["from"])
+        for page in query.get("pages", []):
+            thumb = (page.get("thumbnail") or {}).get("source", "")
+            image = page.get("pageimage", "")
+            if (re.search(r"driver|racer|racing|motorsport|nascar", page.get("description", ""), re.I)
+                    and re.match(r"https://(upload|thumb)\.wikimedia\.org/", thumb) and re.search(r"\.(jpe?g|png|webp)$", image, re.I)
+                    and not re.search(r"logo|flag|signature|helmet|map", image, re.I)):
+                found[back.get(page.get("title", ""), page.get("title", ""))] = thumb.split("?")[0]
+        if not fetcher:
+            time.sleep(1)
+    # Plain names often lead to a disambiguation page ("William Byron"); try "<name> (racing driver)" for the misses.
+    retry = {f"{title} (racing driver)": title for title in titles if title not in found and "(" not in title}
+    keys = sorted(retry)
+    for start in range(0, len(keys), 50):
+        batch = keys[start:start + 50]
+        try:
+            data = fetch_json(WIKIPEDIA, {"action": "query", "prop": "pageimages|description", "piprop": "thumbnail|name", "pithumbsize": "120",
+                                          "pilicense": "any", "redirects": "1", "titles": "|".join(batch), "format": "json", "formatversion": "2"}, fetcher)
+        except Exception as error:
+            print(f"  headshots: {error}", file=sys.stderr)
+            continue
+        query = data.get("query") or {}
+        back = {}
+        for item in query.get("normalized", []) + query.get("redirects", []):
+            back[item["to"]] = back.get(item["from"], item["from"])
+        for page in query.get("pages", []):
+            thumb = (page.get("thumbnail") or {}).get("source", "")
+            image = page.get("pageimage", "")
+            original = retry.get(back.get(page.get("title", ""), page.get("title", "")))
+            if (original and re.search(r"driver|racer|racing|motorsport|nascar", page.get("description", ""), re.I)
+                    and re.match(r"https://(upload|thumb)\.wikimedia\.org/", thumb) and re.search(r"\.(jpe?g|png|webp)$", image, re.I)
+                    and not re.search(r"logo|flag|signature|helmet|map", image, re.I)):
+                found[original] = thumb.split("?")[0]
+        if not fetcher:
+            time.sleep(1)
+    checked = now.isoformat(timespec="seconds")
+    for title, names in todo.items():
+        for name in names:
+            out[name] = {"url": found.get(title, ""), "article": title, "checkedAt": checked}
+    return out
+
+
 # ---------- summary ----------
 
 def summarize(series_list, now=None):
@@ -782,6 +863,13 @@ def main():
         print(f"logos: {sum(1 for item in logos.values() if item.get('url'))} of {len(logos)} teams")
     except Exception as error:
         print(f"Team logos failed, keeping the previous file: {error}", file=sys.stderr)
+    try:
+        heads = build_headshots(built, load_previous("headshots").get("drivers"))
+        (OUT / "headshots.json").write_text(json.dumps({"generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"), "source": "Wikipedia / Wikimedia Commons",
+                                                        "drivers": dict(sorted(heads.items()))}, ensure_ascii=False, separators=(",", ":")))
+        print(f"headshots: {sum(1 for item in heads.values() if item.get('url'))} of {len(heads)} drivers")
+    except Exception as error:
+        print(f"Headshots failed, keeping the previous file: {error}", file=sys.stderr)
     try:
         maps = build_track_maps(built, load_previous("tracks").get("circuits"))
         (OUT / "tracks.json").write_text(json.dumps({"generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"), "source": "Wikipedia / Wikimedia Commons",

@@ -62,13 +62,14 @@ Tests: `python3 scripts/test_build_idols.py`, `python3 scripts/test_namu_parse.p
 
 ## Motorsports
 
-Channel 13 covers **F1, NASCAR, IMSA and WEC** (`#motorsports`, `#motorsports/<f1|nascar|imsa|wec>`, `#motorsports/<series>/<round>`):
+Channel 03 covers **F1, NASCAR, IMSA and WEC** (`#motorsports`, `#motorsports/<f1|nascar|imsa|wec>`, `#motorsports/<series>/<round>`):
 
 - **Overview:** each series' next race with a countdown in your time zone, the last winner and the championship leader (or champion once a season ends). During an F1 or NASCAR session, ESPN's live running order appears at the top and refreshes every 30 seconds.
 - **Series pages:** the full calendar (the next round shows every session in your time zone; finished rounds show the winner), and standings: F1 drivers and constructors; NASCAR drivers for the Cup, O'Reilly Auto Parts and Truck series (with wins, top 5s and top 10s); IMSA GTP, LMP2, GTD Pro and GTD drivers; WEC Hypercar and LMGT3 drivers.
 - **Rounds:** F1 race and sprint classification (grid, laps, time, points, fastest lap); NASCAR full finishing order (start, laps led, status, points) with stage winners, cautions, lead changes and margin; IMSA and WEC class winners with their drivers.
 - **Track maps** come from each circuit's Wikipedia infobox (Wikimedia Commons diagrams), cached in `data/motorsports/tracks.json`: shown on every round and as a thumbnail on the next race. Sports-car series get the road course where a track has several layouts (Daytona's Sports Car Course for IMSA, the tri-oval for NASCAR).
 - **Team logos** come from each team's Wikipedia article (its lead image when that's a logo, else the infobox logo), cached in `data/motorsports/logos.json`; teams without one show their flag.
+- **Driver headshots** come from each driver's Wikipedia article (its lead photo, only when the article describes a racing driver; "<name> (racing driver)" is tried when the plain name is a disambiguation page), cached in `data/motorsports/headshots.json` and shown as a round avatar next to the name in results, standings and the overview.
 - **Flags** show each driver's country (images from flagcdn.com): F1 from Jolpica's nationality, NASCAR from each driver's home country in the results feed, IMSA and WEC from the flag beside each name on Wikipedia, and the live order from ESPN. `scripts/countries.py` maps codes, country names and nationalities to two-letter country codes.
 - Race weekends show in the Guide's Motorsports row and in **This week**, and race days can trigger a notification.
 
@@ -95,10 +96,10 @@ Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
 
 ## Sports leagues
 
-The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
+The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League, La Liga and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
 
 
-### Premier League and MLS
+### Premier League, La Liga and MLS
 
 The soccer tabs have **Matches | Table | Stats**:
 - **Matches:** a match centre for the selected game: score and form, a timeline (goals with assists, cards, substitutions), match stats (possession, shots, on target, corners, passes, tackles, saves, fouls, cards), lineups drawn in formation with substitutions, each club's last five results in all competitions, and the part of the table around both clubs.

@@ -1,5 +1,5 @@
 // More leagues for the Sports channel: a shared scoreboard for MLB, NHL, college football and basketball,
-// the Premier League and MLS, using ESPN's public scoreboard API (NBA and NFL keep their own scoreboards).
+// the Premier League, La Liga and MLS, using ESPN's public scoreboard API (NBA and NFL keep their own scoreboards).
 // Loaded as a classic script before the main app script; element() comes from the app at call time.
 
 const sportsLeagues = [
@@ -10,6 +10,7 @@ const sportsLeagues = [
   { id: "cfb", label: "College football", path: "football/college-football", espn: "college-football", groups: "80" },
   { id: "cbb", label: "College basketball", path: "basketball/mens-college-basketball", espn: "mens-college-basketball", groups: "50" },
   { id: "epl", label: "Premier League", path: "soccer/eng.1", espn: "soccer", soccer: true },
+  { id: "laliga", label: "La Liga", path: "soccer/esp.1", espn: "soccer", soccer: true },
   { id: "mls", label: "MLS", path: "soccer/usa.1", espn: "soccer", soccer: true },
 ];
 const sportsLeagueDates = new Map(); // league id → YYYY-MM-DD shown

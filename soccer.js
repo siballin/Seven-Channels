@@ -1,4 +1,4 @@
-// Premier League and MLS: Matches | Table | Stats tabs inside the league panel, and a soccer match centre
+// Premier League, La Liga and MLS: Matches | Table | Stats tabs inside the league panel, and a soccer match centre
 // (timeline, match stats, lineups, form, mini table). Everything comes from ESPN's public soccer endpoints,
 // fetched in the browser. Loaded after sports-leagues.js; element() comes from the app.
 
