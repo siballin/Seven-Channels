@@ -60,6 +60,31 @@ Namu Wiki is CC BY-NC-SA 2.0 KR (credit, non-commercial, share-alike), so keep t
 
 Tests: `python3 scripts/test_build_idols.py`, `python3 scripts/test_namu_parse.py` and `node tests/idols-data.test.js`.
 
+## Motorsports
+
+Channel 13 covers **F1, NASCAR, IMSA and WEC** (`#motorsports`, `#motorsports/<f1|nascar|imsa|wec>`, `#motorsports/<series>/<round>`):
+
+- **Overview:** each series' next race with a countdown in your time zone, the last winner and the championship leader (or champion once a season ends). During an F1 or NASCAR session, ESPN's live running order appears at the top and refreshes every 30 seconds.
+- **Series pages:** the full calendar (the next round shows every session in your time zone; finished rounds show the winner), and standings: F1 drivers and constructors; NASCAR drivers for the Cup, O'Reilly Auto Parts and Truck series (with wins, top 5s and top 10s); IMSA GTP, LMP2, GTD Pro and GTD drivers; WEC Hypercar and LMGT3 drivers.
+- **Rounds:** F1 race and sprint classification (grid, laps, time, points, fastest lap); NASCAR full finishing order (start, laps led, status, points) with stage winners, cautions, lead changes and margin; IMSA and WEC class winners with their drivers.
+- **Track maps** come from each circuit's Wikipedia infobox (Wikimedia Commons diagrams), cached in `data/motorsports/tracks.json`: shown on every round and as a thumbnail on the next race. Sports-car series get the road course where a track has several layouts (Daytona's Sports Car Course for IMSA, the tri-oval for NASCAR).
+- **Team logos** come from each team's Wikipedia article (its lead image when that's a logo, else the infobox logo), cached in `data/motorsports/logos.json`; teams without one show their flag.
+- **Flags** show each driver's country (images from flagcdn.com): F1 from Jolpica's nationality, NASCAR from each driver's home country in the results feed, IMSA and WEC from the flag beside each name on Wikipedia, and the live order from ESPN. `scripts/countries.py` maps codes, country names and nationalities to two-letter country codes.
+- Race weekends show in the Guide's Motorsports row and in **This week**, and race days can trigger a notification.
+
+**Data.** `scripts/update_motorsports.py` runs in the publish workflow and writes `data/motorsports/`: F1 from the Jolpica F1 API (the open successor to Ergast), NASCAR from NASCAR's public feeds (times converted from US Eastern), IMSA and WEC from their Wikipedia season articles (CC BY-SA 4.0; the timing sites don't offer a usable index). A series that fails keeps its previous file, and finished NASCAR races aren't refetched. News comes from The Race, RACER, Motorsport.com, Autosport, Formula 1, Sportscar365 and Jayski. Tests: `python3 scripts/test_update_motorsports.py`.
+
+## NBA player database
+
+`#sports/players` (the **NBA player database** card on the Sports channel) covers every player with regular-season stats on ESPN:
+
+- **Players:** search by name or college; filter by team, position, era and active or retired; sort by career points, per-game averages, games or most recent.
+- **Player pages** (`#sports/players/<ESPN id>`): photo, position, team, born, height and weight, college, draft, every team; career averages and totals; where they rank all-time in the database; a points/rebounds/assists chart by season; and a season-by-season table (per game or totals, traded seasons split by team, career highs highlighted).
+- **All-time leaders** (`#sports/players/records`): career totals, career per-game (400+ games) and best single seasons (58+ games).
+- **Compare** (`#sports/players/compare/<id>,<id>`): up to three players side by side, with points per game by season of career.
+
+**Data.** `scripts/build_nba_players.py` finds players in ESPN's season stats lists (complete from 1996-97, partial through the 1980s) and fetches each one's bio and full career from ESPN, which can reach back before the lists (Michael Jordan from 1984-85). It writes `data/nba/index.json`, `records.json` and 64 profile shards. Retired players are fetched once and kept; players from the last two seasons refresh weekly in the publish workflow. Players who retired before the 1980s aren't in ESPN's lists; add their ESPN ids to `data/nba/extra-players.json` (`{"players": [{"id": "…", "name": "…"}]}`) to include them if ESPN has their stats. Tests: `python3 scripts/test_build_nba_players.py`.
+
 ## Movies and Anime
 
 Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
@@ -72,6 +97,15 @@ Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
 
 The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
 
+
+### Premier League and MLS
+
+The soccer tabs have **Matches | Table | Stats**:
+- **Matches:** a match centre for the selected game: score and form, a timeline (goals with assists, cards, substitutions), match stats (possession, shots, on target, corners, passes, tackles, saves, fouls, cards), lineups drawn in formation with substitutions, each club's last five results in all competitions, and the part of the table around both clubs.
+- **Table:** the full table (P W D L GF GA GD Pts) with qualification and relegation zones, last-five form, and home-only or away-only tables worked out from this season's results. MLS shows each conference or all clubs together (the Supporters' Shield race).
+- **Stats:** top scorers, assists and goals + assists from ESPN; club numbers worked out from results (most goals, fewest conceded, clean sheets, failed to score, unbeaten runs, biggest wins) and league averages.
+
+The side table orders clubs by the league's ranking and shows points and goal difference; the leaders widget shows season top scorers. `soccer.js`; ESPN responses saved in `tests/fixtures/espn-soccer/` for testing.
 ## Video Games
 
 **My games** (`#games`) is your game log. Add a game by searching the catalog as you type; picking a result fills in its cover, platforms, release date, genres, critic score and time to beat. Then record your platform, hours played, a rating out of 10, and when you started or finished. Games you add without a catalog match keep whatever you type. Games are listed under Playing, Backlog and Finished, and the backlog can be sorted by shortest to beat or highest critic score. A dashboard totals what you're playing, your backlog with estimated hours, games finished this year, hours played and your average rating. Game entries are saved in the browser and sync to your account like other entries.

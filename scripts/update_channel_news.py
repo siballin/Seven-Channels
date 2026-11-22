@@ -98,6 +98,15 @@ CHANNELS = {
             [("https://www.livenationentertainment.com/feed/", None)], "site:livenationentertainment.com"),
         src("Soompi (tours)", "https://www.soompi.com/", {"soompi.com"}, [("https://www.soompi.com/feed", "tour")], "site:soompi.com tour"),
     ]},
+    "motorsports": {"title": "Motorsport news", "sources": [
+        src("The Race", "https://www.the-race.com/", {"the-race.com"}, [("https://www.the-race.com/feed/", None)], "site:the-race.com"),
+        src("RACER", "https://racer.com/", {"racer.com"}, [("https://racer.com/feed/", None)], "site:racer.com"),
+        src("Motorsport.com", "https://www.motorsport.com/", {"motorsport.com"}, [("https://www.motorsport.com/rss/all/news/", None)], "site:motorsport.com"),
+        src("Autosport", "https://www.autosport.com/", {"autosport.com"}, [("https://www.autosport.com/rss/feed/all", None)], "site:autosport.com"),
+        src("Formula 1", "https://www.formula1.com/en/latest", {"formula1.com"}, [("https://www.formula1.com/en/latest/all.xml", None)], "site:formula1.com"),
+        src("Sportscar365", "https://sportscar365.com/", {"sportscar365.com"}, [("https://sportscar365.com/feed/", None)], "site:sportscar365.com IMSA OR WEC"),
+        src("Jayski", "https://www.jayski.com/", {"jayski.com"}, [("https://www.jayski.com/feed/", None)], "site:jayski.com NASCAR"),
+    ]},
     "betting": {"title": "Betting news", "sources": [
         src("Covers", "https://www.covers.com/", {"covers.com"}, [("https://www.covers.com/rss/news", "betting"), ("https://www.covers.com/feed", "betting")], "site:covers.com odds"),
         src("Action Network", "https://www.actionnetwork.com/", {"actionnetwork.com"}, [("https://www.actionnetwork.com/rss", "betting")], "site:actionnetwork.com odds"),

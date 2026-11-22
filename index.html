@@ -145,6 +145,7 @@
     .this-week-item.creator .this-week-dot { background: #d6409f; }
     .this-week-item.kpop .this-week-dot { background: #8e4ec6; }
     .this-week-item.birthday .this-week-dot { background: #f5a623; }
+    .this-week-item.race .this-week-dot { background: #ff4f4f; }
     .this-week-item.birthday .this-week-image { border-radius: 50%; width: 40px; height: 40px; object-position: top; }
     .this-week-item.game .this-week-dot { background: #0090ff; }
     .this-week-item.movie .this-week-dot { background: #f76b15; }
@@ -291,6 +292,243 @@
       .idol-lineup-row small { display: none; }
       .idol-lineup-axis { margin-left: 86px; }
     }
+    .nba-db-view, .nba-db { display: grid; gap: 14px; min-width: 0; }
+    .nba-db h2 { margin: 0; }
+    .nba-db h3 { margin: 6px 0 0; font-size: 1rem; }
+    .nba-db-muted { color: var(--muted); font-size: .88rem; margin: 0; }
+    .nba-db-credit { border-top: 1px solid color-mix(in srgb, var(--line) 50%, transparent); padding-top: 10px; }
+    .nba-db-nav { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .nba-db-nav a { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--glass-edge, var(--line)); text-decoration: none; font-size: .9rem; color: inherit; }
+    .nba-db-nav a.is-active { background: color-mix(in srgb, var(--signal) 22%, transparent); border-color: var(--signal); }
+    .nba-db-nav .nba-db-back { margin-left: auto; border: 0; color: var(--muted); }
+    .nba-db-controls { display: grid; grid-template-columns: minmax(180px, 2fr) repeat(5, minmax(110px, 1fr)); gap: 10px; align-items: end; }
+    .nba-db-controls .field { margin: 0; min-width: 0; }
+    .nba-db-controls select, .nba-db-controls input { width: 100%; }
+    .nba-db-scroll { overflow-x: auto; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); }
+    .nba-db-table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+    .nba-db-table th, .nba-db-table td { padding: 7px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid color-mix(in srgb, var(--line) 40%, transparent); }
+    .nba-db-table thead th { position: sticky; top: 0; background: var(--screen); color: var(--muted); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; }
+    .nba-db-table th:first-child, .nba-db-table td:nth-child(2), .nba-db-table thead th:nth-child(2), .nba-db-table .nba-db-teams { text-align: left; }
+    .nba-db-compare thead th:nth-child(2) { text-align: right; }
+    .nba-db-table tbody th { font-weight: 500; }
+    .nba-db-player-link { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+    .nba-db-player-link span { display: grid; text-align: left; }
+    .nba-db-player-link small { color: var(--muted); font-size: .75rem; }
+    .nba-db-player-link:hover strong, .nba-db-player-link:focus-visible strong { text-decoration: underline; }
+    .nba-db-thumb { width: 44px; height: 32px; object-fit: cover; border-radius: 6px; flex: none; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+    .nba-db-initials { display: inline-grid; place-items: center; font-weight: 700; color: var(--muted); background: color-mix(in srgb, var(--signal) 14%, transparent); font-size: .75rem; }
+    .nba-db-teams { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+    .nba-db-hero { display: grid; grid-template-columns: minmax(150px, 260px) 1fr; gap: 20px; align-items: start; }
+    .nba-db-photo-large { width: 100%; aspect-ratio: 1.37; object-fit: cover; border-radius: 14px; background: color-mix(in srgb, var(--ink) 6%, transparent); font-size: 2.4rem; }
+    .nba-db-hero h2 { font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.05; }
+    .nba-db-subtitle { margin: 6px 0 10px; color: var(--muted); }
+    .nba-db-facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; }
+    .nba-db-facts dt { color: var(--muted); font-size: .85rem; }
+    .nba-db-facts dd { margin: 0; overflow-wrap: anywhere; }
+    .nba-db-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; align-items: center; }
+    .nba-db-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+    .nba-db-tile { display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); }
+    .nba-db-tile strong { font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+    .nba-db-tile span { color: var(--muted); font-size: .78rem; }
+    .nba-db-ranks { margin: 0; padding: 10px 14px; border-radius: var(--glass-radius-small, 12px); background: color-mix(in srgb, var(--signal) 12%, transparent); }
+    .nba-db-chart-wrap { margin: 0; display: grid; gap: 6px; }
+    .nba-db-chart { width: 100%; height: auto; max-height: 260px; }
+    .nba-db-chart text { fill: var(--muted); font-size: 11px; }
+    .nba-db-grid { stroke: color-mix(in srgb, var(--line) 50%, transparent); stroke-width: 1; }
+    .nba-db-line { fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+    .nba-db-line.series-0, .nba-db-legend .series-0 i { stroke: var(--signal); background: var(--signal); }
+    .nba-db-line.series-1, .nba-db-legend .series-1 i { stroke: #f5a623; background: #f5a623; }
+    .nba-db-line.series-2, .nba-db-legend .series-2 i { stroke: #12a594; background: #12a594; }
+    .nba-db-legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: .85rem; }
+    .nba-db-legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+    .nba-db-table-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .nba-db-toggle { display: flex; gap: 6px; }
+    .nba-db-seasons tr.is-split td, .nba-db-seasons tr.is-split th { color: var(--muted); font-size: .85rem; }
+    .nba-db-seasons tr.is-total th, .nba-db-seasons tr.is-total td { font-weight: 600; }
+    .nba-db-table td.is-best { color: var(--signal); font-weight: 700; }
+    .nba-db-record-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+    .nba-db-record { padding: 12px 14px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); }
+    .nba-db-record h4 { margin: 0 0 6px; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .nba-db-record ol { margin: 0; padding-left: 22px; display: grid; gap: 3px; font-size: .9rem; }
+    .nba-db-record li small { color: var(--muted); margin-left: 4px; }
+    .nba-db-record li strong { float: right; font-variant-numeric: tabular-nums; }
+    .nba-db-picker { display: grid; gap: 4px; max-width: 420px; }
+    .nba-db-suggestions { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+    .nba-db-suggestions a { display: block; padding: 6px 10px; border-radius: 8px; text-decoration: none; }
+    .nba-db-suggestions a:hover, .nba-db-suggestions a:focus-visible { background: color-mix(in srgb, var(--signal) 14%, transparent); }
+    .nba-db-compare th .nba-db-player-link { justify-content: flex-end; }
+    .nba-db-remove { display: block; font-size: .75rem; color: var(--muted); margin-top: 2px; }
+    @media (max-width: 900px) { .nba-db-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nba-db-controls .nba-db-search { grid-column: 1 / -1; } }
+    @media (max-width: 560px) {
+      .nba-db-hero { grid-template-columns: 1fr; }
+      .nba-db-photo-large { max-width: 260px; }
+      .nba-db-nav .nba-db-back { margin-left: 0; }
+    }
+    .soccer-tabs { display: flex; gap: 6px; margin: 4px 0 10px; flex-wrap: wrap; }
+    .soccer-tab { background: transparent; border: 1px solid var(--glass-edge, var(--line)); color: inherit; border-radius: 999px; padding: 5px 14px; min-height: 0; }
+    .soccer-tab[aria-selected="true"] { background: color-mix(in srgb, var(--signal) 22%, transparent); border-color: var(--signal); }
+    .soccer-panel { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
+    .soccer-panel[hidden] { display: none; }
+    .soccer-panel-title { margin: 4px 0 0; font-size: .95rem; }
+    .soccer-muted { color: var(--muted); font-size: .85rem; margin: 0; }
+    .soccer-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+    .soccer-controls .field { margin: 0; }
+    .soccer-table-scroll { overflow-x: auto; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); }
+    .soccer-table { width: 100%; border-collapse: collapse; font-size: .88rem; font-variant-numeric: tabular-nums; }
+    .soccer-table th, .soccer-table td { padding: 7px 8px; text-align: center; white-space: nowrap; border-bottom: 1px solid color-mix(in srgb, var(--line) 35%, transparent); }
+    .soccer-table thead th { color: var(--muted); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
+    .soccer-table tr.has-zone td:first-child { box-shadow: inset 4px 0 0 var(--zone); }
+    .soccer-table tr.is-highlight td { background: color-mix(in srgb, var(--signal) 12%, transparent); font-weight: 600; }
+    .soccer-table .soccer-club, .soccer-table thead th:nth-child(2) { text-align: left; }
+    .soccer-club-inner { display: flex; align-items: center; gap: 8px; }
+    .soccer-table .soccer-pts { font-weight: 700; }
+    .soccer-table .is-plus { color: #3e9b4f; }
+    .soccer-table .is-minus { color: #e5484d; }
+    .soccer-club-abbr { display: none; }
+    .soccer-logo { width: 20px; height: 20px; object-fit: contain; flex: none; }
+    .soccer-logo-empty { display: inline-block; width: 20px; height: 20px; }
+    .soccer-form { display: inline-flex; gap: 3px; }
+    .soccer-chip { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 5px; font-size: .7rem; font-weight: 700; color: #fff; }
+    .soccer-chip.is-W { background: #3e9b4f; }
+    .soccer-chip.is-D { background: #8b8d98; }
+    .soccer-chip.is-L { background: #e5484d; }
+    .soccer-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .82rem; color: var(--muted); }
+    .soccer-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+    .soccer-leader-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+    .soccer-leaders { padding: 12px 14px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); min-width: 0; }
+    .soccer-leaders h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .soccer-leaders ol { margin: 0; padding-left: 22px; display: grid; gap: 5px; font-size: .88rem; }
+    .soccer-leaders li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; }
+    .soccer-leader-name { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .soccer-leader-name strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .soccer-leader-name small, .soccer-leader-extra { color: var(--muted); font-size: .75rem; white-space: nowrap; }
+    .soccer-leader-value { font-variant-numeric: tabular-nums; }
+    .soccer-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+    .soccer-summary-tile { display: grid; padding: 10px 12px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); }
+    .soccer-summary-tile strong { font-size: 1.3rem; }
+    .soccer-summary-tile span { color: var(--muted); font-size: .78rem; }
+    .soccer-centre { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; container-type: inline-size; }
+    .soccer-scoreline { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; text-align: center; }
+    .soccer-side { display: grid; justify-items: center; gap: 4px; }
+    .soccer-side .soccer-logo { width: 40px; height: 40px; }
+    .soccer-score { display: grid; gap: 2px; }
+    .soccer-score strong { font-size: 1.8rem; font-variant-numeric: tabular-nums; }
+    .soccer-score small { color: var(--muted); }
+    .soccer-score small.is-live { color: #e5484d; font-weight: 700; }
+    .soccer-centre-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    @container (min-width: 720px) { .soccer-centre-body { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+    .soccer-centre-main, .soccer-centre-side { display: grid; gap: 14px; align-content: start; min-width: 0; }
+    .soccer-section h5 { margin: 0 0 6px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .soccer-timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+    .soccer-event { display: grid; grid-template-columns: 44px 22px 1fr; gap: 6px; align-items: center; font-size: .88rem; }
+    .soccer-event.is-away { grid-template-columns: 1fr 22px 44px; text-align: right; }
+    .soccer-event.is-away .soccer-minute { order: 3; }
+    .soccer-event.is-away .soccer-event-icon { order: 2; }
+    .soccer-event.is-away .soccer-event-text { order: 1; }
+    .soccer-minute { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .soccer-event-icon { display: inline-grid; place-items: center; }
+    .soccer-event.is-yellow .soccer-event-icon::before, .soccer-event.is-red .soccer-event-icon::before { content: ""; width: 10px; height: 14px; border-radius: 2px; background: #f5c518; }
+    .soccer-event.is-red .soccer-event-icon::before { background: #e5484d; }
+    .soccer-event.is-goal .soccer-event-text, .soccer-event.is-own .soccer-event-text { font-weight: 600; }
+    .soccer-event.is-sub { color: var(--muted); font-size: .82rem; }
+    .soccer-bars { display: grid; gap: 8px; }
+    .soccer-bar-labels { display: flex; justify-content: space-between; font-size: .82rem; }
+    .soccer-bar-labels span { color: var(--muted); }
+    .soccer-bar-labels .is-lead { color: var(--signal); }
+    .soccer-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: color-mix(in srgb, var(--ink) 8%, transparent); gap: 2px; }
+    .soccer-bar-home { background: var(--signal); }
+    .soccer-bar-away { background: color-mix(in srgb, var(--ink) 45%, transparent); }
+    .soccer-lineups { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .soccer-lineup h6 { margin: 0 0 6px; font-size: .9rem; display: flex; align-items: center; gap: 6px; }
+    .soccer-pitch { display: grid; gap: 6px; padding: 10px 6px; border-radius: 10px; background: linear-gradient(180deg, color-mix(in srgb, #3e9b4f 22%, transparent), color-mix(in srgb, #3e9b4f 10%, transparent)); }
+    .soccer-pitch-line, .soccer-list { list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-around; gap: 4px; flex-wrap: wrap; }
+    .soccer-list { display: grid; justify-content: stretch; }
+    .soccer-pitch-line li, .soccer-list li { display: grid; justify-items: center; font-size: .72rem; text-align: center; min-width: 0; max-width: 72px; }
+    .soccer-list li { display: flex; gap: 6px; max-width: none; justify-items: start; }
+    .soccer-jersey { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--screen); border: 1px solid var(--line); font-weight: 700; font-size: .7rem; }
+    .soccer-pitch-line li.is-off { opacity: .7; }
+    .soccer-sub-mark { font-size: .65rem; color: var(--muted); }
+    .soccer-bench { font-size: .78rem; margin-top: 6px; }
+    .soccer-last-five { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+    .soccer-last-team { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+    .sports-widget-gd { color: var(--muted); font-size: .75rem; margin-left: auto; margin-right: 8px; }
+    @media (max-width: 560px) {
+      .soccer-club-name { display: none; }
+      .soccer-club-abbr { display: inline; }
+      .soccer-table th, .soccer-table td { padding: 6px 5px; }
+    }
+    .ms-view, .ms-page { display: grid; gap: 14px; min-width: 0; grid-template-columns: minmax(0, 1fr); }
+    .ms-muted { color: var(--muted); font-size: .86rem; margin: 0; }
+    .ms-credit { border-top: 1px solid color-mix(in srgb, var(--line) 50%, transparent); padding-top: 10px; }
+    .ms-nav { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ms-nav a { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--glass-edge, var(--line)); color: inherit; text-decoration: none; font-weight: 600; font-size: .9rem; }
+    .ms-nav a.is-active { background: color-mix(in srgb, var(--signal) 22%, transparent); border-color: var(--signal); }
+    .ms-head { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; justify-content: space-between; }
+    .ms-head h2 { margin: 0; }
+    .ms-head .field { margin: 0; }
+    .ms-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+    .ms-card { display: grid; gap: 8px; align-content: start; padding: 16px; border-radius: var(--glass-radius, 16px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); color: inherit; text-decoration: none; }
+    .ms-card:hover, .ms-card:focus-visible { border-color: var(--signal); }
+    .ms-card h3 { margin: 0; font-size: 1.05rem; }
+    .ms-card-next, .ms-card-last { display: grid; gap: 1px; }
+    .ms-card-next small, .ms-card-last small { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+    .ms-card-next strong { font-size: 1.1rem; }
+    .ms-card-done { margin: 0; font-weight: 600; color: var(--signal); }
+    .ms-card-leader { margin: 0; font-size: .88rem; }
+    .ms-live { padding: 14px 16px; border-radius: var(--glass-radius, 16px); border: 1px solid #e5484d; background: color-mix(in srgb, #e5484d 10%, var(--glass-base, var(--panel))); }
+    .ms-live h3 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+    .ms-live-dot { width: 10px; height: 10px; border-radius: 50%; background: #e5484d; animation: ms-pulse 1.4s ease-in-out infinite; }
+    @keyframes ms-pulse { 50% { opacity: .35; } }
+    @media (prefers-reduced-motion: reduce) { .ms-live-dot { animation: none; } }
+    .ms-live-order { margin: 8px 0; padding-left: 26px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 3px 16px; font-size: .9rem; }
+    .ms-live-order small { color: var(--muted); margin-left: 6px; }
+    .ms-layout { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 18px; align-items: start; }
+    .ms-section h3, .ms-section h4 { margin: 0 0 8px; }
+    .ms-section h4 { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-top: 6px; }
+    .ms-rounds { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+    .ms-round-link { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; padding: 10px 12px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); color: inherit; text-decoration: none; }
+    .ms-round-link:hover, .ms-round-link:focus-visible { border-color: var(--signal); }
+    .ms-round.is-next .ms-round-link { border-color: var(--signal); box-shadow: inset 4px 0 0 var(--signal); }
+    .ms-round.is-done .ms-round-date strong { color: var(--muted); }
+    .ms-round-date, .ms-round-body { display: grid; gap: 1px; min-width: 0; }
+    .ms-round-date small, .ms-round-body small { color: var(--muted); font-size: .78rem; }
+    .ms-round-body strong { overflow-wrap: anywhere; }
+    .ms-round-winner { font-size: .85rem; overflow-wrap: anywhere; }
+    .ms-round-next { font-size: .85rem; color: var(--signal); font-weight: 600; }
+    .ms-sessions { list-style: none; margin: 6px 0 4px; padding: 0 12px; display: grid; gap: 3px; font-size: .86rem; }
+    .ms-sessions li { display: flex; justify-content: space-between; gap: 12px; }
+    .ms-sessions li.is-past { color: var(--muted); }
+    .ms-scroll { overflow-x: auto; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); }
+    .ms-table { width: 100%; border-collapse: collapse; font-size: .88rem; font-variant-numeric: tabular-nums; }
+    .ms-table th, .ms-table td { padding: 6px 9px; text-align: left; white-space: nowrap; border-bottom: 1px solid color-mix(in srgb, var(--line) 35%, transparent); }
+    .ms-table td { white-space: normal; }
+    .ms-table thead th { color: var(--muted); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
+    .ms-table tr.is-first td { font-weight: 600; }
+    .ms-standings { display: grid; gap: 14px; }
+    .ms-round-detail { display: grid; gap: 10px; }
+    .ms-round-detail h3 { margin: 0; font-size: 1.3rem; }
+    .ms-back { justify-self: start; font-size: .9rem; }
+    .ms-facts { margin: 0; padding: 10px 12px; border-radius: var(--glass-radius-small, 12px); background: color-mix(in srgb, var(--signal) 10%, transparent); font-size: .9rem; }
+    .ms-person { display: inline-flex; align-items: center; gap: 6px; }
+    .ms-flag { width: 20px; height: 15px; object-fit: cover; border-radius: 2px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 18%, transparent); flex: none; }
+    .ms-people { display: inline; }
+    .ms-logo { width: 22px; height: 22px; object-fit: contain; flex: none; border-radius: 4px; background: #fff; padding: 2px; box-sizing: border-box; }
+    .ms-people .ms-person { margin-right: 2px; }
+    .ms-people.is-stacked { display: grid; gap: 3px; }
+    .ms-round-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 16px; align-items: start; }
+    .ms-round-top:has(> :only-child) { grid-template-columns: minmax(0, 1fr); }
+    .ms-track { margin: 0; display: grid; gap: 4px; justify-items: center; padding: 10px; border-radius: var(--glass-radius-small, 12px); background: #fff; }
+    .ms-track img { width: 100%; max-width: 320px; height: auto; max-height: 240px; object-fit: contain; }
+    .ms-track figcaption { color: #555; font-size: .75rem; text-align: center; }
+    .ms-track figcaption a { color: #333; }
+    .ms-track.is-small { margin: 6px 12px 0; padding: 6px; justify-self: start; }
+    .ms-track.is-small img { width: 160px; max-height: 110px; }
+    @media (max-width: 760px) { .ms-round-top { grid-template-columns: minmax(0, 1fr); } }
+    .ms-class-winners { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    .ms-class-winner { display: grid; gap: 3px; padding: 12px 14px; border-radius: var(--glass-radius-small, 12px); border: 1px solid var(--glass-edge, var(--line)); background: var(--glass-base, var(--panel)); }
+    .ms-class-winner small { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+    @media (max-width: 900px) { .ms-layout { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 560px) { .ms-round-link { grid-template-columns: 74px minmax(0, 1fr); gap: 8px; } }
     .guide { display: grid; gap: 3px; }
     .guide-row {
       display: grid;
@@ -2892,7 +3130,7 @@
     .media-hub-chip { padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); font-size: .74rem; font-weight: 700; text-decoration: none; background: var(--surface); }
     .media-hub-chip:hover { border-color: var(--signal); }
     /* More leagues (sports-leagues.js) */
-    .sports-hub .scoreboard.league-scoreboard { display: grid; gap: 8px; grid-column: 1 / -1; grid-row: 2; min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-base); box-shadow: var(--glass-shadow); }
+    .sports-hub .scoreboard.league-scoreboard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; grid-column: 1 / -1; grid-row: 2; min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-base); box-shadow: var(--glass-shadow); }
     .league-scoreboard .score-status, .league-scoreboard .score-updated, .league-scoreboard .score-countdown { margin: 0; }
     .league-scoreboard .league-body { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr); gap: 12px; align-items: start; }
     .league-scoreboard .league-detail-area:not(:empty) { margin-top: 0; }
@@ -3260,6 +3498,7 @@
     .dial a[data-channel="music"] { --chan: #e08aff; }
     .dial a[data-channel="creator"] { --chan: #bde56f; }
     .dial a[data-channel="live"] { --chan: #3fdcc8; }
+    .dial a[data-channel="motorsports"] { --chan: #ff4f4f; }
     :root[data-theme="light"] .dial a[data-channel="guide"] { --chan: #4e5770; }
     :root[data-theme="light"] .dial a[data-channel="sports"] { --chan: #c0352a; }
     :root[data-theme="light"] .dial a[data-channel="betting"] { --chan: #137a45; }
@@ -3272,6 +3511,7 @@
     :root[data-theme="light"] .dial a[data-channel="music"] { --chan: #8f2bb3; }
     :root[data-theme="light"] .dial a[data-channel="creator"] { --chan: #4f7a00; }
     :root[data-theme="light"] .dial a[data-channel="live"] { --chan: #0b7a6b; }
+    :root[data-theme="light"] .dial a[data-channel="motorsports"] { --chan: #b3141c; }
     .dial a[data-channel] b { color: var(--chan); }
     .dial-dot { width: 7px; height: 7px; flex: none; align-self: center; border-radius: 50%; background: var(--chan, var(--signal)); box-shadow: 0 0 6px color-mix(in srgb, var(--chan, var(--signal)) 70%, transparent); }
     .dial a[data-channel] { gap: 5px; padding-inline: 9px; }
@@ -3299,6 +3539,7 @@
     :root[data-channel="music"] { --channel-color: #e08aff; }
     :root[data-channel="creator"] { --channel-color: #bde56f; }
     :root[data-channel="live"] { --channel-color: #3fdcc8; }
+    :root[data-channel="motorsports"] { --channel-color: #ff4f4f; }
     :root[data-theme="light"][data-channel="guide"] { --channel-color: #4e5770; }
     :root[data-theme="light"][data-channel="sports"] { --channel-color: #c0352a; }
     :root[data-theme="light"][data-channel="betting"] { --channel-color: #137a45; }
@@ -3311,6 +3552,7 @@
     :root[data-theme="light"][data-channel="music"] { --channel-color: #8f2bb3; }
     :root[data-theme="light"][data-channel="creator"] { --channel-color: #4f7a00; }
     :root[data-theme="light"][data-channel="live"] { --channel-color: #0b7a6b; }
+    :root[data-theme="light"][data-channel="motorsports"] { --channel-color: #b3141c; }
     .channel-heading .number, .channel-heading h2 { color: var(--channel-color, var(--glass-accent-ink)); }
     /* Guide headlines: each channel label in its channel color. */
     .channel-news-channel[data-channel="sports"] { color: #ff7a6b; } :root[data-theme="light"] .channel-news-channel[data-channel="sports"] { color: #c0352a; }
@@ -3324,6 +3566,12 @@
     .channel-news-channel[data-channel="music"] { color: #e08aff; } :root[data-theme="light"] .channel-news-channel[data-channel="music"] { color: #8f2bb3; }
     .channel-news-channel[data-channel="creator"] { color: #bde56f; } :root[data-theme="light"] .channel-news-channel[data-channel="creator"] { color: #4f7a00; }
     .channel-news-channel[data-channel="live"] { color: #3fdcc8; } :root[data-theme="light"] .channel-news-channel[data-channel="live"] { color: #0b7a6b; }
+    .channel-news-channel[data-channel="motorsports"] { color: #ff4f4f; } :root[data-theme="light"] .channel-news-channel[data-channel="motorsports"] { color: #b3141c; }
+    /* Thirteen channels: keep the desktop channel bar on one row from 1280px up. */
+    @media (min-width: 761px) {
+      .dial ul { gap: 3px; }
+      .dial a, .dial a[data-channel] { padding: 6px 7px; gap: 5px; font-size: .8rem; }
+    }
   </style>
 </head>
 <body>
@@ -3436,9 +3684,11 @@
   <script src="creator-studio-data.js"></script>
   <script src="live-events-data.js"></script>
   <script src="idols-data.js"></script>
+  <script src="motorsports-data.js"></script>
   <script src="channel-news.js"></script>
   <script src="betting-stats.js"></script>
   <script src="sports-leagues.js"></script>
+  <script src="soccer.js"></script>
   <script src="media-hub.js"></script>
   <script src="this-week.js"></script>
   <script src="search.js"></script>
@@ -3457,7 +3707,8 @@
       { id: "bowling", number: "09", name: "Bowling", description: "Log league nights, track your arsenal, and look back at which ball changes and lane moves worked.", labels: ["Last session", "Average", "High game"], hints: ["Session", "Notes"], links: [] },
       { id: "music", number: "10", name: "Music Lab", description: "Dig into who wrote, produced and engineered the songs you love, follow their collaborations, and keep your own ratings and notes.", labels: ["Following", "Last rated", "Saved"], hints: ["Song or album", "Notes"], links: [] },
       { id: "creator", number: "11", name: "Creator Studio", description: "Plan, film, clip and track your YouTube channel: uploads, reaction clips, the content calendar and your ideas.", labels: ["Next post", "In production", "Ideas"], hints: ["Video", "Notes"], links: [] },
-      { id: "live", number: "12", name: "Live Events", description: "Find concerts, follow your artists’ tours, plan trips, and keep a journal of every show you’ve seen.", labels: ["Next concert", "Following", "Seen live"], hints: ["Concert", "Notes"], links: [] }
+      { id: "live", number: "12", name: "Live Events", description: "Find concerts, follow your artists’ tours, plan trips, and keep a journal of every show you’ve seen.", labels: ["Next concert", "Following", "Seen live"], hints: ["Concert", "Notes"], links: [] },
+      { id: "motorsports", number: "13", name: "Motorsports", description: "F1, NASCAR, IMSA and WEC: race weekends in your time zone, results, championship standings and live running order.", labels: ["Race weekend", "Up next", "Last winner"], hints: ["Race or series", "Notes"], links: [] }
     ];
     const storageKey = "seven-channels.entries.v1";
     const nbaFollowStorageKey = "seven-channels.nba-followed-teams.v1";
@@ -3848,7 +4099,7 @@
     const channelAccents = {
       sports: ["#ff7a6b", "#c0352a"], betting: ["#45d98c", "#137a45"], kpop: ["#ff7fb5", "#b8286b"], movies: ["#ffd166", "#8a6000"],
       anime: ["#ae95ff", "#6142d0"], games: ["#4fcdf2", "#0a6f86"], politics: ["#7f9bff", "#2f55c9"], bowling: ["#ffa24a", "#a84f00"],
-      music: ["#e08aff", "#8f2bb3"], creator: ["#bde56f", "#4f7a00"], live: ["#3fdcc8", "#0b7a6b"]
+      music: ["#e08aff", "#8f2bb3"], creator: ["#bde56f", "#4f7a00"], live: ["#3fdcc8", "#0b7a6b"], motorsports: ["#ff4f4f", "#b3141c"]
     };
 
     function applyAccent() {
@@ -5447,7 +5698,10 @@
       upcoming.append(element("h3", "", "Upcoming games"), upcomingBody);
       left.append(teams, standings, injuries);
       right.append(news, leaders, upcoming, createRedditWidget("sports"));
-      main.append(featured, scoreboard, planner);
+      const playerDbLink = element("a", "idol-entry nba-db-entry");
+      playerDbLink.href = "#sports/players";
+      playerDbLink.append(element("strong", "", "NBA player database"), element("span", "", "Every player’s season-by-season stats, all-time leaders and side-by-side comparisons"));
+      main.append(playerDbLink, featured, scoreboard, planner);
       const sideColumn = element("div", "sports-hub-side-column");
       sideColumn.append(left, right);
       hub.append(sideColumn, main, resources);
@@ -5591,6 +5845,36 @@
 
       function renderLeaders() {
         leadersBody.replaceChildren();
+        if (sportsLeague(activeSport)?.soccer && typeof soccerFetch === "function") {
+          // Soccer: season top scorers instead of single-day game leaders.
+          leaders.querySelector("h3").textContent = "Top scorers";
+          const sport = activeSport;
+          leadersBody.append(element("p", "", "Loading…"));
+          soccerFetch(`https://site.api.espn.com/apis/site/v2/sports/${sportsLeague(sport).path}/statistics`).then((data) => {
+            if (activeSport !== sport) return;
+            const goals = (data.stats || []).find((item) => item.name === "goalsLeaders")?.leaders || [];
+            const list = element("ul");
+            goals.slice(0, 5).forEach((item, index) => {
+              const row = element("li", "sports-widget-row");
+              row.append(element("strong", "", String(index + 1)), soccerLogo(item.athlete?.team, 20));
+              const info = element("span");
+              info.append(element("strong", "", item.athlete?.displayName || ""), element("small", "", item.athlete?.team?.abbreviation || ""));
+              row.append(info, element("strong", "", String(item.value ?? "")));
+              list.append(row);
+            });
+            leadersBody.replaceChildren(goals.length ? list : element("p", "", "No scorers yet this season."));
+            const more = element("button", "secondary", "All player and club stats");
+            more.type = "button";
+            more.addEventListener("click", () => {
+              const panel = document.querySelector(`.${sport}-scoreboard`);
+              panel?.showSoccerTab?.("stats");
+              panel?.scrollIntoView({ block: "start", behavior: "smooth" });
+            });
+            leadersBody.append(more);
+          }).catch(() => leadersBody.replaceChildren(element("p", "", "Top scorers are unavailable.")));
+          return;
+        }
+        leaders.querySelector("h3").textContent = "Game leaders";
         // NBA and NFL use fixed stats; other leagues offer the leader categories ESPN reports for that day's games.
         const reported = new Map();
         for (const event of schedules.get(activeSport)?.events || []) {
@@ -5709,15 +5993,19 @@
           if (requestId !== widgetRequestId || signal.aborted) return;
           const groups = (data.children || []).filter((group) => Array.isArray(group.standings?.entries) && group.standings.entries.length);
           if (!groups.length) throw new TypeError("Standings response contained no teams.");
-          const label = element("label", "", "Conference");
+          const label = element("label", "", sportsLeague(sport)?.soccer ? (groups.length > 1 ? "Conference" : "Table") : "Conference");
           const select = document.createElement("select");
           select.setAttribute("aria-label", "Standings conference");
           groups.forEach((group, index) => { const option = element("option", "", group.name); option.value = String(index); select.append(option); });
           const list = element("ul");
+          const soccer = Boolean(sportsLeague(sport)?.soccer);
+          const statOf = (entry, name) => entry.stats?.find((stat) => stat.name === name);
           function draw() {
             list.replaceChildren();
             const entries = [...groups[Number(select.value)].standings.entries];
-            entries.sort((a, b) => (Number(b.stats?.find((s) => s.name === "winPercent")?.value) || 0) - (Number(a.stats?.find((s) => s.name === "winPercent")?.value) || 0));
+            // Soccer tables go by the league's own ranking (points, goal difference…), not win percentage.
+            if (soccer) entries.sort((a, b) => (Number(statOf(a, "rank")?.value) || 99) - (Number(statOf(b, "rank")?.value) || 99));
+            else entries.sort((a, b) => (Number(statOf(b, "winPercent")?.value) || 0) - (Number(statOf(a, "winPercent")?.value) || 0));
             entries.forEach((entry, index) => {
               const row = element("li", "sports-widget-row");
               row.append(element("strong", "", String(index + 1)));
@@ -5726,19 +6014,36 @@
               const followed = sport === "nba" && followedNbaTeams.some((team) => team.id === String(entry.team?.id));
               const label = `${followed ? "★ " : ""}${entry.team?.abbreviation || entry.team?.displayName || "Team"}`;
               row.append(sport === "nba" ? nbaTeamLink(entry.team, label) : element("span", "", label));
-              const wins = entry.stats?.find((stat) => stat.name === "wins")?.displayValue;
-              const losses = entry.stats?.find((stat) => stat.name === "losses")?.displayValue;
-              row.append(element("strong", "", wins != null && losses != null ? `${wins}-${losses}` : "—"));
+              const wins = statOf(entry, "wins")?.displayValue;
+              const losses = statOf(entry, "losses")?.displayValue;
+              if (soccer) {
+                if (entry.note?.color) row.style.boxShadow = `inset 3px 0 0 ${soccerNoteColor(entry.note.color)}`;
+                const gd = statOf(entry, "pointDifferential")?.displayValue;
+                row.append(element("small", "sports-widget-gd", gd != null ? `GD ${gd}` : ""), element("strong", "", `${statOf(entry, "points")?.displayValue ?? "—"} pts`));
+              } else {
+                row.append(element("strong", "", wins != null && losses != null ? `${wins}-${losses}` : "—"));
+              }
               list.append(row);
             });
           }
           select.addEventListener("change", draw);
           label.append(select);
           standingBody.replaceChildren(label, list);
-          const link = element("a", "", `Full ${sportsLeague(sport).label} standings`);
-          link.href = sport === "nba" ? "#sports-standings" : `https://www.espn.com/${sportsLeague(sport).espn}/standings${sportsLeague(sport).soccer ? `/_/league/${sportsLeague(sport).path.split("/")[1]}` : ""}`;
-          if (sport !== "nba") { link.target = "_blank"; link.rel = "noopener noreferrer"; }
-          standingBody.append(link);
+          if (soccer) {
+            const open = element("button", "secondary", `Full ${sportsLeague(sport).label} table`);
+            open.type = "button";
+            open.addEventListener("click", () => {
+              const panel = document.querySelector(`.${sport}-scoreboard`);
+              panel?.showSoccerTab?.("table");
+              panel?.scrollIntoView({ block: "start", behavior: "smooth" });
+            });
+            standingBody.append(open);
+          } else {
+            const link = element("a", "", `Full ${sportsLeague(sport).label} standings`);
+            link.href = sport === "nba" ? "#sports-standings" : `https://www.espn.com/${sportsLeague(sport).espn}/standings`;
+            if (sport !== "nba") { link.target = "_blank"; link.rel = "noopener noreferrer"; }
+            standingBody.append(link);
+          }
           draw();
         }).catch((error) => {
           if (signal.aborted || requestId !== widgetRequestId) return;
@@ -7524,8 +7829,10 @@
       if (route === "games/releases") return "games";
       if (/^music\/.+/.test(route)) return "music";
       if (/^kpop\/(idols|idol\/Q\d+|group\/Q\d+)$/.test(route)) return "kpop";
+      if (/^sports\/players(\/(\d+|records|compare(\/[\d,]*)?))?$/.test(route)) return "sports";
       if (/^creator\/.+/.test(route)) return "creator";
       if (/^live\/.+/.test(route)) return "live";
+      if (/^motorsports\/(f1|nascar|imsa|wec)(\/[\w-]+)?$/.test(route)) return "motorsports";
       if (/^politics\/members(\/[A-Z]\d{6})?$/.test(route)) return "politics";
       if (/^politics\/elections(\/midterms|\/(president|senate|house|governor)(\/\d{4})?)?$/.test(route)) return "politics";
       return route === "guide" || channels.some((channel) => channel.id === route) ? route : "guide";
@@ -8872,8 +9179,8 @@
         const title = element("div", "channel-cell");
         title.append(element("span", "number", `CH ${channel.number}`), element("span", "name", channel.name));
         row.append(title);
-        if (["bowling", "music", "creator", "live"].includes(channel.id)) {
-          ({ bowling: bowlingGuideCells, music: musicLabGuideCells, creator: creatorGuideCells, live: liveGuideCells })[channel.id]().forEach((summary, index) => addSummaryCell(row, channel.labels[index], summary));
+        if (["bowling", "music", "creator", "live", "motorsports"].includes(channel.id)) {
+          ({ bowling: bowlingGuideCells, music: musicLabGuideCells, creator: creatorGuideCells, live: liveGuideCells, motorsports: motorsportsGuideCells })[channel.id]().forEach((summary, index) => addSummaryCell(row, channel.labels[index], summary));
         } else {
           addListingCell(row, channel, "now", channel.labels[0]);
           addListingCell(row, channel, "next", channel.labels[1]);
@@ -11941,8 +12248,10 @@
       music: ["music-lab.js"],
       creator: ["creator-studio.js", "creator-clips.js"],
       live: ["live-events.js"],
+      motorsports: ["motorsports.js"],
       wrapped: ["year-in-review.js"],
-      idols: ["idols.js"]
+      idols: ["idols.js"],
+      nbaPlayers: ["nba-players.js"]
     };
     const lazyReady = new Set();
     const lazyPending = new Map();
@@ -11987,6 +12296,13 @@
       heading.append(element("span", "number", `CH ${channel.number}`), element("h2", "", channel.name));
       const description = element("p", "lede", channel.description);
       if (lazyScripts[channel.id] && needsLazy(channel.id, heading, description)) return;
+      const playerDbRoute = /^sports\/players(?:\/(\d+|records|compare(?:\/[\d,]*)?))?$/.exec(location.hash.slice(1));
+      if (channel.id === "sports" && playerDbRoute) {
+        if (needsLazy("nbaPlayers", heading, description)) return;
+        view.replaceChildren(heading, description, createNbaPlayersView(playerDbRoute[1] || ""));
+        scrollTo(0, 0);
+        return;
+      }
       const idolRoute = /^kpop\/(idols|idol\/Q\d+|group\/Q\d+)$/.exec(location.hash.slice(1));
       if (channel.id === "kpop" && idolRoute) {
         if (needsLazy("idols", heading, description)) return;
@@ -12009,6 +12325,10 @@
       }
       if (channel.id === "creator") {
         view.replaceChildren(heading, description, withChannelNews(channel.id, [createCreatorStudio()]));
+        return;
+      }
+      if (channel.id === "motorsports") {
+        view.replaceChildren(heading, description, withChannelNews(channel.id, [createMotorsports(location.hash.slice(1).replace(/^motorsports\/?/, ""))]));
         return;
       }
       if (channel.id === "live") {
