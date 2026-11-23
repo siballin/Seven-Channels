@@ -1,0 +1,72 @@
+== catalog index head
+{"generatedAt":"2026-11-23T03:43:18+00:00","count":20854,"shards":64,"source":"IGDB","sourceUrl":"https://www.igdb.com/","games":[[117500,"#Blud",2024,"co9oug"],[9888,"#IDARB",2015,"co1wlw"],[116194,"'83",2026,"cobs6p"],[93548,"...Iru!",1998,"co40b7"],[307541,".45 Parabellum Bloodhound",null,"co8j7p
+
+== catalog detail
+{"5":{"name":"Baldur's Gate","released":"1998-12-21","cover":"co20gb","platforms":["Linux","Mac","PC","iOS"],"genres":["Role-playing (RPG)"],"url":"https://www.igdb.com/games/baldur-s-gate","rating":85,"ratingCount":356},"69":{"name":"Master of Orion III","released":"2003-02-25","cover":"co3c5p","platforms":["Mac","PC"],"genres":["Strategy","Turn-based strategy (TBS)"],"url":"https://www.igdb.com/games/master-of-orion-iii","criticScore":55,"criticCount":2,"rating":44,"ratingCount":14},"325":{"name":"Hellgate: London","released":"2007-10-31","cover":"co218m","platforms":["PC"],"genres":["Role-playing (RPG)","Shooter"],"url":"https://www.igdb.com/games/hellgate-london","criticScore":70,"criticCount":2,"rating":75,"ratingCount":77},"389":{"name":"Final Fantasy XIII","released":"2009-12-17","c
+
+== gamerpower
+14 items
+[
+ {
+  "id": 3854,
+  "title": "Lonesome Village (Mobile) Giveaway",
+  "worth": "$4.99",
+  "thumbnail": "https://www.gamerpower.com/offers/1/6aff20a09cb65.jpg",
+  "image": "https://www.gamerpower.com/offers/1b/6aff20a09cb65.jpg",
+  "description": "Chants of Sennaar (Mobile version) is free until November 26 on the Epic Games Store App for iPhone, iPad, and Android.\r\n\r\nNote: May not be available in all regions.",
+  "instructions": "1. Click the button using your phone to visit the Epic Games Store mobile page.\r\n2. Install the Epic Games Store App on your Android or iOS device.\r\n3. Open the App, scroll down to the \"Free Games\" section and click on the giveaway banner.\r\n4. Install the game and have fun!",
+  "open_giveaway_url": "https://www.gamerpower.com/open/lonesome-village-mobile-giveaway",
+  "published_date": "2026-11-19 11:15:28",
+  "type": "Game",
+  "platforms": "Android, iOS",
+  "end_date": "2026-11-26 23:59:00",
+  "users": 7660,
+  "status": "Active",
+  "gamerpower_url": "https://www.gamerpower.com/lonesome-village-mobile-giveaway",
+  "open_giveaway": "https://www.gamerpower.com/open/lonesome-village-mobile-giveaway"
+ },
+ {
+  "id": 3853,
+  "title": "Mark of the Deep (Epic Games) Giveaway",
+  "worth": "$19.99",
+  "thumbnail": "https://www.gamerpower.com/offers/1/6aff1d0e4942d.jpg",
+  "image": "https://www.gamerpower.com/offers/1b/6aff1d0e4942d.jpg",
+  "description": "Score Mark of the Deep for free on Epic Games Store! Mark of the Deep is a pirate-themed adventure game with elements from Metroidvania and Souls-Like games.",
+  "instructions": "1. Click the button to visit the giveaway page.\r\n2. Login into your Epic Games Store account.\r\n3. Click the button to add the game to your library",
+  "open_giveaway_url": "https://www.gamerpower.com/open/mark-of-the-deep-epic-games-giveaway",
+  "published_date": "2026-11-19 11:00:14",
+  "type": "Game",
+  "platforms": "PC, Epic Games Store",
+  "end_date": "2026-11-26 23:59:00",
+  "users": 15770,
+  "status": "Active",
+  "gamerpower_url": "https://www.gamerpower.com/mark-of-the-deep-epic-games-giveaway",
+  "open_giveaway": "https://www.gamerpower.com/open/mark-of-the-deep-epic-games-giveaway"
+ }
+]
+platforms: ['Android, iOS', 'PC', 'PC, DRM-Free', 'PC, Epic Games Store', 'PC, Itch.io, DRM-Free', 'PC, Steam', 'VR']
+
+== gamepass all console
+[{"siglId":"f6f1f99f-9b49-4ccd-b3bf-4d9767a77f5e","title":"All Console Games","description":"Explore every game included with XBOX Game Pass Console","requiresShuffling":"False","imageUrl":"https://cms-assets.xboxservices.com/assets/72/73/727315ef-a870-42f3-9e15-1a31555c0676.png"},{"id":"9P8LR42PTRGJ"},{"id":"9NGLST31DG26"},{"id":"BWVBNCMF22ZK"},{"id":"9P4NV23Q6QC2"},{"id":"9NR6NJ401NBS"},{"id":"9P8NKVVB0XQJ"},{"id":"9P59J86GHDGL"},{"id":"9N42SSSX2MTG"},{"id":"9PHH1ZWRSZ41"},{"id":"9NPKGVXPFRSX"},{"id":"9PDC9X7BKZR3"},{"id":"BSNZHRCKC13J"},{"id":"9MX7DMHK13SC"},{"id":"9NG07QJNK38J"},{"id":"9PK
+
+== gamepass pc all
+[{"siglId":"fdd9e2a7-0fee-49f6-ad69-4354098401ff","title":"All PC Games","description":"Explore every game included with PC Game Pass","requiresShuffling":"False","imageUrl":"https://cms-assets.xboxservices.com/assets/72/73/727315ef-a870-42f3-9e15-1a31555c0676.png"},{"id":"9P8LR42PTRGJ"},{"id":"9NNM7PKZN3JF"},{"id":"9NGLST31DG26"},{"id":"9P4NV23Q6QC2"},{"id":"9NR6NJ401NBS"},{"id":"9P8NKVVB0XQJ"},{"id":"9P59J86GHDGL"},{"id":"9NJWTJSVGVLJ"},{"id":"9N42SSSX2MTG"},{"id":"9P91FNMH1GG0"},{"id":"9N94NCGM1Q2N"},{"id":"9NPKGVXPFRSX"},{"id":"9PDC9X7BKZR3"},{"id":"9N1M64W9XZQ7"},{"id":"9NG07QJNK38J"},{"i
+
+== gamepass coming soon
+[{"siglId":"095bda36-f5cd-43f2-9ee1-0a72f371fb96","title":"Coming to Game Pass","description":"Discover your next favorite game","requiresShuffling":"False","imageUrl":"https://cms-assets.xboxservices.com/assets/72/73/727315ef-a870-42f3-9e15-1a31555c0676.png"},{"id":"9NV8BWGH15GN"},{"id":"9NR13RF1V2WV"},{"id":"9NMBDPRKK1XF"},{"id":"9NL8MF491NRZ"},{"id":"9N5NPMGBPCCR"},{"id":"9P8XK6X57GBF"},{"id":"9NW6JK0ZC9J6"},{"id":"9N40DK5N4LD4"},{"id":"9PMN4DGRT1LN"},{"id":"9NFW93G1GFXG"}]
+
+== gamepass leaving soon
+[{"siglId":"393f05bf-e596-4ef6-9487-6d4fa0eab987","title":"Leaving soon","description":"Don't want the fun to end? Save on these games now.","requiresShuffling":"False","imageUrl":"https://cms-assets.xboxservices.com/assets/72/73/727315ef-a870-42f3-9e15-1a31555c0676.png"},{"id":"9MT19Q3CRMQZ"},{"id":"9MX7DMHK13SC"},{"id":"9MXHL3TT792F"},{"id":"9NFQ1XMXDLN6"},{"id":"9NKFS43DLFFL"},{"id":"9NZG72SH3H4W"},{"id":"9P88K6NQW12H"},{"id":"C20WW4W29FQ1"}]
+
+== gamepass recently added
+[{"siglId":"f13cf6b4-57e6-4459-89df-6aec18cf0538","title":"Recently added","description":"With games added all the time, you'll always have something new to play","requiresShuffling":"False","imageUrl":"https://cms-assets.xboxservices.com/assets/72/73/727315ef-a870-42f3-9e15-1a31555c0676.png"},{"id":"9N3P3TRJGWV0"},{"id":"BTHC2G28X9H4"},{"id":"9MTGCZ84M503"},{"id":"9P1S707BPW6W"},{"id":"9NWWL1CBWFCG"},{"id":"9N5DDTDLTWCL"},{"id":"9MZZWGTF7V65"},{"id":"9NRBW3FJSJWT"},{"id":"9P743P6195Q5"},{"id":"9N74KFV7253H"},{"id":"9N8RS7CW8CGL"},{"id":"9N8RKWJT32L4"},{"id":"9N9K5QP9G3GL"},{"id":"9MW4MFG0192L
+
+== displaycatalog
+{"title": "PAW Patrol\u2122: Dino World", "images": [["SuperHeroArt", "//store-images.s-microsoft.com/image/apps.173.14003155671712527.e2286374-c296-44cb-8b6c-1bb5b97b583a.5e64d97c-fef0-4890-869e-572b86e75412"], ["TitledHeroArt", "//store-images.s-microsoft.com/image/apps.29964.14003155671712527.e2286374-c296-44cb-8b6c-1bb5b97b583a.78463401-4b70-40c1-8a74-4368f5193a15"], ["FeaturePromotionalSquareArt", "//store-images.s-microsoft.com/image/apps.37478.14003155671712527.e2286374-c296-44cb-8b6c-1bb5b97b583a.1853456c-b630-4d6f-8a5d-f5e86797b8d0"], ["Poster", "//store-images.s-microsoft.com/image/apps.23698.14003155671712527.e2286374-c296-44cb-8b6c-1bb5b97b583a.6e26181c-b9e8-4402-8d4b-77f3dcadcd79"], ["BoxArt", "//store-images.s-microsoft.com/image/apps.6586.14003155671712527.e2286374-c296-44cb-8b6c-1bb5b97b583a.541483cb-d84e-4407-a531-08c76a595a07"], ["Screenshot", "//store-images.s-microsoft.com/image/apps.3044.14003155671712527.22fc8ae7-1097-4ceb-a3ba-1be24053c586.9b332bc2-8f52-49e3-afb8-22b307bb1d52"], ["Screenshot", "//store-images.s-microsoft.com/image/apps.3044.14003155671712527.22fc8ae7-1097-4ceb-a3ba-1be24053c586.9b332bc2-8f52-49e3-afb8-22b307bb1d52"], ["Screenshot", "//store-images.s-microsoft.com/image/apps.48805.14003155671712527.22fc8ae7-1097-4ceb-a3ba-1be24053c586.f6abf4ac-03b6-439c-91d8-b410ea6805f7"]], "keys": ["LastModifiedDate", "LocalizedProperties", "MarketProperties", "ProductASchema", "ProductBSchema", "ProductId", "Properties", "AlternateIds", "DomainDataVersion", "IngestionSource", "IsMicrosoftProduct", "PreferredSkuId", "ProductType", "ValidationData", "MerchandizingTags", "PartD", "SandboxId", "ProductFamily", "SchemaVersion", "IsSandboxedProduct", "ProductKind", "ProductPolicies", "DisplaySkuAvailabilities"]}
+
+== wiki 2026 in video games
+len 133066 events at -1
+
+
+== wiki 2027 in video games
+len 14464 events at -1
