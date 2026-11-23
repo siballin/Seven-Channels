@@ -218,6 +218,7 @@ function createThisWeek({ signal } = {}) {
     ["idol birthdays", thisWeekIdolBirthdays(days, signal).then((list) => ({ items: list, hidden: 0 }))],
     ["races", (typeof motorsportsThisWeek === "function" ? motorsportsThisWeek(days) : Promise.resolve([])).then((list) => ({ items: list, hidden: 0 }))],
     ["game releases", thisWeekGames(days, signal)],
+    ["esports matches", (typeof gamesEsportsThisWeek === "function" ? gamesEsportsThisWeek(days) : Promise.resolve([])).then((list) => ({ items: list, hidden: 0 }))],
     ["gaming showcases", (typeof gamesShowcasesThisWeek === "function" ? gamesShowcasesThisWeek(days) : Promise.resolve([])).then((list) => ({ items: list, hidden: 0 }))],
     ["movie releases", thisWeekMovies(days, signal)]
   ];

@@ -8,7 +8,7 @@ const notifyStorageKey = "seven-channels.notifications.v1";
 const notifyTypes = [
   ["tours", "New shows for artists you follow", "Uses Ticketmaster; near you when a location is set in Live Events."],
   ["kpop", "K-pop releases and birthdays today", "From artists you follow on the K-Pop channel."],
-  ["games", "Favorite game releases and showcases today", "Games you starred in the release calendar, and gaming shows on the day."],
+  ["games", "Game releases, showcases and esports today", "Games you starred in the release calendar, gaming shows, and matches for esports teams you follow."],
   ["deals", "Game price alerts", "When a game you set a price alert on drops to your price (PC stores, via CheapShark)."],
   ["today", "Today’s plans", "Concerts, league night, planned uploads and race days, on the day."]
 ];
@@ -167,6 +167,7 @@ async function notifyCheck({ force = false } = {}) {
         body: [race.note, race.time ? `Starts ${notifyTime(race.time)}` : ""].filter(Boolean).join(" · "), href: race.href })));
     }
     if (state.types.games && typeof gamesShowcaseAlerts === "function") alerts.games.push(...await gamesShowcaseAlerts(today));
+    if (state.types.games && typeof gamesEsportsAlerts === "function") alerts.games.push(...await gamesEsportsAlerts(today));
     const list = [...(state.types.today ? alerts.today : []), ...(state.types.kpop ? alerts.kpop : []), ...(state.types.games ? alerts.games : [])];
     if (state.types.deals && typeof gamesPriceAlertCheck === "function") list.push(...await gamesPriceAlertCheck().catch(() => []));
     if (state.types.tours) list.push(...await notifyTourAlerts(state));

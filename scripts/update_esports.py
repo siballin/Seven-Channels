@@ -66,7 +66,7 @@ def match_row(match, game):
         "id": match.get("id"), "game": game, "status": match.get("status") or "", "start": match.get("begin_at") or match.get("scheduled_at") or "",
         "end": match.get("end_at") or "", "bestOf": match.get("number_of_games") if match.get("match_type") in ("best_of", None) else None,
         "league": (league.get("name") or "")[:60], **({"leagueLogo": https(league.get("image_url"))} if https(league.get("image_url")) else {}),
-        "event": event[:120], "teams": teams, **({"winner": match["winner_id"]} if match.get("winner_id") else {}),
+        "event": event[:120], **({"tier": str(tournament["tier"]).lower()} if tournament.get("tier") else {}), "teams": teams, **({"winner": match["winner_id"]} if match.get("winner_id") else {}),
         **({"stream": stream_of(match)} if stream_of(match) else {}),
     }
 
@@ -75,7 +75,7 @@ def build(key, fetch=fetch_json, now=None):
     now = now or datetime.now(timezone.utc).replace(microsecond=0)
     out = {"generatedAt": now.isoformat(), "source": "PandaScore", "games": [], "matches": []}
     week_ago = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    two_weeks = (now + timedelta(days=14)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    two_weeks = (now + timedelta(days=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
     now_text = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     failures = []
     for game, label, path in GAMES:

@@ -343,6 +343,15 @@ function gamesCardExtras(entry, body, actions) {
     body.insertBefore(element("p", "games-muted games-session-line", `${sessions.length} session${sessions.length === 1 ? "" : "s"} · ${gamesHoursText(minutes)} logged · last ${gamesFormatDate(last.date, { month: "short", day: "numeric" })}`), actions);
   }
   if (Number.isInteger(entry.topRank)) title?.prepend(element("span", "games-top-badge", `#${entry.topRank}`));
+  if (Number.isInteger(entry.steamAppId) && typeof gamesLoadSteam === "function") {
+    const line = element("p", "games-muted games-session-line", "");
+    body.insertBefore(line, actions);
+    gamesLoadSteam().then((steam) => {
+      const stats = steam?.achievements?.[entry.steamAppId];
+      if (stats) line.textContent = gamesAchievementText(stats);
+      else line.remove();
+    });
+  }
   const alertLine = gamesAlertLine(entry);
   if (alertLine && entry.status !== "done") body.insertBefore(alertLine, actions);
   const add = (label, tool, aria) => {
@@ -620,6 +629,7 @@ function gamesGamePage(id) {
     }
     columns.append(main, side);
     page.append(columns);
+    if (entry && typeof gamesSteamAchievementsSection === "function") gamesSteamAchievementsSection(entry, side);
   });
   return page;
 }
@@ -929,4 +939,466 @@ async function gamesShowcasesThisWeek(days) {
   const data = await gamesFetchJson("data/games-sidebar.json");
   return (data.showcases?.items || []).filter((event) => event.start && event.start >= days[0] && event.start <= days[days.length - 1])
     .map((event) => ({ kind: "game", label: "Gaming showcase", date: event.start, title: event.text.split(/ (?:will|was|is|takes?|held)\b/)[0].slice(0, 80), note: event.text, href: "#games/discover" }));
+}
+
+// ---------- Steam (data/steam.json, built by scripts/update_steam.py) ----------
+
+let gamesSteamPromise = null;
+let gamesSteamSynced = false;
+let gamesSteamImportOpen = false;
+let gamesSteamImportChoices = new Map(); // appid → status
+let gamesSteamImportQuery = "";
+let gamesSteamImportShown = 60;
+
+// Like the catalog, branch previews borrow the live site's copy (the file isn't committed).
+function gamesLoadSiteData(path) {
+  const live = new URL(path, GAMES_LIVE_CATALOG.replace(/data\/games-catalog\/$/, "")).href;
+  const onLiveSite = location.hostname === new URL(GAMES_LIVE_CATALOG).hostname;
+  return fetch(path).then((response) => {
+    if (response.ok) return response.json();
+    if (response.status === 404 && !onLiveSite) return fetch(live).then((other) => other.ok ? other.json() : null);
+    return null;
+  }).catch(() => (onLiveSite ? null : fetch(live).then((other) => other.ok ? other.json() : null).catch(() => null)));
+}
+
+function gamesLoadSteam() {
+  gamesSteamPromise ||= gamesLoadSiteData("data/steam.json").then((data) => (data && Array.isArray(data.games) ? data : null));
+  return gamesSteamPromise;
+}
+
+function gamesSteamCover(appid) {
+  return `https://cdn.cloudflare.steamstatic.com/steam/apps/${encodeURIComponent(appid)}/capsule_184x69.jpg`;
+}
+
+function gamesSteamEntry(appid, name) {
+  return gamesEntries().find((entry) => entry.steamAppId === appid) || gamesEntryFor(null, name);
+}
+
+// Keeps hours on Steam-linked games up to date with Steam's play time (never lowers hours you logged yourself).
+function gamesSteamSyncHours(steam) {
+  if (gamesSteamSynced || !steam) return 0;
+  gamesSteamSynced = true;
+  const minutes = new Map(steam.games.map(([appid, , played]) => [appid, played]));
+  let changed = 0;
+  entries = entries.map((entry) => {
+    if (entry.channel !== "games" || !Number.isInteger(entry.steamAppId) || !minutes.has(entry.steamAppId)) return entry;
+    const hours = Math.round((minutes.get(entry.steamAppId) / 60) * 10) / 10;
+    if (!(hours > (Number.isFinite(entry.hours) ? entry.hours : 0))) return entry;
+    changed++;
+    return { ...entry, hours };
+  });
+  if (changed) saveEntries();
+  return changed;
+}
+
+function gamesAchievementText(stats) {
+  if (!stats?.total) return "";
+  return `🏆 ${stats.unlocked}/${stats.total} achievements (${Math.round((stats.unlocked / stats.total) * 100)}%)`;
+}
+
+function gamesSteamPanel() {
+  const panel = element("section", "games-panel games-steam");
+  panel.setAttribute("aria-labelledby", "games-steam-title");
+  panel.hidden = true;
+  gamesLoadSteam().then((steam) => {
+    if (!steam) return;
+    if (gamesSteamSyncHours(steam)) {
+      gamesRefresh();
+      return;
+    }
+    panel.hidden = false;
+    const head = element("div", "games-steam-head");
+    if (steam.profile?.avatar) {
+      const avatar = element("img", "games-steam-avatar");
+      avatar.src = steam.profile.avatar;
+      avatar.alt = "";
+      avatar.referrerPolicy = "no-referrer";
+      head.append(avatar);
+    }
+    const title = element("h3", "", "Steam");
+    title.id = "games-steam-title";
+    const who = element("div", "");
+    who.append(title, steam.profile?.url ? gamesLink(`${steam.profile.name || "Your profile"} ↗`, steam.profile.url, "games-muted") : element("small", "games-muted", steam.profile?.name || ""));
+    head.append(who);
+    const played = steam.games.filter((game) => game[2] > 0);
+    const minutes = steam.games.reduce((sum, game) => sum + game[2], 0);
+    const grid = element("div", "games-metrics");
+    const achievementGames = Object.values(steam.achievements || {});
+    for (const [label, value, note] of [
+      ["Games owned", steam.games.length.toLocaleString(), `${played.length.toLocaleString()} played`],
+      ["Hours on Steam", Math.round(minutes / 60).toLocaleString(), "All time"],
+      ["Never played", (steam.games.length - played.length).toLocaleString(), "Your Steam pile of shame"],
+      ["Achievements", achievementGames.reduce((sum, item) => sum + item.unlocked, 0).toLocaleString(), `In your ${achievementGames.length} most-played games`],
+    ]) {
+      const metric = element("div", "games-metric");
+      metric.append(element("span", "", label), element("strong", "", value), element("small", "", note));
+      grid.append(metric);
+    }
+    panel.append(head, grid);
+    const recent = steam.games.filter((game) => game[3] > 0).sort((a, b) => b[3] - a[3]).slice(0, 5);
+    if (recent.length) {
+      const list = element("ul", "games-steam-recent");
+      for (const [appid, name, total, twoWeeks] of recent) {
+        const item = element("li", "");
+        const img = element("img", "");
+        img.src = gamesSteamCover(appid);
+        img.alt = "";
+        img.loading = "lazy";
+        img.referrerPolicy = "no-referrer";
+        img.addEventListener("error", () => img.remove(), { once: true });
+        const text = element("span", "");
+        text.append(element("strong", "", name), element("small", "games-muted", `${gamesHoursText(twoWeeks)} in the last 2 weeks · ${gamesHoursText(total)} total${steam.achievements?.[appid] ? ` · ${gamesAchievementText(steam.achievements[appid]).replace("🏆 ", "")}` : ""}`));
+        item.append(img, text);
+        list.append(item);
+      }
+      panel.append(element("h4", "", "Recently played"), list);
+    }
+    const rare = Object.entries(steam.achievements || {}).flatMap(([appid, stats]) => (stats.rare || []).map((item) => ({ ...item, appid: Number(appid) })))
+      .filter((item) => Number.isFinite(item.percent)).sort((a, b) => a.percent - b.percent).slice(0, 4);
+    if (rare.length) {
+      const names = new Map(steam.games.map(([appid, name]) => [appid, name]));
+      const list = element("ul", "games-steam-rare");
+      for (const item of rare) {
+        const li = element("li", "");
+        if (item.icon) {
+          const icon = element("img", "");
+          icon.src = item.icon;
+          icon.alt = "";
+          icon.loading = "lazy";
+          icon.referrerPolicy = "no-referrer";
+          li.append(icon);
+        }
+        const text = element("span", "");
+        text.append(element("strong", "", item.name), element("small", "games-muted", `${names.get(item.appid) || ""} · ${item.percent}% of players`));
+        li.append(text);
+        list.append(li);
+      }
+      panel.append(element("h4", "", "Your rarest achievements"), list);
+    }
+    const linked = steam.games.filter(([appid, name]) => gamesSteamEntry(appid, name)).length;
+    const actions = element("div", "games-tool-actions");
+    const toggle = element("button", gamesSteamImportOpen ? "secondary" : "", gamesSteamImportOpen ? "Close import" : "Import from Steam");
+    toggle.type = "button";
+    toggle.id = "games-steam-import-toggle";
+    toggle.setAttribute("aria-expanded", String(gamesSteamImportOpen));
+    toggle.addEventListener("click", () => {
+      gamesSteamImportOpen = !gamesSteamImportOpen;
+      gamesRefresh("games-steam-import-toggle");
+    });
+    actions.append(toggle, element("small", "games-muted", `${linked} of your Steam games are in My games. Hours on imported games update from Steam each day.`));
+    panel.append(actions);
+    if (gamesSteamImportOpen) panel.append(gamesSteamImport(steam));
+    panel.append(element("small", "games-muted", `Updated ${new Date(steam.generatedAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} from the Steam Web API.`));
+  });
+  return panel;
+}
+
+function gamesSteamImport(steam) {
+  const wrap = element("div", "games-steam-import");
+  const candidates = steam.games.filter(([appid, name]) => !gamesSteamEntry(appid, name));
+  if (!candidates.length) {
+    wrap.append(element("p", "games-empty", "Every Steam game is already in My games."));
+    return wrap;
+  }
+  if (!gamesSteamImportChoices.size) candidates.forEach(([appid, , , twoWeeks]) => { if (twoWeeks) gamesSteamImportChoices.set(appid, "now"); });
+  const quick = element("div", "games-tool-actions");
+  const preset = (label, apply) => {
+    const button = element("button", "secondary", label);
+    button.type = "button";
+    button.addEventListener("click", () => { apply(); renderRows(); });
+    quick.append(button);
+  };
+  preset("Recently played → Playing", () => candidates.forEach(([appid, , , twoWeeks]) => { if (twoWeeks) gamesSteamImportChoices.set(appid, "now"); }));
+  preset("Never played → Backlog", () => candidates.forEach(([appid, , played]) => { if (!played) gamesSteamImportChoices.set(appid, "next"); }));
+  preset("Played 20h+ → Finished", () => candidates.forEach(([appid, , played, twoWeeks]) => { if (played >= 1200 && !twoWeeks) gamesSteamImportChoices.set(appid, "done"); }));
+  preset("Clear", () => gamesSteamImportChoices.clear());
+  const search = gamesInput("games-steam-search", gamesSteamImportQuery, { type: "search", placeholder: "Filter your Steam games" });
+  search.addEventListener("input", () => { gamesSteamImportQuery = search.value; gamesSteamImportShown = 60; renderRows(); });
+  const list = element("ul", "games-steam-list");
+  const summary = element("p", "games-muted", "");
+  summary.setAttribute("role", "status");
+  const save = element("button", "", "Import");
+  save.type = "button";
+  const more = element("button", "secondary", "Show more");
+  more.type = "button";
+  more.addEventListener("click", () => { gamesSteamImportShown += 100; renderRows(); });
+  const renderRows = () => {
+    const key = gamesSearchKey(gamesSteamImportQuery);
+    const shown = candidates.filter(([, name]) => !key || gamesSearchKey(name).includes(key));
+    list.replaceChildren();
+    for (const [appid, name, played, twoWeeks] of shown.slice(0, gamesSteamImportShown)) {
+      const item = element("li", "");
+      const select = document.createElement("select");
+      select.setAttribute("aria-label", `Import ${name} as`);
+      for (const [value, label] of [["", "Skip"], ["now", "Playing"], ["next", "Backlog"], ["done", "Finished"]]) select.append(new Option(label, value, false, (gamesSteamImportChoices.get(appid) || "") === value));
+      select.addEventListener("change", () => {
+        if (select.value) gamesSteamImportChoices.set(appid, select.value);
+        else gamesSteamImportChoices.delete(appid);
+        count();
+      });
+      const text = element("span", "");
+      text.append(element("strong", "", name), element("small", "games-muted", [played ? `${gamesHoursText(played)} played` : "Never played", twoWeeks ? "played recently" : "", steam.achievements?.[appid] ? gamesAchievementText(steam.achievements[appid]) : ""].filter(Boolean).join(" · ")));
+      item.append(text, select);
+      list.append(item);
+    }
+    more.hidden = shown.length <= gamesSteamImportShown;
+    count();
+  };
+  const count = () => {
+    const chosen = [...gamesSteamImportChoices.values()];
+    summary.textContent = `${candidates.length} Steam games aren’t in My games yet. Importing ${chosen.length}: ${["now", "next", "done"].map((status) => `${chosen.filter((value) => value === status).length} ${(gamesStatuses.find(([v]) => v === status) || [])[1].toLowerCase()}`).join(", ")}.`;
+    save.disabled = !chosen.length;
+    save.textContent = chosen.length ? `Import ${chosen.length} game${chosen.length === 1 ? "" : "s"}` : "Import";
+  };
+  save.addEventListener("click", async () => {
+    save.disabled = true;
+    save.textContent = "Importing…";
+    const catalog = await gamesLoadCatalog();
+    const byKey = new Map((catalog?.games || []).map((game) => [game.key, game]));
+    const chosen = candidates.filter(([appid]) => gamesSteamImportChoices.has(appid));
+    const created = [];
+    for (const [appid, name, played] of chosen) {
+      const status = gamesSteamImportChoices.get(appid);
+      const match = byKey.get(gamesSearchKey(name));
+      created.push({ id: gamesNewId(), created: new Date().toLocaleDateString(), channel: "games", title: name.slice(0, 100), note: "", status, platform: "PC (Steam)",
+        hours: played ? Math.round((played / 60) * 10) / 10 : null, rating: null, started: "", finished: "", steamAppId: appid,
+        game: match ? { id: match.id, name: match.name, cover: match.cover || "" } : null });
+    }
+    entries = [...created, ...entries];
+    saveEntries();
+    gamesSteamImportChoices = new Map();
+    gamesSteamImportOpen = false;
+    gamesStatus = `Imported ${created.length} game${created.length === 1 ? "" : "s"} from Steam.`;
+    gamesStatusError = false;
+    gamesRefresh();
+    // Fill in critic scores, time to beat and genres for a few of them (the rest fill in from their game pages).
+    for (const entry of created.filter((item) => item.game?.id).slice(0, 25)) {
+      const details = await gamesDetails(entry.game.id).catch(() => null);
+      if (details) gamesUpdateEntry(entry.id, { game: gamesSnapshot(entry.game.id, details) });
+    }
+    gamesRefresh();
+  });
+  renderRows();
+  wrap.append(quick, search, summary, list, more, save);
+  return wrap;
+}
+
+// Achievements on a game page (for games imported from Steam).
+function gamesSteamAchievementsSection(entry, container) {
+  if (!Number.isInteger(entry?.steamAppId)) return;
+  gamesLoadSteam().then((steam) => {
+    const stats = steam?.achievements?.[entry.steamAppId];
+    if (!stats) return;
+    const section = element("section", "games-panel");
+    section.append(element("h4", "", "Your achievements"));
+    const bar = element("div", "games-progress");
+    bar.style.setProperty("--p", `${(stats.unlocked / stats.total) * 100}%`);
+    bar.setAttribute("role", "img");
+    bar.setAttribute("aria-label", gamesAchievementText(stats));
+    section.append(element("p", "", gamesAchievementText(stats).replace("🏆 ", "")), bar);
+    if (stats.rare?.length) {
+      const list = element("ul", "games-steam-rare");
+      for (const item of stats.rare) {
+        const li = element("li", "");
+        if (item.icon) {
+          const icon = element("img", "");
+          icon.src = item.icon;
+          icon.alt = "";
+          icon.referrerPolicy = "no-referrer";
+          li.append(icon);
+        }
+        const text = element("span", "");
+        text.append(element("strong", "", item.name), element("small", "games-muted", [item.description, Number.isFinite(item.percent) ? `${item.percent}% of players` : ""].filter(Boolean).join(" · ")));
+        li.append(text);
+        list.append(li);
+      }
+      section.append(element("small", "games-muted", "Your rarest unlocked:"), list);
+    }
+    container.prepend(section);
+  });
+}
+
+// ---------- Esports (data/esports.json, built by scripts/update_esports.py) ----------
+
+const gamesEsportsFollowKey = "seven-channels.esports-follows.v1";
+let gamesEsportsPromise = null;
+let gamesEsportsFilter = "all";
+let gamesEsportsAllTiers = false; // PandaScore tiers: s, a = top events; b, c, d = smaller ones
+
+function gamesLoadEsports() {
+  gamesEsportsPromise ||= gamesLoadSiteData("data/esports.json").then((data) => (data && Array.isArray(data.matches) ? data : null));
+  return gamesEsportsPromise;
+}
+
+function gamesEsportsFollows() {
+  try {
+    const value = JSON.parse(localStorage.getItem(gamesEsportsFollowKey) || "[]");
+    return Array.isArray(value) ? value.filter((team) => team && Number.isInteger(team.id) && typeof team.game === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function gamesEsportsFollowing(game, id) {
+  return gamesEsportsFollows().some((team) => team.game === game && team.id === id);
+}
+
+function gamesEsportsToggle(game, team) {
+  const list = gamesEsportsFollows();
+  const next = gamesEsportsFollowing(game, team.id) ? list.filter((item) => !(item.game === game && item.id === team.id)) : [...list, { game, id: team.id, name: team.name, short: team.short || "" }];
+  try { localStorage.setItem(gamesEsportsFollowKey, JSON.stringify(next)); } catch { /* optional */ }
+}
+
+// A not-started match whose start time has passed is most likely on now (the file updates once a day).
+function gamesEsportsState(match, now = Date.now()) {
+  const start = Date.parse(match.start || "");
+  if (match.status === "finished") return "finished";
+  if (Number.isFinite(start) && start <= now && now - start < 6 * 3600000) return "live";
+  if (match.status === "running" && !Number.isFinite(start)) return "live";
+  if (Number.isFinite(start) && start < now) return "finished";
+  return "upcoming";
+}
+
+function gamesEsportsMatch(match, labels) {
+  const state = gamesEsportsState(match);
+  const followed = match.teams.some((team) => gamesEsportsFollowing(match.game, team.id));
+  const card = element("li", `games-match is-${state}${followed ? " is-followed" : ""}`);
+  const top = element("div", "games-match-top");
+  if (match.leagueLogo) {
+    const logo = element("img", "games-match-league");
+    logo.src = match.leagueLogo;
+    logo.alt = "";
+    logo.loading = "lazy";
+    logo.referrerPolicy = "no-referrer";
+    logo.addEventListener("error", () => logo.remove(), { once: true });
+    top.append(logo);
+  }
+  const start = new Date(match.start);
+  const when = state === "live" ? "LIVE" : Number.isNaN(start.getTime()) ? "Time TBA"
+    : start.toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit", ...(state === "finished" ? { month: "short", day: "numeric" } : {}) });
+  top.append(element("strong", "", [labels[match.game], match.league].filter(Boolean).join(" · ")), element("span", state === "live" ? "games-match-live" : "games-muted", [when, match.bestOf ? `Bo${match.bestOf}` : ""].filter(Boolean).join(" · ")));
+  card.append(top);
+  if (match.event) card.append(element("small", "games-muted", match.event));
+  const teams = element("div", "games-match-teams");
+  if (!match.teams.length) teams.append(element("span", "games-muted", "Teams to be decided"));
+  for (const team of match.teams) {
+    const row = element("div", `games-match-team${match.winner === team.id ? " is-winner" : ""}`);
+    if (team.logo) {
+      const logo = element("img", "");
+      logo.src = team.logo;
+      logo.alt = "";
+      logo.loading = "lazy";
+      logo.referrerPolicy = "no-referrer";
+      logo.addEventListener("error", () => logo.replaceWith(element("span", "games-match-nologo")), { once: true });
+      row.append(logo);
+    } else row.append(element("span", "games-match-nologo"));
+    row.append(element("span", "games-match-name", team.name));
+    const follow = element("button", "games-match-follow", gamesEsportsFollowing(match.game, team.id) ? "★" : "☆");
+    follow.type = "button";
+    follow.setAttribute("aria-pressed", String(gamesEsportsFollowing(match.game, team.id)));
+    follow.setAttribute("aria-label", `${gamesEsportsFollowing(match.game, team.id) ? "Unfollow" : "Follow"} ${team.name}`);
+    follow.addEventListener("click", () => {
+      gamesEsportsToggle(match.game, team);
+      gamesRefresh();
+    });
+    row.append(follow, element("strong", "games-match-score", state === "upcoming" || !Number.isInteger(team.score) ? "" : String(team.score)));
+    teams.append(row);
+  }
+  card.append(teams);
+  if (match.stream && state !== "finished") card.append(gamesLink(state === "live" ? "Watch live ↗" : "Stream ↗", match.stream, "games-external"));
+  return card;
+}
+
+function gamesEsportsPage() {
+  const wrap = element("div", "games-esports");
+  wrap.append(element("p", "games-muted", "Loading matches…"));
+  gamesLoadEsports().then((data) => {
+    wrap.replaceChildren();
+    if (!data) {
+      wrap.append(element("p", "games-empty", "Esports data isn’t available yet. It appears after the next site update."));
+      return;
+    }
+    const labels = Object.fromEntries(data.games.map((game) => [game.id, game.id === "lol" ? "LoL" : game.id === "cs2" ? "CS2" : game.label]));
+    const follows = gamesEsportsFollows();
+    const filters = element("div", "games-filters");
+    filters.setAttribute("role", "group");
+    filters.setAttribute("aria-label", "Filter matches");
+    for (const [value, label] of [["all", "All"], ...data.games.map((game) => [game.id, game.label]), ...(follows.length ? [["following", `★ My teams (${follows.length})`]] : [])]) {
+      const button = element("button", "secondary", label);
+      button.type = "button";
+      button.setAttribute("aria-pressed", String(gamesEsportsFilter === value));
+      button.addEventListener("click", () => { gamesEsportsFilter = value; gamesRefresh(); });
+      filters.append(button);
+    }
+    wrap.append(filters);
+    const bigEvent = (match) => gamesEsportsAllTiers || !match.tier || ["s", "a"].includes(match.tier) || match.teams.some((team) => gamesEsportsFollowing(match.game, team.id));
+    const smaller = data.matches.filter((match) => !bigEvent(match)).length;
+    if (smaller || gamesEsportsAllTiers) {
+      const tiers = element("label", "games-esports-tiers");
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.checked = gamesEsportsAllTiers;
+      box.addEventListener("change", () => { gamesEsportsAllTiers = box.checked; gamesRefresh(); });
+      tiers.append(box, ` Include smaller events${smaller ? ` (${smaller} more matches)` : ""}`);
+      wrap.append(tiers);
+    }
+    const matches = data.matches.filter(bigEvent).filter((match) => gamesEsportsFilter === "all" || match.game === gamesEsportsFilter
+      || (gamesEsportsFilter === "following" && match.teams.some((team) => gamesEsportsFollowing(match.game, team.id))));
+    const followedFirst = (a, b) => Number(b.teams.some((team) => gamesEsportsFollowing(b.game, team.id))) - Number(a.teams.some((team) => gamesEsportsFollowing(a.game, team.id)));
+    const live = matches.filter((match) => gamesEsportsState(match) === "live").sort(followedFirst);
+    const upcoming = matches.filter((match) => gamesEsportsState(match) === "upcoming");
+    const results = matches.filter((match) => gamesEsportsState(match) === "finished").reverse();
+    const section = (title, list, empty, groupByDay = false) => {
+      const panel = element("section", "games-panel");
+      panel.append(element("h3", "", title));
+      if (!list.length) {
+        panel.append(element("p", "games-empty", empty));
+        return panel;
+      }
+      if (!groupByDay) {
+        const ul = element("ul", "games-matches");
+        list.slice(0, 40).forEach((match) => ul.append(gamesEsportsMatch(match, labels)));
+        panel.append(ul);
+        return panel;
+      }
+      const days = new Map();
+      for (const match of list) {
+        const day = new Date(match.start).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+        if (!days.has(day)) days.set(day, []);
+        days.get(day).push(match);
+      }
+      for (const [day, dayMatches] of [...days].slice(0, 7)) {
+        panel.append(element("h4", "games-match-day", day));
+        const ul = element("ul", "games-matches");
+        [...dayMatches].sort(followedFirst).forEach((match) => ul.append(gamesEsportsMatch(match, labels)));
+        panel.append(ul);
+      }
+      return panel;
+    };
+    if (live.length) wrap.append(section("Live now", live, ""));
+    wrap.append(section("Upcoming", upcoming, gamesEsportsFilter === "following" ? "No upcoming matches for your teams in the next two weeks." : "No upcoming matches in the next two weeks.", true),
+      section("Results (last 7 days)", results, "No results in the last week."));
+    wrap.append(element("small", "games-muted", `Follow teams with ☆ to put their matches first, see them in This week and get a notification on match day. Data from PandaScore, updated ${new Date(data.generatedAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} (once a day, so check the stream for live scores).`));
+  });
+  return wrap;
+}
+
+// Followed teams' matches: This week items and match-day notifications.
+async function gamesEsportsThisWeek(days) {
+  const follows = gamesEsportsFollows();
+  if (!follows.length) return [];
+  const data = await gamesLoadEsports();
+  if (!data) return [];
+  return data.matches.filter((match) => match.teams.some((team) => gamesEsportsFollowing(match.game, team.id))).map((match) => {
+    const start = new Date(match.start);
+    const day = Number.isNaN(start.getTime()) ? "" : gamesDayString(start);
+    return { kind: "game", label: `Esports · ${match.game === "lol" ? "LoL" : "CS2"}`, date: day, time: Number.isNaN(start.getTime()) ? "" : `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`,
+      title: match.teams.map((team) => team.short || team.name).join(" vs ") || "TBD", note: match.league, href: "#games/esports" };
+  }).filter((item) => item.date >= days[0] && item.date <= days[days.length - 1]);
+}
+
+async function gamesEsportsAlerts(today) {
+  const items = await gamesEsportsThisWeek([today]).catch(() => []);
+  return items.map((item) => ({ key: `esports:${item.title}:${item.date}:${item.time}`, title: `Match day: ${item.title}`,
+    body: [item.note, item.time ? `Starts ${typeof notifyTime === "function" ? notifyTime(item.time) : item.time}` : ""].filter(Boolean).join(" · "), href: item.href }));
 }

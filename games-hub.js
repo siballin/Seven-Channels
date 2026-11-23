@@ -30,6 +30,7 @@ function gamesView() {
   if (/^#games\/releases$/.test(hash)) return "releases";
   if (/^#games\/discover$/.test(hash)) return "discover";
   if (/^#games\/top$/.test(hash)) return "top";
+  if (/^#games\/esports$/.test(hash)) return "esports";
   if (/^#games\/game\/\d+$/.test(hash)) return "game";
   return "log";
 }
@@ -88,7 +89,7 @@ function gamesFormatDate(value, options = { month: "short", day: "numeric", year
 function gamesTabs(active) {
   const nav = element("nav", "games-tabs");
   nav.setAttribute("aria-label", "Video Games sections");
-  for (const [view, label, href] of [["log", "My games", "#games"], ["discover", "Discover", "#games/discover"], ["top", "My top 10", "#games/top"], ["releases", "Release calendar", "#games/releases"]]) {
+  for (const [view, label, href] of [["log", "My games", "#games"], ["discover", "Discover", "#games/discover"], ["top", "My top 10", "#games/top"], ["esports", "Esports", "#games/esports"], ["releases", "Release calendar", "#games/releases"]]) {
     const link = element("a", "", label);
     link.href = href;
     if (view === active) link.setAttribute("aria-current", "page");
@@ -1023,6 +1024,10 @@ function createGamesHub() {
     root.append(gamesDiscover());
     return root;
   }
+  if (view === "esports" && typeof gamesEsportsPage === "function") {
+    root.append(gamesEsportsPage());
+    return root;
+  }
   if (view === "top" && typeof gamesTopPage === "function") {
     root.append(gamesTopPage());
     return root;
@@ -1040,6 +1045,7 @@ function createGamesHub() {
     if (picker) main.append(picker);
   }
   if (typeof gamesPlayPanel === "function") main.append(gamesPlayPanel(list));
+  if (typeof gamesSteamPanel === "function") main.append(gamesSteamPanel());
   main.append(gamesForm(list), gamesLists(list));
   layout.append(main, gamesSidebar());
   root.append(layout);

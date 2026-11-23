@@ -3712,6 +3712,41 @@
       .games-top-item .games-cover { width: 40px; height: 53px; }
       .games-top-controls { grid-column: 1 / -1; justify-content: end; }
     }
+    /* Steam and esports (games-more.js) */
+    .games-steam-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .games-steam-head h3 { margin: 0; }
+    .games-steam-avatar { width: 44px; height: 44px; border-radius: 8px; }
+    .games-steam h4 { margin: 12px 0 6px; font-size: .85rem; }
+    .games-steam-recent, .games-steam-rare { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+    .games-steam-recent li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px; align-items: center; }
+    .games-steam-recent img { width: 120px; aspect-ratio: 184 / 69; object-fit: cover; border-radius: 6px; }
+    .games-steam-recent span, .games-steam-rare span { display: grid; gap: 1px; min-width: 0; }
+    .games-steam-rare li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; align-items: center; }
+    .games-steam-rare img { width: 36px; height: 36px; border-radius: 6px; }
+    .games-steam .games-tool-actions { margin-top: 10px; }
+    .games-steam-import { display: grid; gap: 8px; margin-top: 10px; padding: 10px; border: 1px dashed var(--line); border-radius: 10px; }
+    .games-steam-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 420px; overflow-y: auto; }
+    .games-steam-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 5px 6px; border-bottom: 1px solid var(--line); }
+    .games-steam-list li span { display: grid; min-width: 0; }
+    .games-progress { height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--ink) 10%, transparent); overflow: hidden; margin-bottom: 8px; }
+    .games-progress::before { content: ""; display: block; width: var(--p); height: 100%; background: var(--signal); }
+    .games-esports { display: grid; gap: 14px; margin-top: 12px; }
+    .games-matches { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+    .games-match { display: grid; gap: 6px; align-content: start; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .games-match.is-followed { box-shadow: inset 3px 0 0 var(--signal); }
+    .games-match-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: .8rem; }
+    .games-match-top .games-muted, .games-match-live { margin-left: auto; }
+    .games-match-live { color: #e0645a; font-weight: 800; font-size: .78rem; }
+    .games-match-league { width: 20px; height: 20px; object-fit: contain; }
+    .games-match-teams { display: grid; gap: 4px; }
+    .games-match-team { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto 28px; gap: 8px; align-items: center; }
+    .games-match-team img, .games-match-nologo { width: 24px; height: 24px; object-fit: contain; }
+    .games-match-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .games-match-team.is-winner .games-match-name, .games-match-team.is-winner .games-match-score { font-weight: 800; }
+    .games-match-score { text-align: right; font: 700 1rem var(--data, inherit); }
+    .games-match-follow { min-height: 0; padding: 0 4px; border: 0; background: transparent; color: var(--signal); font-size: 1rem; }
+    .games-match-day { margin: 12px 0 6px; font-size: .85rem; color: var(--muted); }
+    .games-esports-tiers { display: flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -8035,7 +8070,7 @@
       if (route === "sports-standings" || route === "sports-leaders" ||
         /^sports\/nba\/(teams|games)\//.test(route)) return "sports";
       if (/^bowling\/(scorer|stats|balls|releases|leagues)$/.test(route)) return "bowling";
-      if (/^games\/(releases|discover|top|game\/\d+)$/.test(route)) return "games";
+      if (/^games\/(releases|discover|top|esports|game\/\d+)$/.test(route)) return "games";
       if (/^music\/.+/.test(route)) return "music";
       if (/^kpop\/(idols|idol\/Q\d+|group\/Q\d+)$/.test(route)) return "kpop";
       if (/^sports\/players(\/(\d+|records|compare(\/[\d,]*)?))?$/.test(route)) return "sports";

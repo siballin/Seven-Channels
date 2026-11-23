@@ -5,6 +5,9 @@ from unittest.mock import patch
 import update_game_catalog as catalog
 import update_game_releases as releases
 import update_games_sidebar as sidebar
+import update_steam as steam
+import update_esports as esports
+from urllib.error import HTTPError
 
 RSS = b"""<?xml version="1.0"?><rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/"><channel>
 <item><title>&#8220;Big&#8221; News</title><link>https://www.gamespot.com/articles/big/</link><pubDate>Sat, 14 Nov 2026 02:02:04 +0000</pubDate>
@@ -146,6 +149,56 @@ class GamesExtraTests(unittest.TestCase):
         self.assertEqual([event["start"] for event in events], ["2026-12-10", "2026-08-26"])
         self.assertEqual(events[0]["text"], "The Game Awards 2026 will take place at the Peacock Theater.")
         self.assertEqual(events[1]["end"], "2026-08-30")
+
+
+class SteamAndEsportsTests(unittest.TestCase):
+    def test_steam_build(self):
+        def fetch(path, params):
+            if "GetOwnedGames" in path:
+                return {"response": {"games": [{"appid": 10, "name": "Played", "playtime_forever": 600, "playtime_2weeks": 30},
+                                               {"appid": 20, "name": "Unplayed", "playtime_forever": 0}, {"appid": 30, "name": ""}]}}
+            if "GetPlayerSummaries" in path:
+                return {"response": {"players": [{"personaname": "me", "avatarfull": "https://avatars.steamstatic.com/a.jpg", "profileurl": "https://steamcommunity.com/id/me/"}]}}
+            if "GetPlayerAchievements" in path:
+                if params["appid"] != 10:
+                    raise HTTPError("u", 400, "no stats", {}, None)
+                return {"playerstats": {"success": True, "achievements": [{"apiname": "A", "achieved": 1, "unlocktime": 5, "name": "Rare one"},
+                                                                          {"apiname": "B", "achieved": 1, "unlocktime": 9, "name": "Common"}, {"apiname": "C", "achieved": 0}]}}
+            if "GetGlobalAchievementPercentages" in path:
+                return {"achievementpercentages": {"achievements": [{"name": "A", "percent": "2.5"}, {"name": "B", "percent": 80}, {"name": "C", "percent": 1}]}}
+            if "GetSchemaForGame" in path:
+                return {"game": {"availableGameStats": {"achievements": [{"name": "A", "icon": "https://steamcdn-a.akamaihd.net/a.jpg"}]}}}
+            raise AssertionError(path)
+        data = steam.build("key", "76561198000000000", fetch, now="2026-11-23T00:00:00+00:00")
+        self.assertEqual([row[:4] for row in data["games"]], [[10, "Played", 600, 30], [20, "Unplayed", 0, 0]])
+        self.assertEqual(data["profile"]["name"], "me")
+        stats = data["achievements"]["10"]
+        self.assertEqual((stats["unlocked"], stats["total"], stats["lastUnlock"]), (2, 3, 9))
+        self.assertEqual(stats["rare"][0], {"name": "Rare one", "description": "", "percent": 2.5, "icon": "https://steamcdn-a.akamaihd.net/a.jpg", "unlocked": 5})
+
+    def test_steam_id_lookup(self):
+        self.assertEqual(steam.resolve_id("k", "https://steamcommunity.com/profiles/76561198000000001/"), "76561198000000001")
+        fetch = lambda path, params: {"response": {"success": 1, "steamid": "76561198000000002"}}
+        self.assertEqual(steam.resolve_id("k", "https://steamcommunity.com/id/myname/", fetch), "76561198000000002")
+
+    def test_esports_rows(self):
+        match = {"id": 1, "status": "finished", "begin_at": "2026-11-20T10:00:00Z", "match_type": "best_of", "number_of_games": 3,
+                 "league": {"name": "LCK", "image_url": "https://cdn.pandascore.co/l.png"}, "serie": {"full_name": "Winter 2026"}, "tournament": {"name": "Playoffs", "tier": "s"},
+                 "opponents": [{"opponent": {"id": 5, "name": "T1", "acronym": "T1", "image_url": "https://cdn.pandascore.co/t1.png"}}, {"opponent": {"id": 6, "name": "Gen.G", "acronym": "GEN"}}],
+                 "results": [{"team_id": 5, "score": 2}, {"team_id": 6, "score": 1}], "winner_id": 5,
+                 "streams_list": [{"language": "ko", "official": True, "main": False, "raw_url": "https://twitch.tv/ko"}, {"language": "en", "official": True, "main": True, "raw_url": "https://twitch.tv/lck"}]}
+        row = esports.match_row(match, "lol")
+        self.assertEqual(row["teams"][0], {"id": 5, "name": "T1", "short": "T1", "logo": "https://cdn.pandascore.co/t1.png", "score": 2})
+        self.assertEqual((row["event"], row["tier"], row["winner"], row["stream"], row["bestOf"]), ("Winter 2026 · Playoffs", "s", 5, "https://twitch.tv/lck", 3))
+        calls = []
+        def fetch(path, params, key):
+            calls.append(path)
+            if path.startswith("csgo"):
+                raise HTTPError("u", 403, "forbidden", {}, None)
+            return [match] if path.endswith("past") else []
+        data = esports.build("key", fetch)
+        self.assertEqual([m["id"] for m in data["matches"]], [1])
+        self.assertEqual(data["unavailable"], ["Counter-Strike 2"])
 
 
 class GameReleaseTests(unittest.TestCase):
