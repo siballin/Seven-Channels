@@ -5,7 +5,7 @@
 let channelNewsData = null;
 let channelNewsRequest = null;
 const channelNewsUi = new Map(); // channel id → { source, limit }
-const channelNewsStep = 8;
+const channelNewsStep = 10; // 10 fills two rows of 5, five of 2, or ten of 1 (see .channel-news-list)
 
 function channelNewsLoad() {
   channelNewsRequest ||= fetch("data/channel-news.json")
