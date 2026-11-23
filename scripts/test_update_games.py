@@ -73,10 +73,79 @@ class GameCatalogTests(unittest.TestCase):
         self.assertEqual(detail["timeToBeat"], {"main": 24.5, "extra": 40.0, "complete": 90.0, "submissions": 120})
         self.assertNotIn("timeToBeat", shards[7]["7"])
 
+    def test_game_page_extras(self):
+        extras = catalog.extras({"summary": "  A   game. ", "screenshots": [{"image_id": "sc1"}, {"image_id": "BAD ID"}], "videos": [{"video_id": "abcdefghijk"}],
+                                 "similar_games": [3, 4], "involved_companies": [{"company": {"name": "Dev Co"}, "developer": True, "publisher": False},
+                                                                                {"company": {"name": "Pub Co"}, "developer": False, "publisher": True}],
+                                 "websites": [{"url": "https://store.steampowered.com/app/1"}, {"url": "https://example.com"}, {"url": "https://foo.itch.io/game"}]})
+        self.assertEqual(extras, {"summary": "A game.", "screenshots": ["sc1"], "video": "abcdefghijk", "similar": [3, 4], "developers": ["Dev Co"],
+                                  "publishers": ["Pub Co"], "stores": {"Steam": "https://store.steampowered.com/app/1", "itch.io": "https://foo.itch.io/game"}})
+        self.assertEqual(catalog.extras({}), {})
+
     def test_skips_without_credentials(self):
         with patch.dict("os.environ", {"TWITCH_CLIENT_ID": "", "TWITCH_CLIENT_SECRET": ""}), patch.object(catalog, "write") as write:
             catalog.main()
         write.assert_not_called()
+
+
+class GamesExtraTests(unittest.TestCase):
+    def test_gamerpower_free_games(self):
+        data = [
+            {"title": "Mark of the Deep (Epic Games) Giveaway", "type": "Game", "status": "Active", "platforms": "PC, Epic Games Store", "worth": "$19.99",
+             "end_date": "2026-11-26 23:59:00", "open_giveaway_url": "https://www.gamerpower.com/open/mark", "thumbnail": "https://www.gamerpower.com/a.jpg"},
+            {"title": "Old Giveaway", "type": "Game", "status": "Active", "platforms": "PC, Steam", "end_date": "2026-11-01 00:00:00", "open_giveaway_url": "https://x.com/a"},
+            {"title": "Skin pack", "type": "DLC", "status": "Active", "platforms": "PC, Steam", "open_giveaway_url": "https://x.com/b"},
+            {"title": "Lonesome Village (Mobile) Giveaway", "type": "Game", "status": "Active", "platforms": "Android, iOS", "worth": "N/A",
+             "end_date": "N/A", "open_giveaway_url": "https://www.gamerpower.com/open/lv"},
+        ]
+        games = sidebar.gamerpower_free_games(data, "2026-11-23T00:00:00+00:00")
+        self.assertEqual([game["title"] for game in games], ["Mark of the Deep", "Lonesome Village"])
+        self.assertEqual(games[0]["store"], "Epic")
+        self.assertEqual(games[0]["worth"], "$19.99")
+        self.assertEqual(games[0]["end"], "2026-11-26T23:59:00+00:00")
+        self.assertEqual(games[1]["store"], "Mobile")
+        self.assertEqual(games[1]["worth"], "")
+
+    def test_game_pass(self):
+        ids = {"f13cf6b4-57e6-4459-89df-6aec18cf0538": ["9AAAAAAAAAAA", "9BBBBBBBBBBB"], "095bda36-f5cd-43f2-9ee1-0a72f371fb96": ["9CCCCCCCCCCC"],
+               "393f05bf-e596-4ef6-9487-6d4fa0eab987": [], sidebar.GAME_PASS_CONSOLE: ["9AAAAAAAAAAA"], sidebar.GAME_PASS_PC: ["9AAAAAAAAAAA", "9BBBBBBBBBBB"]}
+        products = {"9AAAAAAAAAAA": {"title": "Alpha", "image": "https://store-images.s-microsoft.com/a?w=200"}, "9BBBBBBBBBBB": {"title": "Beta"}}
+        out = sidebar.game_pass(lambda sigl: ids[sigl], lambda wanted: {key: value for key, value in products.items() if key in wanted})
+        self.assertEqual([game["title"] for game in out["recent"]], ["Alpha", "Beta"])
+        self.assertEqual(out["recent"][0]["on"], ["Console", "PC"])
+        self.assertEqual(out["recent"][1]["on"], ["PC"])
+        self.assertEqual(out["coming"], [])  # no product details → left out
+        self.assertTrue(out["recent"][0]["url"].endswith("/9AAAAAAAAAAA"))
+
+    def test_showcase_events(self):
+        wikitext = """==Major events==
+{{Table alignment}}
+{| class="wikitable"
+! Month
+! Day(s)
+! Event
+|-
+| rowspan="2" | June
+| 5
+| [[Summer Game Fest]] will be held in Los Angeles.<ref>x</ref> More text here.
+|-
+| 9
+| [[Ubisoft]] announced layoffs.
+|-
+| December
+| 10
+| [[The Game Awards 2026]] will take place at the Peacock Theater.
+|-
+| August
+| 26–30
+| [[Gamescom]] will be held in Cologne.
+|}
+==Notable deaths==
+"""
+        events = sidebar.showcase_events(wikitext, 2026, "2026-08-27")
+        self.assertEqual([event["start"] for event in events], ["2026-12-10", "2026-08-26"])
+        self.assertEqual(events[0]["text"], "The Game Awards 2026 will take place at the Peacock Theater.")
+        self.assertEqual(events[1]["end"], "2026-08-30")
 
 
 class GameReleaseTests(unittest.TestCase):

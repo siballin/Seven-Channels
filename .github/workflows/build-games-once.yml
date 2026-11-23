@@ -1,0 +1,47 @@
+name: Build games data (temporary)
+on:
+  push:
+    branches: [claude/dazzling-hamilton-4jcfnt]
+    paths: [scripts/update_games_sidebar.py, scripts/update_game_catalog.py, .github/workflows/build-games-once.yml]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: python scripts/update_games_sidebar.py
+      - name: Catalog sample
+        continue-on-error: true
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+        run: |
+          python scripts/update_game_catalog.py
+          python - <<'PY'
+          import json, glob
+          sample = {}
+          for path in sorted(glob.glob("data/games-catalog/details-*.json")):
+              for gid, d in json.load(open(path)).items():
+                  if d["name"] in ("The Witcher 3: Wild Hunt", "Hades", "Elden Ring", "Stardew Valley"):
+                      sample[gid] = d
+          stats = {k: 0 for k in ("summary", "screenshots", "video", "similar", "stores", "developers")}
+          total = 0
+          for path in glob.glob("data/games-catalog/details-*.json"):
+              for d in json.load(open(path)).values():
+                  total += 1
+                  for k in stats:
+                      stats[k] += k in d
+          import os
+          size = sum(os.path.getsize(p) for p in glob.glob("data/games-catalog/details-*.json"))
+          json.dump({"total": total, "with": stats, "detailBytes": size, "sample": sample}, open("data/games-catalog-sample.json", "w"), indent=1)
+          PY
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          git add data/games-sidebar.json data/games-catalog-sample.json || true
+          git commit -m "Games data build" || exit 0
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done

@@ -18,6 +18,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 import json
 import os
+import re
 from pathlib import Path
 import sys
 import time
@@ -60,7 +61,9 @@ class Igdb:
 
 def fetch_games(igdb):
     fields = ("id,name,first_release_date,cover.image_id,platforms.abbreviation,platforms.name,genres.name,"
-              "aggregated_rating,aggregated_rating_count,total_rating,total_rating_count,hypes,url")
+              "aggregated_rating,aggregated_rating_count,total_rating,total_rating_count,hypes,url,"
+              "summary,screenshots.image_id,videos.video_id,similar_games,websites.url,"
+              "involved_companies.company.name,involved_companies.developer,involved_companies.publisher")
     where = f"(total_rating_count >= 5 | aggregated_rating_count >= 2 | hypes >= 5) & game_type = {GAME_TYPES}"
     games, offset = [], 0
     while True:
@@ -86,6 +89,52 @@ def hours(seconds):
     return round(seconds / 3600, 1) if isinstance(seconds, (int, float)) and seconds > 0 else None
 
 
+STORE_HOSTS = [
+    ("Steam", ("store.steampowered.com",)), ("GOG", ("gog.com", "www.gog.com")), ("Epic", ("store.epicgames.com", "www.epicgames.com")),
+    ("PlayStation", ("store.playstation.com",)), ("Xbox", ("www.xbox.com", "xbox.com", "www.microsoft.com", "apps.microsoft.com")),
+    ("Nintendo", ("www.nintendo.com", "nintendo.com")), ("itch.io", ("itch.io",)),
+]
+
+
+def store_name(url):
+    host = (re.match(r"https://([^/]+)", url or "") or [None, ""])[1].lower()
+    for name, hosts in STORE_HOSTS:
+        if host in hosts or (name == "itch.io" and host.endswith(".itch.io")):
+            return name
+    return ""
+
+
+def extras(game):
+    """Game page details: summary, screenshots, trailer, similar games, developer/publisher and store links."""
+    out = {}
+    summary = re.sub(r"\s+", " ", game.get("summary") or "").strip()
+    if summary:
+        out["summary"] = summary if len(summary) <= 700 else summary[:697].rsplit(" ", 1)[0] + "…"
+    shots = [shot["image_id"] for shot in game.get("screenshots") or [] if re.fullmatch(r"[a-z0-9]+", shot.get("image_id", ""))][:4]
+    if shots:
+        out["screenshots"] = shots
+    video = next((v["video_id"] for v in game.get("videos") or [] if re.fullmatch(r"[A-Za-z0-9_-]{11}", v.get("video_id", ""))), "")
+    if video:
+        out["video"] = video
+    similar = [g for g in game.get("similar_games") or [] if isinstance(g, int)][:8]
+    if similar:
+        out["similar"] = similar
+    companies = game.get("involved_companies") or []
+    for key, role in (("developers", "developer"), ("publishers", "publisher")):
+        names = sorted({c["company"]["name"] for c in companies if c.get(role) and (c.get("company") or {}).get("name")})[:3]
+        if names:
+            out[key] = names
+    stores = {}
+    for site in game.get("websites") or []:
+        url = site.get("url", "")
+        name = store_name(url)
+        if name and name not in stores:
+            stores[name] = url
+    if stores:
+        out["stores"] = stores
+    return out
+
+
 def build(games, times):
     index, shards = [], defaultdict(dict)
     for game in games:
@@ -103,6 +152,7 @@ def build(games, times):
             "genres": sorted({g["name"] for g in game.get("genres") or [] if g.get("name")}),
             "url": game.get("url", ""),
         }
+        detail.update(extras(game))
         if isinstance(game.get("aggregated_rating"), (int, float)) and game.get("aggregated_rating_count"):
             detail["criticScore"] = round(game["aggregated_rating"])
             detail["criticCount"] = game["aggregated_rating_count"]
