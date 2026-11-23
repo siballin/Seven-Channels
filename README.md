@@ -28,6 +28,14 @@ The **Search** button in the header (or press `/` or Ctrl+K anywhere) searches y
 
 ## Notifications
 
+## Install as an app
+
+Seven Channels can be installed like an app (it's a progressive web app). On Android, and in Chrome or Edge on a computer, press **Install app** in the header. On iPhone or iPad, open the site in Safari, tap **Share**, then **Add to Home Screen**; the Install app button shows these steps. Installed, it opens full screen from its own icon. A long press on the icon jumps straight to the Guide, Sports scores, Motorsports or K-Pop, on phones that support shortcuts.
+
+- **Offline:** the service worker (`sw.js`) saves the page, its scripts and the data files you've opened. Without a connection, the site still opens and shows your saved lists and the last copy of each data file, with an **Offline** badge in the header. Live scores and other live lookups need a connection. Online, it always loads the newest version first, so a new deploy shows up straight away.
+- **Notifications:** on iPhone and iPad, notifications only work in the installed app (iOS 16.4 or later). Alerts go through the service worker, and tapping one opens the app at the right page.
+- **Files:** the manifest is `manifest.webmanifest`, and `pwa.js` handles the install button, the offline badge and notification taps. `scripts/make_app_icons.py` draws the icons in `assets/app/`. `scripts/build_site.py` stamps `sw.js` with a version for each deploy, plus the list of files to save when it installs.
+
 Turn on **🔔 Notifications** in the Guide's This week panel to get browser alerts while Seven Channels is open in a tab (there's no server sending push messages): newly announced shows for artists you follow in Live Events (Ticketmaster key required; limited to your area when a location is set; the first check only records what's already on sale), K-pop releases out today from followed artists, favorite game releases out today, and today's concerts, league night and planned uploads. It checks a minute after the page loads, then every 30 minutes and whenever you come back to the tab. Each alert is sent once, at most five at a time. Some mobile browsers only allow notifications from installed apps. Tests: `node tests/notifications.test.js`.
 
 ## K-pop idol directory

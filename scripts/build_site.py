@@ -9,6 +9,8 @@ Usage: python scripts/build_site.py [--out _site] [--esbuild "npx --yes esbuild@
 """
 
 import argparse
+import hashlib
+import json
 import os
 import re
 import shlex
@@ -47,6 +49,32 @@ def copy_site(out):
             shutil.copy2(source, target)
 
 
+def stamp_service_worker(out):
+    """Give sw.js a version (a hash of the published files, so each deploy replaces the old offline copy) and the
+    files to save at install: the page, the scripts it loads up front, the manifest and the app icons."""
+    path = os.path.join(out, "sw.js")
+    if not os.path.isfile(path):
+        return
+    with open(os.path.join(out, "index.html"), encoding="utf-8") as handle:
+        html = handle.read()
+    scripts = [src for src in re.findall(r'<script src="([^"]+)"', html) if not re.match(r"https?://", src)]
+    precache = ["./", "index.html", "manifest.webmanifest", *scripts, "assets/app/icon-192.png", "assets/app/icon-512.png"]
+    digest = hashlib.sha256()
+    for root, _dirs, files in sorted(os.walk(out)):
+        for name in sorted(files):
+            if name == "sw.js" or root.startswith(os.path.join(out, "data")):
+                continue
+            with open(os.path.join(root, name), "rb") as handle:
+                digest.update(name.encode() + handle.read())
+    with open(path, encoding="utf-8") as handle:
+        source = handle.read()
+    source = re.sub(r'const VERSION = "[^"]*";', f'const VERSION = "{digest.hexdigest()[:12]}";', source, count=1)
+    source = re.sub(r"const PRECACHE = \[[^\]]*\];", f"const PRECACHE = {json.dumps(precache)};", source, count=1)
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(source)
+    print(f"sw.js: version {digest.hexdigest()[:12]}, {len(precache)} files saved for offline use")
+
+
 def minify_html(html, command):
     """Minify inline <script> (without src or type) and <style> blocks."""
     def script(match):
@@ -75,6 +103,7 @@ def main():
     args = parser.parse_args()
     command = shlex.split(args.esbuild)
     copy_site(args.out)
+    stamp_service_worker(args.out)
     before = after = 0
     for name in sorted(os.listdir(args.out)):
         path = os.path.join(args.out, name)

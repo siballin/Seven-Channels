@@ -1,0 +1,24 @@
+{
+  "name": "Seven Channels",
+  "short_name": "Seven Channels",
+  "description": "A little guide to everything you’re into: sports, motorsports, K-pop, movies, anime, games, bowling, music and live events.",
+  "id": "./",
+  "start_url": "./#guide",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#11151d",
+  "theme_color": "#11151d",
+  "categories": ["entertainment", "sports", "lifestyle"],
+  "icons": [
+    { "src": "assets/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Guide", "url": "./#guide", "icons": [{ "src": "assets/app/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Sports scores", "url": "./#sports", "icons": [{ "src": "assets/app/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Motorsports", "url": "./#motorsports", "icons": [{ "src": "assets/app/icon-192.png", "sizes": "192x192" }] },
+    { "name": "K-Pop", "url": "./#kpop", "icons": [{ "src": "assets/app/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

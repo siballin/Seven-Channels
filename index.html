@@ -4,6 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#eef1f5">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="48x48" href="assets/app/favicon-48.png">
+  <link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Seven Channels">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Seven Channels — Your personal guide</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3606,6 +3613,14 @@
     .league-follow .team-follow-toggle, .nfl-scoreboard .team-follow-toggle { min-height: 0; padding: 2px 9px; font-size: .72rem; border-radius: 999px; }
     .sports-widget-others { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 8px 0 0; }
     .sports-widget-others .followed-team-chip { cursor: pointer; font-size: .72rem; }
+    /* Installable app */
+    .app-install-button[hidden], .offline-pill[hidden] { display: none; }
+    .offline-pill { align-self: center; padding: 4px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; background: color-mix(in srgb, #d98a1f 22%, transparent); border: 1px solid #d98a1f; color: var(--ink); }
+    .install-dialog { max-width: min(420px, calc(100vw - 32px)); border: 1px solid var(--line); border-radius: 16px; background: var(--panel); color: var(--ink); padding: 20px; }
+    .install-dialog::backdrop { background: rgb(0 0 0 / .5); }
+    .install-dialog h2 { margin: 0 0 8px; font-size: 1.1rem; }
+    .install-dialog form { display: flex; justify-content: end; margin-top: 12px; }
+    @media (display-mode: standalone) { .app-install-button { display: none; } }
   </style>
 </head>
 <body>
@@ -3621,6 +3636,8 @@
           <small>YOUR LOCAL TIME</small>
         </div>
         <button type="button" class="secondary site-search-button" id="site-search-open" aria-keyshortcuts="/ Control+K">Search <kbd aria-hidden="true">/</kbd></button>
+        <button type="button" class="secondary app-install-button" id="app-install" hidden>Install app</button>
+        <span class="offline-pill" id="offline-pill" role="status" hidden>Offline · showing saved data</span>
         <form id="sync-panel" class="sync-panel" aria-label="Cross-device account" hidden>
           <div class="sync-auth-buttons">
             <button type="button" class="secondary" data-auth-toggle="sign-in" aria-expanded="false" aria-controls="sync-credentials">Sign in <span aria-hidden="true">▾</span></button>
@@ -3696,6 +3713,12 @@
     <div id="notice" class="notice" role="status" hidden></div>
     <div id="view"></div>
   </main>
+  <dialog id="install-dialog" class="install-dialog" aria-labelledby="install-dialog-title">
+    <h2 id="install-dialog-title">Install Seven Channels</h2>
+    <p class="install-ios" hidden>In Safari, tap the <strong>Share</strong> button <span aria-hidden="true">(□↑)</span>, then <strong>Add to Home Screen</strong>. Open it from the new icon to get full-screen views and notifications.</p>
+    <p class="install-other" hidden>Use your browser menu: <strong>Install app</strong> or <strong>Add to Home screen</strong> (Chrome, Edge, Samsung Internet). On a desktop, look for the install icon at the end of the address bar.</p>
+    <form method="dialog"><button type="submit">Got it</button></form>
+  </dialog>
   <dialog id="player-dialog" class="player-dialog" aria-labelledby="player-dialog-title">
     <div class="player-profile-shell">
       <header class="player-profile-header">
@@ -3727,6 +3750,7 @@
   <script src="this-week.js"></script>
   <script src="search.js"></script>
   <script src="notifications.js"></script>
+  <script src="pwa.js"></script>
   <script src="games-hub.js"></script>
   <script>
     "use strict";
