@@ -125,6 +125,25 @@ The side table orders clubs by the league's ranking and shows points and goal di
 
 **Check price** on a playing or backlog game looks up current PC store prices on [CheapShark](https://www.cheapshark.com/), with the best deal, its discount and the lowest price on record; console prices aren't covered. The sidebar lists the Epic Games Store's current and upcoming free games, recent trailers from PlayStation, Xbox, Nintendo of America, IGN and GameSpot, and gaming news from IGN, GameSpot and Polygon, refreshed daily by `scripts/update_games_sidebar.py`. Each part refreshes on its own and keeps its last items if a source fails.
 
+**What should I play next?** picks a game from your backlog. Filter by how long you have (time to beat), your mood (matched to genres) and platform; it favors well-reviewed games and games that have waited longest. **Start playing** moves the pick to Playing, and **Another pick** skips it.
+
+**Play sessions:** **Log session** on a game you're playing records the date, minutes and a note, and adds the time to its hours. The **Play time** panel shows this week's hours, your daily streak, the most-played game this month and a chart of the last 8 weeks. Year in review adds your hours and most-played games.
+
+**Price alerts:** set a target price on a backlog or playing game. While the site is open, it checks CheapShark's PC store prices about twice a day, and the card shows the last price seen. With notifications on (Guide → This week), you get an alert when the price drops to your target or below.
+
+**Clip ideas** on a game you're playing adds a "clips and highlights" idea to Creator Studio, linked back to the game.
+
+**Game pages** (`#games/game/<IGDB id>`; click a game's title): cover, developer and publisher, critic and player scores, time to beat, platforms, the summary, a trailer (it loads only when you press play), screenshots, store links, the best PC price, similar games, and your own status, hours and rank. You can add the game from its page. The details come from IGDB in the game catalog, which is rebuilt on each deploy.
+
+**Discover** (`#games/discover`):
+- **Showcases & events:** upcoming shows and award nights, such as The Game Awards, Summer Game Fest and Gamescom, with a countdown. They come from Wikipedia's "<year> in video games" Major events table. They also appear in This week, and as notifications on the day.
+- **Free to keep:** Epic's weekly free games, plus giveaways on Steam, GOG, itch.io, mobile and more from [GamerPower](https://www.gamerpower.com/), filterable by store.
+- **Xbox Game Pass:** Recently added, Coming soon and Leaving soon from Xbox's public Game Pass catalog (US), marked Console or PC, with **+ Backlog**. PlayStation Plus doesn't publish its catalog in a way the site can read.
+
+These are refreshed daily by `scripts/update_games_sidebar.py` into `data/games-sidebar.json`.
+
+**My top 10** (`#games/top`): rank your favorite games by dragging or with the arrows. **Start from my ratings** fills it from your highest-rated games, and **Copy list** puts it on the clipboard. Ranks are saved on the game entries, so they sync like the rest of your games.
+
 **Release calendar** (`#games/releases`) shows Game Informer's release schedules for last year, this year and next year, refreshed daily into `data/game-releases.json`, including available box art. Filter by platform, search titles, and star games to follow them. Starred games appear under **Upcoming favorites** with a countdown, and stay listed under **Released favorites** after they come out, even once that year's schedule leaves the calendar. Favorites are saved on this device.
 
 The catalog, critic scores and time to beat come from [IGDB](https://www.igdb.com/). `scripts/update_game_catalog.py` builds `data/games-catalog/` during the daily Pages workflow from games with enough ratings, critic reviews or pre-release interest, split into a search index and detail files so the page only downloads what it needs. It needs a Twitch developer application: register one at the [Twitch developer console](https://dev.twitch.tv/console) (OAuth redirect URL `http://localhost`, category Website Integration, confidential client), then add its Client ID and Client Secret as repository secrets named `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`. Until then the catalog is skipped and games are added by hand. Critic scores are IGDB's average of external critic reviews; time-to-beat figures come from IGDB player submissions.

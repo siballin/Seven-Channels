@@ -218,6 +218,7 @@ function createThisWeek({ signal } = {}) {
     ["idol birthdays", thisWeekIdolBirthdays(days, signal).then((list) => ({ items: list, hidden: 0 }))],
     ["races", (typeof motorsportsThisWeek === "function" ? motorsportsThisWeek(days) : Promise.resolve([])).then((list) => ({ items: list, hidden: 0 }))],
     ["game releases", thisWeekGames(days, signal)],
+    ["gaming showcases", (typeof gamesShowcasesThisWeek === "function" ? gamesShowcasesThisWeek(days) : Promise.resolve([])).then((list) => ({ items: list, hidden: 0 }))],
     ["movie releases", thisWeekMovies(days, signal)]
   ];
   Promise.allSettled(sources.map(([, promise]) => promise)).then((results) => {

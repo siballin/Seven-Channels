@@ -67,6 +67,17 @@ function wrappedStats(year, { entries = [], bowling = {}, live = {}, creator = {
     return [channel, { count: list.length, top: top(list), titles: list.map((entry) => entry.title).slice(0, 12) }];
   }));
 
+  // Play time from Video Games sessions logged during the year.
+  const play = new Map();
+  for (const entry of entries.filter((item) => item.channel === "games" && Array.isArray(item.sessions))) {
+    for (const session of entry.sessions) {
+      if (!String(session?.date || "").startsWith(String(year)) || !Number.isFinite(session.minutes)) continue;
+      play.set(entry.title, (play.get(entry.title) || 0) + session.minutes);
+    }
+  }
+  const played = [...play].sort((a, b) => b[1] - a[1]);
+  stats.playTime = { minutes: played.reduce((sum, [, minutes]) => sum + minutes, 0), top: played.slice(0, 3).map(([title, minutes]) => ({ title, hours: Math.round(minutes / 6) / 10 })) };
+
   const settled = entries.filter((entry) => entry.channel === "betting" && inYear(typeof bettingDateOf === "function" ? bettingDateOf(entry) : entry.updatedAt));
   const betting = typeof bettingStats === "function" ? bettingStats(settled) : null;
   stats.betting = betting && betting.bets ? {
@@ -139,6 +150,7 @@ function wrappedSummaryText(stats) {
     const block = stats.media[channel];
     if (block.count) lines.push(`${emoji} ${block.count} ${noun}${block.count === 1 || noun === "anime" ? "" : "s"} finished${block.top[0] ? `, top: ${block.top[0].title}` : ""}`);
   }
+  if (stats.playTime?.minutes) lines.push(`🕹️ ${Math.round(stats.playTime.minutes / 60)} hours of games logged${stats.playTime.top[0] ? `, most: ${stats.playTime.top[0].title}` : ""}`);
   if (stats.music.producers.length) lines.push(`🎛️ Followed ${stats.music.producers.length} producer${stats.music.producers.length === 1 ? "" : "s"} in Music Lab`);
   if (stats.betting.bets) lines.push(`🎲 ${stats.betting.wins}-${stats.betting.losses}${stats.betting.pushes ? `-${stats.betting.pushes}` : ""} betting, ${stats.betting.net >= 0 ? "+" : ""}${wrappedNumber(stats.betting.net, 2)} units`);
   if (stats.creator.published) lines.push(`📹 ${stats.creator.published} upload${stats.creator.published === 1 ? "" : "s"} published`);
@@ -211,6 +223,10 @@ function createYearInReview(year, entries) {
       bw.twoHundreds ? `${bw.twoHundreds} game${bw.twoHundreds === 1 ? "" : "s"} of 200 or more` : "",
       trend
     ], "#bowling/stats"));
+  }
+  if (stats.playTime?.minutes) {
+    grid.append(wrappedCard("games", "Play time", Math.round(stats.playTime.minutes / 60), "hours played",
+      stats.playTime.top.map((item, index) => `${index + 1}. ${item.title} (${item.hours}h)`), "#games"));
   }
   for (const [channel, label, noun] of [["movies", "Movies", "watched"], ["anime", "Anime", "finished"], ["games", "Video Games", "finished"], ["kpop", "K-Pop", "played out"]]) {
     const block = stats.media[channel];
