@@ -26,7 +26,13 @@ let gamesCalendarState = { month: "", day: "", platform: "all", query: "" };
 const gamesDataCache = new Map();
 
 function gamesView() {
-  return /^#games\/releases$/.test(location.hash) ? "releases" : "log";
+  const hash = location.hash;
+  if (/^#games\/releases$/.test(hash)) return "releases";
+  if (/^#games\/discover$/.test(hash)) return "discover";
+  if (/^#games\/top$/.test(hash)) return "top";
+  if (/^#games\/esports$/.test(hash)) return "esports";
+  if (/^#games\/game\/\d+$/.test(hash)) return "game";
+  return "log";
 }
 
 function gamesToday() {
@@ -83,7 +89,7 @@ function gamesFormatDate(value, options = { month: "short", day: "numeric", year
 function gamesTabs(active) {
   const nav = element("nav", "games-tabs");
   nav.setAttribute("aria-label", "Video Games sections");
-  for (const [view, label, href] of [["log", "My games", "#games"], ["releases", "Release calendar", "#games/releases"]]) {
+  for (const [view, label, href] of [["log", "My games", "#games"], ["discover", "Discover", "#games/discover"], ["top", "My top 10", "#games/top"], ["esports", "Esports", "#games/esports"], ["releases", "Release calendar", "#games/releases"]]) {
     const link = element("a", "", label);
     link.href = href;
     if (view === active) link.setAttribute("aria-current", "page");
@@ -598,6 +604,7 @@ function gamesCard(entry) {
   }
   actions.append(remove);
   body.append(price, actions);
+  if (typeof gamesCardExtras === "function") gamesCardExtras(entry, body, actions);
   card.append(body);
   return card;
 }
@@ -1013,10 +1020,33 @@ function createGamesHub() {
     root.append(gamesCalendar());
     return root;
   }
+  if (view === "discover" && typeof gamesDiscover === "function") {
+    root.append(gamesDiscover());
+    return root;
+  }
+  if (view === "esports" && typeof gamesEsportsPage === "function") {
+    root.append(gamesEsportsPage());
+    return root;
+  }
+  if (view === "top" && typeof gamesTopPage === "function") {
+    root.append(gamesTopPage());
+    return root;
+  }
+  if (view === "game" && typeof gamesGamePage === "function") {
+    root.append(gamesGamePage(location.hash.split("/").pop()));
+    return root;
+  }
   const list = gamesEntries();
   const layout = element("div", "games-layout");
   const main = element("div", "games-main");
-  main.append(gamesDashboard(list), gamesForm(list), gamesLists(list));
+  main.append(gamesDashboard(list));
+  if (typeof gamesPicker === "function") {
+    const picker = gamesPicker(list);
+    if (picker) main.append(picker);
+  }
+  if (typeof gamesPlayPanel === "function") main.append(gamesPlayPanel(list));
+  if (typeof gamesSteamPanel === "function") main.append(gamesSteamPanel());
+  main.append(gamesForm(list), gamesLists(list));
   layout.append(main, gamesSidebar());
   root.append(layout);
   return root;

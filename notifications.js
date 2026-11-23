@@ -1,14 +1,15 @@
 // Browser notifications while the site is open (opt-in, from the Guide's This week panel).
 // Checks once a minute after load and then every 30 minutes: new shows announced for followed artists
 // (Ticketmaster, needs your key in Live Events settings), K-pop releases out today from followed artists,
-// favorite game releases out today, and today's own plans (concerts, league night, planned uploads).
+// favorite game releases and gaming showcases today, game price alerts, and today's own plans (concerts, league night, planned uploads).
 // Each alert is sent once; what was sent is remembered on this device only.
 
 const notifyStorageKey = "seven-channels.notifications.v1";
 const notifyTypes = [
   ["tours", "New shows for artists you follow", "Uses Ticketmaster; near you when a location is set in Live Events."],
   ["kpop", "K-pop releases and birthdays today", "From artists you follow on the K-Pop channel."],
-  ["games", "Favorite game releases out today", "Games you starred in the release calendar."],
+  ["games", "Game releases, showcases and esports today", "Games you starred in the release calendar, gaming shows, and matches for esports teams you follow."],
+  ["deals", "Game price alerts", "When a game you set a price alert on drops to your price (PC stores, via CheapShark)."],
   ["today", "Today’s plans", "Concerts, league night, planned uploads and race days, on the day."]
 ];
 const notifyInterval = 30 * 60000;
@@ -165,7 +166,10 @@ async function notifyCheck({ force = false } = {}) {
       alerts.today.push(...races.map((race) => ({ key: `race:${race.label}:${race.title}:${today}`, title: `Race day: ${race.label} ${race.title}`,
         body: [race.note, race.time ? `Starts ${notifyTime(race.time)}` : ""].filter(Boolean).join(" · "), href: race.href })));
     }
+    if (state.types.games && typeof gamesShowcaseAlerts === "function") alerts.games.push(...await gamesShowcaseAlerts(today));
+    if (state.types.games && typeof gamesEsportsAlerts === "function") alerts.games.push(...await gamesEsportsAlerts(today));
     const list = [...(state.types.today ? alerts.today : []), ...(state.types.kpop ? alerts.kpop : []), ...(state.types.games ? alerts.games : [])];
+    if (state.types.deals && typeof gamesPriceAlertCheck === "function") list.push(...await gamesPriceAlertCheck().catch(() => []));
     if (state.types.tours) list.push(...await notifyTourAlerts(state));
     // Don't flood: at most five at once; the rest are marked sent and summed up.
     const fresh = list.filter((alert) => !state.sent[alert.key]);
