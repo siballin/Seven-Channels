@@ -1,72 +1,132 @@
-== catalog index head
-{"generatedAt":"2026-11-23T03:43:18+00:00","count":20854,"shards":64,"source":"IGDB","sourceUrl":"https://www.igdb.com/","games":[[117500,"#Blud",2024,"co9oug"],[9888,"#IDARB",2015,"co1wlw"],[116194,"'83",2026,"cobs6p"],[93548,"...Iru!",1998,"co40b7"],[307541,".45 Parabellum Bloodhound",null,"co8j7p
+== 2026 in video games: 2:Top-rated games | 3:Critically acclaimed games | 3:Major awards | 2:Major events | 2:Notable deaths | 2:Hardware releases | 2:Games released in 2026 | 2:Cancelled games | 2:Discontinued games | 2:Video game-based film and television releases | 2:Notes | 2:References
 
-== catalog detail
-{"5":{"name":"Baldur's Gate","released":"1998-12-21","cover":"co20gb","platforms":["Linux","Mac","PC","iOS"],"genres":["Role-playing (RPG)"],"url":"https://www.igdb.com/games/baldur-s-gate","rating":85,"ratingCount":356},"69":{"name":"Master of Orion III","released":"2003-02-25","cover":"co3c5p","platforms":["Mac","PC"],"genres":["Strategy","Turn-based strategy (TBS)"],"url":"https://www.igdb.com/games/master-of-orion-iii","criticScore":55,"criticCount":2,"rating":44,"ratingCount":14},"325":{"name":"Hellgate: London","released":"2007-10-31","cover":"co218m","platforms":["PC"],"genres":["Role-playing (RPG)","Shooter"],"url":"https://www.igdb.com/games/hellgate-london","criticScore":70,"criticCount":2,"rating":75,"ratingCount":77},"389":{"name":"Final Fantasy XIII","released":"2009-12-17","c
+-- section Major events:
+==Major events==
+{{Table alignment}}
+{| class="wikitable"
+! Month
+! Day(s)
+! Event
+|-
+| rowspan="2" | January
+| 13
+| [[Meta Platforms|Meta]] announced the closure of the studios [[Armature Studio]], [[Sanzaru Games]], and [[Twisted Pixel]]. In addition, they announced more than 1,000 jobs would be laid off in their [[Reality Labs]] business.<ref>{{Cite web|url=https://www.gematsu.com/2026/01/meta-shuts-down-armature-studio-sanzaru-games-and-twisted-pixel|title=Meta shuts down Armature Studio, Sanzaru Games, and Twisted Pixel|last=Romano|first=Sal|date=January 13, 2026|website=Gematsu|access-date=January 14, 2026|archive-date=April 10, 2026|archive-url=https://web.archive.org/web/20260410143553/https://www.gematsu.com/2026/01/meta-shuts-down-armature-studio-sanzaru-games-and-twisted-pixel|url-status=live}}</ref><ref name=":3">{{Cite web|url=https://www.bloomberg.com/news/articles/2026-01-13/meta-begins-jobs-cuts-after-shifting-focus-from-metaverse-to-phones|title=Meta Begins Jobs Cuts as It Shifts from Metaverse to AI Devices|last=Wagner|first=Kurt|date=January 13, 2026|website=[[Bloomberg News|Bloomberg]]|access-date=January 14, 2026|url-access=subscription}}</ref>
+|-
+| 21
+| [[Ubisoft]] announced a major restructuring into five creative houses.<ref name="variety houses">{{cite news | url = https://variety.com/2026/gaming/news/prince-of-persia-remake-canceled-ubisoft-reorg-layoffs-1236636684/ | title = Ubisoft Shake-Up: Layoffs, Studio Closures Begin in Major Reorg; Six Games Canceled, Including 'Prince of Persia' Remake | first = Jennifer | last = Maas | date = January 21, 2026 | accessdate = January 21, 2026 | work = [[Variety (magazine)|Variety]] | archive-date = January 21, 2026 | archive-url = https://web.archive.org/web/20260121173747/https://variety.com/2026/gaming/news/prince-of-persia-remake-canceled-ubisoft-reorg-layoffs-1236636684/ | url-status = live }}</ref>
+|-
+| rowspan="3" | February
+| 10–12
+| The [[Academy of Interactive Arts & Sciences]] hosted the 2026 D.I.C.E. Summit and the [[29th Annual D.I.C.E. Awards]] at the [[Aria Resort and Casino]] in [[Las Vegas, Nevada]].<ref name=":2">{{#invoke:cite|web |url=https://web.cvent.com/event/106a63af-3888-4d62-a678-68b13e68528d/summary |title=Home – 2026 D.I.C.E. Summit & 29th Annual D.I.C.E. Awards |access-date=October 25, 2025 |website=interactive.org |publisher=[[Academy of Interactive Arts & Sciences]]}}</ref>
+|-
+| 19
+| [[Sony Interactive Entertainment]] shut down [[Bluepoint Games]].<ref>{{cite web|url=https://www.ign.com/articles/playstation-shuts-down-demons-souls-shadow-of-the-colossus-remake-studio-bluepoint-games|title=PlayStation Shuts Down Demon's Souls, Shadow of the Colossus Remake Studio Bluepoint Games|first=Rebekah|last=Valentine|work=[[IGN]]|date=February 20, 2026|accessdate=September 12, 2026}}</ref>
+|-
+| 20
+| [[Xbox (division)|Microsoft Gaming]]'s [[Phil Spencer (business executive)|Phil Spencer]] and [[Sarah Bond (executive)|Sarah Bond]] left the company, with [[Asha Sharma]] replacing Spencer, and Matt Booty promoted to chief content officer. The division was later rebranded to simply Xbox.<ref>{{Cite web|url=https://www.ign.com/articles/phil-spencer-retiring-sarah-bond-out-matt-booty-promoted-as-microsoft-ai-exec-asha-sharma-named-new-xbox-boss-exclusive|title=Phil Spencer Retiring, Sarah Bond Out, Matt Booty Promoted as Microsoft AI Exec Asha Sharma Named New Xbox Boss – Exclusive|last=McCaffrey|first=Ryan|date=February 20, 2026|website=[[IGN]]|access-date=February 20, 2026|archive-date=March 23, 2026|archive-url=https://web.archive.org/web/20260323001845/https://www.ign.com/articles/phil-spencer-retiring-sarah-bond-out-matt-booty-promoted-as-microsoft-ai-exec-asha-sharma-named-new-xbox-boss-exclusive|url-status=live}}</ref><ref name="VarietyXboxRebrand2026">{{cite web |last1=Spangler |first1=Todd |title=Microsoft Gaming Changes Name to Xbox: 'Our New North Star Will Be Daily Active Players,' Execs Say in Staff Memo |url=https://variety.com/2026/digital/news/microsoft-gaming-changes-name-to-xbox-1236729080/ |website=[[Variety (magazine)|Variety]] |access-date=April 23, 2026 |date=April 23, 2026 |archive-date=April 23, 2026 |archive-url=https://web.archive.org/web/20260423195121/https://variety.com/2026/digital/news/microsoft-gaming-changes-name-to-xbox-1236729080/ |url-status=live }}</ref>
+|-
+| rowspan="2" | March
+| 9–21
+| The [[Game Developers Conference]], branded as "Festival of Gaming", was held in [[San Francisco, California]].<ref name="gibiz 2026">{{cite web | url = https://www.gamesindustry.biz/game-developer-conference-rebrands-as-gdc-festival-of-gaming-the-industry-is-changing-and-so-are-we | title = Game Developer Conference rebrands as GDC Festival of Gaming: "the industry is changing and so are we" | first = Vikki | last = Blake | date = September 25, 2025 | accessdate = September 28, 2025 | work = [[GamesIndustry.biz]] | archive-date = September 28, 2025 | archive-url = https://web.archive.org/web/20250928024019/h
 
-== gamerpower
-14 items
-[
- {
-  "id": 3854,
-  "title": "Lonesome Village (Mobile) Giveaway",
-  "worth": "$4.99",
-  "thumbnail": "https://www.gamerpower.com/offers/1/6aff20a09cb65.jpg",
-  "image": "https://www.gamerpower.com/offers/1b/6aff20a09cb65.jpg",
-  "description": "Chants of Sennaar (Mobile version) is free until November 26 on the Epic Games Store App for iPhone, iPad, and Android.\r\n\r\nNote: May not be available in all regions.",
-  "instructions": "1. Click the button using your phone to visit the Epic Games Store mobile page.\r\n2. Install the Epic Games Store App on your Android or iOS device.\r\n3. Open the App, scroll down to the \"Free Games\" section and click on the giveaway banner.\r\n4. Install the game and have fun!",
-  "open_giveaway_url": "https://www.gamerpower.com/open/lonesome-village-mobile-giveaway",
-  "published_date": "2026-11-19 11:15:28",
-  "type": "Game",
-  "platforms": "Android, iOS",
-  "end_date": "2026-11-26 23:59:00",
-  "users": 7660,
-  "status": "Active",
-  "gamerpower_url": "https://www.gamerpower.com/lonesome-village-mobile-giveaway",
-  "open_giveaway": "https://www.gamerpower.com/open/lonesome-village-mobile-giveaway"
- },
- {
-  "id": 3853,
-  "title": "Mark of the Deep (Epic Games) Giveaway",
-  "worth": "$19.99",
-  "thumbnail": "https://www.gamerpower.com/offers/1/6aff1d0e4942d.jpg",
-  "image": "https://www.gamerpower.com/offers/1b/6aff1d0e4942d.jpg",
-  "description": "Score Mark of the Deep for free on Epic Games Store! Mark of the Deep is a pirate-themed adventure game with elements from Metroidvania and Souls-Like games.",
-  "instructions": "1. Click the button to visit the giveaway page.\r\n2. Login into your Epic Games Store account.\r\n3. Click the button to add the game to your library",
-  "open_giveaway_url": "https://www.gamerpower.com/open/mark-of-the-deep-epic-games-giveaway",
-  "published_date": "2026-11-19 11:00:14",
-  "type": "Game",
-  "platforms": "PC, Epic Games Store",
-  "end_date": "2026-11-26 23:59:00",
-  "users": 15770,
-  "status": "Active",
-  "gamerpower_url": "https://www.gamerpower.com/mark-of-the-deep-epic-games-giveaway",
-  "open_giveaway": "https://www.gamerpower.com/open/mark-of-the-deep-epic-games-giveaway"
- }
-]
-platforms: ['Android, iOS', 'PC', 'PC, DRM-Free', 'PC, Epic Games Store', 'PC, Itch.io, DRM-Free', 'PC, Steam', 'VR']
+== 2027 in video games: 2:Top-rated games | 3:Critically acclaimed games | 2:Major events | 2:Hardware releases | 2:Games released in 2027 | 2:Discontinued games | 2:Video game-based film and television releases | 2:References
 
-== gamepass all console
-[{"siglId":"f6f1f99f-9b49-4ccd-b3bf-4d9767a77f5e","title":"All Console Games","description":"Explore every game included with XBOX Game Pass Console","requiresShuffling":"False","imageUrl":"https://cms-assets.xboxservices.com/assets/72/73/727315ef-a870-42f3-9e15-1a31555c0676.png"},{"id":"9P8LR42PTRGJ"},{"id":"9NGLST31DG26"},{"id":"BWVBNCMF22ZK"},{"id":"9P4NV23Q6QC2"},{"id":"9NR6NJ401NBS"},{"id":"9P8NKVVB0XQJ"},{"id":"9P59J86GHDGL"},{"id":"9N42SSSX2MTG"},{"id":"9PHH1ZWRSZ41"},{"id":"9NPKGVXPFRSX"},{"id":"9PDC9X7BKZR3"},{"id":"BSNZHRCKC13J"},{"id":"9MX7DMHK13SC"},{"id":"9NG07QJNK38J"},{"id":"9PK
+-- section Major events:
+==Major events==
+{{Table alignment}}
+{| class="wikitable"
+! Date
+! Event
+! {{refh}}
+|-
+| February
+| [[Nintendo]] will end production of all [[Nintendo Switch]] hardware in Europe, including the [[Nintendo Switch Lite]] and [[Nintendo Switch OLED Model|OLED Model]].
+| <ref>{{cite web | url = https://www.eurogamer.net/nintendo-switch-2-replaceable-batteries-revision-plans-detailed | title = Nintendo has detailed rollout plans for Switch 2 product revisions in Europe with replaceable batteries, and Switch 1 consoles are being discontinued | first = Fran | last = Ruiz | date = July 6, 2026 | accessdate = July 6, 2026 | work = [[Eurogamer]] | archive-date = July 6, 2026 | archive-url = https://web.archive.org/web/20260706153649/https://www.eurogamer.net/nintendo-switch-2-replaceable-batteries-revision-plans-detailed | url-status = live }}</ref>
+|}
+<!-- ==Notable deaths== -->
 
-== gamepass pc all
-[{"siglId":"fdd9e2a7-0fee-49f6-ad69-4354098401ff","title":"All PC Games","description":"Explore every game included with PC Game Pass","requiresShuffling":"False","imageUrl":"https://cms-assets.xboxservices.com/assets/72/73/727315ef-a870-42f3-9e15-1a31555c0676.png"},{"id":"9P8LR42PTRGJ"},{"id":"9NNM7PKZN3JF"},{"id":"9NGLST31DG26"},{"id":"9P4NV23Q6QC2"},{"id":"9NR6NJ401NBS"},{"id":"9P8NKVVB0XQJ"},{"id":"9P59J86GHDGL"},{"id":"9NJWTJSVGVLJ"},{"id":"9N42SSSX2MTG"},{"id":"9P91FNMH1GG0"},{"id":"9N94NCGM1Q2N"},{"id":"9NPKGVXPFRSX"},{"id":"9PDC9X7BKZR3"},{"id":"9N1M64W9XZQ7"},{"id":"9NG07QJNK38J"},{"i
+==Hardware releases==
 
-== gamepass coming soon
-[{"siglId":"095bda36-f5cd-43f2-9ee1-0a72f371fb96","title":"Coming to Game Pass","description":"Discover your next favorite game","requiresShuffling":"False","imageUrl":"https://cms-assets.xboxservices.com/assets/72/73/727315ef-a870-42f3-9e15-1a31555c0676.png"},{"id":"9NV8BWGH15GN"},{"id":"9NR13RF1V2WV"},{"id":"9NMBDPRKK1XF"},{"id":"9NL8MF491NRZ"},{"id":"9N5NPMGBPCCR"},{"id":"9P8XK6X57GBF"},{"id":"9NW6JK0ZC9J6"},{"id":"9N40DK5N4LD4"},{"id":"9PMN4DGRT1LN"},{"id":"9NFW93G1GFXG"}]
+{{Table alignment}}
+{| class="wikitable col-1center"
+! Date
+! Console
+! Manufacturer
+! {{refh}}
+|-
+| {{abbr|Q|Quarter}}2<!--see [[MOS:SEASON]]-->
+| [[Meta VR Glasses]]
+| [[Reality Labs]]
+| <ref>{{cite web |last=Gibbs |first=Samuel |title=Meta debuts no-camera smart glasses and virtual reality spectacles |url=https://www.theguardian.com/technology/2026/sep/23/meta-smart-vr-glasses |website=[[The Guardian]] |date=September 24, 2026 |access-date=September 24, 2026 |quote=The Meta VR glasses will cost $1,299.99 and will be available from spring 2027 in North America, Europe and Asia.}}</ref>
+|}
 
-== gamepass leaving soon
-[{"siglId":"393f05bf-e596-4ef6-9487-6d4fa0eab987","title":"Leaving soon","description":"Don't want the fun to end? Save on these games now.","requiresShuffling":"False","imageUrl":"https://cms-assets.xboxservices.com/assets/72/73/727315ef-a870-42f3-9e15-1a31555c0676.png"},{"id":"9MT19Q3CRMQZ"},{"id":"9MX7DMHK13SC"},{"id":"9MXHL3TT792F"},{"id":"9NFQ1XMXDLN6"},{"id":"9NKFS43DLFFL"},{"id":"9NZG72SH3H4W"},{"id":"9P88K6NQW12H"},{"id":"C20WW4W29FQ1"}]
+==Games released in 2027==
+{{Main|List of video games released in 2027}}
 
-== gamepass recently added
-[{"siglId":"f13cf6b4-57e6-4459-89df-6aec18cf0538","title":"Recently added","description":"With games added all the time, you'll always have something new to play","requiresShuffling":"False","imageUrl":"https://cms-assets.xboxservices.com/assets/72/73/727315ef-a870-42f3-9e15-1a31555c0676.png"},{"id":"9N3P3TRJGWV0"},{"id":"BTHC2G28X9H4"},{"id":"9MTGCZ84M503"},{"id":"9P1S707BPW6W"},{"id":"9NWWL1CBWFCG"},{"id":"9N5DDTDLTWCL"},{"id":"9MZZWGTF7V65"},{"id":"9NRBW3FJSJWT"},{"id":"9P743P6195Q5"},{"id":"9N74KFV7253H"},{"id":"9N8RS7CW8CGL"},{"id":"9N8RKWJT32L4"},{"id":"9N9K5QP9G3GL"},{"id":"9MW4MFG0192L
+<!-- ==Cancelled games==
+{| class="wikitable sortable col-1center" style=width:100%
+! Title
+! class="unsortable" | Platform(s)
+! class="unsortable" | Genre(s)
+! Developer(s)
+! Publisher(s)
+! Month cancelled
+! class="unsortable" | {{refh}}
+|} -->
+==Discontinued games==
 
-== displaycatalog
-{"title": "PAW Patrol\u2122: Dino World", "images": [["SuperHeroArt", "//store-images.s-microsoft.com/image/apps.173.14003155671712527.e2286374-c296-44cb-8b6c-1bb5b97b583a.5e64d97c-fef0-4890-869e-572b86e75412"], ["TitledHeroArt", "//store-images.s-microsoft.com/image/apps.29964.14003155671712527.e2286374-c296-44cb-8b6c-1bb5b97b583a.78463401-4b70-40c1-8a74-4368f5193a15"], ["FeaturePromotionalSquareArt", "//store-images.s-microsoft.com/image/apps.37478.14003155671712527.e2286374-c296-44cb-8b6c-1bb5b97b583a.1853456c-b630-4d6f-8a5d-f5e86797b8d0"], ["Poster", "//store-images.s-microsoft.com/image/apps.23698.14003155671712527.e2286374-c296-44cb-8b6c-1bb5b97b583a.6e26181c-b9e8-4402-8d4b-77f3dcadcd79"], ["BoxArt", "//store-images.s-microsoft.com/image/apps.6586.14003155671712527.e2286374-c296-44cb-8b6c-1bb5b97b583a.541483cb-d84e-4407-a531-08c76a595a07"], ["Screenshot", "//store-images.s-microsoft.com/image/apps.3044.14003155671712527.22fc8ae7-1097-4ceb-a3ba-1be24053c586.9b332bc2-8f52-49e3-afb8-22b307bb1d52"], ["Screenshot", "//store-images.s-microsoft.com/image/apps.3044.14003155671712527.22fc8ae7-1097-4ceb-a3ba-1be24053c586.9b332bc2-8f52-49e3-afb8-22b307bb1d52"], ["Screenshot", "//store-images.s-microsoft.com/image/apps.48805.14003155671712527.22fc8ae7-1097-4ceb-a3ba-1be24053c586.f6abf4ac-03b6-439c-91d8-b410ea6805f7"]], "keys": ["LastModifiedDate", "LocalizedProperties", "MarketProperties", "ProductASchema", "ProductBSchema", "ProductId", "Properties", "AlternateIds", "DomainDataVersion", "IngestionSource", "IsMicrosoftProduct", "PreferredSkuId", "ProductType", "ValidationData", "MerchandizingTags", "PartD", "SandboxId", "ProductFamily", "SchemaVersion", "IsSandboxedProduct", "ProductKind", "ProductPolicies", "DisplaySkuAvailabilities"]}
-
-== wiki 2026 in video games
-len 133066 events at -1
-
-
-== wiki 2027 in video games
-len 14464 events at -1
+Games highlighted in '''bold''' indicate that the full game will be shut down.{{Table alignment}}
+{| class="wikitable sortable col-1center" style="width:100%"
+! Title
+! class="unsortable" | Platform(s)
+! Genre(s)
+! Developer(s)
+! Publisher(s)
+! Shutdown date
+! class="unsortable" | {{refh}}
+|-
+| '''''[[New World (video game)|New World]]'''''
+| [[Windows|WIN]], [[PS5]], [[Xbox Series X/S|XBX/S]]
+| rowspan="2" | [[MMORPG]]
+| [[Amazon Games Orange County]]
+| [[Amazon Games]]
+| {{dts|January 31, 2027}}
+| <ref>{{cite news |last=Notis |first=Ari |title=Amazon's New World MMO is the latest game to get delisted |url=https://www.polygon.com/new-world-aeternum-shutting-down-delisted-offline/ |work=Polygon |date=January 15, 2026 |access-date=July 15, 2026}}</ref>
+|-
+| {{sort|Kingdom of the Winds: Yeon|'''''[[Nexon#Games|The Kingdom of the Winds: Yeon]]'''''}}
+| [[Windows|WIN]], [[iOS]], [[Android (operating system)|DROID]]
+| Supercat
+| [[Nexon]]
+| {{dts|February 12, 2027}}
+| <ref>{{cite web |last=Yoon |first=Seoho "Ruudi" |title='Nexus: The Kingdom of the Winds: Yeon' to End Service on February 12, 2027 |url=https://www.invenglobal.com/articles/24686/nexus-the-kingdom-of-the-winds-yeon-to-end-service-on-february-12-2027 |website=[[:ko:인벤|Inven]]Global |date=August 12, 2026 |access-date=August 13, 2026}}</ref>
+|-
+| '''''[[Idoly Pride]]'''''
+| [[iOS]], [[Android (operating system)|DROID]]
+| [[Rhythm game|Rhythm]]
+| colspan="2" | QualiArts
+| {{dts|March 1, 2027}}
+| <ref>{{Cite web |last= |first= |date=November 11, 2026 |title=「IDOLY PRIDE」，2027年3月1日をもってサービス終了。オフライン版へアップデート予定 |url=https://www.4gamer.net/games/547/G054739/20261030018/ |access-date=2026-11-11 |website=4Gamer |language=ja}}</ref>
+|-
+| '''''[[PGA Tour 2K23]]'''''
+| [[Windows|WIN]], [[PS4]], [[PS5]], [[Xbox One|XBO]], [[Xbox Series X/S|XBX/S]]
+| [[Sports video game|Sports]]
+| [[HB Studios]]
+| [[2K (company)|2K]]
+| {{dts|March 12, 2027}}
+| <ref>{{cite web |last=Wright |first=Steve |title=PGA Tour 2K23 servers to close in March 2027 |url=https://stevivor.com/news/pga-tour-2k23-servers-to-close-in-march-2027/ |website=Stevivor |date=April 14, 2026 |access-date=July 15, 2026 |quote=PGA Tour 2K23 servers will go offline on 12 March 2027, 2K has today announced.}}</ref>
+|-
+| '''''[[Pokemon Unite]]'''''
+| [[Nintendo Switch|NS]], [[Android (operating system)|DROID]], [[iOS]]
+| [[MOBA]]
+| [[TiMi Studio Group]] 
+| {{vgrelease|CN|[[Tencent Games]]|WW|[[The Pokémon Company]]}}
+| {{dts|March 23, 2027}}
+| <ref>{{cite web |last=Mejia |first=Ozzie |title=Pokemon Unite will end service in March 2027 |url=https://www.shacknews.com/article/151155/pokemon-unite-end-of-service-march-2027 |website=[[Shacknews]] |date=October 26, 2026 |access-date=October 26, 2026|quote=For now, Pokemon Unite service will officially end on March 23, 2027.}}</ref>
+|-
+| '''''[[Lego 2K Drive]]'''''
+| [[Windows|WIN]], [[Nintendo Switch|NS]], [[PS4]], [[PS5]], [[Xbox One|XBO]], [[Xbox Series X/S|XBX/S]]
+| [[Racing video game|Racing]]
+| [[Visual Concepts]]
+| [[2K (company)|2K]]
+| {{dts|May 31, 2027}}
+| <ref>{{cite web |last=Duckworth |first=Joshua |title=2K Game is Shutting Down on May 19 |ur
