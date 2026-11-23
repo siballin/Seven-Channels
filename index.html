@@ -4,6 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#eef1f5">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="48x48" href="assets/app/favicon-48.png">
+  <link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Seven Channels">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Seven Channels — Your personal guide</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3573,6 +3580,47 @@
       .dial ul { gap: 3px; }
       .dial a, .dial a[data-channel] { padding: 6px 7px; gap: 5px; font-size: .8rem; }
     }
+    /* Soccer lineups: headshots and match ratings */
+    .soccer-pitch-line { flex-wrap: nowrap; gap: 2px; }
+    .soccer-pitch-line li { gap: 2px; flex: 1 1 0; max-width: 76px; min-width: 0; }
+    .soccer-subs-used { flex-wrap: wrap; }
+    .soccer-subs-used li { flex: 0 0 64px; }
+    .soccer-avatar-wrap { position: relative; display: inline-grid; place-items: center; }
+    .soccer-avatar { display: inline-grid; place-items: center; position: relative; }
+    .soccer-avatar .soccer-jersey { width: 32px; height: 32px; font-size: .78rem; }
+    .soccer-face { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: top; background: var(--screen); border: 1px solid var(--line); }
+    .soccer-avatar-number { position: absolute; left: -4px; bottom: -2px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 8px; background: var(--screen); border: 1px solid var(--line); font-size: .58rem; font-weight: 700; line-height: 13px; text-align: center; }
+    .soccer-rating { position: absolute; left: calc(100% - 4px); top: -6px; padding: 1px 4px; border-radius: 6px; font: 700 .62rem/1.3 var(--data, inherit); color: #fff; background: #8a8f98; }
+    .soccer-rating.is-poor { background: #d9534f; }
+    .soccer-rating.is-ok { background: #d98a1f; }
+    .soccer-rating.is-good { background: #2e9e57; }
+    .soccer-rating.is-great { background: #2f6fd6; }
+    .soccer-rating.is-best::before { content: "★ "; }
+    .soccer-rating { white-space: nowrap; z-index: 1; }
+    .soccer-lineup .soccer-pitch { padding: 12px 18px 10px 8px; }
+    .soccer-player-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; font-size: .68rem; }
+    .soccer-subs-used { justify-content: flex-start; gap: 8px 6px; padding: 4px 6px 0; }
+    .soccer-list li .soccer-avatar-wrap { margin-right: 14px; }
+    .soccer-rating-note { margin: -2px 0 8px; font-size: .75rem; }
+    .soccer-centre-main, .soccer-centre-side { grid-template-columns: minmax(0, 1fr); }
+    .soccer-section { min-width: 0; }
+    /* Team follows on every league's game cards */
+    .league-game-wrap { display: grid; gap: 4px; min-width: 0; }
+    .league-game-wrap .league-game { height: 100%; }
+    .league-game-wrap.has-followed-team .league-game { box-shadow: inset 3px 0 0 var(--signal); }
+    .league-game-wrap.has-followed-team .league-game[aria-pressed="true"] { box-shadow: inset 3px 0 0 var(--signal), 0 0 0 1px var(--signal); }
+    .league-follow { display: flex; gap: 6px; flex-wrap: wrap; }
+    .league-follow .team-follow-toggle, .nfl-scoreboard .team-follow-toggle { min-height: 0; padding: 2px 9px; font-size: .72rem; border-radius: 999px; }
+    .sports-widget-others { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 8px 0 0; }
+    .sports-widget-others .followed-team-chip { cursor: pointer; font-size: .72rem; }
+    /* Installable app */
+    .app-install-button[hidden], .offline-pill[hidden] { display: none; }
+    .offline-pill { align-self: center; padding: 4px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; background: color-mix(in srgb, #d98a1f 22%, transparent); border: 1px solid #d98a1f; color: var(--ink); }
+    .install-dialog { max-width: min(420px, calc(100vw - 32px)); border: 1px solid var(--line); border-radius: 16px; background: var(--panel); color: var(--ink); padding: 20px; }
+    .install-dialog::backdrop { background: rgb(0 0 0 / .5); }
+    .install-dialog h2 { margin: 0 0 8px; font-size: 1.1rem; }
+    .install-dialog form { display: flex; justify-content: end; margin-top: 12px; }
+    @media (display-mode: standalone) { .app-install-button { display: none; } }
   </style>
 </head>
 <body>
@@ -3588,6 +3636,8 @@
           <small>YOUR LOCAL TIME</small>
         </div>
         <button type="button" class="secondary site-search-button" id="site-search-open" aria-keyshortcuts="/ Control+K">Search <kbd aria-hidden="true">/</kbd></button>
+        <button type="button" class="secondary app-install-button" id="app-install" hidden>Install app</button>
+        <span class="offline-pill" id="offline-pill" role="status" hidden>Offline · showing saved data</span>
         <form id="sync-panel" class="sync-panel" aria-label="Cross-device account" hidden>
           <div class="sync-auth-buttons">
             <button type="button" class="secondary" data-auth-toggle="sign-in" aria-expanded="false" aria-controls="sync-credentials">Sign in <span aria-hidden="true">▾</span></button>
@@ -3663,6 +3713,12 @@
     <div id="notice" class="notice" role="status" hidden></div>
     <div id="view"></div>
   </main>
+  <dialog id="install-dialog" class="install-dialog" aria-labelledby="install-dialog-title">
+    <h2 id="install-dialog-title">Install Seven Channels</h2>
+    <p class="install-ios" hidden>In Safari, tap the <strong>Share</strong> button <span aria-hidden="true">(□↑)</span>, then <strong>Add to Home Screen</strong>. Open it from the new icon to get full-screen views and notifications.</p>
+    <p class="install-other" hidden>Use your browser menu: <strong>Install app</strong> or <strong>Add to Home screen</strong> (Chrome, Edge, Samsung Internet). On a desktop, look for the install icon at the end of the address bar.</p>
+    <form method="dialog"><button type="submit">Got it</button></form>
+  </dialog>
   <dialog id="player-dialog" class="player-dialog" aria-labelledby="player-dialog-title">
     <div class="player-profile-shell">
       <header class="player-profile-header">
@@ -3694,6 +3750,7 @@
   <script src="this-week.js"></script>
   <script src="search.js"></script>
   <script src="notifications.js"></script>
+  <script src="pwa.js"></script>
   <script src="games-hub.js"></script>
   <script>
     "use strict";
@@ -3969,32 +4026,82 @@
         notice.hidden = true;
         scheduleCloudSync();
       } catch (error) {
-        console.error("Could not save followed NBA teams.", error);
-        showNotice("Your followed NBA teams could not be saved. Check your browser storage settings.");
+        console.error("Could not save followed teams.", error);
+        showNotice("Your followed teams could not be saved. Check your browser storage settings.");
       }
     }
 
-    function isFollowingNbaTeam(team) {
-      return followedNbaTeams.some((followed) => followed.id === String(team?.team?.id));
+    // Followed teams for every league on the Sports page. They're kept under the original NBA storage key and
+    // synced as followedNbaTeams so earlier follows carry over; an entry without a sport is an NBA team.
+    // ESPN team ids repeat across leagues, so a follow is a sport + id pair.
+    function followedTeamSport(team) {
+      return team?.sport || "nba";
     }
+
+    function isFollowingTeamId(sport, id) {
+      return followedNbaTeams.some((team) => followedTeamSport(team) === sport && team.id === String(id ?? ""));
+    }
+
+    function isFollowingNbaTeam(team) {
+      return isFollowingTeamId("nba", team?.team?.id);
+    }
+
+    function toggleFollowedTeam(sport, team) {
+      const id = String(team.id);
+      if (isFollowingTeamId(sport, id)) followedNbaTeams = followedNbaTeams.filter((item) => !(followedTeamSport(item) === sport && item.id === id));
+      else followedNbaTeams.push({ id, name: team.name || "Team", abbreviation: team.abbreviation || "", sport, ...(/^https:\/\//.test(team.logo || "") ? { logo: team.logo } : {}) });
+      saveFollowedNbaTeams();
+      document.dispatchEvent(new CustomEvent("sports-follows", { detail: { sport } }));
+    }
+
+    // Follow button for any league's game card (the NBA scoreboard keeps its own). Pass ESPN's competitor.team.
+    function createTeamFollowButton(sport, team) {
+      const button = element("button", "team-follow-toggle", "");
+      button.type = "button";
+      button.dataset.sport = sport;
+      button.dataset.teamId = String(team?.id || "");
+      button.dataset.teamName = team?.displayName || team?.name || "team";
+      button.dataset.teamAbbreviation = team?.abbreviation || "";
+      button.dataset.teamLogo = team?.logo || team?.logos?.[0]?.href || "";
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleFollowedTeam(sport, { id: button.dataset.teamId, name: button.dataset.teamName, abbreviation: button.dataset.teamAbbreviation, logo: button.dataset.teamLogo });
+      });
+      updateTeamFollowButton(button);
+      return button;
+    }
+
+    function updateTeamFollowButton(button) {
+      const followed = isFollowingTeamId(button.dataset.sport, button.dataset.teamId);
+      button.setAttribute("aria-pressed", String(followed));
+      button.setAttribute("aria-label", `${followed ? "Unfollow" : "Follow"} ${button.dataset.teamName}`);
+      button.textContent = `${followed ? "★" : "☆"} ${button.dataset.teamAbbreviation || button.dataset.teamName}`;
+    }
+
+    function refreshTeamFollowButtons() {
+      for (const button of document.querySelectorAll(".team-follow-toggle[data-sport]")) updateTeamFollowButton(button);
+      for (const card of document.querySelectorAll("[data-follow-card]")) {
+        card.classList.toggle("has-followed-team", [...card.querySelectorAll(".team-follow-toggle[data-sport]")].some((button) => button.getAttribute("aria-pressed") === "true"));
+      }
+    }
+    document.addEventListener("sports-follows", refreshTeamFollowButtons);
 
     function renderFollowedTeamChips(container) {
       container.replaceChildren();
-      container.hidden = followedNbaTeams.length === 0;
-      if (!followedNbaTeams.length) return;
+      const nbaTeams = followedNbaTeams.filter((team) => followedTeamSport(team) === "nba");
+      container.hidden = nbaTeams.length === 0;
+      if (!nbaTeams.length) return;
       container.append(element("span", "followed-teams-label", "Following"));
-      for (const team of followedNbaTeams) {
+      for (const team of nbaTeams) {
         const chip = element("span", "followed-team-chip", `${team.abbreviation} · ${team.name}`);
         const remove = element("button", "", "×");
         remove.type = "button";
         remove.setAttribute("aria-label", `Unfollow ${team.name}`);
         remove.addEventListener("click", () => {
-          followedNbaTeams = followedNbaTeams.filter((item) => item.id !== team.id);
-          saveFollowedNbaTeams();
+          toggleFollowedTeam("nba", team);
           renderFollowedTeamChips(container);
           const scoreboard = container.closest(".scoreboard");
           if (scoreboard) updateNbaFollowControls(scoreboard);
-          document.dispatchEvent(new Event("sports-follows"));
         });
         chip.append(remove);
         container.append(chip);
@@ -4004,12 +4111,10 @@
     function updateNbaFollowControls(section) {
       for (const card of section.querySelectorAll(".game-card[data-game-id]")) {
         const buttons = card.querySelectorAll(".team-follow-toggle");
-        const hasFollowedTeam = [...buttons].some((button) =>
-          followedNbaTeams.some((team) => team.id === button.dataset.teamId)
-        );
+        const hasFollowedTeam = [...buttons].some((button) => isFollowingTeamId("nba", button.dataset.teamId));
         card.classList.toggle("has-followed-team", hasFollowedTeam);
         for (const button of buttons) {
-          const followed = followedNbaTeams.some((team) => team.id === button.dataset.teamId);
+          const followed = isFollowingTeamId("nba", button.dataset.teamId);
           button.setAttribute("aria-pressed", String(followed));
           button.textContent = followed ? "★ Following" : "☆ Follow";
           button.setAttribute("aria-label", `${followed ? "Unfollow" : "Follow"} ${button.dataset.teamName}`);
@@ -5613,21 +5718,9 @@
       games.addEventListener("click", (event) => {
         const toggle = event.target.closest(".team-follow-toggle");
         if (!toggle) return;
-        const teamId = toggle.dataset.teamId;
-        const existing = followedNbaTeams.find((team) => team.id === teamId);
-        if (existing) {
-          followedNbaTeams = followedNbaTeams.filter((team) => team.id !== teamId);
-        } else {
-          followedNbaTeams.push({
-            id: teamId,
-            name: toggle.dataset.teamName,
-            abbreviation: toggle.dataset.teamAbbreviation
-          });
-        }
-        saveFollowedNbaTeams();
+        toggleFollowedTeam("nba", { id: toggle.dataset.teamId, name: toggle.dataset.teamName, abbreviation: toggle.dataset.teamAbbreviation });
         renderFollowedTeamChips(followed);
         updateNbaFollowControls(section);
-        document.dispatchEvent(new Event("sports-follows"));
       });
       loadNbaGames(section, selectedNbaDate);
       return section;
@@ -5741,50 +5834,65 @@
 
       function renderTeams() {
         teamBody.replaceChildren();
-        if (activeSport !== "nba") {
-          teamBody.append(element("p", "", "Team following is currently available for the NBA."));
-          return;
+        const label = typeof sportsLeague === "function" ? sportsLeague(activeSport).label : activeSport.toUpperCase();
+        const mine = followedNbaTeams.filter((team) => followedTeamSport(team) === activeSport);
+        if (!mine.length) teamBody.append(element("p", "", `Follow ${label} teams with the ☆ buttons on game cards.`));
+        else {
+          const list = element("ul");
+          for (const team of mine) {
+            const item = element("li", "sports-widget-row");
+            const event = (schedules.get(activeSport)?.events || []).find((game) => gameTeams(game).some((entry) => String(entry.team?.id) === team.id));
+            const competitor = gameTeams(event || {}).find((entry) => String(entry.team?.id) === team.id);
+            const logo = teamLogo(competitor?.team || (team.logo ? { logo: team.logo } : null));
+            if (logo) item.append(logo);
+            const info = element("span");
+            info.append(activeSport === "nba" ? nbaTeamLink(team, team.name) : element("strong", "", team.name));
+            const record = competitor?.records?.find((entry) => entry.type === "total" || entry.name === "overall")?.summary;
+            if (record) info.append(element("small", "", `Record: ${record}`));
+            if (event) {
+              const state = event.competitions?.[0]?.status?.type;
+              const opponent = gameTeams(event).find((entry) => String(entry.team?.id) !== team.id);
+              const score = state?.state !== "pre" && competitor?.score != null && opponent?.score != null ? ` ${competitor.score}–${opponent.score}` : "";
+              info.append(element("small", "", `${competitor?.homeAway === "home" ? "vs" : "at"} ${opponent?.team?.shortDisplayName || opponent?.team?.displayName || "TBD"}${score} · ${state?.shortDetail || "Scheduled"}`));
+            } else info.append(element("small", "", "No game on the selected day."));
+            const remove = element("button", "secondary", "Remove");
+            remove.type = "button";
+            remove.setAttribute("aria-label", `Unfollow ${team.name}`);
+            remove.addEventListener("click", () => {
+              toggleFollowedTeam(activeSport, team);
+              if (activeSport === "nba") {
+                const nba = scoreboard.querySelector(".nba-scoreboard");
+                if (nba) {
+                  renderFollowedTeamChips(nba.querySelector(".followed-teams"));
+                  updateNbaFollowControls(nba);
+                }
+              }
+            });
+            item.append(info, remove);
+            list.append(item);
+          }
+          teamBody.append(list);
         }
-        if (!followedNbaTeams.length) {
-          teamBody.append(element("p", "", "Follow NBA teams using the controls on game cards."));
-          return;
+        // Teams followed in other leagues: one tap switches to that league.
+        const others = followedNbaTeams.filter((team) => followedTeamSport(team) !== activeSport);
+        if (others.length) {
+          const row = element("p", "sports-widget-others");
+          row.append(element("small", "", "Also following "));
+          for (const team of others) {
+            const sport = followedTeamSport(team);
+            const chip = element("button", "secondary followed-team-chip", `${team.abbreviation || team.name} · ${typeof sportsLeague === "function" ? sportsLeague(sport).label : sport.toUpperCase()}`);
+            chip.type = "button";
+            chip.addEventListener("click", () => document.getElementById(`${sport}-scores-tab`)?.click());
+            row.append(chip);
+          }
+          teamBody.append(row);
         }
-        const list = element("ul");
-        for (const team of followedNbaTeams) {
-          const item = element("li", "sports-widget-row");
-          const event = (schedules.get("nba")?.events || []).find((game) => gameTeams(game).some((entry) => String(entry.team?.id) === team.id));
-          const competitor = gameTeams(event || {}).find((entry) => String(entry.team?.id) === team.id);
-          const logo = teamLogo(competitor?.team);
-          if (logo) item.append(logo);
-          const info = element("span");
-          info.append(nbaTeamLink(team, team.name));
-          const record = competitor?.records?.find((entry) => entry.type === "total")?.summary;
-          if (record) info.append(element("small", "", `Record: ${record}`));
-          if (event) {
-            const state = event.competitions?.[0]?.status?.type?.shortDetail || "Scheduled";
-            info.append(element("small", "", `${event.shortName || "Game"} · ${state}`));
-          } else info.append(element("small", "", "No game on the selected day."));
-          const remove = element("button", "secondary", "Remove");
-          remove.type = "button";
-          remove.setAttribute("aria-label", `Unfollow ${team.name}`);
-          remove.addEventListener("click", () => {
-            followedNbaTeams = followedNbaTeams.filter((item) => item.id !== team.id);
-            saveFollowedNbaTeams();
-            const nba = scoreboard.querySelector(".nba-scoreboard");
-            renderFollowedTeamChips(nba.querySelector(".followed-teams"));
-            updateNbaFollowControls(nba);
-            document.dispatchEvent(new Event("sports-follows"));
-          });
-          item.append(info, remove);
-          list.append(item);
-        }
-        teamBody.append(list);
       }
 
       function renderSchedule() {
         const schedule = schedules.get(activeSport);
         const events = (schedule?.events || []).filter((event) => gameTeams(event).length >= 2);
-        const follows = (event) => activeSport === "nba" && gameTeams(event).some(isFollowingNbaTeam);
+        const follows = (event) => gameTeams(event).some((team) => isFollowingTeamId(activeSport, team.team?.id));
         const stateRank = (event) => ({ in: 0, pre: 1, post: 2 }[event.competitions?.[0]?.status?.type?.state] ?? 3);
         const sorted = [...events].sort((a, b) =>
           Number(follows(b)) - Number(follows(a)) || stateRank(a) - stateRank(b) ||
@@ -6012,7 +6120,7 @@
               row.append(element("strong", "", String(index + 1)));
               const logo = teamLogo(entry.team);
               if (logo) row.append(logo);
-              const followed = sport === "nba" && followedNbaTeams.some((team) => team.id === String(entry.team?.id));
+              const followed = isFollowingTeamId(sport, entry.team?.id);
               const label = `${followed ? "★ " : ""}${entry.team?.abbreviation || entry.team?.displayName || "Team"}`;
               row.append(sport === "nba" ? nbaTeamLink(entry.team, label) : element("span", "", label));
               const wins = statOf(entry, "wins")?.displayValue;
@@ -6318,6 +6426,9 @@
         status.textContent = games.length
           ? `${games.length} ${games.length === 1 ? "game" : "games"} · ${dayLabel}`
           : `No NFL games scheduled for this day · ${dayLabel}`;
+        // Followed teams' games first, otherwise ESPN's order.
+        const followsGame = (event) => (event.competitions?.[0]?.competitors || []).some((team) => isFollowingTeamId("nfl", team.team?.id));
+        games.sort((a, b) => Number(followsGame(b)) - Number(followsGame(a)));
         if (!games.length) {
           gamesContainer.replaceChildren(createNbaListState("No NFL games are scheduled for this day.", "empty"));
           detailArea.replaceChildren(element("p", "game-detail-placeholder", "There are no games to display for this date."));
@@ -6380,9 +6491,14 @@
               selectGame.append(row);
             }
             card.append(selectGame);
+            const followControls = element("div", "game-follow-controls");
+            for (const team of competitors) if (team.team?.id) followControls.append(createTeamFollowButton("nfl", team.team));
+            card.append(followControls);
+            card.dataset.followCard = "";
             gameCards.append(card);
           }
           gamesContainer.replaceChildren(gameCards);
+          refreshTeamFollowButtons();
           const selectedEvent = games.find((event) => String(event.id) === selectedNflGameId) || games[0];
           selectedNflGameId = String(selectedEvent.id);
           document.dispatchEvent(new CustomEvent("sports-selection", { detail: { sport: "nfl", event: selectedEvent } }));

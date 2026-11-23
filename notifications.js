@@ -52,8 +52,20 @@ function notifySave(state) {
 function notifyShow({ key, title, body, href }, state) {
   if (state.sent[key]) return false;
   state.sent[key] = Date.now();
+  const options = { body, tag: key, icon: "assets/app/icon-192.png", badge: "assets/app/icon-192.png", data: { href: href || "" } };
+  // Through the service worker when there is one: installed apps on phones (iPhone included) only allow
+  // notifications that way, and a tap opens the app at the right page (see sw.js).
+  if (typeof navigator !== "undefined" && navigator.serviceWorker?.controller) {
+    navigator.serviceWorker.ready.then((registration) => registration.showNotification(title, options))
+      .catch((error) => { console.warn("The service worker couldn't show the notification.", error); notifyShowDirect(title, options, href); });
+    return true;
+  }
+  return notifyShowDirect(title, options, href);
+}
+
+function notifyShowDirect(title, options, href) {
   try {
-    const note = new Notification(title, { body, tag: key });
+    const note = new Notification(title, options);
     note.addEventListener("click", () => {
       window.focus();
       if (href?.startsWith("#")) location.hash = href;

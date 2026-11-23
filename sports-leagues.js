@@ -210,6 +210,9 @@ async function loadLeagueGames(section, { automatic = false } = {}) {
     status.textContent = `${events.length} game${events.length === 1 ? "" : "s"}${live ? ` · ${live} live` : ""}`;
     let selectedId = sportsLeagueSelected.get(league.id);
     if (!events.some((event) => String(event.id) === selectedId)) selectedId = String((events.find((event) => sportsLeagueStatus(event.competitions[0]).state === "in") || events[0]).id);
+    // Followed teams' games first (isFollowingTeamId and createTeamFollowButton come from the app).
+    const follows = typeof isFollowingTeamId === "function" ? (event) => event.competitions[0].competitors.some((team) => isFollowingTeamId(league.id, team.team?.id)) : () => false;
+    events.sort((a, b) => Number(follows(b)) - Number(follows(a)));
     for (const event of events) {
       const competition = event.competitions[0];
       const gameStatus = sportsLeagueStatus(competition);
@@ -229,8 +232,17 @@ async function loadLeagueGames(section, { automatic = false } = {}) {
         detailArea.replaceChildren(sportsLeagueDetail(event, league));
         document.dispatchEvent(new CustomEvent("sports-selection", { detail: { sport: league.id, event } }));
       });
-      games.append(card);
+      const wrap = element("div", "league-game-wrap");
+      wrap.dataset.followCard = "";
+      wrap.append(card);
+      if (typeof createTeamFollowButton === "function") {
+        const followRow = element("div", "league-follow");
+        teams.filter((team) => team.team?.id).forEach((team) => followRow.append(createTeamFollowButton(league.id, team.team)));
+        wrap.append(followRow);
+      }
+      games.append(wrap);
     }
+    if (typeof refreshTeamFollowButtons === "function") refreshTeamFollowButtons();
     const selected = events.find((event) => String(event.id) === selectedId);
     sportsLeagueSelected.set(league.id, selectedId);
     detailArea.replaceChildren(sportsLeagueDetail(selected, league));

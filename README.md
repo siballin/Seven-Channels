@@ -28,6 +28,14 @@ The **Search** button in the header (or press `/` or Ctrl+K anywhere) searches y
 
 ## Notifications
 
+## Install as an app
+
+Seven Channels can be installed like an app (it's a progressive web app). On Android, and in Chrome or Edge on a computer, press **Install app** in the header. On iPhone or iPad, open the site in Safari, tap **Share**, then **Add to Home Screen**; the Install app button shows these steps. Installed, it opens full screen from its own icon. A long press on the icon jumps straight to the Guide, Sports scores, Motorsports or K-Pop, on phones that support shortcuts.
+
+- **Offline:** the service worker (`sw.js`) saves the page, its scripts and the data files you've opened. Without a connection, the site still opens and shows your saved lists and the last copy of each data file, with an **Offline** badge in the header. Live scores and other live lookups need a connection. Online, it always loads the newest version first, so a new deploy shows up straight away.
+- **Notifications:** on iPhone and iPad, notifications only work in the installed app (iOS 16.4 or later). Alerts go through the service worker, and tapping one opens the app at the right page.
+- **Files:** the manifest is `manifest.webmanifest`, and `pwa.js` handles the install button, the offline badge and notification taps. `scripts/make_app_icons.py` draws the icons in `assets/app/`. `scripts/build_site.py` stamps `sw.js` with a version for each deploy, plus the list of files to save when it installs.
+
 Turn on **🔔 Notifications** in the Guide's This week panel to get browser alerts while Seven Channels is open in a tab (there's no server sending push messages): newly announced shows for artists you follow in Live Events (Ticketmaster key required; limited to your area when a location is set; the first check only records what's already on sale), K-pop releases out today from followed artists, favorite game releases out today, and today's concerts, league night and planned uploads. It checks a minute after the page loads, then every 30 minutes and whenever you come back to the tab. Each alert is sent once, at most five at a time. Some mobile browsers only allow notifications from installed apps. Tests: `node tests/notifications.test.js`.
 
 ## K-pop idol directory
@@ -98,13 +106,17 @@ Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
 
 The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League, La Liga and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
 
+**Team following** works in every league: tap ☆ under a team on any game card to follow it. Followed teams' games move to the top of the list and get a highlighted edge, the featured matchup prefers them, and they're starred in the standings. **My teams** shows the selected league's teams with their record and that day's game. It also lists teams you follow in other leagues, and tapping one switches to that league. Follows are saved on this device and sync to your account; NBA teams you already followed carry over.
+
 
 ### Premier League, La Liga and MLS
 
 The soccer tabs have **Matches | Table | Stats**:
-- **Matches:** a match centre for the selected game: score and form, a timeline (goals with assists, cards, substitutions), match stats (possession, shots, on target, corners, passes, tackles, saves, fouls, cards), lineups drawn in formation with substitutions, each club's last five results in all competitions, and the part of the table around both clubs.
+- **Matches:** a match centre for the selected game: score and form, a timeline (goals with assists, cards, substitutions), match stats (possession, shots, on target, corners, passes, tackles, saves, fouls, cards), lineups drawn in formation with substitutions, player headshots (where ESPN has one; otherwise the shirt number) and match ratings, each club's last five results in all competitions, and the part of the table around both clubs.
 - **Table:** the full table (P W D L GF GA GD Pts) with qualification and relegation zones, last-five form, and home-only or away-only tables worked out from this season's results. MLS shows each conference or all clubs together (the Supporters' Shield race).
 - **Stats:** top scorers, assists and goals + assists from ESPN; club numbers worked out from results (most goals, fewest conceded, clean sheets, failed to score, unbeaten runs, biggest wins) and league averages.
+
+**Match ratings** are this site's own estimate, because FotMob and SofaScore ratings have no open API. A rating starts at 6.4 and is worked out from ESPN's per-player match stats: goals, assists, shots and shots on target, saves, goals conceded while on the pitch (clean sheets count for keepers and defenders), cards, fouls, offsides and the result. Substitutes' scores are pulled toward 6.4. Ratings are colour-coded (under 6 red, 6–6.9 orange, 7–7.9 green, 8+ blue), ★ marks the best of the match, and they update during live games. Hovering over a player shows their numbers.
 
 The side table orders clubs by the league's ranking and shows points and goal difference; the leaders widget shows season top scorers. `soccer.js`; ESPN responses saved in `tests/fixtures/espn-soccer/` for testing.
 ## Video Games
