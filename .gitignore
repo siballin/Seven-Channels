@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 _site/
 node_modules/
+# Built during the Pages deploy from your Steam account; published with the site but not kept in git history.
+data/steam.json

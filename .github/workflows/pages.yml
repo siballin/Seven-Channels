@@ -34,6 +34,17 @@ jobs:
       - name: Refresh games news, trailers and free games
         continue-on-error: true
         run: python scripts/update_games_sidebar.py
+      - name: Refresh Steam library
+        continue-on-error: true
+        env:
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+          STEAM_ID: ${{ secrets.STEAM_ID }}
+        run: python scripts/update_steam.py
+      - name: Refresh esports matches
+        continue-on-error: true
+        env:
+          PANDASCORE_KEY: ${{ secrets.PANDASCORE_KEY }}
+        run: python scripts/update_esports.py
       - name: Restore last game catalog
         uses: actions/cache/restore@v4
         with:
