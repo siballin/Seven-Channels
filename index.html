@@ -3621,6 +3621,11 @@
     .install-dialog h2 { margin: 0 0 8px; font-size: 1.1rem; }
     .install-dialog form { display: flex; justify-content: end; margin-top: 12px; }
     @media (display-mode: standalone) { .app-install-button { display: none; } }
+    /* News rows show 10 headlines at a time: 1, 2 or 5 columns so every row is full. */
+    .channel-news { container-type: inline-size; }
+    .channel-news-list { grid-template-columns: minmax(0, 1fr); }
+    @container (min-width: 440px) { .channel-news-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @container (min-width: 860px) { .channel-news-list { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
   </style>
 </head>
 <body>
