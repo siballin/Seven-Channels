@@ -202,6 +202,31 @@ function createNbaTeamPage(slug) {
       .map((stat) => [stat.name, stat]));
   }
 
+  // Ratings from ESPN season totals with the usual possession estimate:
+  // possessions ≈ FGA − offensive rebounds + turnovers + 0.44 × FTA. Offensive rating = points per 100 possessions,
+  // defensive rating = points allowed per 100 possessions (the opponent's possessions are taken as equal to the
+  // team's), net = the difference, pace = possessions per game.
+  function teamRatings(stats, entry) {
+    const number = (key) => {
+      const value = stats.get(key)?.value;
+      return typeof value === "number" && Number.isFinite(value) ? value : null;
+    };
+    const games = number("gamesPlayed");
+    const fga = number("fieldGoalsAttempted"), oreb = number("offensiveRebounds"), tov = number("turnovers"), fta = number("freeThrowsAttempted");
+    const points = number("points");
+    if (!(games > 0) || [fga, oreb, tov, fta, points].some((value) => value == null)) return null;
+    const pace = (fga - oreb + tov + 0.44 * fta) / games;
+    if (!(pace > 0)) return null;
+    const allowed = Number.parseFloat(standingsStats(entry).get("avgPointsAgainst"));
+    const offensive = (100 * points / games) / pace;
+    const defensive = Number.isFinite(allowed) ? (100 * allowed) / pace : null;
+    return { offensive, defensive, net: defensive == null ? null : offensive - defensive, pace };
+  }
+
+  function ratingText(value, signed = false) {
+    return value == null ? "—" : `${signed && value > 0 ? "+" : ""}${value.toFixed(1)}`;
+  }
+
   function standingsStats(entry) {
     return new Map((entry?.stats || []).map((stat) => [stat.name, stat.displayValue]));
   }
@@ -274,9 +299,10 @@ function createNbaTeamPage(slug) {
       const efg = fgm != null && threes != null && fga > 0 ? `${((fgm + 0.5 * threes) / fga * 100).toFixed(1)}%` : "—";
       const ts = points != null && fga != null && fta != null && fga + 0.44 * fta > 0
         ? `${(points / (2 * (fga + 0.44 * fta)) * 100).toFixed(1)}%` : "—";
+      const ratings = teamRatings(stats, teamEntry);
       const values = [
-        ["Points/game", stats.get("avgPoints")?.displayValue ?? "—"], ["Offensive rating", "Unavailable"],
-        ["Defensive rating", "Unavailable"], ["Net rating", "Unavailable"], ["Pace", "Unavailable"],
+        ["Points/game", stats.get("avgPoints")?.displayValue ?? "—"], ["Offensive rating", ratingText(ratings?.offensive)],
+        ["Defensive rating", ratingText(ratings?.defensive)], ["Net rating", ratingText(ratings?.net, true)], ["Pace", ratingText(ratings?.pace)],
         ["eFG%", efg], ["TS%", ts]
       ];
       container.dataset.state = "ready";
@@ -620,7 +646,8 @@ function createNbaTeamPage(slug) {
           const points = number("points"), turnovers = number("turnovers");
           const percentage = (numerator, denominator) => numerator != null && denominator > 0 ? `${(100 * numerator / denominator).toFixed(1)}%` : "—";
           const advanced = [
-            ["Offensive rating", "—"], ["Defensive rating", "—"], ["Net rating", "—"], ["Pace", "—"],
+            ["Offensive rating", ratingText(teamRatings(stats, teamEntry)?.offensive)], ["Defensive rating", ratingText(teamRatings(stats, teamEntry)?.defensive)],
+            ["Net rating", ratingText(teamRatings(stats, teamEntry)?.net, true)], ["Pace", ratingText(teamRatings(stats, teamEntry)?.pace)],
             ["Effective FG%", fgm != null && threes != null ? percentage(fgm + 0.5 * threes, fga) : "—"],
             ["True shooting %", points != null && fga != null && fta != null ? percentage(points, 2 * (fga + 0.44 * fta)) : "—"],
             ["Turnover %", turnovers != null && fga != null && fta != null ? percentage(turnovers, fga + 0.44 * fta + turnovers) : "—"],
@@ -637,7 +664,7 @@ function createNbaTeamPage(slug) {
             list.append(element("dt", "", label), element("dd", "", value ?? "—"));
           }
           note.textContent = view.value === "advanced"
-            ? "Calculated from ESPN season totals: eFG% = (FGM + 0.5 × 3PM) / FGA; TS% = points / (2 × (FGA + 0.44 × FTA)); turnover % = turnovers / (FGA + 0.44 × FTA + turnovers); free throw rate = FTA / FGA. Ratings, pace, opponent rebound data, league comparisons and splits are unavailable."
+            ? "Calculated from ESPN season totals: eFG% = (FGM + 0.5 × 3PM) / FGA; TS% = points / (2 × (FGA + 0.44 × FTA)); turnover % = turnovers / (FGA + 0.44 × FTA + turnovers); free throw rate = FTA / FGA. Possessions ≈ FGA − OREB + TOV + 0.44 × FTA; offensive and defensive ratings are points scored and allowed per 100 possessions (treating the opponent's possessions as equal), net rating is the difference and pace is possessions per game, so they can differ slightly from NBA.com. Opponent rebound data, league comparisons and splits are unavailable."
             : "Regular-season averages from ESPN. League ranks, league averages and game-window splits are unavailable.";
         }
         view.addEventListener("change", draw);
