@@ -5,14 +5,17 @@ def get(api, params):
     return json.loads(urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60).read())
 W = "https://en.wikipedia.org/w/api.php"; C = "https://commons.wikimedia.org/w/api.php"
 out = []
-for team in ["Utah Jazz", "Chicago Bulls", "Boston Celtics"]:
-    text = get(W, {"action": "parse", "page": team, "prop": "wikitext", "section": 0})["parse"]["wikitext"]
-    kit = [l for l in text.split("\n") if re.search(r"kit|body|shorts|pattern|uniform|jersey", l, re.I)][:40]
-    out.append(f"== {team} infobox kit lines:\n" + "\n".join(kit))
-    html = get(W, {"action": "parse", "page": team, "prop": "text", "section": 0})["parse"]["text"]
-    i = html.find("Kit_body")
-    out.append("html around kit: " + html[max(0, i - 1500):i + 1500].replace("\n", " ") if i >= 0 else "no Kit_body in html")
-    for cat in [f"Category:{team} jerseys", f"Category:{team} uniforms", f"Category:{team} kit templates"]:
-        m = get(C, {"action": "query", "list": "categorymembers", "cmtitle": cat, "cmlimit": 40})
-        out.append(f"   {cat}: " + " | ".join(x["title"] for x in m.get("query", {}).get("categorymembers", [])[:25]))
+html = get(W, {"action": "parse", "page": "Chicago Bulls", "prop": "text", "section": 0})["parse"]["text"]
+i = html.find('<table class="kit">')
+j = html.find("</table>", i)
+out.append("KIT TABLE:\n" + html[i:j + 8])
+for team in ["Chicago Bulls", "Boston Celtics", "Utah Jazz", "Golden State Warriors", "Detroit Pistons", "Washington Wizards"]:
+    for part in ["body", "shorts"]:
+        files, cont = [], {}
+        while True:
+            m = get(C, {"action": "query", "list": "categorymembers", "cmtitle": f"Category:Basketball kit {part}/{team}", "cmlimit": 500, "cmtype": "file", **cont})
+            files += [x["title"] for x in m.get("query", {}).get("categorymembers", [])]
+            if "continue" not in m: break
+            cont = m["continue"]
+        out.append(f"== {team} {part}: {len(files)}: " + " | ".join(files[:60]))
 open("scratch-probe/output.txt", "w").write("\n".join(out))
