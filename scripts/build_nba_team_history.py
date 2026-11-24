@@ -70,7 +70,7 @@ class SectionParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.blocks = []
-        self.depth = 0
+        self.stack = []  # open tags; an end tag closes back to its matching start (Wikipedia HTML isn't always tidy)
         self.skip_from = None  # depth where a skipped element started
         self.text = None
         self.kind = None
@@ -83,7 +83,8 @@ class SectionParser(HTMLParser):
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         if tag not in self.VOID:
-            self.depth += 1
+            self.stack.append(tag)
+        self.depth = len(self.stack)
         if self.skip_from is not None:
             return
         classes = attrs.get("class") or ""
@@ -115,10 +116,13 @@ class SectionParser(HTMLParser):
             self.kind, self.text, self.text_from = "p", [], self.depth
 
     def handle_endtag(self, tag):
-        if tag in self.VOID:
+        if tag in self.VOID or tag not in self.stack:
             return
-        depth = self.depth
-        self.depth -= 1
+        while self.stack and self.stack[-1] != tag:
+            self.stack.pop()
+        depth = len(self.stack)
+        self.stack.pop()
+        self.depth = len(self.stack)
         if self.skip_from is not None:
             if depth <= self.skip_from:
                 self.skip_from = None
