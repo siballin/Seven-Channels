@@ -98,7 +98,8 @@ function nbaTeamHistoryView(history) {
   let more = null;
   for (const block of history.blocks) {
     // Show the first few paragraphs; the rest of the history opens with "Read the full history".
-    if (block.p && ++paragraphs === 5 && !more) {
+    if (block.p) paragraphs++;
+    if (!more && ((block.h && paragraphs >= 4) || (block.p && paragraphs === 7))) {
       more = element("details", "nba-history-more");
       more.append(element("summary", "", "Read the full history"));
       box.append(more);

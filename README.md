@@ -109,6 +109,12 @@ The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FB
 **Team following** works in every league: tap ☆ under a team on any game card to follow it. Followed teams' games move to the top of the list and get a highlighted edge, the featured matchup prefers them, and they're starred in the standings. **My teams** shows the selected league's teams with their record and that day's game. It also lists teams you follow in other leagues, and tapping one switches to that league. Follows are saved on this device and sync to your account; NBA teams you already followed carry over.
 
 
+**Logos & Uniforms** (team page tab):
+- **Current logos:** the team's current logo set from ESPN (primary, on dark backgrounds, scoreboard).
+- **History:** the logo and uniform history from Wikipedia: the team's "Logos and uniforms of the …" article when one exists, otherwise the logo/uniform section of the team's article. It keeps the text, era headings, and logo and uniform images with captions. Each image links to its Wikipedia file page, where its license is. Long histories open with **Read the full history**.
+
+`scripts/build_nba_team_history.py` builds `data/nba-team-history.json` every 30 days in the Pages workflow (`--force` rebuilds now). Wikipedia limits how many non-free team logos it can show, so some teams have text only.
+
 ### Premier League, La Liga and MLS
 
 The soccer tabs have **Matches | Table | Stats**:
