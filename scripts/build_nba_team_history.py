@@ -52,6 +52,9 @@ FORMER_NAMES = {
     "utah-jazz": ["New Orleans Jazz"], "washington-wizards": ["Washington Bullets", "Capital Bullets", "Baltimore Bullets", "Chicago Zephyrs"],
 }
 LOGO_WORDS = re.compile(r"\b(logo|logos|wordmark|emblem|crest|monogram)\b", re.I)
+# Other things that share a team's name (a jazz museum, a college team…).
+NOT_THE_TEAM = re.compile(r"\b(museum|band|festival|orchestra|club|records?|radio|fm|tv|university|college|school|academy|hockey|football|baseball|"
+                          r"soccer|rugby|cricket|volleyball|wnba|g league|summer league|esports|gaming|foundation|arena|stadium)\b", re.I)
 
 
 def fetch_json(params):
@@ -236,11 +239,12 @@ def commons_logos(names, known_files=(), fetch=commons_json, limit=24):
     keys = [re.sub(r"[^a-z0-9]+", " ", name.lower()).strip() for name in names]
     def wanted(title):
         plain = re.sub(r"[^a-z0-9]+", " ", title.lower())
-        return (any(f" {key} " in f" {plain} " for key in keys) and LOGO_WORDS.search(title.replace("_", " "))
+        return (any(f" {key} " in f" {plain} " for key in keys) and LOGO_WORDS.search(title.replace("_", " ")) and not NOT_THE_TEAM.search(title.replace("_", " "))
                 and re.search(r"\.(svg|png|gif)$", title, re.I))
     for name in names[:1]:
         data = fetch({"action": "query", "list": "categorymembers", "cmtitle": f"Category:{name} logos", "cmtype": "file", "cmlimit": 50})
-        titles += [item["title"] for item in (data.get("query") or {}).get("categorymembers", []) if re.search(r"\.(svg|png|gif)$", item["title"], re.I)]
+        titles += [item["title"] for item in (data.get("query") or {}).get("categorymembers", [])
+                   if re.search(r"\.(svg|png|gif)$", item["title"], re.I) and not NOT_THE_TEAM.search(item["title"])]
     for name in names:
         data = fetch({"action": "query", "list": "search", "srsearch": f'intitle:"{name}" logo', "srnamespace": 6, "srlimit": 30})
         titles += [item["title"] for item in (data.get("query") or {}).get("search", []) if wanted(item["title"])]
@@ -266,7 +270,14 @@ def commons_logos(names, known_files=(), fetch=commons_json, limit=24):
                         "license": re.sub(r"<[^>]+>", "", (meta.get("LicenseShortName") or {}).get("value", ""))[:60],
                         "width": info.get("thumbwidth") or 0, "height": info.get("thumbheight") or 0})
     out.sort(key=lambda item: (item.get("from") or 9999, item["caption"].lower()))
-    return out[:limit]
+    # The same logo is often uploaded as both SVG and PNG; keep one per name.
+    seen, unique_out = set(), []
+    for item in out:
+        key = re.sub(r"[^a-z0-9]+", "", item["caption"].lower())
+        if key not in seen:
+            seen.add(key)
+            unique_out.append(item)
+    return unique_out[:limit]
 
 
 def unquote_title(url):

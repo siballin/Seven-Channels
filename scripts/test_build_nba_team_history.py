@@ -48,7 +48,8 @@ class TeamHistoryTests(unittest.TestCase):
                 return {"query": {"categorymembers": [{"title": "File:Utah Jazz wordmark logo primary color.png"}, {"title": "File:Jazz game photo.jpg"}]}}
             if params.get("list") == "search":
                 return {"query": {"search": [{"title": "File:Utah Jazz Logo, 1980-1996.png"}, {"title": "File:New Orleans Jazz Logo, 1975-1979.png"},
-                                             {"title": "File:Montreux Jazz Logo.jpg"}, {"title": "File:Detroit Jazz Festival logo.png"}, {"title": "File:Utah Jazz arena.png"}]}}
+                                             {"title": "File:Montreux Jazz Logo.jpg"}, {"title": "File:Detroit Jazz Festival logo.png"}, {"title": "File:Utah Jazz arena.png"},
+                                             {"title": "File:New Orleans Jazz Museum logo.svg"}, {"title": "File:New Orleans Jazz Logo, 1975-1979.svg"}]}}
             pages = [{"title": title, "imageinfo": [{"thumburl": f"https://upload.wikimedia.org/thumb/{i}.png", "descriptionurl": f"https://commons.wikimedia.org/wiki/{title}",
                                                       "extmetadata": {"LicenseShortName": {"value": "Public domain"}}, "thumbwidth": 300, "thumbheight": 140}]}
                      for i, title in enumerate(params["titles"].split("|"))]
