@@ -6255,23 +6255,56 @@
         newsLoading.setAttribute("aria-label", "Loading sports news");
         standingBody.replaceChildren(standingsLoading);
         newsBody.replaceChildren(newsLoading);
-        const standingsTask = fetchWidget(`https://site.api.espn.com/apis/v2/sports/${path}/standings`).then((data) => {
+        // The NFL comes with divisions (level=3): each conference holds its four divisions.
+        const withDivisions = sport === "nfl";
+        const standingsTask = fetchWidget(`https://site.api.espn.com/apis/v2/sports/${path}/standings${withDivisions ? "?level=3" : ""}`).then((data) => {
           if (requestId !== widgetRequestId || signal.aborted) return;
-          const groups = (data.children || []).filter((group) => Array.isArray(group.standings?.entries) && group.standings.entries.length);
+          const hasEntries = (group) => Array.isArray(group?.standings?.entries) && group.standings.entries.length > 0;
+          const groups = [];
+          for (const conference of data.children || []) {
+            const divisions = (conference.children || []).filter(hasEntries);
+            if (divisions.length) {
+              groups.push({ name: conference.name, short: conference.abbreviation || conference.name, conference: true,
+                standings: { entries: divisions.flatMap((division) => division.standings.entries) } });
+              divisions.forEach((division) => groups.push({ name: division.name, parent: conference.abbreviation || conference.name, standings: division.standings }));
+            } else if (hasEntries(conference)) groups.push(conference);
+          }
           if (!groups.length) throw new TypeError("Standings response contained no teams.");
-          const label = element("label", "", sportsLeague(sport)?.soccer ? (groups.length > 1 ? "Conference" : "Table") : "Conference");
+          const hasDivisions = groups.some((group) => group.parent);
+          const label = element("label", "", sportsLeague(sport)?.soccer ? (groups.length > 1 ? "Conference" : "Table") : hasDivisions ? "Conference or division" : "Conference");
           const select = document.createElement("select");
-          select.setAttribute("aria-label", "Standings conference");
-          groups.forEach((group, index) => { const option = element("option", "", group.name); option.value = String(index); select.append(option); });
+          select.setAttribute("aria-label", hasDivisions ? "Standings conference or division" : "Standings conference");
+          if (hasDivisions) {
+            let optgroup = null;
+            groups.forEach((group, index) => {
+              if (group.conference) {
+                optgroup = document.createElement("optgroup");
+                optgroup.label = group.short;
+                select.append(optgroup);
+              }
+              const option = element("option", "", group.conference ? `All ${group.short}` : group.name);
+              option.value = String(index);
+              (optgroup || select).append(option);
+            });
+            // Start on the division of a team you follow.
+            const followedDivision = groups.findIndex((group) => group.parent && group.standings.entries.some((entry) => isFollowingTeamId(sport, entry.team?.id)));
+            if (followedDivision >= 0) select.value = String(followedDivision);
+          } else {
+            groups.forEach((group, index) => { const option = element("option", "", group.name); option.value = String(index); select.append(option); });
+          }
           const list = element("ul");
           const soccer = Boolean(sportsLeague(sport)?.soccer);
           const statOf = (entry, name) => entry.stats?.find((stat) => stat.name === name);
           function draw() {
             list.replaceChildren();
-            const entries = [...groups[Number(select.value)].standings.entries];
+            const group = groups[Number(select.value)];
+            const entries = [...group.standings.entries];
+            const seed = (entry) => Number(statOf(entry, "playoffSeed")?.value) || 99;
             // Soccer tables go by the league's own ranking (points, goal difference…), not win percentage.
             if (soccer) entries.sort((a, b) => (Number(statOf(a, "rank")?.value) || 99) - (Number(statOf(b, "rank")?.value) || 99));
-            else entries.sort((a, b) => (Number(statOf(b, "winPercent")?.value) || 0) - (Number(statOf(a, "winPercent")?.value) || 0));
+            // A whole NFL conference goes by playoff seed; a division by win percentage (seed breaks ties).
+            else if (group.conference) entries.sort((a, b) => seed(a) - seed(b));
+            else entries.sort((a, b) => (Number(statOf(b, "winPercent")?.value) || 0) - (Number(statOf(a, "winPercent")?.value) || 0) || seed(a) - seed(b));
             entries.forEach((entry, index) => {
               const row = element("li", "sports-widget-row");
               row.append(element("strong", "", String(index + 1)));
@@ -6287,7 +6320,10 @@
                 const gd = statOf(entry, "pointDifferential")?.displayValue;
                 row.append(element("small", "sports-widget-gd", gd != null ? `GD ${gd}` : ""), element("strong", "", `${statOf(entry, "points")?.displayValue ?? "—"} pts`));
               } else {
-                row.append(element("strong", "", wins != null && losses != null ? `${wins}-${losses}` : "—"));
+                // Records with ties (NFL) come from the "overall" summary, e.g. 6-3-1.
+                const overall = statOf(entry, "overall")?.displayValue || statOf(entry, "overall")?.summary;
+                const ties = Number(statOf(entry, "ties")?.value) || 0;
+                row.append(element("strong", "", overall && /^\d+-\d+(-\d+)?$/.test(overall) ? overall : wins != null && losses != null ? `${wins}-${losses}${ties ? `-${ties}` : ""}` : "—"));
               }
               list.append(row);
             });
