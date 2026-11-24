@@ -4,6 +4,7 @@ import build_nba_team_history as history
 
 HTML = '''<div class="mw-heading mw-heading2"><h2 id="Logos">Logos and uniforms</h2></div>
 <div role="note" class="hatnote">Main article: X</div>
+<div id="toc" class="toc"><div class="toctitle"><h2>Contents</h2></div><ul><li>1 Logos and uniforms and a long table of contents entry</li></ul></div>
 <p>The Bucks' first logo was a deer<sup class="reference"><a>[1]</a></sup> wearing a sweater, used from 1968 to 1993.</p>
 <figure typeof="mw:File/Thumb"><a href="/wiki/File:Bucks_1968.png"><img src="//upload.wikimedia.org/wikipedia/en/thumb/a/ab/Bucks_1968.png/220px-Bucks_1968.png" width="220" height="200"></a><figcaption>Logo, <i>1968–1993</i></figcaption></figure>
 <h3>Uniforms</h3><ul class="gallery"><li class="gallerybox"><div class="thumb"><span><a href="/wiki/File:Home.svg"><img src="//upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Home.svg/120px-Home.svg.png" width="120" height="120"></a></span></div><div class="gallerytext">Home uniform (2015–present)</div></li></ul>

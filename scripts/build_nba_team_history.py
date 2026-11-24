@@ -65,7 +65,7 @@ class SectionParser(HTMLParser):
 
     VOID = {"img", "br", "hr", "meta", "link", "input", "wbr", "source", "col", "area", "base", "track"}
     SKIP_TAGS = {"style", "script", "sup", "table"}  # footnote markers, navboxes and infobox-style tables
-    SKIP_CLASSES = ("reference", "mw-editsection", "hatnote", "navbox", "noprint", "mw-empty-elt", "shortdescription")
+    SKIP_CLASSES = ("reference", "mw-editsection", "hatnote", "navbox", "noprint", "mw-empty-elt", "shortdescription", "toc", "toclimit-3", "toclimit-4")
 
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -88,7 +88,7 @@ class SectionParser(HTMLParser):
         if self.skip_from is not None:
             return
         classes = attrs.get("class") or ""
-        if tag in self.SKIP_TAGS or any(name in classes.split() for name in self.SKIP_CLASSES):
+        if tag in self.SKIP_TAGS or any(name in classes.split() for name in self.SKIP_CLASSES) or attrs.get("id") == "toc":
             if tag not in self.VOID:
                 self.skip_from = self.depth
             return
