@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light" data-design="home">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -3778,6 +3778,8 @@
     .nba-history-more[open] { display: grid; }
     .nba-history-figure figcaption { font-size: .76rem; color: var(--muted); line-height: 1.4; }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="design.css">
 </head>
 <body>
   <header class="masthead">
@@ -3794,6 +3796,13 @@
         <button type="button" class="secondary site-search-button" id="site-search-open" aria-keyshortcuts="/ Control+K">Search <kbd aria-hidden="true">/</kbd></button>
         <button type="button" class="secondary app-install-button" id="app-install" hidden>Install app</button>
         <span class="offline-pill" id="offline-pill" role="status" hidden>Offline · showing saved data</span>
+        <details class="settings-menu" id="settings-menu">
+          <summary class="settings-button" aria-label="Settings">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>
+            <span class="settings-label">Settings</span>
+          </summary>
+          <div class="settings-panel">
+            <h2 class="settings-title">Settings</h2>
         <form id="sync-panel" class="sync-panel" aria-label="Cross-device account" hidden>
           <div class="sync-auth-buttons">
             <button type="button" class="secondary" data-auth-toggle="sign-in" aria-expanded="false" aria-controls="sync-credentials">Sign in <span aria-hidden="true">▾</span></button>
@@ -3819,6 +3828,7 @@
               <span>COLOR THEME</span>
               <select id="color-preset" aria-label="Color combination template">
                 <option value="custom">Custom</option>
+                <option value="home">Home screen</option>
                 <option value="midnight">Midnight Blue</option>
                 <option value="emerald">Deep Emerald</option>
                 <option value="plum">Plum Night</option>
@@ -3858,13 +3868,24 @@
             <button id="theme-switch" class="theme-switch" type="button" role="switch" aria-checked="true" aria-label="Dark mode"></button>
           </div>
         </div>
+          </div>
+        </details>
       </div>
     </div>
   </header>
   <div class="ticker" aria-label="Channel guide ticker">
     <div class="ticker-track" id="ticker-track" aria-hidden="true"></div>
   </div>
-  <nav class="dial wrap" aria-label="Channels"><ul id="dial"></ul></nav>
+  <nav class="dial wrap" id="channel-nav" aria-label="Channels">
+    <a class="rail-home" href="#guide" aria-label="Seven Channels: Guide">7</a>
+    <ul id="dial"></ul>
+  </nav>
+  <nav class="tabbar" aria-label="Main">
+    <a href="#guide" data-tab="guide"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg><span>Home</span></a>
+    <button type="button" data-tab="channels" aria-expanded="false" aria-controls="channel-nav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg><span>Channels</span></button>
+    <button type="button" data-tab="search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><span>Search</span></button>
+    <button type="button" data-tab="settings" aria-controls="settings-menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"></path></svg><span>Settings</span></button>
+  </nav>
   <main class="wrap">
     <div id="notice" class="notice" role="status" hidden></div>
     <div id="view"></div>
@@ -3939,6 +3960,7 @@
       publishableKey: "sb_publishable_dHTd0sBNc3sYGCMOjsPgWg_04IQv7X6"
     };
     const colorThemes = {
+      home: { darkMain: "#0f131b", lightMain: "#eceff4", accent: "#3a4fd6" },
       midnight: { darkMain: "#11151d", lightMain: "#eef1f5", accent: "#7396ff" },
       emerald: { darkMain: "#101b19", lightMain: "#edf3ee", accent: "#53d6a1" },
       plum: { darkMain: "#1b1422", lightMain: "#f1edf6", accent: "#c3a6ff" },
@@ -3950,9 +3972,11 @@
       blush: { darkMain: "#24151c", lightMain: "#f7eef1", accent: "#b23861" }
     };
     const defaultAppearance = {
-      theme: "dark", main: "#11151d", mainDark: "#11151d", mainLight: "#eef1f5",
-      accent: "#7396ff", preset: "midnight"
+      theme: "light", main: "#eceff4", mainDark: "#0f131b", mainLight: "#eceff4",
+      accent: "#3a4fd6", preset: "home", design: 2
     };
+    // The 2026 redesign switches everyone to its look once; the theme picker and dark switch still work after that.
+    const designVersionKey = "seven-channels.design.v2";
     const appearance = loadAppearance();
     const initialEntries = [
       { id: "demo-sports", channel: "sports", title: "Sunday afternoon game", note: "Save a spot for your team", status: "next", created: "Sample" },
@@ -4295,6 +4319,11 @@
 
     function loadAppearance() {
       try {
+        if (localStorage.getItem(designVersionKey) === null) {
+          localStorage.setItem(designVersionKey, "1");
+          localStorage.setItem(appearanceStorageKey, JSON.stringify(defaultAppearance));
+          return { ...defaultAppearance };
+        }
         const saved = localStorage.getItem(appearanceStorageKey);
         if (saved === null) return { ...defaultAppearance };
         const parsed = JSON.parse(saved);
@@ -4316,7 +4345,8 @@
           accent: validColor(parsed?.accent)
             ? parsed.accent
             : defaultAppearance.accent,
-          preset
+          preset,
+          design: 2
         };
       } catch (error) {
         console.error("Could not load appearance settings.", error);
@@ -4339,9 +4369,9 @@
       root.dataset.glassTone = lightCanvas ? "light" : "dark";
       const contrast = lightCanvas ? "#ffffff" : "#000000";
       const mix = (amount) => `color-mix(in srgb, var(--screen) ${100 - amount}%, ${contrast} ${amount}%)`;
-      root.style.setProperty("--panel", mix(lightCanvas ? 6 : 8));
+      root.style.setProperty("--panel", lightCanvas ? "#ffffff" : mix(8));
       root.style.setProperty("--panel-hover", mix(lightCanvas ? 12 : 14));
-      root.style.setProperty("--surface", mix(lightCanvas ? 3 : 5));
+      root.style.setProperty("--surface", lightCanvas ? "#ffffff" : mix(6));
       root.style.setProperty("--surface-hover", mix(lightCanvas ? 8 : 10));
       root.style.setProperty("--header-surface", mix(lightCanvas ? 2 : 3));
       root.style.setProperty("--selected-surface", mix(lightCanvas ? 10 : 12));
@@ -4354,8 +4384,7 @@
       accentPicker.value = appearance.accent;
       presetPicker.value = appearance.preset;
       themeSwitch.setAttribute("aria-checked", String(appearance.theme === "dark"));
-      document.querySelector('meta[name="theme-color"]').content =
-        appearance.theme === "dark" ? "#11151d" : "#eef1f5";
+      document.querySelector('meta[name="theme-color"]').content = appearance.main;
     }
 
     // The accent follows the channel you're on (the same colors as the channel buttons); the Guide keeps the theme's accent.
@@ -7683,7 +7712,7 @@
       }
       return {
         entries: [...combined.values()],
-        appearance: remoteState?.appearance || localState?.appearance || { ...defaultAppearance },
+        appearance: (remoteState?.appearance?.design === 2 ? remoteState.appearance : null) || localState?.appearance || remoteState?.appearance || { ...defaultAppearance },
         followedNbaTeams: remoteState?.followedNbaTeams || localState?.followedNbaTeams || [],
         kpopArtistFollows: mergeKpopArtistFollows(localState?.kpopArtistFollows, remoteState?.kpopArtistFollows),
         deletedEntryIds: [...tombstones],
@@ -7769,7 +7798,8 @@
         mainDark,
         mainLight,
         accent: validColor(value?.accent) ? value.accent : defaultAppearance.accent,
-        preset
+        preset,
+        design: 2
       };
     }
 
@@ -8154,6 +8184,39 @@
       return route === "sports-standings" || route === "sports-leaders" ? route : "sports-scores";
     }
 
+    // Icons for the channel sidebar and the phone's channel sheet (24×24, stroked).
+    const channelIcons = {
+      guide: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
+      sports: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+      motorsports: '<path d="M5 21V4M5 4h13l-3 4 3 4H5"/>',
+      betting: '<path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+      kpop: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+      movies: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14M3 10h4M3 14h4M17 10h4M17 14h4"/>',
+      anime: '<path d="M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1-5.4 3.1 1.3-6L3.3 9.2l6.1-.6z"/>',
+      games: '<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18 14h.01"/>',
+      politics: '<path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6"/>',
+      bowling: '<circle cx="12" cy="12" r="9"/><circle cx="10" cy="9" r="1"/><circle cx="14" cy="9" r="1"/><circle cx="12" cy="12.5" r="1"/>',
+      music: '<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/>',
+      creator: '<path d="M15 10l5-3v10l-5-3z"/><rect x="3" y="7" width="12" height="10" rx="2"/>',
+      live: '<path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v4"/>'
+    };
+
+    function channelIcon(id) {
+      const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      icon.setAttribute("viewBox", "0 0 24 24");
+      icon.setAttribute("width", "22");
+      icon.setAttribute("height", "22");
+      icon.setAttribute("fill", "none");
+      icon.setAttribute("stroke", "currentColor");
+      icon.setAttribute("stroke-width", "2");
+      icon.setAttribute("stroke-linecap", "round");
+      icon.setAttribute("stroke-linejoin", "round");
+      icon.setAttribute("aria-hidden", "true");
+      icon.setAttribute("class", "dial-icon");
+      icon.innerHTML = channelIcons[id] || channelIcons.guide;
+      return icon;
+    }
+
     function renderDial(route) {
       dial.replaceChildren();
       const items = [{ id: "guide", number: "01", name: "Guide" }, ...channels];
@@ -8162,13 +8225,17 @@
         const link = document.createElement("a");
         link.href = `#${item.id}`;
         link.dataset.channel = item.id;
+        link.title = item.name;
         if (route === item.id) link.setAttribute("aria-current", "page");
         const dot = element("i", "dial-dot");
         dot.setAttribute("aria-hidden", "true");
-        link.append(dot, element("b", "", item.number), document.createTextNode(item.name));
+        link.append(channelIcon(item.id), dot, element("b", "", item.number), element("span", "dial-name", item.name));
         li.append(link);
         dial.append(li);
       }
+      document.querySelectorAll(".tabbar [data-tab]").forEach((tab) => {
+        if (tab.dataset.tab === "guide") tab.toggleAttribute("aria-current", route === "guide");
+      });
     }
 
     function listFor(channel, status) {
@@ -13262,6 +13329,29 @@
     );
     const siteSearch = createSiteSearch({ getEntries: () => entries, channelList: channels });
     document.getElementById("site-search-open").addEventListener("click", siteSearch.open);
+    // Phone tab bar: Home, Channels (opens the channel sheet), Search and Settings.
+    const settingsMenu = document.getElementById("settings-menu");
+    const channelsTab = document.querySelector('.tabbar [data-tab="channels"]');
+    const setChannelSheet = (open) => {
+      document.body.classList.toggle("channels-open", open);
+      channelsTab?.setAttribute("aria-expanded", String(open));
+    };
+    channelsTab?.addEventListener("click", () => setChannelSheet(!document.body.classList.contains("channels-open")));
+    document.querySelector('.tabbar [data-tab="search"]')?.addEventListener("click", () => { setChannelSheet(false); siteSearch.open(); });
+    document.querySelector('.tabbar [data-tab="settings"]')?.addEventListener("click", () => {
+      setChannelSheet(false);
+      settingsMenu.open = true;
+      settingsMenu.querySelector("summary")?.focus();
+    });
+    document.getElementById("channel-nav").addEventListener("click", (event) => { if (event.target.closest("a")) setChannelSheet(false); });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      if (document.body.classList.contains("channels-open")) { setChannelSheet(false); channelsTab?.focus(); }
+      if (settingsMenu.open) { settingsMenu.open = false; settingsMenu.querySelector("summary")?.focus(); }
+    });
+    document.addEventListener("click", (event) => {
+      if (settingsMenu.open && !settingsMenu.contains(event.target) && !event.target.closest('.tabbar [data-tab="settings"]')) settingsMenu.open = false;
+    });
     notifyStart();
     preloadLazy();
     bowlingOnChange = scheduleCloudSync;

@@ -1,0 +1,218 @@
+/* Seven Channels redesign — the "home screen" look (style C).
+   Loaded after the page's own styles and active while <html data-design="home">. It restyles the whole site through
+   the existing variables (--screen, --surface, --line, --signal, the --glass-* set) plus a few of its own, and turns
+   the channel bar into an icon sidebar on wide screens and a sheet opened from a bottom tab bar on phones.
+   Light: gray canvas, white tiles. Dark: near-black canvas, slate tiles. The theme picker and dark switch still work. */
+
+:root[data-design="home"] {
+  --font-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: "Space Grotesk", Inter, system-ui, sans-serif;
+  --tile-radius: 22px;
+  --ctl-radius: 12px;
+  --rail-w: 88px;
+  --tabbar-h: 68px;
+  --ctl-line: #dde1e8;
+  --tile-strong: #1b2130;
+  --tile-strong-ink: #ffffff;
+  --glass-radius: 22px;
+  --glass-radius-small: 14px;
+  --glass-base: var(--surface);
+  --glass-edge: #e3e7ee;
+  --glass-sheen: none;
+  --glass-inset: none;
+  --glass-rim: none;
+  --glass-shadow: none;
+  --glass-shadow-prominent: 0 18px 50px rgb(16 22 36 / 16%);
+  --glass-opacity-standard: 100%;
+  --glass-opacity-subtle: 100%;
+  --glass-opacity-prominent: 100%;
+  --glass-accent-ink: var(--signal);
+  --channel-photo-opacity: 0;
+}
+:root[data-design="home"][data-glass-tone="light"] {
+  --glass-base: var(--surface);
+  --glass-edge: #e3e7ee;
+  --glass-sheen: none;
+  --glass-inset: none;
+  --glass-rim: none;
+  --glass-shadow: none;
+  --glass-accent-ink: var(--signal);
+}
+:root[data-design="home"][data-theme="dark"],
+:root[data-design="home"][data-glass-tone="dark"] {
+  --ctl-line: #2b3343;
+  --glass-edge: #262e3d;
+  --tile-strong: #e8ecf4;
+  --tile-strong-ink: #0f131b;
+  --glass-shadow-prominent: 0 18px 50px rgb(0 0 0 / 45%);
+}
+
+/* ---------- Base ---------- */
+:root[data-design="home"] body {
+  font-family: var(--font-body);
+  background: var(--screen);
+  background-image: none;
+}
+:root[data-design="home"] body::before,
+:root[data-design="home"] body::after { display: none; }
+:root[data-design="home"] * { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+:root[data-design="home"] :is(.dial ul, .scoreboard, .music-hero, .le-hero, .kpop-featured)::after { display: none; }
+:root[data-design="home"] :is(h1, h2, h3, .logo, .channel-heading h2) { font-family: var(--font-heading); letter-spacing: -.015em; }
+:root[data-design="home"] .wrap { width: min(1320px, 100%); margin-inline: auto; padding-inline: 28px; box-sizing: border-box; }
+
+/* ---------- Header ---------- */
+:root[data-design="home"] .masthead {
+  position: sticky; top: 0; z-index: 25;
+  padding-block: 12px;
+  background: color-mix(in srgb, var(--screen) 94%, transparent);
+  border-bottom: 0;
+}
+:root[data-design="home"] .masthead-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: nowrap; }
+:root[data-design="home"] .logo { font-size: 1.35rem; font-weight: 700; color: var(--ink); text-decoration: none; letter-spacing: -.03em; }
+:root[data-design="home"] .tagline { margin: 2px 0 0; font-size: .8rem; color: var(--muted); }
+:root[data-design="home"] .clock-tools { display: flex; align-items: center; gap: 10px; max-width: none; width: auto; flex-wrap: nowrap; }
+:root[data-design="home"] .clock { text-align: right; }
+:root[data-design="home"] .clock span { font-family: var(--font-heading); font-weight: 600; font-size: 1.05rem; }
+:root[data-design="home"] .clock small { display: block; font-size: .62rem; letter-spacing: .08em; color: var(--muted); }
+:root[data-design="home"] .site-search-button { height: 44px; padding: 0 14px; border-radius: var(--ctl-radius); }
+
+/* Settings menu: account, colors, YouTube key and dark mode in one popover. */
+:root[data-design="home"] .settings-menu { position: relative; }
+:root[data-design="home"] .settings-button {
+  list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+  height: 44px; padding: 0 14px; border-radius: var(--ctl-radius);
+  border: 1px solid var(--ctl-line); background: var(--surface); color: var(--ink); font-weight: 600; font-size: .88rem;
+}
+:root[data-design="home"] .settings-button::-webkit-details-marker { display: none; }
+:root[data-design="home"] .settings-menu[open] > .settings-button { border-color: var(--signal); }
+:root[data-design="home"] .settings-panel {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 40;
+  width: min(400px, calc(100vw - 32px)); max-height: min(78vh, 720px); overflow: auto; box-sizing: border-box;
+  display: grid; gap: 14px; padding: 18px;
+  border-radius: 20px; border: 1px solid var(--ctl-line); background: var(--surface); color: var(--ink);
+  box-shadow: var(--glass-shadow-prominent);
+}
+:root[data-design="home"] .settings-title { margin: 0; font-size: 1.15rem; }
+:root[data-design="home"] .settings-panel .sync-panel,
+:root[data-design="home"] .settings-panel .appearance-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; justify-content: flex-start; }
+:root[data-design="home"] .settings-panel .sync-panel[hidden] { display: none; }
+:root[data-design="home"] .settings-panel .appearance-controls { padding-top: 12px; border-top: 1px solid var(--ctl-line); }
+:root[data-design="home"] .settings-panel .youtube-key-settings { width: 100%; }
+
+/* ---------- Controls ---------- */
+:root[data-design="home"] button { border-radius: var(--ctl-radius); font-family: var(--font-body); font-weight: 600; }
+:root[data-design="home"] button.secondary { background: var(--surface); border: 1px solid var(--ctl-line); color: var(--ink); }
+:root[data-design="home"] button.secondary:hover { border-color: color-mix(in srgb, var(--signal) 45%, var(--ctl-line)); }
+:root[data-design="home"] :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]), select, textarea) {
+  border-radius: var(--ctl-radius); border: 1px solid var(--ctl-line); background: var(--surface); color: var(--ink); font-family: var(--font-body);
+}
+
+/* Pill tabs and filters everywhere: the selected one is a solid dark pill (light pill in dark mode). */
+:root[data-design="home"] :is(.sports-score-tab, .soccer-tab, .games-tabs a, .ms-nav a, .nba-db-nav a, .channel-news-filters button,
+  .games-filters button, .nba-team-hub-tabs button, .nba-slnet-filters button, .kpop-tabs a, .music-tabs a, .le-tabs a, .cs-tabs a) {
+  border-radius: 999px; border: 1px solid var(--ctl-line); background: var(--surface); color: var(--ink);
+}
+:root[data-design="home"] :is(.sports-score-tab, .soccer-tab, .nba-team-hub-tabs button)[aria-selected="true"],
+:root[data-design="home"] :is(.games-tabs a, .ms-nav a, .nba-db-nav a, .kpop-tabs a, .music-tabs a, .le-tabs a, .cs-tabs a)[aria-current="page"],
+:root[data-design="home"] :is(.channel-news-filters button, .games-filters button, .nba-slnet-filters button)[aria-pressed="true"],
+:root[data-design="home"] .ms-nav a.is-active {
+  background: var(--tile-strong); border-color: var(--tile-strong); color: var(--tile-strong-ink);
+}
+
+/* ---------- Tiles ---------- */
+:root[data-design="home"] :is(.entry-form, .list-column, .scoreboard, .channel-planner, .sports-widget, .games-panel, .channel-news, .this-week,
+  .nba-team-hub-card, .nba-team-hub-hero, .ms-card, .bet-dashboard, .bet-importer, .musicbrainz, .game-release-calendar, .bowling-panel,
+  .music-panel, .music-hero, .cs-panel, .le-panel, .le-hero, .sports-featured, .wrapped-banner, .idol-entry, .nba-db-entry) {
+  border-radius: var(--tile-radius);
+  border-color: var(--glass-edge);
+  box-shadow: none;
+}
+:root[data-design="home"] .channel-heading { display: flex; flex-direction: column-reverse; align-items: flex-start; gap: 2px; margin-bottom: 6px; }
+:root[data-design="home"] .channel-heading .number { color: var(--muted); font-size: .85rem; font-weight: 500; letter-spacing: 0; }
+:root[data-design="home"] .channel-heading h2 { color: var(--ink); font-size: clamp(1.9rem, 1.4rem + 1.5vw, 2.5rem); font-weight: 700; margin: 0; }
+:root[data-design="home"] .lede { color: var(--muted); font-size: .95rem; }
+
+/* ---------- Channel sidebar (wide screens) ---------- */
+:root[data-design="home"] .dial-icon { flex: none; }
+:root[data-design="home"] .dial a[data-channel] { --chan-icon: var(--chan); }
+:root[data-design="home"] .rail-home {
+  display: grid; place-items: center; width: 48px; height: 48px; flex: none; border-radius: 14px;
+  background: var(--tile-strong); color: var(--tile-strong-ink); text-decoration: none;
+  font-family: var(--font-heading); font-weight: 700; font-size: 1.35rem;
+}
+:root[data-design="home"] .tabbar { display: none; }
+
+@media (min-width: 900px) {
+  :root[data-design="home"] body { padding-left: var(--rail-w); }
+  :root[data-design="home"] .dial.wrap {
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 30;
+    width: var(--rail-w); padding: 16px 0 20px; margin: 0; box-sizing: border-box;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    background: var(--surface); border-right: 1px solid var(--ctl-line);
+    overflow-y: auto; scrollbar-width: thin;
+  }
+  :root[data-design="home"] .dial ul {
+    display: flex; flex-direction: column; flex-wrap: nowrap; align-items: center; gap: 4px;
+    margin: 0; padding: 0; border: 0; background: none; box-shadow: none; border-radius: 0;
+  }
+  :root[data-design="home"] .dial a[data-channel] {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    width: 72px; padding: 4px 0 6px; border: 0; border-radius: 14px;
+    background: transparent; color: var(--muted); font-size: .66rem; font-weight: 600; line-height: 1.15; text-align: center; text-decoration: none;
+  }
+  :root[data-design="home"] .dial a[data-channel] .dial-icon { box-sizing: content-box; padding: 9px 13px; border-radius: 13px; color: var(--chan, var(--ink)); }
+  :root[data-design="home"] .dial a[data-channel]:hover { background: transparent; color: var(--ink); }
+  :root[data-design="home"] .dial a[data-channel]:hover .dial-icon { background: color-mix(in srgb, var(--chan, var(--ink)) 12%, transparent); }
+  :root[data-design="home"] .dial a[data-channel][aria-current="page"] { background: transparent; color: var(--ink); box-shadow: none; }
+  :root[data-design="home"] .dial a[data-channel][aria-current="page"] .dial-icon { background: var(--signal); color: var(--signal-ink, #ffffff); }
+  :root[data-design="home"] .dial a b,
+  :root[data-design="home"] .dial-dot { display: none; }
+  :root[data-design="home"] .dial-name { max-width: 70px; overflow-wrap: anywhere; }
+}
+
+/* ---------- Phones: bottom tab bar and channel sheet ---------- */
+@media (max-width: 899px) {
+  :root[data-design="home"] body { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); }
+  :root[data-design="home"] .wrap { padding-inline: 16px; }
+  :root[data-design="home"] .tagline { display: none; }
+  :root[data-design="home"] .clock { display: none; }
+  :root[data-design="home"] .site-search-button { display: none; }
+  :root[data-design="home"] .settings-label { display: none; }
+  :root[data-design="home"] .tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 4px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+    background: var(--surface); border-top: 1px solid var(--ctl-line);
+  }
+  :root[data-design="home"] .tabbar :is(a, button) {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    min-height: 54px; padding: 4px 0; border: 0; border-radius: 12px; background: transparent;
+    color: var(--muted); font: 600 .7rem var(--font-body); text-decoration: none;
+  }
+  :root[data-design="home"] .tabbar [aria-current],
+  :root[data-design="home"] .tabbar [aria-expanded="true"] { color: var(--signal); }
+  :root[data-design="home"] .dial.wrap { display: none; }
+  :root[data-design="home"] body.channels-open .dial.wrap {
+    display: block; position: fixed; left: 0; right: 0; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); z-index: 45;
+    max-height: 72vh; overflow-y: auto; margin: 0; padding: 18px 16px 20px; box-sizing: border-box;
+    background: var(--surface); border-radius: 24px 24px 0 0; box-shadow: 0 0 0 100vmax rgb(10 14 22 / 40%);
+  }
+  :root[data-design="home"] body.channels-open .dial .rail-home { display: none; }
+  :root[data-design="home"] body.channels-open .dial ul {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
+    margin: 0; padding: 0; border: 0; background: none; box-shadow: none; border-radius: 0;
+  }
+  :root[data-design="home"] body.channels-open .dial a[data-channel] {
+    display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px;
+    border: 1px solid var(--ctl-line); border-radius: 16px; background: var(--screen); color: var(--ink);
+    font-size: .78rem; font-weight: 600; text-align: center; text-decoration: none;
+  }
+  :root[data-design="home"] body.channels-open .dial a .dial-icon { color: var(--chan, var(--ink)); }
+  :root[data-design="home"] body.channels-open .dial a[aria-current="page"] { border-color: var(--signal); }
+  :root[data-design="home"] body.channels-open .dial a b,
+  :root[data-design="home"] body.channels-open .dial-dot { display: none; }
+}
+@media (max-width: 899px) and (prefers-reduced-motion: no-preference) {
+  :root[data-design="home"] body.channels-open .dial.wrap { animation: sheet-up .18s ease-out; }
+  @keyframes sheet-up { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+}
