@@ -41,6 +41,17 @@ TEAMS = {
 SECTION_NAMES = [r"logos? and uniforms?", r"uniforms? and logos?", r"logos?,? (?:colou?rs )?and uniforms?", r"uniforms?", r"uniform history",
                  r"team (?:branding|identity)", r".*\b(?:logos?|uniforms?)\b.*", r"colou?rs"]
 REFRESH_DAYS = 30
+COMMONS_API = "https://commons.wikimedia.org/w/api.php"
+# Former names, so older logos on Wikimedia Commons are found too.
+FORMER_NAMES = {
+    "atlanta-hawks": ["St. Louis Hawks", "Milwaukee Hawks", "Tri-Cities Blackhawks"], "brooklyn-nets": ["New Jersey Nets", "New York Nets"],
+    "charlotte-hornets": ["Charlotte Bobcats"], "detroit-pistons": ["Fort Wayne Pistons"], "golden-state-warriors": ["San Francisco Warriors", "Philadelphia Warriors"],
+    "houston-rockets": ["San Diego Rockets"], "la-clippers": ["San Diego Clippers", "Buffalo Braves"], "los-angeles-lakers": ["Minneapolis Lakers"],
+    "memphis-grizzlies": ["Vancouver Grizzlies"], "new-orleans-pelicans": ["New Orleans Hornets"], "oklahoma-city-thunder": ["Seattle SuperSonics"],
+    "philadelphia-76ers": ["Syracuse Nationals"], "sacramento-kings": ["Kansas City Kings", "Cincinnati Royals", "Rochester Royals"],
+    "utah-jazz": ["New Orleans Jazz"], "washington-wizards": ["Washington Bullets", "Capital Bullets", "Baltimore Bullets", "Chicago Zephyrs"],
+}
+LOGO_WORDS = re.compile(r"\b(logo|logos|wordmark|emblem|crest|monogram)\b", re.I)
 
 
 def fetch_json(params):
@@ -196,6 +207,73 @@ def team_history(name):
     return {"article": article, "url": url, "section": section, "blocks": blocks[:80]}
 
 
+def commons_json(params):
+    url = f"{COMMONS_API}?{urlencode({**params, 'format': 'json', 'formatversion': '2'})}"
+    for attempt in range(4):
+        try:
+            with urlopen(Request(url, headers={"User-Agent": USER_AGENT}), timeout=60) as response:
+                return json.loads(response.read())
+        except HTTPError as error:
+            if error.code == 429 and attempt < 3:
+                time.sleep(15 * (attempt + 1))
+                continue
+            raise
+
+
+def logo_years(text):
+    """(start, end) years from a file name like "Utah Jazz Logo, 1980-1996" ("current"/"present" → None end)."""
+    match = re.search(r"\b(1[89]\d\d|20\d\d)\b(?:\s*[-–_]\s*(1[89]\d\d|20\d\d|present|current|now)\b)?", text, re.I)
+    if not match:
+        return None, None
+    end = match.group(2)
+    return int(match.group(1)), (int(end) if end and end.isdigit() else ("present" if end else None))
+
+
+def commons_logos(names, known_files=(), fetch=commons_json, limit=24):
+    """Logo files on Wikimedia Commons whose names mention the team (or a former name): the team's logo category,
+    then a file-name search. Photos and other teams with the same nickname are left out."""
+    titles = []
+    keys = [re.sub(r"[^a-z0-9]+", " ", name.lower()).strip() for name in names]
+    def wanted(title):
+        plain = re.sub(r"[^a-z0-9]+", " ", title.lower())
+        return (any(f" {key} " in f" {plain} " for key in keys) and LOGO_WORDS.search(title.replace("_", " "))
+                and re.search(r"\.(svg|png|gif)$", title, re.I))
+    for name in names[:1]:
+        data = fetch({"action": "query", "list": "categorymembers", "cmtitle": f"Category:{name} logos", "cmtype": "file", "cmlimit": 50})
+        titles += [item["title"] for item in (data.get("query") or {}).get("categorymembers", []) if re.search(r"\.(svg|png|gif)$", item["title"], re.I)]
+    for name in names:
+        data = fetch({"action": "query", "list": "search", "srsearch": f'intitle:"{name}" logo', "srnamespace": 6, "srlimit": 30})
+        titles += [item["title"] for item in (data.get("query") or {}).get("search", []) if wanted(item["title"])]
+        time.sleep(0.5)
+    known = {re.sub(r"[ _]+", "_", unquote_title(url)) for url in known_files}
+    unique = []
+    for title in titles:
+        if title not in unique and re.sub(r"[ _]+", "_", title.removeprefix("File:")) not in known:
+            unique.append(title)
+    out = []
+    for start in range(0, len(unique), 40):
+        data = fetch({"action": "query", "titles": "|".join(unique[start:start + 40]), "prop": "imageinfo", "iiprop": "url|extmetadata", "iiurlwidth": 300})
+        for page in (data.get("query") or {}).get("pages", []):
+            info = (page.get("imageinfo") or [{}])[0]
+            thumb = (info.get("thumburl") or "").split("?")[0]
+            if not re.match(r"https://(upload|thumb)\.wikimedia\.org/", thumb):
+                continue
+            meta = info.get("extmetadata") or {}
+            caption = re.sub(r"\.(svg|png|gif)$", "", page["title"].removeprefix("File:"), flags=re.I).replace("_", " ").strip()
+            first, last = logo_years(caption)
+            out.append({"img": thumb, "file": info.get("descriptionurl") or f"https://commons.wikimedia.org/wiki/{quote(page['title'].replace(' ', '_'))}",
+                        "caption": caption[:140], **({"from": first} if first else {}), **({"to": last} if last else {}),
+                        "license": re.sub(r"<[^>]+>", "", (meta.get("LicenseShortName") or {}).get("value", ""))[:60],
+                        "width": info.get("thumbwidth") or 0, "height": info.get("thumbheight") or 0})
+    out.sort(key=lambda item: (item.get("from") or 9999, item["caption"].lower()))
+    return out[:limit]
+
+
+def unquote_title(url):
+    from urllib.parse import unquote
+    return unquote(url.rsplit("/wiki/", 1)[-1]).removeprefix("File:")
+
+
 def main():
     now = datetime.now(timezone.utc)
     previous = {}
@@ -214,8 +292,15 @@ def main():
         except Exception as error:
             print(f"  {name}: {error}", file=sys.stderr)
             history = (previous.get("teams") or {}).get(slug)
-        if history:
-            teams[slug] = history
+        try:
+            known = [block["file"] for block in (history or {}).get("blocks", []) if block.get("file")]
+            extra = commons_logos([name, *FORMER_NAMES.get(slug, [])], known)
+        except Exception as error:
+            print(f"  {name} (Commons): {error}", file=sys.stderr)
+            extra = ((previous.get("teams") or {}).get(slug) or {}).get("commons", [])
+        if history or extra:
+            teams[slug] = {**(history or {"article": name, "url": f"https://en.wikipedia.org/wiki/{quote(name.replace(' ', '_'))}", "section": "", "blocks": []}),
+                           **({"commons": extra} if extra else {})}
         time.sleep(1)
     if len(teams) < 20:
         print(f"NBA team history: only {len(teams)} teams found; keeping the previous file.", file=sys.stderr)
@@ -223,7 +308,8 @@ def main():
     OUTPUT.write_text(json.dumps({"generatedAt": now.replace(microsecond=0).isoformat(), "source": "Wikipedia", "teams": teams},
                                  ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     images = sum(1 for team in teams.values() for block in team["blocks"] if "img" in block)
-    print(f"NBA team history: {len(teams)} teams, {images} images")
+    extra = sum(len(team.get("commons", [])) for team in teams.values())
+    print(f"NBA team history: {len(teams)} teams, {images} Wikipedia images, {extra} more logos from Commons")
 
 
 if __name__ == "__main__":

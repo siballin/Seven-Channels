@@ -85,10 +85,43 @@ function nbaTeamCurrentLogos(team) {
   return box;
 }
 
+// More logos found on Wikimedia Commons, oldest first.
+function nbaTeamCommonsLogos(history) {
+  const logos = (history?.commons || []).filter((logo) => /^https:\/\/(upload|thumb)\.wikimedia\.org\//.test(logo.img || ""));
+  if (!logos.length) return null;
+  const box = element("section", "nba-team-hub-card nba-history");
+  box.append(element("h3", "", "Logo gallery"));
+  const gallery = element("div", "nba-history-gallery");
+  for (const logo of logos) {
+    const figure = element("figure", "nba-history-figure");
+    const link = element("a", "nba-history-image");
+    link.href = logo.file;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.title = "Image details and license on Wikimedia Commons";
+    const image = element("img", "");
+    image.src = logo.img;
+    image.alt = logo.caption;
+    image.loading = "lazy";
+    image.referrerPolicy = "no-referrer";
+    image.addEventListener("error", () => figure.remove(), { once: true });
+    link.append(image);
+    const years = logo.from ? `${logo.from}${logo.to ? `–${logo.to === "present" ? "present" : logo.to}` : ""}` : "";
+    const caption = element("figcaption", "");
+    if (years) caption.append(element("strong", "", years), document.createElement("br"));
+    caption.append(logo.caption.replace(/,?\s*\b(1[89]\d\d|20\d\d)\b(\s*[-–]\s*(\d{4}|present|current|now))?/i, "").trim() || logo.caption);
+    if (logo.license) caption.append(element("small", "nba-history-license", ` · ${logo.license}`));
+    figure.append(link, caption);
+    gallery.append(figure);
+  }
+  box.append(gallery, element("p", "nba-team-hub-note", "More logos from Wikimedia Commons, oldest first. Tap one for its file page and license."));
+  return box;
+}
+
 function nbaTeamHistoryView(history) {
   const box = element("section", "nba-team-hub-card nba-history");
   box.append(element("h3", "", "Logos & uniforms"));
-  if (!history?.blocks?.length) {
+  if (!history?.blocks?.some((block) => block.p || block.img)) {
     box.append(element("p", "nba-team-hub-note", "Logo and uniform history isn’t available for this team yet."));
     return box;
   }
@@ -646,7 +679,7 @@ function createNbaTeamPage(slug) {
       } else if (name === "history") {
         const [data, team] = await Promise.all([nbaTeamHistory(), api(`/teams/${id}`).catch(() => null)]);
         if (current !== tabRequest || signal.aborted) return;
-        panel.replaceChildren(...[nbaTeamCurrentLogos(team?.team), nbaTeamHistoryView(data?.teams?.[slug])].filter(Boolean));
+        panel.replaceChildren(...[nbaTeamCurrentLogos(team?.team), nbaTeamCommonsLogos(data?.teams?.[slug]), nbaTeamHistoryView(data?.teams?.[slug])].filter(Boolean));
         return;
       } else if (name === "roster" || name === "depth") {
         const data = await api(`/teams/${id}/roster`);

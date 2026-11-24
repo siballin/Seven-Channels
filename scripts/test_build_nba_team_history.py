@@ -42,6 +42,27 @@ class TeamHistoryTests(unittest.TestCase):
         self.assertNotEqual(result["blocks"][0].get("h"), "Logos and uniforms")  # the section's own heading is dropped
         self.assertTrue(result["url"].endswith("#Logos_and_uniforms"))
 
+    def test_commons_logos(self):
+        def fetch(params):
+            if params.get("list") == "categorymembers":
+                return {"query": {"categorymembers": [{"title": "File:Utah Jazz wordmark logo primary color.png"}, {"title": "File:Jazz game photo.jpg"}]}}
+            if params.get("list") == "search":
+                return {"query": {"search": [{"title": "File:Utah Jazz Logo, 1980-1996.png"}, {"title": "File:New Orleans Jazz Logo, 1975-1979.png"},
+                                             {"title": "File:Montreux Jazz Logo.jpg"}, {"title": "File:Detroit Jazz Festival logo.png"}, {"title": "File:Utah Jazz arena.png"}]}}
+            pages = [{"title": title, "imageinfo": [{"thumburl": f"https://upload.wikimedia.org/thumb/{i}.png", "descriptionurl": f"https://commons.wikimedia.org/wiki/{title}",
+                                                      "extmetadata": {"LicenseShortName": {"value": "Public domain"}}, "thumbwidth": 300, "thumbheight": 140}]}
+                     for i, title in enumerate(params["titles"].split("|"))]
+            return {"query": {"pages": pages}}
+        original = history.time.sleep
+        history.time.sleep = lambda seconds: None
+        try:
+            logos = history.commons_logos(["Utah Jazz", "New Orleans Jazz"], ["https://en.wikipedia.org/wiki/File:Utah_Jazz_Logo,_1980-1996.png"], fetch)
+        finally:
+            history.time.sleep = original
+        self.assertEqual([logo["caption"] for logo in logos], ["New Orleans Jazz Logo, 1975-1979", "Utah Jazz wordmark logo primary color"])
+        self.assertEqual((logos[0]["from"], logos[0]["to"], logos[0]["license"]), (1975, 1979, "Public domain"))
+        self.assertEqual(history.logo_years("Knicks Wordmark Logo 2012-current"), (2012, "present"))
+
     def test_every_team_has_an_article(self):
         self.assertEqual(len(history.TEAMS), 30)
 
