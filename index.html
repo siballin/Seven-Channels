@@ -6038,14 +6038,13 @@
         editWidgets.setAttribute("aria-pressed", String(editingWidgets));
         applyWidgetGrid(widgetGrid, sportsLayoutKey, editingWidgets);
       });
-      top.append(editWidgets);
+      // The widget grid was removed from Sports at the user's request; the page keeps the redesign's look.
       const scoresTile = element("section", "sports-scores-tile");
       scoresTile.setAttribute("aria-labelledby", "sports-scores-title");
       const scoresTitle = element("h2", "sports-section-title", "Scores & game center");
       scoresTitle.id = "sports-scores-title";
       scoresTile.append(scoresTitle, scoreboard);
-      hub.append(top, widgetGrid, scoresTile, planner, resources, createRedditWidget("sports"));
-      applyWidgetGrid(widgetGrid, sportsLayoutKey, false);
+      hub.append(top, scoresTile, planner, resources, createRedditWidget("sports"));
 
       // Team ratings (NBA): offense, defense, net and pace for the first NBA team you follow, from ESPN season totals.
       async function renderRatings() {
@@ -6423,6 +6422,7 @@
       }
 
       async function loadWidgets() {
+        if (!widgetGrid.isConnected) return; // no widgets on the page
         const requestId = ++widgetRequestId;
         const sport = activeSport;
         playersTile.hidden = sport !== "nba";

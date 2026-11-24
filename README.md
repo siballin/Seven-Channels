@@ -45,18 +45,7 @@ The site uses the "home screen" design (style C): Space Grotesk headings and Int
 
 A widget with nothing to show stays out of the way. **Edit widgets** lets you hide, re-add and reorder them; the layout is remembered on this device. Below the widgets: This week, Year in review, **All channels** (a tile per channel with its three summary lines) and the top headlines.
 
-**Sports channel** (redesigned):
-- **League buttons and Edit widgets:** the league buttons sit at the top (a swipeable row on phones), with **Edit widgets** beside them.
-- **Widgets that follow the selected league:**
-  - **Live game:** a dark tile with your team's game first, otherwise the best live game.
-  - **My teams** and **Standings** (with NFL divisions).
-  - **Game leaders**, **Upcoming games**, **Injury report** and **Sports news**.
-  - **Team ratings:** offense, defense, net and pace for an NBA team you follow, from ESPN season totals.
-  - **NBA player search:** opens the player database with your search.
-  - **Your picks:** open bets from Betting.
-  - **From the archive:** one logo or uniform from your NBA team's history each day, from SportsLogos.Net, credited.
-- **Editing:** hide and reorder widgets; the layout is remembered on this device.
-- **Below the widgets:** **Scores & game center**, with the day's games, date controls and the full game center, then your lists, Reddit and the headlines.
+**Sports channel** (redesigned): the league buttons sit at the top (a swipeable row on phones), then **Scores & game center** with the day's games, date controls and the full game center, then your lists, Reddit and the headlines.
 
 ## Install as an app
 
