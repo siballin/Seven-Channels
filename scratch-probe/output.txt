@@ -1,0 +1,16 @@
+== https://site.api.espn.com/apis/v2/sports/football/nfl/standings?level=3
+  American Football Conference abbr=AFC entries=0 children=4
+    AFC East abbr=EAST entries=4
+      stats: differential=+105, gamesBehind=-, losses=1, playoffSeed=1, pointDifferential=+105, pointsAgainst=208, pointsFor=313, streak=W6, ties=0, winPercent=.900, wins=9, divisionLosses=1, divisionRecord=2-1, divisionTies=0.000, divisionWins=2.000, lockedDivRank=0, overall=9-1, Home=4-1, Road=5-0, vs. Div.=2-1, vs. Conf.=6-1
+    AFC North abbr=NORTH entries=4
+    AFC South abbr=SOUTH entries=4
+    AFC West abbr=WEST entries=4
+  National Football Conference abbr=NFC entries=0 children=4
+    NFC East abbr=EAST entries=4
+      stats: differential=+12, gamesBehind=-, losses=3, playoffSeed=3, pointDifferential=+12, pointsAgainst=214, pointsFor=226, streak=W1, ties=1, winPercent=.650, wins=6, divisionLosses=1, divisionRecord=2-1-1, divisionTies=1.000, divisionWins=2.000, lockedDivRank=0, overall=6-3-1, Home=4-2, Road=2-1-1, vs. Div.=2-1-1, vs. Conf.=3-3-1
+    NFC North abbr=NORTH entries=4
+    NFC South abbr=SOUTH entries=4
+    NFC West abbr=WEST entries=4
+== https://site.api.espn.com/apis/v2/sports/football/nfl/standings
+  American Football Conference abbr=AFC entries=16 children=0
+  National Football Conference abbr=NFC entries=16 children=0
