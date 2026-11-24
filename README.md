@@ -28,6 +28,36 @@ The **Search** button in the header (or press `/` or Ctrl+K anywhere) searches y
 
 ## Notifications
 
+## Design
+
+The site uses the "home screen" design (style C): Space Grotesk headings and Inter text, white rounded tiles on a light gray canvas (slate tiles on near-black in dark mode), pill-shaped tabs and filters, and an icon sidebar for the channels. On phones the sidebar becomes a bottom tab bar (Home, Channels, Search, Settings); Channels opens a sheet with every channel. The color theme, colors, YouTube key, account and dark mode are in **Settings**. The look lives in `design.css`, loaded after the page's own styles. It restyles the site through the existing color variables, so the theme picker and dark switch keep working. The first visit after the redesign switches you to the new "Home screen" theme once.
+
+**The Guide is a home screen** (`home-screen.js`): a greeting and a grid of widgets built from what you follow and log:
+- your teams' games today (live score first);
+- the next race;
+- the game you're playing and your play time;
+- price alerts;
+- your esports teams' next match;
+- your next concert;
+- your bowling average trend;
+- the next gaming showcase;
+- K-pop releases this week.
+
+A widget with nothing to show stays out of the way. **Edit widgets** lets you hide, re-add and reorder them; the layout is remembered on this device. Below the widgets: This week, Year in review, **All channels** (a tile per channel with its three summary lines) and the top headlines.
+
+**Sports channel** (redesigned):
+- **League buttons and Edit widgets:** the league buttons sit at the top (a swipeable row on phones), with **Edit widgets** beside them.
+- **Widgets that follow the selected league:**
+  - **Live game:** a dark tile with your team's game first, otherwise the best live game.
+  - **My teams** and **Standings** (with NFL divisions).
+  - **Game leaders**, **Upcoming games**, **Injury report** and **Sports news**.
+  - **Team ratings:** offense, defense, net and pace for an NBA team you follow, from ESPN season totals.
+  - **NBA player search:** opens the player database with your search.
+  - **Your picks:** open bets from Betting.
+  - **From the archive:** one logo or uniform from your NBA team's history each day, from SportsLogos.Net, credited.
+- **Editing:** hide and reorder widgets; the layout is remembered on this device.
+- **Below the widgets:** **Scores & game center**, with the day's games, date controls and the full game center, then your lists, Reddit and the headlines.
+
 ## Install as an app
 
 Seven Channels can be installed like an app (it's a progressive web app). On Android, and in Chrome or Edge on a computer, press **Install app** in the header. On iPhone or iPad, open the site in Safari, tap **Share**, then **Add to Home Screen**; the Install app button shows these steps. Installed, it opens full screen from its own icon. A long press on the icon jumps straight to the Guide, Sports scores, Motorsports or K-Pop, on phones that support shortcuts.
@@ -104,10 +134,19 @@ Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:
 
 ## Sports leagues
 
-The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League, La Liga and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device.
+The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FBS), college basketball (Division I men's), the Premier League, La Liga and MLS. NBA and NFL keep their full scoreboards; the other leagues share one (`sports-leagues.js`) built on ESPN's public scoreboard data: every game for the chosen day with logos, records, rankings, live status and TV network, plus a period-by-period box score, game leaders and a link to the full game on ESPN. Live games refresh every 10 seconds like the NBA and NFL, the side widgets (standings, news, leaders, featured matchup) follow the selected league, and the last league you opened is remembered on this device. The NFL standings widget can show a whole conference (ordered by playoff seed) or any of its four divisions, with records including ties, and starts on the division of an NFL team you follow.
 
 **Team following** works in every league: tap ☆ under a team on any game card to follow it. Followed teams' games move to the top of the list and get a highlighted edge, the featured matchup prefers them, and they're starred in the standings. **My teams** shows the selected league's teams with their record and that day's game. It also lists teams you follow in other leagues, and tapping one switches to that league. Follows are saved on this device and sync to your account; NBA teams you already followed carry over.
 
+
+**Logos & Uniforms** (team page tab):
+- **Current logos:** the team's current logo set from ESPN (primary, on dark backgrounds, scoreboard).
+- **Logo & uniform history (SportsLogos.Net):** every primary, alternate, jersey, wordmark and anniversary logo, and home, road and alternate uniforms, by season, including former names (Seattle SuperSonics, Washington Bullets…), with **All / Logos / Uniforms** filters. Source: Chris Creamer's [SportsLogos.Net](https://www.sportslogos.net). Their terms allow fair use and personal, non-commercial reference (no commercial rights; the logos belong to the teams and the NBA) and require a visible credit with a link back. The tab shows "Credit: Chris Creamer's SportsLogos.Net — https://www.sportslogos.net" and links every image to its SportsLogos.Net page. If the site ever becomes commercial (ads, sales), this section has to come off. `scripts/build_sportslogos.py` follows their robots.txt, waits between requests, refreshes every 30 days, and downloads each thumbnail once into the Pages workflow's cache, so the site serves its own copies instead of hotlinking.
+- **Uniform gallery:** uniform drawings from Wikipedia's kit templates on Wikimedia Commons (the colored jersey and shorts patterns under Wikipedia's outlines). The current set comes from the team article's infobox, then past uniforms by season or era, newest first. Mostly 2016 onward, with some teams going back to the 1970s and 80s.
+- **Logo gallery:** more logos from Wikimedia Commons, Wikipedia's free media library: the team's logo category plus files named after the team or its former names (New Orleans Jazz, Seattle SuperSonics, Washington Bullets…), oldest first, each with its license. Every team has at least one.
+- **History:** the logo and uniform history from Wikipedia: the team's "Logos and uniforms of the …" article when one exists, otherwise the logo/uniform section of the team's article. It keeps the text, era headings, and logo and uniform images with captions. Each image links to its Wikipedia file page, where its license is. Long histories open with **Read the full history**.
+
+`scripts/build_nba_team_history.py` builds `data/nba-team-history.json` every 30 days in the Pages workflow (`--force` rebuilds now). Wikipedia limits how many non-free team logos it can show, so some teams have text only.
 
 ### Premier League, La Liga and MLS
 

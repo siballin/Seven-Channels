@@ -47,6 +47,289 @@ async function nbaHubFetch(url, signal) {
   return pending.get(url);
 }
 
+// Logo and uniform history (data/nba-team-history.json, built from Wikipedia by scripts/build_nba_team_history.py).
+let nbaTeamHistoryRequest = null;
+function nbaTeamHistory() {
+  nbaTeamHistoryRequest ||= fetch(new URL("data/nba-team-history.json", location.href))
+    .then((response) => (response.ok ? response.json() : null))
+    .catch(() => { nbaTeamHistoryRequest = null; return null; });
+  return nbaTeamHistoryRequest;
+}
+
+// The team's current logo set from ESPN (primary, dark-background and alternate versions).
+function nbaTeamCurrentLogos(team) {
+  const logos = (team?.logos || []).filter((logo) => /^https:\/\//.test(logo.href || ""));
+  const seen = new Set();
+  const unique = logos.filter((logo) => !seen.has(logo.href) && seen.add(logo.href)).slice(0, 6);
+  if (!unique.length) return null;
+  const box = element("section", "nba-team-hub-card nba-history");
+  box.append(element("h3", "", "Current logos"));
+  const gallery = element("div", "nba-history-gallery");
+  for (const logo of unique) {
+    const rel = logo.rel || [];
+    const dark = rel.includes("dark");
+    const figure = element("figure", "nba-history-figure");
+    const wrap = element("span", `nba-history-image${dark ? " is-dark" : ""}`);
+    const image = element("img", "");
+    image.src = logo.href;
+    image.alt = logo.alt || `${team.displayName || "Team"} logo`;
+    image.loading = "lazy";
+    image.addEventListener("error", () => figure.remove(), { once: true });
+    wrap.append(image);
+    const label = rel.includes("primary_logo_on_black_color") || rel.includes("primary_logo_on_primary_color") ? "On team color"
+      : rel.includes("scoreboard") ? "Scoreboard" : dark ? "On dark backgrounds" : rel.includes("primary_logo_on_white_color") ? "On white" : "Primary";
+    figure.append(wrap, element("figcaption", "", label));
+    gallery.append(figure);
+  }
+  box.append(gallery, element("p", "nba-team-hub-note", "Current logos from ESPN."));
+  return box;
+}
+
+// Logo and uniform history from Chris Creamer's SportsLogos.Net (data/sportslogos.json, built by
+// scripts/build_sportslogos.py). Their terms: fair use / personal non-commercial reference, no commercial rights,
+// and a visible credit with a link back, which this view shows and every image links to its SportsLogos.Net page.
+// The thumbnails are copies served from this site; branch previews borrow the live site's copies.
+const nbaSportsLogosLive = "https://siballin.github.io/Seven-Channels/";
+let nbaSportsLogosRequest = null;
+let nbaSportsLogosFilter = "all";
+function nbaSportsLogos() {
+  const live = location.hostname === new URL(nbaSportsLogosLive).hostname;
+  const load = (base) => fetch(new URL("data/sportslogos.json", base)).then((response) => (response.ok ? response.json() : null));
+  nbaSportsLogosRequest ||= load(location.href).then((data) => data || (live ? null : load(nbaSportsLogosLive))).catch(() => null)
+    .then((data) => { if (!data) nbaSportsLogosRequest = null; return data; });
+  return nbaSportsLogosRequest;
+}
+
+function nbaSportsLogosView(data, slug) {
+  const team = data?.teams?.[slug];
+  if (!team) return null;
+  const box = element("section", "nba-team-hub-card nba-history nba-slnet");
+  box.append(element("h3", "", "Logo & uniform history"));
+  const filters = element("div", "nba-team-hub-filters nba-slnet-filters");
+  filters.setAttribute("role", "group");
+  filters.setAttribute("aria-label", "Show logos or uniforms");
+  const body = element("div", "nba-slnet-body");
+  const pages = [{ name: team.name, years: "", url: team.url, sections: team.sections || [] },
+    ...(team.former || []).map((page) => ({ ...page, sections: page.sections || [] }))];
+  const range = (item) => [item.from, item.to && item.to !== item.from ? item.to : ""].filter(Boolean).join("–");
+  const draw = () => {
+    body.replaceChildren();
+    for (const page of pages) {
+      const sections = page.sections.filter((section) => nbaSportsLogosFilter === "all" || (nbaSportsLogosFilter === "uniforms" ? /uniform/i.test(section.name) : !/uniform/i.test(section.name)));
+      if (!sections.length) continue;
+      if (page !== pages[0]) body.append(element("h4", "nba-slnet-franchise", `${page.name}${page.years ? ` (${page.years.replace(/-/g, "–")})` : ""}`));
+      for (const section of sections) {
+        body.append(element("h5", "nba-history-heading", section.name));
+        const gallery = element("div", "nba-history-gallery nba-slnet-gallery");
+        for (const item of section.items) {
+          const figure = element("figure", "nba-history-figure");
+          const link = element("a", "nba-history-image");
+          link.href = item.view;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.title = `${item.title} — view on SportsLogos.Net`;
+          const image = element("img", "");
+          image.src = item.img || item.thumb;
+          image.alt = item.title;
+          image.loading = "lazy";
+          image.addEventListener("error", () => {
+            // Previews of a branch: use the live site's copy; otherwise drop the card.
+            const fallback = new URL(item.img || "", nbaSportsLogosLive).href;
+            if (item.img && image.src !== fallback) image.src = fallback;
+            else figure.remove();
+          });
+          link.append(image);
+          const caption = element("figcaption", "");
+          if (range(item)) caption.append(element("strong", "", range(item)), document.createElement("br"));
+          caption.append(item.title.replace(/\s*\([^)]*\)\s*$/, ""));
+          figure.append(link, caption);
+          gallery.append(figure);
+        }
+        body.append(gallery);
+      }
+    }
+  };
+  for (const [value, label] of [["all", "All"], ["logos", "Logos"], ["uniforms", "Uniforms"]]) {
+    const button = element("button", "secondary", label);
+    button.type = "button";
+    button.setAttribute("aria-pressed", String(nbaSportsLogosFilter === value));
+    button.addEventListener("click", () => {
+      nbaSportsLogosFilter = value;
+      filters.querySelectorAll("button").forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
+      draw();
+    });
+    filters.append(button);
+  }
+  draw();
+  const credit = element("p", "nba-slnet-credit");
+  const courtesy = element("a", "", "Image courtesy of SportsLogos.Net");
+  courtesy.href = "https://www.sportslogos.net";
+  courtesy.target = "_blank";
+  courtesy.rel = "noopener";
+  const teamLink = element("a", "", `${team.name} on SportsLogos.Net`);
+  teamLink.href = team.url;
+  teamLink.target = "_blank";
+  teamLink.rel = "noopener";
+  credit.append(courtesy, ` · Credit: Chris Creamer's SportsLogos.Net — `, Object.assign(element("a", "", "https://www.sportslogos.net"), { href: "https://www.sportslogos.net", target: "_blank", rel: "noopener" }),
+    " · ", teamLink, ". Logos and uniforms are trademarks of their teams and the NBA, shown for personal, non-commercial reference.");
+  box.append(filters, body, credit);
+  return box;
+}
+
+// Uniform drawings: Wikipedia's kit template layers a colored jersey pattern and shorts pattern (from Wikimedia
+// Commons) under shared jersey and shorts outlines. Current uniforms first, then past seasons, newest first.
+const nbaKitOutlines = {
+  body: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Kit_body_basketball.svg/120px-Kit_body_basketball.svg.png",
+  shorts: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Kit_shorts.svg/250px-Kit_shorts.svg.png"
+};
+
+function nbaKitDrawing(kit) {
+  const drawing = element("span", "nba-kit");
+  drawing.setAttribute("role", "img");
+  drawing.setAttribute("aria-label", `${kit.kind}${kit.season ? ` ${kit.season}` : ""} uniform`);
+  const layer = (src, part) => {
+    const image = element("img", `nba-kit-${part}`);
+    image.src = src;
+    image.alt = "";
+    image.loading = "lazy";
+    image.referrerPolicy = "no-referrer";
+    return image;
+  };
+  drawing.append(layer(kit.body, "body"), layer(nbaKitOutlines.body, "body"));
+  if (kit.shorts) drawing.append(layer(kit.shorts, "shorts"));
+  drawing.append(layer(nbaKitOutlines.shorts, "shorts"));
+  return drawing;
+}
+
+function nbaTeamUniformGallery(history) {
+  const kits = (history?.uniforms || []).filter((kit) => /^https:\/\/upload\.wikimedia\.org\//.test(kit.body || ""));
+  if (!kits.length) return null;
+  const box = element("section", "nba-team-hub-card nba-history");
+  box.append(element("h3", "", "Uniform gallery"));
+  const group = (title, list) => {
+    if (!list.length) return;
+    box.append(element("h4", "nba-history-heading", title));
+    const gallery = element("div", "nba-kit-gallery");
+    for (const kit of list) {
+      const figure = element("figure", "nba-kit-figure");
+      const link = element("a", "nba-kit-link");
+      link.href = kit.file;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.title = "Drawing details and license on Wikimedia Commons";
+      link.append(nbaKitDrawing(kit));
+      const caption = element("figcaption", "");
+      caption.append(element("strong", "", kit.kind));
+      if (kit.season) caption.append(document.createElement("br"), kit.season);
+      figure.append(link, caption);
+      gallery.append(figure);
+    }
+    box.append(gallery);
+  };
+  group("Current uniforms", kits.filter((kit) => kit.current));
+  const past = kits.filter((kit) => !kit.current);
+  const dated = past.filter((kit) => kit.season);
+  for (const season of [...new Set(dated.map((kit) => kit.season))]) group(season, dated.filter((kit) => kit.season === season));
+  group(dated.length ? "Other uniforms" : "Uniforms", past.filter((kit) => !kit.season));
+  box.append(element("p", "nba-team-hub-note", "Uniform drawings from Wikipedia’s kit templates on Wikimedia Commons (mostly 2016 onward). Tap one for its file page; shorts are left plain when there’s no drawing for them."));
+  return box;
+}
+
+// More logos found on Wikimedia Commons, oldest first.
+function nbaTeamCommonsLogos(history) {
+  const logos = (history?.commons || []).filter((logo) => /^https:\/\/(upload|thumb)\.wikimedia\.org\//.test(logo.img || ""));
+  if (!logos.length) return null;
+  const box = element("section", "nba-team-hub-card nba-history");
+  box.append(element("h3", "", "Logo gallery"));
+  const gallery = element("div", "nba-history-gallery");
+  for (const logo of logos) {
+    const figure = element("figure", "nba-history-figure");
+    const link = element("a", "nba-history-image");
+    link.href = logo.file;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.title = "Image details and license on Wikimedia Commons";
+    const image = element("img", "");
+    image.src = logo.img;
+    image.alt = logo.caption;
+    image.loading = "lazy";
+    image.referrerPolicy = "no-referrer";
+    image.addEventListener("error", () => figure.remove(), { once: true });
+    link.append(image);
+    const years = logo.from ? `${logo.from}${logo.to ? `–${logo.to === "present" ? "present" : logo.to}` : ""}` : "";
+    const caption = element("figcaption", "");
+    if (years) caption.append(element("strong", "", years), document.createElement("br"));
+    const name = logo.caption.replace(/,?\s*\b(1[89]\d\d|20\d\d)\b(\s*[-–]\s*(\d{4}|present|current|now))?/i, "").replace(/\(\s*\)/g, "").replace(/[\s,]+$/, "").trim();
+    caption.append(name || logo.caption);
+    if (logo.license) caption.append(element("small", "nba-history-license", ` · ${logo.license}`));
+    figure.append(link, caption);
+    gallery.append(figure);
+  }
+  box.append(gallery, element("p", "nba-team-hub-note", "More logos from Wikimedia Commons, oldest first. Tap one for its file page and license."));
+  return box;
+}
+
+function nbaTeamHistoryView(history) {
+  const box = element("section", "nba-team-hub-card nba-history");
+  box.append(element("h3", "", "Logos & uniforms"));
+  if (!history?.blocks?.some((block) => block.p || block.img)) {
+    box.append(element("p", "nba-team-hub-note", "Logo and uniform history isn’t available for this team yet."));
+    return box;
+  }
+  let gallery = null;
+  let target = box;
+  let paragraphs = 0;
+  let more = null;
+  for (const block of history.blocks) {
+    // Show the first few paragraphs; the rest of the history opens with "Read the full history".
+    if (block.p) paragraphs++;
+    if (!more && ((block.h && paragraphs >= 4) || (block.p && paragraphs === 7))) {
+      more = element("details", "nba-history-more");
+      more.append(element("summary", "", "Read the full history"));
+      box.append(more);
+      target = more;
+      gallery = null;
+    }
+    if (block.img) {
+      if (!gallery) {
+        gallery = element("div", "nba-history-gallery");
+        target.append(gallery);
+      }
+      const figure = element("figure", "nba-history-figure");
+      const image = element("img", "");
+      image.src = block.img;
+      image.alt = block.caption || "Logo or uniform";
+      image.loading = "lazy";
+      image.referrerPolicy = "no-referrer";
+      if (block.width && block.height) image.style.aspectRatio = `${block.width} / ${block.height}`;
+      image.addEventListener("error", () => figure.remove(), { once: true });
+      const wrap = block.file ? element("a", "nba-history-image") : element("span", "nba-history-image");
+      if (block.file) {
+        wrap.href = block.file;
+        wrap.target = "_blank";
+        wrap.rel = "noopener noreferrer";
+        wrap.title = "Image details and license on Wikipedia";
+      }
+      wrap.append(image);
+      figure.append(wrap);
+      if (block.caption) figure.append(element("figcaption", "", block.caption));
+      gallery.append(figure);
+      continue;
+    }
+    gallery = null;
+    if (block.h) target.append(element(block.level <= 3 ? "h4" : "h5", "nba-history-heading", block.h));
+    else if (block.p) target.append(element("p", "nba-history-text", block.p));
+  }
+  const source = element("p", "nba-team-hub-note");
+  const link = element("a", "", `${history.article}${history.section ? ` › ${history.section}` : ""}`);
+  link.href = history.url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  source.append("From Wikipedia: ", link, ". Text is CC BY-SA; logos are trademarks of their teams, and each image’s license is on its Wikipedia file page.");
+  box.append(source);
+  return box;
+}
+
 function createNbaTeamPage(slug) {
   nbaHubController?.abort();
   nbaHubController = new AbortController();
@@ -68,7 +351,7 @@ function createNbaTeamPage(slug) {
   const standingsUrl = "https://site.api.espn.com/apis/v2/sports/basketball/nba/standings";
   const tabs = [
     ["overview", "Overview"], ["roster", "Roster"], ["stats", "Stats"],
-    ["schedule", "Schedule"], ["news", "News"], ["depth", "Depth Chart"]
+    ["schedule", "Schedule"], ["news", "News"], ["depth", "Depth Chart"], ["history", "Logos & Uniforms"]
   ];
   let activeTab = "overview";
   let tabRequest = 0;
@@ -202,6 +485,31 @@ function createNbaTeamPage(slug) {
       .map((stat) => [stat.name, stat]));
   }
 
+  // Ratings from ESPN season totals with the usual possession estimate:
+  // possessions ≈ FGA − offensive rebounds + turnovers + 0.44 × FTA. Offensive rating = points per 100 possessions,
+  // defensive rating = points allowed per 100 possessions (the opponent's possessions are taken as equal to the
+  // team's), net = the difference, pace = possessions per game.
+  function teamRatings(stats, entry) {
+    const number = (key) => {
+      const value = stats.get(key)?.value;
+      return typeof value === "number" && Number.isFinite(value) ? value : null;
+    };
+    const games = number("gamesPlayed");
+    const fga = number("fieldGoalsAttempted"), oreb = number("offensiveRebounds"), tov = number("turnovers"), fta = number("freeThrowsAttempted");
+    const points = number("points");
+    if (!(games > 0) || [fga, oreb, tov, fta, points].some((value) => value == null)) return null;
+    const pace = (fga - oreb + tov + 0.44 * fta) / games;
+    if (!(pace > 0)) return null;
+    const allowed = Number.parseFloat(standingsStats(entry).get("avgPointsAgainst"));
+    const offensive = (100 * points / games) / pace;
+    const defensive = Number.isFinite(allowed) ? (100 * allowed) / pace : null;
+    return { offensive, defensive, net: defensive == null ? null : offensive - defensive, pace };
+  }
+
+  function ratingText(value, signed = false) {
+    return value == null ? "—" : `${signed && value > 0 ? "+" : ""}${value.toFixed(1)}`;
+  }
+
   function standingsStats(entry) {
     return new Map((entry?.stats || []).map((stat) => [stat.name, stat.displayValue]));
   }
@@ -274,9 +582,10 @@ function createNbaTeamPage(slug) {
       const efg = fgm != null && threes != null && fga > 0 ? `${((fgm + 0.5 * threes) / fga * 100).toFixed(1)}%` : "—";
       const ts = points != null && fga != null && fta != null && fga + 0.44 * fta > 0
         ? `${(points / (2 * (fga + 0.44 * fta)) * 100).toFixed(1)}%` : "—";
+      const ratings = teamRatings(stats, teamEntry);
       const values = [
-        ["Points/game", stats.get("avgPoints")?.displayValue ?? "—"], ["Offensive rating", "Unavailable"],
-        ["Defensive rating", "Unavailable"], ["Net rating", "Unavailable"], ["Pace", "Unavailable"],
+        ["Points/game", stats.get("avgPoints")?.displayValue ?? "—"], ["Offensive rating", ratingText(ratings?.offensive)],
+        ["Defensive rating", ratingText(ratings?.defensive)], ["Net rating", ratingText(ratings?.net, true)], ["Pace", ratingText(ratings?.pace)],
         ["eFG%", efg], ["TS%", ts]
       ];
       container.dataset.state = "ready";
@@ -518,6 +827,12 @@ function createNbaTeamPage(slug) {
           console.error("Could not load team news.", error);
           headlines.replaceChildren(element("h3", "", "Team news"), element("p", "nba-team-hub-note", "Team news is unavailable."));
         });
+      } else if (name === "history") {
+        const [data, team, sportsLogos] = await Promise.all([nbaTeamHistory(), api(`/teams/${id}`).catch(() => null), nbaSportsLogos()]);
+        if (current !== tabRequest || signal.aborted) return;
+        panel.replaceChildren(...[nbaTeamCurrentLogos(team?.team), nbaSportsLogosView(sportsLogos, slug), nbaTeamUniformGallery(data?.teams?.[slug]),
+          nbaTeamCommonsLogos(data?.teams?.[slug]), nbaTeamHistoryView(data?.teams?.[slug])].filter(Boolean));
+        return;
       } else if (name === "roster" || name === "depth") {
         const data = await api(`/teams/${id}/roster`);
         if (!Array.isArray(data.athletes)) throw new TypeError("Roster data is incomplete.");
@@ -620,7 +935,8 @@ function createNbaTeamPage(slug) {
           const points = number("points"), turnovers = number("turnovers");
           const percentage = (numerator, denominator) => numerator != null && denominator > 0 ? `${(100 * numerator / denominator).toFixed(1)}%` : "—";
           const advanced = [
-            ["Offensive rating", "—"], ["Defensive rating", "—"], ["Net rating", "—"], ["Pace", "—"],
+            ["Offensive rating", ratingText(teamRatings(stats, teamEntry)?.offensive)], ["Defensive rating", ratingText(teamRatings(stats, teamEntry)?.defensive)],
+            ["Net rating", ratingText(teamRatings(stats, teamEntry)?.net, true)], ["Pace", ratingText(teamRatings(stats, teamEntry)?.pace)],
             ["Effective FG%", fgm != null && threes != null ? percentage(fgm + 0.5 * threes, fga) : "—"],
             ["True shooting %", points != null && fga != null && fta != null ? percentage(points, 2 * (fga + 0.44 * fta)) : "—"],
             ["Turnover %", turnovers != null && fga != null && fta != null ? percentage(turnovers, fga + 0.44 * fta + turnovers) : "—"],
@@ -637,7 +953,7 @@ function createNbaTeamPage(slug) {
             list.append(element("dt", "", label), element("dd", "", value ?? "—"));
           }
           note.textContent = view.value === "advanced"
-            ? "Calculated from ESPN season totals: eFG% = (FGM + 0.5 × 3PM) / FGA; TS% = points / (2 × (FGA + 0.44 × FTA)); turnover % = turnovers / (FGA + 0.44 × FTA + turnovers); free throw rate = FTA / FGA. Ratings, pace, opponent rebound data, league comparisons and splits are unavailable."
+            ? "Calculated from ESPN season totals: eFG% = (FGM + 0.5 × 3PM) / FGA; TS% = points / (2 × (FGA + 0.44 × FTA)); turnover % = turnovers / (FGA + 0.44 × FTA + turnovers); free throw rate = FTA / FGA. Possessions ≈ FGA − OREB + TOV + 0.44 × FTA; offensive and defensive ratings are points scored and allowed per 100 possessions (treating the opponent's possessions as equal), net rating is the difference and pace is possessions per game, so they can differ slightly from NBA.com. Opponent rebound data, league comparisons and splits are unavailable."
             : "Regular-season averages from ESPN. League ranks, league averages and game-window splits are unavailable.";
         }
         view.addEventListener("change", draw);

@@ -4,3 +4,5 @@ _site/
 node_modules/
 # Built during the Pages deploy from your Steam account; published with the site but not kept in git history.
 data/steam.json
+# SportsLogos.Net thumbnails: downloaded during the Pages deploy and kept in its cache, not in git.
+data/sportslogos/
