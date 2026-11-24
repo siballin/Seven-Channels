@@ -70,6 +70,17 @@ class TeamHistoryTests(unittest.TestCase):
         self.assertEqual(history.kit_label("bostonceltics1617a"), ("Away", "2016–17"))
         self.assertEqual(history.kit_label("'25 Utah Jazz icon"), ("Icon", "2025–26"))
         self.assertEqual(history.kit_label("gswarriorsh"), ("Home", ""))
+        self.assertEqual(history.kit_label("1997-2019 BKN home"), ("Home", "1997–2019"))
+        self.assertEqual(history.kit_label("2019-97 odd"), ("Uniform", ""))
+
+    def test_current_kits_from_infobox(self):
+        html = ('<table class="kit"><tbody><tr><td><div><img src="//upload.wikimedia.org/wikipedia/commons/e/e9/Kit_body_chicagobulls_association.png?utm=1" />'
+                '<img src="//thumb.wikimedia.org/wikipedia/commons/thumb/7/73/Kit_body_basketball.svg/40px-Kit_body_basketball.svg.png" />'
+                '<img src="//upload.wikimedia.org/wikipedia/commons/1/17/Kit_shorts_chicagobulls_association.png" /></div><div><b>Association</b></div></td>'
+                '<td><img src="//upload.wikimedia.org/wikipedia/commons/d/d1/Kit_body_chicagobulls_icon.png" /><b>Icon</b></td></tr></tbody></table>')
+        kits = history.current_kits("Chicago Bulls", lambda params: {"parse": {"text": html}})
+        self.assertEqual([(kit["kind"], "shorts" in kit) for kit in kits], [("Association", True), ("Icon", False)])
+        self.assertEqual(kits[0]["body"], "https://upload.wikimedia.org/wikipedia/commons/e/e9/Kit_body_chicagobulls_association.png")
 
     def test_team_uniforms_pair_body_and_shorts(self):
         def fetch(params):

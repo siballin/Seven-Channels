@@ -289,9 +289,15 @@ def kit_label(suffix):
     → (kind, season) like ("City", "2021–22"); season is "" when the name has no year."""
     text = suffix.strip().replace("_", " ")
     season = ""
-    match = re.search(r"\b(20\d\d)-(\d\d)\b", text)
+    match = re.search(r"\b((?:19|20)\d\d)-((?:19|20)\d\d)\b", text)  # an era: 1997-2019
     if match:
-        season = f"{match.group(1)}–{match.group(2)}"
+        if int(match.group(2)) >= int(match.group(1)):
+            season = f"{match.group(1)}–{match.group(2)}"
+        text = text.replace(match.group(0), " ")
+    match = None if season else re.search(r"\b(20\d\d)-(\d\d)\b", text)
+    if match:
+        if int(match.group(2)) >= int(match.group(1)[2:]):
+            season = f"{match.group(1)}–{match.group(2)}"
         text = text.replace(match.group(0), " ")
     else:
         match = re.search(r"'(\d\d)\b", text)
@@ -362,6 +368,28 @@ def team_uniforms(name, current_patterns=(), fetch=commons_json, limit=40):
     return kits[:limit]
 
 
+def current_kits(name, fetch=fetch_json):
+    """The uniforms drawn in the team article's infobox, straight from its rendered kit table:
+    [{"kind", "body", "shorts"}] with the colored pattern images."""
+    data = fetch({"action": "parse", "page": name, "prop": "text", "section": 0, "redirects": 1})
+    html = (data.get("parse") or {}).get("text", "")
+    start = html.find('<table class="kit">')
+    if start < 0:
+        return []
+    table = html[start:html.find("</table>", start)]
+    kits = []
+    for cell in re.split(r"<td>", table)[1:]:
+        body = re.search(r'src="(?:https:)?(//upload\.wikimedia\.org/[^"?]*/Kit_body_[^"?]+\.png)', cell)
+        shorts = re.search(r'src="(?:https:)?(//upload\.wikimedia\.org/[^"?]*/Kit_shorts_[^"?]+\.png)', cell)
+        label = re.search(r"<b>([^<]{1,40})</b>", cell)
+        if body:
+            file_name = body.group(1).rsplit("/", 1)[-1]
+            kits.append({"kind": label.group(1).strip() if label else "Uniform", "season": "", "current": True, "body": "https:" + body.group(1),
+                         **({"shorts": "https:" + shorts.group(1)} if shorts else {}),
+                         "file": f"https://commons.wikimedia.org/wiki/File:{file_name}"})
+    return kits
+
+
 def current_kit_patterns(name, fetch=fetch_json):
     """The kit patterns in the team article's infobox (its current uniforms), e.g. "_chicagobulls_association"."""
     data = fetch({"action": "parse", "page": name, "prop": "wikitext", "section": 0, "redirects": 1})
@@ -399,7 +427,12 @@ def main():
             print(f"  {name} (Commons): {error}", file=sys.stderr)
             extra = ((previous.get("teams") or {}).get(slug) or {}).get("commons", [])
         try:
+            current = current_kits(name)
             uniforms = team_uniforms(name, current_kit_patterns(name))
+            if current:
+                # The infobox's own drawings are the current set; the category copies of them become past entries only if different.
+                urls = {kit["body"].split("/")[-1].lower() for kit in current}
+                uniforms = current + [{**kit, "current": False} for kit in uniforms if kit["body"].split("/")[-1].lower() not in urls]
         except Exception as error:
             print(f"  {name} (uniforms): {error}", file=sys.stderr)
             uniforms = ((previous.get("teams") or {}).get(slug) or {}).get("uniforms", [])
