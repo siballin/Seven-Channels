@@ -111,6 +111,7 @@ The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FB
 
 **Logos & Uniforms** (team page tab):
 - **Current logos:** the team's current logo set from ESPN (primary, on dark backgrounds, scoreboard).
+- **Uniform gallery:** uniform drawings from Wikipedia's kit templates on Wikimedia Commons (the colored jersey and shorts patterns under Wikipedia's outlines). The current set comes from the team article's infobox, then past uniforms by season or era, newest first. Mostly 2016 onward, with some teams going back to the 1970s and 80s.
 - **Logo gallery:** more logos from Wikimedia Commons, Wikipedia's free media library: the team's logo category plus files named after the team or its former names (New Orleans Jazz, Seattle SuperSonics, Washington Bullets…), oldest first, each with its license. Every team has at least one.
 - **History:** the logo and uniform history from Wikipedia: the team's "Logos and uniforms of the …" article when one exists, otherwise the logo/uniform section of the team's article. It keeps the text, era headings, and logo and uniform images with captions. Each image links to its Wikipedia file page, where its license is. Long histories open with **Read the full history**.
 
