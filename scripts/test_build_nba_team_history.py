@@ -8,7 +8,7 @@ HTML = '''<div class="mw-heading mw-heading2"><h2 id="Logos">Logos and uniforms<
 <figure typeof="mw:File/Thumb"><a href="/wiki/File:Bucks_1968.png"><img src="//upload.wikimedia.org/wikipedia/en/thumb/a/ab/Bucks_1968.png/220px-Bucks_1968.png" width="220" height="200"></a><figcaption>Logo, <i>1968–1993</i></figcaption></figure>
 <h3>Uniforms</h3><ul class="gallery"><li class="gallerybox"><div class="thumb"><span><a href="/wiki/File:Home.svg"><img src="//upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Home.svg/120px-Home.svg.png" width="120" height="120"></a></span></div><div class="gallerytext">Home uniform (2015–present)</div></li></ul>
 <table><tr><td>A long table cell that should never become a paragraph of text.</td></tr></table>
-<p>Short.</p><img src="//upload.wikimedia.org/tiny.png" width="20" height="20">'''
+<p>Short.</p><img src="//upload.wikimedia.org/tiny.png" width="20" height="20"><img src="//thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Logo.png/250px-Logo.png?utm_source=x" width="180" height="85">'''
 
 
 class TeamHistoryTests(unittest.TestCase):
@@ -23,6 +23,7 @@ class TeamHistoryTests(unittest.TestCase):
             {"h": "Uniforms", "level": 3},
             {"img": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Home.svg/300px-Home.svg.png", "file": "https://en.wikipedia.org/wiki/File:Home.svg",
              "caption": "Home uniform (2015–present)", "w": 120, "h": 120},
+            {"img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Logo.png/300px-Logo.png", "file": "", "caption": "", "w": 180, "h": 85},
         ])
 
     def test_every_team_has_an_article(self):

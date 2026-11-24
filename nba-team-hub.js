@@ -47,6 +47,64 @@ async function nbaHubFetch(url, signal) {
   return pending.get(url);
 }
 
+// Logo and uniform history (data/nba-team-history.json, built from Wikipedia by scripts/build_nba_team_history.py).
+let nbaTeamHistoryRequest = null;
+function nbaTeamHistory() {
+  nbaTeamHistoryRequest ||= fetch(new URL("data/nba-team-history.json", location.href))
+    .then((response) => (response.ok ? response.json() : null))
+    .catch(() => { nbaTeamHistoryRequest = null; return null; });
+  return nbaTeamHistoryRequest;
+}
+
+function nbaTeamHistoryView(history) {
+  const box = element("section", "nba-team-hub-card nba-history");
+  box.append(element("h3", "", "Logos & uniforms"));
+  if (!history?.blocks?.length) {
+    box.append(element("p", "nba-team-hub-note", "Logo and uniform history isn’t available for this team yet."));
+    return box;
+  }
+  let gallery = null;
+  for (const block of history.blocks) {
+    if (block.img) {
+      if (!gallery) {
+        gallery = element("div", "nba-history-gallery");
+        box.append(gallery);
+      }
+      const figure = element("figure", "nba-history-figure");
+      const image = element("img", "");
+      image.src = block.img;
+      image.alt = block.caption || "Logo or uniform";
+      image.loading = "lazy";
+      image.referrerPolicy = "no-referrer";
+      if (block.w && block.h) image.style.aspectRatio = `${block.w} / ${block.h}`;
+      image.addEventListener("error", () => figure.remove(), { once: true });
+      const wrap = block.file ? element("a", "nba-history-image") : element("span", "nba-history-image");
+      if (block.file) {
+        wrap.href = block.file;
+        wrap.target = "_blank";
+        wrap.rel = "noopener noreferrer";
+        wrap.title = "Image details and license on Wikipedia";
+      }
+      wrap.append(image);
+      figure.append(wrap);
+      if (block.caption) figure.append(element("figcaption", "", block.caption));
+      gallery.append(figure);
+      continue;
+    }
+    gallery = null;
+    if (block.h) box.append(element(block.level <= 3 ? "h4" : "h5", "nba-history-heading", block.h));
+    else if (block.p) box.append(element("p", "nba-history-text", block.p));
+  }
+  const source = element("p", "nba-team-hub-note");
+  const link = element("a", "", `${history.article}${history.section ? ` › ${history.section}` : ""}`);
+  link.href = history.url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  source.append("From Wikipedia: ", link, ". Text is CC BY-SA; logos are trademarks of their teams, and each image’s license is on its Wikipedia file page.");
+  box.append(source);
+  return box;
+}
+
 function createNbaTeamPage(slug) {
   nbaHubController?.abort();
   nbaHubController = new AbortController();
@@ -68,7 +126,7 @@ function createNbaTeamPage(slug) {
   const standingsUrl = "https://site.api.espn.com/apis/v2/sports/basketball/nba/standings";
   const tabs = [
     ["overview", "Overview"], ["roster", "Roster"], ["stats", "Stats"],
-    ["schedule", "Schedule"], ["news", "News"], ["depth", "Depth Chart"]
+    ["schedule", "Schedule"], ["news", "News"], ["depth", "Depth Chart"], ["history", "Logos & Uniforms"]
   ];
   let activeTab = "overview";
   let tabRequest = 0;
@@ -544,6 +602,11 @@ function createNbaTeamPage(slug) {
           console.error("Could not load team news.", error);
           headlines.replaceChildren(element("h3", "", "Team news"), element("p", "nba-team-hub-note", "Team news is unavailable."));
         });
+      } else if (name === "history") {
+        const data = await nbaTeamHistory();
+        if (current !== tabRequest || signal.aborted) return;
+        panel.replaceChildren(nbaTeamHistoryView(data?.teams?.[slug]));
+        return;
       } else if (name === "roster" || name === "depth") {
         const data = await api(`/teams/${id}/roster`);
         if (!Array.isArray(data.athletes)) throw new TypeError("Roster data is incomplete.");

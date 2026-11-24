@@ -37,7 +37,9 @@ TEAMS = {
     "portland-trail-blazers": "Portland Trail Blazers", "sacramento-kings": "Sacramento Kings", "san-antonio-spurs": "San Antonio Spurs",
     "toronto-raptors": "Toronto Raptors", "utah-jazz": "Utah Jazz", "washington-wizards": "Washington Wizards",
 }
-SECTION_NAMES = [r"logos? and uniforms?", r"uniforms? and logos?", r"logos?,? (?:colou?rs )?and uniforms?", r"uniforms?", r"logos?", r"colou?rs"]
+# Tried in order: exact names first, then any section mentioning logos or uniforms, then branding/identity.
+SECTION_NAMES = [r"logos? and uniforms?", r"uniforms? and logos?", r"logos?,? (?:colou?rs )?and uniforms?", r"uniforms?", r"uniform history",
+                 r".*\b(?:logos?|uniforms?)\b.*", r"team (?:branding|identity)", r"colou?rs"]
 REFRESH_DAYS = 30
 
 
@@ -96,9 +98,11 @@ class SectionParser(HTMLParser):
             width = int(attrs.get("width") or 0)
             if src.startswith("//"):
                 src = "https:" + src
-            if src.startswith("https://upload.wikimedia.org/") and width >= 40:
+            src = src.split("?")[0]
+            if re.match(r"https://(upload|thumb)\.wikimedia\.org/", src) and width >= 40:
                 big = re.sub(r"/(\d+)px-", lambda m: f"/{max(int(m.group(1)), 300)}px-", src) if "/thumb/" in src else src
                 self.blocks.append({"img": big, "file": self.file_link, "caption": "", "w": width, "h": int(attrs.get("height") or 0)})
+            self.file_link = ""
             return
         if self.caption is None and (tag == "figcaption" or "thumbcaption" in classes.split() or "gallerytext" in classes.split()):
             self.caption, self.caption_from = [], self.depth
