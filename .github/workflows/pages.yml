@@ -89,6 +89,9 @@ jobs:
       - name: Refresh motorsports (F1, NASCAR, IMSA, WEC)
         continue-on-error: true
         run: python scripts/update_motorsports.py
+      - name: Refresh NBA logo and uniform history from Wikipedia (every 30 days)
+        continue-on-error: true
+        run: python scripts/build_nba_team_history.py
       - name: Restore last NBA player database
         uses: actions/cache/restore@v4
         with:
