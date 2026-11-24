@@ -284,42 +284,58 @@ KIT_KINDS = {"association": "Association", "icon": "Icon", "statement": "Stateme
              "h": "Home", "a": "Away", "3": "Alternate", "home": "Home", "away": "Away", "alternate": "Alternate"}
 
 
+def year_span(start, end_two):
+    """2017, 18 → "2017–18" (one season); 2003, 15 → "2003–2015" (an era); nonsense → ""."""
+    end = start // 100 * 100 + end_two
+    if end < start:
+        end += 100
+    if end - start > 30:
+        return ""
+    return f"{start}–{end_two:02d}" if end == start + 1 else f"{start}–{end}"
+
+
+def compact_year(two):
+    return (1900 if two >= 46 else 2000) + two
+
+
 def kit_label(suffix):
-    """A kit file's suffix ("2017-18 CHI association", "chicagobulls city2122", "bostonceltics1617a", "'25 Utah Jazz icon")
-    → (kind, season) like ("City", "2021–22"); season is "" when the name has no year."""
+    """A kit file's suffix → (kind, season): "2017-18 CHI association" → ("Association", "2017–18"), "chicagobulls city2122"
+    → ("City", "2021–22"), "nyknicks home9712" → ("Home", "1997–2012"), "NJNets 1997h" → ("Home", "1997"). No year → ""."""
     text = suffix.strip().replace("_", " ")
     season = ""
-    match = re.search(r"\b((?:19|20)\d\d)-((?:19|20)\d\d)\b", text)  # an era: 1997-2019
+    match = re.search(r"\b((?:19|20)\d\d)-((?:19|20)\d\d)\b", text)  # 1997-2019
     if match:
-        if int(match.group(2)) >= int(match.group(1)):
+        if int(match.group(2)) >= int(match.group(1)) and int(match.group(2)) - int(match.group(1)) <= 30:
             season = f"{match.group(1)}–{match.group(2)}"
         text = text.replace(match.group(0), " ")
-    match = None if season else re.search(r"\b(20\d\d)-(\d\d)\b", text)
+    match = None if season else re.search(r"\b((?:19|20)\d\d)-(\d\d)\b", text)  # 2017-18, 2003-15
     if match:
-        if int(match.group(2)) >= int(match.group(1)[2:]):
-            season = f"{match.group(1)}–{match.group(2)}"
+        season = year_span(int(match.group(1)), int(match.group(2)))
         text = text.replace(match.group(0), " ")
-    else:
-        match = re.search(r"'(\d\d)\b", text)
-        if match:
-            year = 2000 + int(match.group(1))
-            season = f"{year}–{str(year + 1)[2:]}"
-            text = text.replace(match.group(0), " ")
-    kind_match = re.search(r"(association|icon|statement|city|classic|earned|home|away|alternate)\s*(\d{4}|\d)?\s*$", text, re.I)
+    match = None if season else re.search(r"'(\d\d)\b", text)  # '25
+    if match:
+        year = 2000 + int(match.group(1))
+        season = f"{year}–{str(year + 1)[2:]}"
+        text = text.replace(match.group(0), " ")
     kind = ""
+    kind_match = re.search(r"(association|icon|statement|city|classic|earned|home|away|alternate)\s*(\d{4}|\d)?\s*$", text, re.I)
     if kind_match:
         kind = KIT_KINDS[kind_match.group(1).lower()]
         digits = kind_match.group(2) or ""
-        if not season and len(digits) == 4:  # city2122 → 2021–22, city2021 → 2020–21
-            season = f"20{digits[:2]}–{digits[2:]}"
-        elif digits and len(digits) == 1 and digits != "1":
+        if not season and len(digits) == 4:  # city2122, home9712
+            season = year_span(compact_year(int(digits[:2])), int(digits[2:]))
+        elif len(digits) == 1 and digits != "1":
             kind = f"{kind} {digits}"
     else:
         match = re.search(r"(\d{4})?([ha3])$", text.replace(" ", ""), re.I)
         if match:
             kind = KIT_KINDS[match.group(2).lower()]
-            if match.group(1) and not season:
-                season = f"20{match.group(1)[:2]}–{match.group(1)[2:]}"
+            digits = match.group(1) or ""
+            if digits and not season:
+                if re.fullmatch(r"19[4-9]\d|20[0-3]\d", digits):
+                    season = digits  # a single year: NJNets 1997h
+                else:
+                    season = year_span(compact_year(int(digits[:2])), int(digits[2:]))  # bostonceltics1617a
     return kind or "Uniform", season
 
 

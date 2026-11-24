@@ -72,6 +72,9 @@ class TeamHistoryTests(unittest.TestCase):
         self.assertEqual(history.kit_label("gswarriorsh"), ("Home", ""))
         self.assertEqual(history.kit_label("1997-2019 BKN home"), ("Home", "1997–2019"))
         self.assertEqual(history.kit_label("2019-97 odd"), ("Uniform", ""))
+        self.assertEqual(history.kit_label("nyknicks home9712"), ("Home", "1997–2012"))
+        self.assertEqual(history.kit_label("NJNets 1997h"), ("Home", "1997"))
+        self.assertEqual(history.kit_label("2003-15 DEN association"), ("Association", "2003–2015"))
 
     def test_current_kits_from_infobox(self):
         html = ('<table class="kit"><tbody><tr><td><div><img src="//upload.wikimedia.org/wikipedia/commons/e/e9/Kit_body_chicagobulls_association.png?utm=1" />'
