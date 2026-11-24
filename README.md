@@ -28,6 +28,23 @@ The **Search** button in the header (or press `/` or Ctrl+K anywhere) searches y
 
 ## Notifications
 
+## Design
+
+The site uses the "home screen" design (style C): Space Grotesk headings and Inter text, white rounded tiles on a light gray canvas (slate tiles on near-black in dark mode), pill-shaped tabs and filters, and an icon sidebar for the channels. On phones the sidebar becomes a bottom tab bar (Home, Channels, Search, Settings); Channels opens a sheet with every channel. The color theme, colors, YouTube key, account and dark mode are in **Settings**. The look lives in `design.css`, loaded after the page's own styles. It restyles the site through the existing color variables, so the theme picker and dark switch keep working. The first visit after the redesign switches you to the new "Home screen" theme once.
+
+**The Guide is a home screen** (`home-screen.js`): a greeting and a grid of widgets built from what you follow and log:
+- your teams' games today (live score first);
+- the next race;
+- the game you're playing and your play time;
+- price alerts;
+- your esports teams' next match;
+- your next concert;
+- your bowling average trend;
+- the next gaming showcase;
+- K-pop releases this week.
+
+A widget with nothing to show stays out of the way. **Edit widgets** lets you hide, re-add and reorder them; the layout is remembered on this device. Below the widgets: This week, Year in review, **All channels** (a tile per channel with its three summary lines) and the top headlines.
+
 ## Install as an app
 
 Seven Channels can be installed like an app (it's a progressive web app). On Android, and in Chrome or Edge on a computer, press **Install app** in the header. On iPhone or iPad, open the site in Safari, tap **Share**, then **Add to Home Screen**; the Install app button shows these steps. Installed, it opens full screen from its own icon. A long press on the icon jumps straight to the Guide, Sports scores, Motorsports or K-Pop, on phones that support shortcuts.

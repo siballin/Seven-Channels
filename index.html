@@ -299,7 +299,7 @@
       .idol-lineup-row small { display: none; }
       .idol-lineup-axis { margin-left: 86px; }
     }
-    .nba-db-view, .nba-db { display: grid; gap: 14px; min-width: 0; }
+    .nba-db-view, .nba-db { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
     .nba-db h2 { margin: 0; }
     .nba-db h3 { margin: 6px 0 0; font-size: 1rem; }
     .nba-db-muted { color: var(--muted); font-size: .88rem; margin: 0; }
@@ -3928,6 +3928,7 @@
   <script src="search.js"></script>
   <script src="notifications.js"></script>
   <script src="pwa.js"></script>
+  <script src="home-screen.js"></script>
   <script src="games-hub.js"></script>
   <script src="games-more.js"></script>
   <script>
@@ -4369,10 +4370,12 @@
       root.dataset.glassTone = lightCanvas ? "light" : "dark";
       const contrast = lightCanvas ? "#ffffff" : "#000000";
       const mix = (amount) => `color-mix(in srgb, var(--screen) ${100 - amount}%, ${contrast} ${amount}%)`;
-      root.style.setProperty("--panel", lightCanvas ? "#ffffff" : mix(8));
-      root.style.setProperty("--panel-hover", mix(lightCanvas ? 12 : 14));
-      root.style.setProperty("--surface", lightCanvas ? "#ffffff" : mix(6));
-      root.style.setProperty("--surface-hover", mix(lightCanvas ? 8 : 10));
+      // Tiles: white on a light canvas, a lighter slate than the canvas on a dark one.
+      const lift = (amount) => `color-mix(in srgb, var(--screen) ${100 - amount}%, #ffffff ${amount}%)`;
+      root.style.setProperty("--panel", lightCanvas ? "#ffffff" : lift(7));
+      root.style.setProperty("--panel-hover", lightCanvas ? mix(12) : lift(11));
+      root.style.setProperty("--surface", lightCanvas ? "#ffffff" : lift(6));
+      root.style.setProperty("--surface-hover", lightCanvas ? mix(8) : lift(10));
       root.style.setProperty("--header-surface", mix(lightCanvas ? 2 : 3));
       root.style.setProperty("--selected-surface", mix(lightCanvas ? 10 : 12));
       root.style.setProperty("--line", mix(lightCanvas ? 18 : 24));
@@ -4397,7 +4400,9 @@
     function applyAccent() {
       const root = document.documentElement;
       const pair = channelAccents[root.dataset.channel];
-      const accent = pair ? pair[appearance.theme === "light" ? 1 : 0] : appearance.accent;
+      // The home-screen blue is too dark to read on dark tiles; dark mode uses its lighter partner.
+      const accent = pair ? pair[appearance.theme === "light" ? 1 : 0]
+        : appearance.theme === "dark" && appearance.accent.toLowerCase() === "#3a4fd6" ? "#8f9dff" : appearance.accent;
       root.style.setProperty("--user-accent", accent);
       const linearChannel = (channel) => {
         const value = channel / 255;
@@ -9544,31 +9549,23 @@
         scrollTo(0, 0);
         return;
       }
-      const guide = element("div", "guide");
-      const header = element("div", "guide-row guide-head");
-      header.setAttribute("aria-hidden", "true");
-      ["CH", "ON NOW", "UP NEXT", "IN THE BOOKS"].forEach((label) => header.append(element("div", "", label)));
-      guide.append(header);
-      for (const channel of channels) {
-        const row = element("a", "guide-row");
-        row.href = `#${channel.id}`;
-        row.setAttribute("aria-label", `Channel ${channel.number}, ${channel.name}`);
-        const title = element("div", "channel-cell");
-        title.append(element("span", "number", `CH ${channel.number}`), element("span", "name", channel.name));
-        row.append(title);
-        if (["bowling", "music", "creator", "live", "motorsports"].includes(channel.id)) {
-          ({ bowling: bowlingGuideCells, music: musicLabGuideCells, creator: creatorGuideCells, live: liveGuideCells, motorsports: motorsportsGuideCells })[channel.id]().forEach((summary, index) => addSummaryCell(row, channel.labels[index], summary));
-        } else {
-          addListingCell(row, channel, "now", channel.labels[0]);
-          addListingCell(row, channel, "next", channel.labels[1]);
-          addListingCell(row, channel, "done", channel.labels[2]);
-        }
-        guide.append(row);
-      }
+      // Home screen (redesign): widgets, This week, Year in review, every channel at a glance, then the headlines.
+      const summaryCells = { bowling: bowlingGuideCells, music: musicLabGuideCells, creator: creatorGuideCells, live: liveGuideCells, motorsports: motorsportsGuideCells };
+      const rows = channels.map((channel) => {
+        const cells = summaryCells[channel.id]
+          ? summaryCells[channel.id]().map((summary, index) => ({ label: channel.labels[index], title: summary.title || "" }))
+          : ["now", "next", "done"].map((status, index) => {
+            const items = listFor(channel.id, status);
+            return { label: channel.labels[index], title: items.length ? `${items[0].title}${items.length > 1 ? ` +${items.length - 1}` : ""}` : "" };
+          });
+        return { channel, cells };
+      });
       const wrappedLink = element("a", "wrapped-banner");
       wrappedLink.href = `#wrapped/${new Date().getFullYear()}`;
       wrappedLink.append(element("strong", "", `Your ${new Date().getFullYear()} in review`), element("span", "", "Concerts, bowling, finished games and shows, Music Lab, bets and uploads"));
-      view.replaceChildren(withChannelNews("guide", [createThisWeek(), wrappedLink, guide]));
+      const page = element("div", "news-stack home-page");
+      page.append(createHomeScreen(renderGuide), createThisWeek(), wrappedLink, createHomeChannels(rows), createChannelNews("guide"));
+      view.replaceChildren(page);
     }
 
     function renderItem(entry, channel) {
