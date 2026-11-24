@@ -1889,11 +1889,13 @@
     .sports-hub .sports-score-tabs { grid-column: 1 / -1; grid-row: 1; margin: 0; }
     .sports-hub .sports-ticker { grid-column: 1 / -1; grid-row: 2; min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-base); box-shadow: var(--glass-shadow); }
     .sports-hub > .resources { grid-column: 1 / -1; grid-row: 3; margin: 0; }
-    .sports-hub .sports-featured { grid-column: 2; grid-row: 4; }
-    .sports-hub .game-detail-area { grid-column: 2; grid-row: 5; }
-    .sports-hub .channel-planner { grid-column: 2; grid-row: 6; }
-    .sports-hub .sports-hub-side-left { grid-column: 1; grid-row: 4 / span 3; }
-    .sports-hub .sports-hub-side-right { grid-column: 3; grid-row: 4 / span 3; }
+    .sports-hub { grid-template-rows: repeat(7, auto) 1fr; }
+    .sports-hub .nba-db-entry { grid-column: 2; grid-row: 4; margin: 0; }
+    .sports-hub .sports-featured { grid-column: 2; grid-row: 5; }
+    .sports-hub .game-detail-area { grid-column: 2; grid-row: 6; }
+    .sports-hub .channel-planner { grid-column: 2; grid-row: 7; }
+    .sports-hub .sports-hub-side-left { grid-column: 1; grid-row: 4 / span 5; }
+    .sports-hub .sports-hub-side-right { grid-column: 3; grid-row: 4 / span 5; }
     .sports-hub .game-list { display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(220px, 260px); gap: 8px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x proximity; padding: 2px 2px 10px; }
     .sports-hub .game-list > * { scroll-snap-align: start; }
     .sports-hub .game-select { grid-template-columns: minmax(0, 1fr); }
@@ -1902,18 +1904,20 @@
     .sports-hub .nba-scoreboard .team-identity { flex: 1 1 0; color: inherit; text-decoration: none; }
     .sports-hub .nba-scoreboard .team-identity:hover strong { text-decoration: underline; }
     @media (max-width: 1250px) {
-      .sports-hub .sports-featured { grid-column: 1; }
+      .sports-hub .nba-db-entry, .sports-hub .sports-featured { grid-column: 1; }
       .sports-hub .game-detail-area, .sports-hub .channel-planner { grid-column: 1; }
-      .sports-hub-side-column { display: grid; grid-column: 2; grid-row: 4 / span 3; gap: 14px; align-content: start; }
+      .sports-hub-side-column { display: grid; grid-column: 2; grid-row: 4 / span 5; gap: 14px; align-content: start; }
       .sports-hub .sports-hub-side-left, .sports-hub .sports-hub-side-right { grid-column: auto; grid-row: auto; }
     }
     @media (max-width: 800px) {
-      .sports-hub .sports-featured { grid-column: 1; grid-row: 4; }
-      .sports-hub .game-detail-area { grid-column: 1; grid-row: 5; }
+      .sports-hub { grid-template-rows: none; }
+      .sports-hub .nba-db-entry { grid-column: 1; grid-row: 4; }
+      .sports-hub .sports-featured { grid-column: 1; grid-row: 5; }
+      .sports-hub .game-detail-area { grid-column: 1; grid-row: 6; }
       .sports-hub-side-column { display: contents; }
-      .sports-hub .sports-hub-side-left { grid-column: 1; grid-row: 6; }
-      .sports-hub .sports-hub-side-right { grid-column: 1; grid-row: 7; }
-      .sports-hub .channel-planner { grid-column: 1; grid-row: 8; }
+      .sports-hub .sports-hub-side-left { grid-column: 1; grid-row: 7; }
+      .sports-hub .sports-hub-side-right { grid-column: 1; grid-row: 8; }
+      .sports-hub .channel-planner { grid-column: 1; grid-row: 9; }
       .sports-hub .game-list { grid-auto-columns: minmax(220px, 80%); }
     }
     .sports-hub .game-list:has(> .game-list-state) { grid-auto-columns: 100%; }
