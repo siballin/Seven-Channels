@@ -85,6 +85,97 @@ function nbaTeamCurrentLogos(team) {
   return box;
 }
 
+// Logo and uniform history from Chris Creamer's SportsLogos.Net (data/sportslogos.json, built by
+// scripts/build_sportslogos.py). Their terms: fair use / personal non-commercial reference, no commercial rights,
+// and a visible credit with a link back, which this view shows and every image links to its SportsLogos.Net page.
+// The thumbnails are copies served from this site; branch previews borrow the live site's copies.
+const nbaSportsLogosLive = "https://siballin.github.io/Seven-Channels/";
+let nbaSportsLogosRequest = null;
+let nbaSportsLogosFilter = "all";
+function nbaSportsLogos() {
+  const live = location.hostname === new URL(nbaSportsLogosLive).hostname;
+  const load = (base) => fetch(new URL("data/sportslogos.json", base)).then((response) => (response.ok ? response.json() : null));
+  nbaSportsLogosRequest ||= load(location.href).then((data) => data || (live ? null : load(nbaSportsLogosLive))).catch(() => null)
+    .then((data) => { if (!data) nbaSportsLogosRequest = null; return data; });
+  return nbaSportsLogosRequest;
+}
+
+function nbaSportsLogosView(data, slug) {
+  const team = data?.teams?.[slug];
+  if (!team) return null;
+  const box = element("section", "nba-team-hub-card nba-history nba-slnet");
+  box.append(element("h3", "", "Logo & uniform history"));
+  const filters = element("div", "nba-team-hub-filters nba-slnet-filters");
+  filters.setAttribute("role", "group");
+  filters.setAttribute("aria-label", "Show logos or uniforms");
+  const body = element("div", "nba-slnet-body");
+  const pages = [{ name: team.name, years: "", url: team.url, sections: team.sections || [] },
+    ...(team.former || []).map((page) => ({ ...page, sections: page.sections || [] }))];
+  const range = (item) => [item.from, item.to && item.to !== item.from ? item.to : ""].filter(Boolean).join("–");
+  const draw = () => {
+    body.replaceChildren();
+    for (const page of pages) {
+      const sections = page.sections.filter((section) => nbaSportsLogosFilter === "all" || (nbaSportsLogosFilter === "uniforms" ? /uniform/i.test(section.name) : !/uniform/i.test(section.name)));
+      if (!sections.length) continue;
+      if (page !== pages[0]) body.append(element("h4", "nba-slnet-franchise", `${page.name}${page.years ? ` (${page.years.replace(/-/g, "–")})` : ""}`));
+      for (const section of sections) {
+        body.append(element("h5", "nba-history-heading", section.name));
+        const gallery = element("div", "nba-history-gallery nba-slnet-gallery");
+        for (const item of section.items) {
+          const figure = element("figure", "nba-history-figure");
+          const link = element("a", "nba-history-image");
+          link.href = item.view;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.title = `${item.title} — view on SportsLogos.Net`;
+          const image = element("img", "");
+          image.src = item.img || item.thumb;
+          image.alt = item.title;
+          image.loading = "lazy";
+          image.addEventListener("error", () => {
+            // Previews of a branch: use the live site's copy; otherwise drop the card.
+            const fallback = new URL(item.img || "", nbaSportsLogosLive).href;
+            if (item.img && image.src !== fallback) image.src = fallback;
+            else figure.remove();
+          });
+          link.append(image);
+          const caption = element("figcaption", "");
+          if (range(item)) caption.append(element("strong", "", range(item)), document.createElement("br"));
+          caption.append(item.title.replace(/\s*\([^)]*\)\s*$/, ""));
+          figure.append(link, caption);
+          gallery.append(figure);
+        }
+        body.append(gallery);
+      }
+    }
+  };
+  for (const [value, label] of [["all", "All"], ["logos", "Logos"], ["uniforms", "Uniforms"]]) {
+    const button = element("button", "secondary", label);
+    button.type = "button";
+    button.setAttribute("aria-pressed", String(nbaSportsLogosFilter === value));
+    button.addEventListener("click", () => {
+      nbaSportsLogosFilter = value;
+      filters.querySelectorAll("button").forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
+      draw();
+    });
+    filters.append(button);
+  }
+  draw();
+  const credit = element("p", "nba-slnet-credit");
+  const courtesy = element("a", "", "Image courtesy of SportsLogos.Net");
+  courtesy.href = "https://www.sportslogos.net";
+  courtesy.target = "_blank";
+  courtesy.rel = "noopener";
+  const teamLink = element("a", "", `${team.name} on SportsLogos.Net`);
+  teamLink.href = team.url;
+  teamLink.target = "_blank";
+  teamLink.rel = "noopener";
+  credit.append(courtesy, ` · Credit: Chris Creamer's SportsLogos.Net — `, Object.assign(element("a", "", "https://www.sportslogos.net"), { href: "https://www.sportslogos.net", target: "_blank", rel: "noopener" }),
+    " · ", teamLink, ". Logos and uniforms are trademarks of their teams and the NBA, shown for personal, non-commercial reference.");
+  box.append(filters, body, credit);
+  return box;
+}
+
 // Uniform drawings: Wikipedia's kit template layers a colored jersey pattern and shorts pattern (from Wikimedia
 // Commons) under shared jersey and shorts outlines. Current uniforms first, then past seasons, newest first.
 const nbaKitOutlines = {
@@ -737,10 +828,10 @@ function createNbaTeamPage(slug) {
           headlines.replaceChildren(element("h3", "", "Team news"), element("p", "nba-team-hub-note", "Team news is unavailable."));
         });
       } else if (name === "history") {
-        const [data, team] = await Promise.all([nbaTeamHistory(), api(`/teams/${id}`).catch(() => null)]);
+        const [data, team, sportsLogos] = await Promise.all([nbaTeamHistory(), api(`/teams/${id}`).catch(() => null), nbaSportsLogos()]);
         if (current !== tabRequest || signal.aborted) return;
-        panel.replaceChildren(...[nbaTeamCurrentLogos(team?.team), nbaTeamUniformGallery(data?.teams?.[slug]), nbaTeamCommonsLogos(data?.teams?.[slug]),
-          nbaTeamHistoryView(data?.teams?.[slug])].filter(Boolean));
+        panel.replaceChildren(...[nbaTeamCurrentLogos(team?.team), nbaSportsLogosView(sportsLogos, slug), nbaTeamUniformGallery(data?.teams?.[slug]),
+          nbaTeamCommonsLogos(data?.teams?.[slug]), nbaTeamHistoryView(data?.teams?.[slug])].filter(Boolean));
         return;
       } else if (name === "roster" || name === "depth") {
         const data = await api(`/teams/${id}/roster`);
