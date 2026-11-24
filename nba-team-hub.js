@@ -93,11 +93,22 @@ function nbaTeamHistoryView(history) {
     return box;
   }
   let gallery = null;
+  let target = box;
+  let paragraphs = 0;
+  let more = null;
   for (const block of history.blocks) {
+    // Show the first few paragraphs; the rest of the history opens with "Read the full history".
+    if (block.p && ++paragraphs === 5 && !more) {
+      more = element("details", "nba-history-more");
+      more.append(element("summary", "", "Read the full history"));
+      box.append(more);
+      target = more;
+      gallery = null;
+    }
     if (block.img) {
       if (!gallery) {
         gallery = element("div", "nba-history-gallery");
-        box.append(gallery);
+        target.append(gallery);
       }
       const figure = element("figure", "nba-history-figure");
       const image = element("img", "");
@@ -121,8 +132,8 @@ function nbaTeamHistoryView(history) {
       continue;
     }
     gallery = null;
-    if (block.h) box.append(element(block.level <= 3 ? "h4" : "h5", "nba-history-heading", block.h));
-    else if (block.p) box.append(element("p", "nba-history-text", block.p));
+    if (block.h) target.append(element(block.level <= 3 ? "h4" : "h5", "nba-history-heading", block.h));
+    else if (block.p) target.append(element("p", "nba-history-text", block.p));
   }
   const source = element("p", "nba-team-hub-note");
   const link = element("a", "", `${history.article}${history.section ? ` › ${history.section}` : ""}`);

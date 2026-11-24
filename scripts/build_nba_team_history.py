@@ -65,7 +65,8 @@ class SectionParser(HTMLParser):
 
     VOID = {"img", "br", "hr", "meta", "link", "input", "wbr", "source", "col", "area", "base", "track"}
     SKIP_TAGS = {"style", "script", "sup", "table"}  # footnote markers, navboxes and infobox-style tables
-    SKIP_CLASSES = ("reference", "mw-editsection", "hatnote", "navbox", "noprint", "mw-empty-elt", "shortdescription", "toc", "toclimit-3", "toclimit-4")
+    SKIP_CLASSES = ("reference", "mw-editsection", "hatnote", "navbox", "noprint", "mw-empty-elt", "shortdescription", "toc", "toclimit-3", "toclimit-4",
+                    "references", "reflist", "mw-references-wrap", "refbegin", "citation")
 
     def __init__(self):
         super().__init__(convert_charrefs=True)
