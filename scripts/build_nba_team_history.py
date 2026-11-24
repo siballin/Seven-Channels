@@ -37,9 +37,9 @@ TEAMS = {
     "portland-trail-blazers": "Portland Trail Blazers", "sacramento-kings": "Sacramento Kings", "san-antonio-spurs": "San Antonio Spurs",
     "toronto-raptors": "Toronto Raptors", "utah-jazz": "Utah Jazz", "washington-wizards": "Washington Wizards",
 }
-# Tried in order: exact names first, then any section mentioning logos or uniforms, then branding/identity.
+# Tried in order: exact names, then branding/identity, then any section mentioning logos or uniforms, then colors.
 SECTION_NAMES = [r"logos? and uniforms?", r"uniforms? and logos?", r"logos?,? (?:colou?rs )?and uniforms?", r"uniforms?", r"uniform history",
-                 r".*\b(?:logos?|uniforms?)\b.*", r"team (?:branding|identity)", r"colou?rs"]
+                 r"team (?:branding|identity)", r".*\b(?:logos?|uniforms?)\b.*", r"colou?rs"]
 REFRESH_DAYS = 30
 
 

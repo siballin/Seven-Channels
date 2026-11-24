@@ -56,6 +56,35 @@ function nbaTeamHistory() {
   return nbaTeamHistoryRequest;
 }
 
+// The team's current logo set from ESPN (primary, dark-background and alternate versions).
+function nbaTeamCurrentLogos(team) {
+  const logos = (team?.logos || []).filter((logo) => /^https:\/\//.test(logo.href || ""));
+  const seen = new Set();
+  const unique = logos.filter((logo) => !seen.has(logo.href) && seen.add(logo.href)).slice(0, 6);
+  if (!unique.length) return null;
+  const box = element("section", "nba-team-hub-card nba-history");
+  box.append(element("h3", "", "Current logos"));
+  const gallery = element("div", "nba-history-gallery");
+  for (const logo of unique) {
+    const rel = logo.rel || [];
+    const dark = rel.includes("dark");
+    const figure = element("figure", "nba-history-figure");
+    const wrap = element("span", `nba-history-image${dark ? " is-dark" : ""}`);
+    const image = element("img", "");
+    image.src = logo.href;
+    image.alt = logo.alt || `${team.displayName || "Team"} logo`;
+    image.loading = "lazy";
+    image.addEventListener("error", () => figure.remove(), { once: true });
+    wrap.append(image);
+    const label = rel.includes("primary_logo_on_black_color") || rel.includes("primary_logo_on_primary_color") ? "On team color"
+      : rel.includes("scoreboard") ? "Scoreboard" : dark ? "On dark backgrounds" : rel.includes("primary_logo_on_white_color") ? "On white" : "Primary";
+    figure.append(wrap, element("figcaption", "", label));
+    gallery.append(figure);
+  }
+  box.append(gallery, element("p", "nba-team-hub-note", "Current logos from ESPN."));
+  return box;
+}
+
 function nbaTeamHistoryView(history) {
   const box = element("section", "nba-team-hub-card nba-history");
   box.append(element("h3", "", "Logos & uniforms"));
@@ -603,9 +632,9 @@ function createNbaTeamPage(slug) {
           headlines.replaceChildren(element("h3", "", "Team news"), element("p", "nba-team-hub-note", "Team news is unavailable."));
         });
       } else if (name === "history") {
-        const data = await nbaTeamHistory();
+        const [data, team] = await Promise.all([nbaTeamHistory(), api(`/teams/${id}`).catch(() => null)]);
         if (current !== tabRequest || signal.aborted) return;
-        panel.replaceChildren(nbaTeamHistoryView(data?.teams?.[slug]));
+        panel.replaceChildren(...[nbaTeamCurrentLogos(team?.team), nbaTeamHistoryView(data?.teams?.[slug])].filter(Boolean));
         return;
       } else if (name === "roster" || name === "depth") {
         const data = await api(`/teams/${id}/roster`);
