@@ -109,7 +109,8 @@ function nbaTeamCommonsLogos(history) {
     const years = logo.from ? `${logo.from}${logo.to ? `–${logo.to === "present" ? "present" : logo.to}` : ""}` : "";
     const caption = element("figcaption", "");
     if (years) caption.append(element("strong", "", years), document.createElement("br"));
-    caption.append(logo.caption.replace(/,?\s*\b(1[89]\d\d|20\d\d)\b(\s*[-–]\s*(\d{4}|present|current|now))?/i, "").trim() || logo.caption);
+    const name = logo.caption.replace(/,?\s*\b(1[89]\d\d|20\d\d)\b(\s*[-–]\s*(\d{4}|present|current|now))?/i, "").replace(/\(\s*\)/g, "").replace(/[\s,]+$/, "").trim();
+    caption.append(name || logo.caption);
     if (logo.license) caption.append(element("small", "nba-history-license", ` · ${logo.license}`));
     figure.append(link, caption);
     gallery.append(figure);

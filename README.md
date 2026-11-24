@@ -111,6 +111,7 @@ The Sports scores page has tabs for the NBA, NFL, MLB, NHL, college football (FB
 
 **Logos & Uniforms** (team page tab):
 - **Current logos:** the team's current logo set from ESPN (primary, on dark backgrounds, scoreboard).
+- **Logo gallery:** more logos from Wikimedia Commons, Wikipedia's free media library: the team's logo category plus files named after the team or its former names (New Orleans Jazz, Seattle SuperSonics, Washington Bullets…), oldest first, each with its license. Every team has at least one.
 - **History:** the logo and uniform history from Wikipedia: the team's "Logos and uniforms of the …" article when one exists, otherwise the logo/uniform section of the team's article. It keeps the text, era headings, and logo and uniform images with captions. Each image links to its Wikipedia file page, where its license is. Long histories open with **Read the full history**.
 
 `scripts/build_nba_team_history.py` builds `data/nba-team-history.json` every 30 days in the Pages workflow (`--force` rebuilds now). Wikipedia limits how many non-free team logos it can show, so some teams have text only.
