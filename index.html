@@ -1195,6 +1195,7 @@
     .palette-control { display: grid; gap: 2px; color: var(--muted); font-size: .6rem; line-height: 1.1; }
     .palette-control select { width: 130px; min-height: 30px; padding: 4px 7px; font-size: .72rem; }
     .theme-control { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: .7rem; white-space: nowrap; cursor: pointer; }
+    .theme-mode { width: auto; min-height: 30px; padding: 3px 8px; font-size: .75rem; }
     .theme-switch { position: relative; width: 42px; min-width: 42px; min-height: 26px; height: 26px; padding: 0; border: 0; border-radius: 999px; background: #737d8c; cursor: pointer; transition: background .2s ease; }
     .theme-switch::after { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 25%); content: ""; transition: transform .2s ease; }
     .theme-switch[aria-checked="true"] { background: var(--signal); }
@@ -1889,11 +1890,13 @@
     .sports-hub .sports-score-tabs { grid-column: 1 / -1; grid-row: 1; margin: 0; }
     .sports-hub .sports-ticker { grid-column: 1 / -1; grid-row: 2; min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-base); box-shadow: var(--glass-shadow); }
     .sports-hub > .resources { grid-column: 1 / -1; grid-row: 3; margin: 0; }
-    .sports-hub .sports-featured { grid-column: 2; grid-row: 4; }
-    .sports-hub .game-detail-area { grid-column: 2; grid-row: 5; }
-    .sports-hub .channel-planner { grid-column: 2; grid-row: 6; }
-    .sports-hub .sports-hub-side-left { grid-column: 1; grid-row: 4 / span 3; }
-    .sports-hub .sports-hub-side-right { grid-column: 3; grid-row: 4 / span 3; }
+    .sports-hub { grid-template-rows: repeat(7, auto) 1fr; }
+    .sports-hub .nba-db-entry { grid-column: 2; grid-row: 4; margin: 0; }
+    .sports-hub .sports-featured { grid-column: 2; grid-row: 5; }
+    .sports-hub .game-detail-area { grid-column: 2; grid-row: 6; }
+    .sports-hub .channel-planner { grid-column: 2; grid-row: 7; }
+    .sports-hub .sports-hub-side-left { grid-column: 1; grid-row: 4 / span 5; }
+    .sports-hub .sports-hub-side-right { grid-column: 3; grid-row: 4 / span 5; }
     .sports-hub .game-list { display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(220px, 260px); gap: 8px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x proximity; padding: 2px 2px 10px; }
     .sports-hub .game-list > * { scroll-snap-align: start; }
     .sports-hub .game-select { grid-template-columns: minmax(0, 1fr); }
@@ -1902,18 +1905,20 @@
     .sports-hub .nba-scoreboard .team-identity { flex: 1 1 0; color: inherit; text-decoration: none; }
     .sports-hub .nba-scoreboard .team-identity:hover strong { text-decoration: underline; }
     @media (max-width: 1250px) {
-      .sports-hub .sports-featured { grid-column: 1; }
+      .sports-hub .nba-db-entry, .sports-hub .sports-featured { grid-column: 1; }
       .sports-hub .game-detail-area, .sports-hub .channel-planner { grid-column: 1; }
-      .sports-hub-side-column { display: grid; grid-column: 2; grid-row: 4 / span 3; gap: 14px; align-content: start; }
+      .sports-hub-side-column { display: grid; grid-column: 2; grid-row: 4 / span 5; gap: 14px; align-content: start; }
       .sports-hub .sports-hub-side-left, .sports-hub .sports-hub-side-right { grid-column: auto; grid-row: auto; }
     }
     @media (max-width: 800px) {
-      .sports-hub .sports-featured { grid-column: 1; grid-row: 4; }
-      .sports-hub .game-detail-area { grid-column: 1; grid-row: 5; }
+      .sports-hub { grid-template-rows: none; }
+      .sports-hub .nba-db-entry { grid-column: 1; grid-row: 4; }
+      .sports-hub .sports-featured { grid-column: 1; grid-row: 5; }
+      .sports-hub .game-detail-area { grid-column: 1; grid-row: 6; }
       .sports-hub-side-column { display: contents; }
-      .sports-hub .sports-hub-side-left { grid-column: 1; grid-row: 6; }
-      .sports-hub .sports-hub-side-right { grid-column: 1; grid-row: 7; }
-      .sports-hub .channel-planner { grid-column: 1; grid-row: 8; }
+      .sports-hub .sports-hub-side-left { grid-column: 1; grid-row: 7; }
+      .sports-hub .sports-hub-side-right { grid-column: 1; grid-row: 8; }
+      .sports-hub .channel-planner { grid-column: 1; grid-row: 9; }
       .sports-hub .game-list { grid-auto-columns: minmax(220px, 80%); }
     }
     .sports-hub .game-list:has(> .game-list-state) { grid-auto-columns: 100%; }
@@ -3863,10 +3868,14 @@
               <p class="youtube-key-status" role="status" aria-live="polite"></p>
             </form>
           </details>
-          <div class="theme-control">
-            <span>Dark</span>
-            <button id="theme-switch" class="theme-switch" type="button" role="switch" aria-checked="true" aria-label="Dark mode"></button>
-          </div>
+          <label class="theme-control">
+            <span>Mode</span>
+            <select id="theme-mode" class="theme-mode" aria-label="Light or dark mode">
+              <option value="auto">Automatic</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
         </div>
           </div>
         </details>
@@ -3973,9 +3982,19 @@
       blush: { darkMain: "#24151c", lightMain: "#f7eef1", accent: "#b23861" }
     };
     const defaultAppearance = {
-      theme: "light", main: "#eceff4", mainDark: "#0f131b", mainLight: "#eceff4",
+      theme: "light", mode: "auto", main: "#eceff4", mainDark: "#0f131b", mainLight: "#eceff4",
       accent: "#3a4fd6", preset: "home", design: 2
     };
+    // "auto" follows the device's light/dark setting; older saved settings without a mode keep the theme they picked.
+    const systemDark = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+    function themeModeOf(value) {
+      if (value?.mode === "auto" || value?.mode === "light" || value?.mode === "dark") return value.mode;
+      return value?.theme === "light" ? "light" : "dark";
+    }
+    function resolvedTheme(mode) {
+      if (mode === "auto") return systemDark?.matches ? "dark" : "light";
+      return mode === "light" ? "light" : "dark";
+    }
     // The 2026 redesign switches everyone to its look once; the theme picker and dark switch still work after that.
     const designVersionKey = "seven-channels.design.v2";
     const appearance = loadAppearance();
@@ -4018,7 +4037,7 @@
     const mainPicker = document.getElementById("main-color");
     const accentPicker = document.getElementById("accent-color");
     const presetPicker = document.getElementById("color-preset");
-    const themeSwitch = document.getElementById("theme-switch");
+    const themeModePicker = document.getElementById("theme-mode");
     const youtubeKeySettings = document.getElementById("youtube-key-settings");
     const youtubeKeyForm = youtubeKeySettings.querySelector("form");
     const youtubeKeyInput = document.getElementById("youtube-api-key");
@@ -4330,7 +4349,8 @@
         const parsed = JSON.parse(saved);
         const preset = Object.hasOwn(colorThemes, parsed?.preset) ? parsed.preset : "custom";
         const validColor = (value) => typeof value === "string" && /^#[\da-f]{6}$/i.test(value);
-        const theme = parsed?.theme === "light" ? "light" : "dark";
+        const mode = themeModeOf(parsed);
+        const theme = resolvedTheme(mode);
         const legacyMain = validColor(parsed?.main) ? parsed.main : defaultAppearance.main;
         const mainDark = validColor(parsed?.mainDark)
           ? parsed.mainDark
@@ -4340,6 +4360,7 @@
           : theme === "light" ? legacyMain : defaultAppearance.mainLight;
         return {
           theme,
+          mode,
           main: theme === "dark" ? mainDark : mainLight,
           mainDark,
           mainLight,
@@ -4357,6 +4378,8 @@
 
     function applyAppearance() {
       const root = document.documentElement;
+      appearance.mode = themeModeOf(appearance);
+      appearance.theme = resolvedTheme(appearance.mode);
       appearance.main = appearance.theme === "dark" ? appearance.mainDark : appearance.mainLight;
       root.dataset.theme = appearance.theme;
       root.style.setProperty("--user-main", appearance.main);
@@ -4386,7 +4409,7 @@
       mainPicker.value = appearance.main;
       accentPicker.value = appearance.accent;
       presetPicker.value = appearance.preset;
-      themeSwitch.setAttribute("aria-checked", String(appearance.theme === "dark"));
+      themeModePicker.value = appearance.mode;
       document.querySelector('meta[name="theme-color"]').content = appearance.main;
     }
 
@@ -4483,10 +4506,14 @@
       applyAppearance();
       saveAppearance();
     });
-    themeSwitch.addEventListener("click", () => {
-      appearance.theme = appearance.theme === "dark" ? "light" : "dark";
+    themeModePicker.addEventListener("change", () => {
+      appearance.mode = themeModePicker.value;
+      appearance.theme = resolvedTheme(appearance.mode);
       applyAppearance();
       saveAppearance();
+    });
+    systemDark?.addEventListener?.("change", () => {
+      if (appearance.mode === "auto") applyAppearance();
     });
 
     function localDateValue(date) {
@@ -5981,160 +6008,15 @@
       news.append(element("h3", "", "Sports news"), newsBody);
       leaders.append(element("h3", "", "Game leaders"), leadersBody);
       upcoming.append(element("h3", "", "Upcoming games"), upcomingBody);
-      // Redesign: league tabs on top, a grid of widgets you can hide and reorder, then scores & game center and your lists.
-      hub.classList.add("sports-home");
-      const live = element("section", "sports-widget sports-live-tile");
-      live.append(featured);
-      const ratings = element("section", "sports-widget sports-ratings");
-      const ratingsBody = element("div");
-      ratings.append(element("h3", "", "Team ratings"), ratingsBody);
-      const playersTile = element("section", "sports-widget sports-players");
-      const playerForm = element("form", "sports-player-form");
-      const playerLabel = element("label", "", "Find any NBA player, past or present");
-      const playerInput = document.createElement("input");
-      playerInput.type = "search";
-      playerInput.placeholder = "e.g. Kareem Abdul-Jabbar";
-      playerInput.id = "sports-player-search";
-      playerLabel.htmlFor = playerInput.id;
-      const playerGo = element("button", "", "Search");
-      playerGo.type = "submit";
-      playerForm.append(playerLabel, playerInput, playerGo);
-      playerForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        try { sessionStorage.setItem("seven-channels.nba-db-query", playerInput.value.trim()); } catch { /* optional */ }
-        location.hash = "#sports/players";
-      });
-      const allPlayers = element("a", "home-widget-link", "Player database →");
-      allPlayers.href = "#sports/players";
-      playersTile.append(element("h3", "", "NBA player database"), playerForm, element("small", "", "Season-by-season stats, all-time leaders and comparisons"), allPlayers);
-      const picks = element("section", "sports-widget sports-picks");
-      const picksBody = element("div");
-      picks.append(element("h3", "", "Your picks"), picksBody);
-      const archive = element("section", "sports-widget sports-archive");
-      const archiveBody = element("div");
-      archive.append(element("h3", "", "From the archive"), archiveBody);
-      const widgetGrid = element("div", "sports-widgets");
-      widgetGrid.setAttribute("aria-label", "Sports widgets");
-      for (const [tile, id, name, size] of [[live, "live", "Live game", "wide"], [teams, "teams", "My teams"], [ratings, "ratings", "Team ratings"],
-        [standings, "standings", "Standings"], [leaders, "leaders", "Game leaders"], [upcoming, "upcoming", "Upcoming games"], [injuries, "injuries", "Injury report"],
-        [playersTile, "players", "NBA player search"], [picks, "picks", "Your picks"], [archive, "archive", "From the archive"], [news, "news", "Sports news", "wide"]]) {
-        tile.dataset.widget = id;
-        tile.dataset.name = name;
-        if (size) tile.classList.add(`is-${size}`);
-        widgetGrid.append(tile);
-      }
-      const sportsLayoutKey = "seven-channels.sports-widgets.v1";
-      let editingWidgets = false;
-      const top = element("div", "sports-top");
-      const leagueTabs = scoreboard.querySelector(".sports-score-tabs");
-      if (leagueTabs) top.append(leagueTabs);
-      const editWidgets = element("button", "secondary sports-edit", "Edit widgets");
-      editWidgets.type = "button";
-      editWidgets.setAttribute("aria-pressed", "false");
-      editWidgets.addEventListener("click", () => {
-        editingWidgets = !editingWidgets;
-        editWidgets.textContent = editingWidgets ? "Done" : "Edit widgets";
-        editWidgets.className = editingWidgets ? "sports-edit" : "secondary sports-edit";
-        editWidgets.setAttribute("aria-pressed", String(editingWidgets));
-        applyWidgetGrid(widgetGrid, sportsLayoutKey, editingWidgets);
-      });
-      top.append(editWidgets);
-      const scoresTile = element("section", "sports-scores-tile");
-      scoresTile.setAttribute("aria-labelledby", "sports-scores-title");
-      const scoresTitle = element("h2", "sports-section-title", "Scores & game center");
-      scoresTitle.id = "sports-scores-title";
-      scoresTile.append(scoresTitle, scoreboard);
-      hub.append(top, widgetGrid, scoresTile, planner, resources, createRedditWidget("sports"));
-      applyWidgetGrid(widgetGrid, sportsLayoutKey, false);
-
-      // Team ratings (NBA): offense, defense, net and pace for the first NBA team you follow, from ESPN season totals.
-      async function renderRatings() {
-        const team = activeSport === "nba" ? followedNbaTeams.find((item) => (item.sport || "nba") === "nba") : null;
-        ratings.hidden = !team;
-        if (!team) return;
-        ratingsBody.replaceChildren(element("p", "", "Loading…"));
-        try {
-          const [stats, standingsData] = await Promise.all([
-            fetchWidget(`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/${encodeURIComponent(team.id)}/statistics?seasontype=2`),
-            fetchWidget("https://site.api.espn.com/apis/v2/sports/basketball/nba/standings")
-          ]);
-          const values = new Map((stats.results?.stats?.categories || []).flatMap((category) => category.stats || []).map((stat) => [stat.name, Number(stat.value)]));
-          const games = values.get("gamesPlayed");
-          const pace = games > 0 ? (values.get("fieldGoalsAttempted") - values.get("offensiveRebounds") + values.get("turnovers") + 0.44 * values.get("freeThrowsAttempted")) / games : NaN;
-          const entry = (standingsData.children || []).flatMap((group) => group.standings?.entries || []).find((item) => String(item.team?.id) === team.id);
-          const allowed = Number(entry?.stats?.find((stat) => stat.name === "avgPointsAgainst")?.value);
-          if (!(pace > 0)) throw new Error("Team totals unavailable.");
-          const offense = (100 * values.get("points") / games) / pace;
-          const defense = Number.isFinite(allowed) ? (100 * allowed) / pace : NaN;
-          const grid = element("div", "sports-ratings-grid");
-          for (const [label, value, signed] of [["Offense", offense], ["Defense", defense], ["Net", offense - defense, true], ["Pace", pace]]) {
-            const cell = element("div", "");
-            cell.append(element("small", "", label), element("strong", "", Number.isFinite(value) ? `${signed && value > 0 ? "+" : ""}${value.toFixed(1)}` : "—"));
-            grid.append(cell);
-          }
-          const link = element("a", "home-widget-link", `${team.name} team page →`);
-          link.href = typeof nbaTeamSlugs !== "undefined" && nbaTeamSlugs.get(team.id) ? `#sports/nba/teams/${nbaTeamSlugs.get(team.id)}` : "#sports";
-          ratingsBody.replaceChildren(element("small", "", team.name), grid, link);
-        } catch {
-          ratingsBody.replaceChildren(element("p", "", "Ratings are unavailable right now."));
-        }
-      }
-
-      // Your open picks from the Betting channel.
-      function renderPicks() {
-        const open = entries.filter((entry) => entry.channel === "betting" && betResult(entry) === "open");
-        const link = element("a", "home-widget-link", "Betting channel →");
-        link.href = "#betting";
-        if (!open.length) {
-          picksBody.replaceChildren(element("p", "", "No open picks."), link);
-          return;
-        }
-        const list = element("ul", "home-list");
-        open.slice(0, 3).forEach((entry) => list.append(element("li", "", entry.title)));
-        picksBody.replaceChildren(element("strong", "sports-big", `${open.length} open`), list, link);
-      }
-
-      // From the archive: one logo or uniform from your NBA team's history each day (SportsLogos.Net, credited).
-      async function renderArchive() {
-        const team = followedNbaTeams.find((item) => (item.sport || "nba") === "nba");
-        const slug = team && typeof nbaTeamSlugs !== "undefined" ? nbaTeamSlugs.get(team.id) : "";
-        archive.hidden = !slug || typeof nbaSportsLogos !== "function";
-        if (archive.hidden) return;
-        const data = await nbaSportsLogos();
-        const history = data?.teams?.[slug];
-        const items = (history?.sections || []).flatMap((section) => section.items.map((item) => ({ ...item, section: section.name })));
-        if (!items.length) {
-          archive.hidden = true;
-          return;
-        }
-        const day = Math.floor(Date.now() / 86400000);
-        const item = items[day % items.length];
-        const figure = element("a", "sports-archive-item");
-        figure.href = item.view;
-        figure.target = "_blank";
-        figure.rel = "noopener noreferrer";
-        const image = element("img", "");
-        image.src = item.img || item.thumb;
-        image.alt = item.title;
-        image.loading = "lazy";
-        image.addEventListener("error", () => {
-          const fallback = new URL(item.img || "", "https://siballin.github.io/Seven-Channels/").href;
-          if (item.img && image.src !== fallback) image.src = fallback;
-          else image.remove();
-        });
-        const text = element("span", "");
-        text.append(element("strong", "", item.title.replace(/\s*\([^)]*\)\s*$/, "")), element("small", "", [item.section, [item.from, item.to !== item.from ? item.to : ""].filter(Boolean).join("–")].filter(Boolean).join(" · ")));
-        figure.append(image, text);
-        const credit = element("small", "sports-archive-credit");
-        const creditLink = element("a", "", "Image courtesy of SportsLogos.Net");
-        creditLink.href = "https://www.sportslogos.net";
-        creditLink.target = "_blank";
-        creditLink.rel = "noopener";
-        credit.append(creditLink);
-        const all = element("a", "home-widget-link", "Logos & uniforms →");
-        all.href = `#sports/nba/teams/${slug}`;
-        archiveBody.replaceChildren(figure, credit, all);
-      }
+      left.append(teams, standings, injuries);
+      right.append(news, leaders, upcoming, createRedditWidget("sports"));
+      const playerDbLink = element("a", "idol-entry nba-db-entry");
+      playerDbLink.href = "#sports/players";
+      playerDbLink.append(element("strong", "", "NBA player database"), element("span", "", "Every player’s season-by-season stats, all-time leaders and side-by-side comparisons"));
+      main.append(playerDbLink, featured, scoreboard, planner);
+      const sideColumn = element("div", "sports-hub-side-column");
+      sideColumn.append(left, right);
+      hub.append(sideColumn, main, resources);
       let activeSport = "nba";
       const schedules = new Map();
       const selections = new Map();
@@ -6425,10 +6307,6 @@
       async function loadWidgets() {
         const requestId = ++widgetRequestId;
         const sport = activeSport;
-        playersTile.hidden = sport !== "nba";
-        renderRatings();
-        renderPicks();
-        renderArchive();
         const path = sportsLeague(sport).path;
         const standingsLoading = element("div", "sports-loading");
         standingsLoading.setAttribute("role", "status");
@@ -7938,7 +7816,8 @@
     function loadAppearanceFromValue(value) {
       const preset = Object.hasOwn(colorThemes, value?.preset) ? value.preset : "custom";
       const validColor = (color) => typeof color === "string" && /^#[\da-f]{6}$/i.test(color);
-      const theme = value?.theme === "light" ? "light" : "dark";
+      const mode = themeModeOf(value);
+      const theme = resolvedTheme(mode);
       const legacyMain = validColor(value?.main) ? value.main : defaultAppearance.main;
       const mainDark = validColor(value?.mainDark)
         ? value.mainDark
@@ -7948,6 +7827,7 @@
         : theme === "light" ? legacyMain : defaultAppearance.mainLight;
       return {
         theme,
+        mode,
         main: theme === "dark" ? mainDark : mainLight,
         mainDark,
         mainLight,
@@ -13418,8 +13298,7 @@
         dashboard.append(leftColumn, middle, right);
         view.replaceChildren(heading, description, withChannelNews("kpop", [dashboard]));
       } else if (channel.id === "sports" && scoreboard) {
-        // Redesign: the headlines move below the scores.
-        view.replaceChildren(heading, description, createSportsHub(scoreboard, planner, resources), createChannelNews("sports"));
+        view.replaceChildren(heading, description, withChannelNews("sports", [createSportsHub(scoreboard, planner, resources)]));
       } else {
         const content = [...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(mediaLookupChannels.has(channel.id) ? [createMediaHub(channel.id, entries)] : []), ...(scoreboard ? [scoreboard] : []), planner];
         const withReddit = redditDefaults[channel.id] ? [withRedditSidebar(channel.id, content)] : content;
