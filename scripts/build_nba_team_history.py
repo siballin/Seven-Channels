@@ -280,6 +280,95 @@ def commons_logos(names, known_files=(), fetch=commons_json, limit=24):
     return unique_out[:limit]
 
 
+KIT_KINDS = {"association": "Association", "icon": "Icon", "statement": "Statement", "city": "City", "classic": "Classic", "earned": "Earned",
+             "h": "Home", "a": "Away", "3": "Alternate", "home": "Home", "away": "Away", "alternate": "Alternate"}
+
+
+def kit_label(suffix):
+    """A kit file's suffix ("2017-18 CHI association", "chicagobulls city2122", "bostonceltics1617a", "'25 Utah Jazz icon")
+    → (kind, season) like ("City", "2021–22"); season is "" when the name has no year."""
+    text = suffix.strip().replace("_", " ")
+    season = ""
+    match = re.search(r"\b(20\d\d)-(\d\d)\b", text)
+    if match:
+        season = f"{match.group(1)}–{match.group(2)}"
+        text = text.replace(match.group(0), " ")
+    else:
+        match = re.search(r"'(\d\d)\b", text)
+        if match:
+            year = 2000 + int(match.group(1))
+            season = f"{year}–{str(year + 1)[2:]}"
+            text = text.replace(match.group(0), " ")
+    kind_match = re.search(r"(association|icon|statement|city|classic|earned|home|away|alternate)\s*(\d{4}|\d)?\s*$", text, re.I)
+    kind = ""
+    if kind_match:
+        kind = KIT_KINDS[kind_match.group(1).lower()]
+        digits = kind_match.group(2) or ""
+        if not season and len(digits) == 4:  # city2122 → 2021–22, city2021 → 2020–21
+            season = f"20{digits[:2]}–{digits[2:]}"
+        elif digits and len(digits) == 1 and digits != "1":
+            kind = f"{kind} {digits}"
+    else:
+        match = re.search(r"(\d{4})?([ha3])$", text.replace(" ", ""), re.I)
+        if match:
+            kind = KIT_KINDS[match.group(2).lower()]
+            if match.group(1) and not season:
+                season = f"20{match.group(1)[:2]}–{match.group(1)[2:]}"
+    return kind or "Uniform", season
+
+
+def category_files(category, fetch):
+    files, cont = [], {}
+    while True:
+        data = fetch({"action": "query", "list": "categorymembers", "cmtitle": category, "cmtype": "file", "cmlimit": 500, **cont})
+        files += [item["title"] for item in (data.get("query") or {}).get("categorymembers", [])]
+        if "continue" not in data:
+            return files
+        cont = data["continue"]
+
+
+def team_uniforms(name, current_patterns=(), fetch=commons_json, limit=40):
+    """Uniform drawings from Wikimedia Commons' "Basketball kit body/shorts/<team>" categories (the colored patterns
+    Wikipedia's kit template layers under its jersey and shorts outlines), paired by file name."""
+    bodies = {re.sub(r"^File:Kit[ _]body[ _]|\.png$", "", title, flags=re.I): title for title in category_files(f"Category:Basketball kit body/{name}", fetch)
+              if title.lower().endswith(".png")}
+    shorts = {re.sub(r"^File:Kit[ _]shorts[ _]|\.png$", "", title, flags=re.I): title for title in category_files(f"Category:Basketball kit shorts/{name}", fetch)
+              if title.lower().endswith(".png")}
+    if not bodies:
+        return []
+    key = lambda text: re.sub(r"[^a-z0-9]+", "", text.lower())
+    shorts_by_key = {key(suffix): title for suffix, title in shorts.items()}
+    current = {key(pattern.lstrip("_")) for pattern in current_patterns}
+    titles = list(bodies.values()) + list(shorts.values())
+    urls = {}
+    for start in range(0, len(titles), 40):
+        data = fetch({"action": "query", "titles": "|".join(titles[start:start + 40]), "prop": "imageinfo", "iiprop": "url"})
+        for page in (data.get("query") or {}).get("pages", []):
+            url = ((page.get("imageinfo") or [{}])[0].get("url") or "")
+            if re.match(r"https://upload\.wikimedia\.org/", url):
+                urls[page["title"]] = url
+    kits = []
+    for suffix, body in bodies.items():
+        if body not in urls:
+            continue
+        kind, season = kit_label(suffix)
+        short = shorts_by_key.get(key(suffix))
+        kits.append({"kind": kind, "season": season, "current": key(suffix) in current, "body": urls[body],
+                     **({"shorts": urls[short]} if short in urls else {}),
+                     "file": f"https://commons.wikimedia.org/wiki/{quote(body.replace(' ', '_'))}"})
+    order = ["Association", "Home", "Icon", "Away", "Statement", "Alternate", "City", "Classic", "Earned"]
+    rank = lambda kit: next((i for i, name in enumerate(order) if kit["kind"].startswith(name)), 99)
+    kits.sort(key=lambda kit: (not kit["current"], -(int(kit["season"][:4]) if kit["season"] else 0), rank(kit)))
+    return kits[:limit]
+
+
+def current_kit_patterns(name, fetch=fetch_json):
+    """The kit patterns in the team article's infobox (its current uniforms), e.g. "_chicagobulls_association"."""
+    data = fetch({"action": "parse", "page": name, "prop": "wikitext", "section": 0, "redirects": 1})
+    text = (data.get("parse") or {}).get("wikitext", "")
+    return re.findall(r"\|\s*(?:\d+_pattern_b|pattern_b\d+)\s*=\s*([^|\n}]+)", text)
+
+
 def unquote_title(url):
     from urllib.parse import unquote
     return unquote(url.rsplit("/wiki/", 1)[-1]).removeprefix("File:")
@@ -309,9 +398,18 @@ def main():
         except Exception as error:
             print(f"  {name} (Commons): {error}", file=sys.stderr)
             extra = ((previous.get("teams") or {}).get(slug) or {}).get("commons", [])
-        if history or extra:
+        try:
+            uniforms = team_uniforms(name, current_kit_patterns(name))
+        except Exception as error:
+            print(f"  {name} (uniforms): {error}", file=sys.stderr)
+            uniforms = ((previous.get("teams") or {}).get(slug) or {}).get("uniforms", [])
+        if uniforms:
+            extra_uniforms = {"uniforms": uniforms}
+        else:
+            extra_uniforms = {}
+        if history or extra or uniforms:
             teams[slug] = {**(history or {"article": name, "url": f"https://en.wikipedia.org/wiki/{quote(name.replace(' ', '_'))}", "section": "", "blocks": []}),
-                           **({"commons": extra} if extra else {})}
+                           **({"commons": extra} if extra else {}), **extra_uniforms}
         time.sleep(1)
     if len(teams) < 20:
         print(f"NBA team history: only {len(teams)} teams found; keeping the previous file.", file=sys.stderr)
@@ -320,7 +418,8 @@ def main():
                                  ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     images = sum(1 for team in teams.values() for block in team["blocks"] if "img" in block)
     extra = sum(len(team.get("commons", [])) for team in teams.values())
-    print(f"NBA team history: {len(teams)} teams, {images} Wikipedia images, {extra} more logos from Commons")
+    kits = sum(len(team.get("uniforms", [])) for team in teams.values())
+    print(f"NBA team history: {len(teams)} teams, {images} Wikipedia images, {extra} more logos from Commons, {kits} uniform drawings")
 
 
 if __name__ == "__main__":

@@ -85,6 +85,65 @@ function nbaTeamCurrentLogos(team) {
   return box;
 }
 
+// Uniform drawings: Wikipedia's kit template layers a colored jersey pattern and shorts pattern (from Wikimedia
+// Commons) under shared jersey and shorts outlines. Current uniforms first, then past seasons, newest first.
+const nbaKitOutlines = {
+  body: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Kit_body_basketball.svg/120px-Kit_body_basketball.svg.png",
+  shorts: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Kit_shorts.svg/250px-Kit_shorts.svg.png"
+};
+
+function nbaKitDrawing(kit) {
+  const drawing = element("span", "nba-kit");
+  drawing.setAttribute("role", "img");
+  drawing.setAttribute("aria-label", `${kit.kind}${kit.season ? ` ${kit.season}` : ""} uniform`);
+  const layer = (src, part) => {
+    const image = element("img", `nba-kit-${part}`);
+    image.src = src;
+    image.alt = "";
+    image.loading = "lazy";
+    image.referrerPolicy = "no-referrer";
+    return image;
+  };
+  drawing.append(layer(kit.body, "body"), layer(nbaKitOutlines.body, "body"));
+  if (kit.shorts) drawing.append(layer(kit.shorts, "shorts"));
+  drawing.append(layer(nbaKitOutlines.shorts, "shorts"));
+  return drawing;
+}
+
+function nbaTeamUniformGallery(history) {
+  const kits = (history?.uniforms || []).filter((kit) => /^https:\/\/upload\.wikimedia\.org\//.test(kit.body || ""));
+  if (!kits.length) return null;
+  const box = element("section", "nba-team-hub-card nba-history");
+  box.append(element("h3", "", "Uniform gallery"));
+  const group = (title, list) => {
+    if (!list.length) return;
+    box.append(element("h4", "nba-history-heading", title));
+    const gallery = element("div", "nba-kit-gallery");
+    for (const kit of list) {
+      const figure = element("figure", "nba-kit-figure");
+      const link = element("a", "nba-kit-link");
+      link.href = kit.file;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.title = "Drawing details and license on Wikimedia Commons";
+      link.append(nbaKitDrawing(kit));
+      const caption = element("figcaption", "");
+      caption.append(element("strong", "", kit.kind));
+      if (kit.season) caption.append(document.createElement("br"), kit.season);
+      figure.append(link, caption);
+      gallery.append(figure);
+    }
+    box.append(gallery);
+  };
+  group("Current uniforms", kits.filter((kit) => kit.current));
+  const past = kits.filter((kit) => !kit.current);
+  const dated = past.filter((kit) => kit.season);
+  for (const season of [...new Set(dated.map((kit) => kit.season))]) group(season, dated.filter((kit) => kit.season === season));
+  group(dated.length ? "Other uniforms" : "Uniforms", past.filter((kit) => !kit.season));
+  box.append(element("p", "nba-team-hub-note", "Uniform drawings from Wikipedia’s kit templates on Wikimedia Commons (mostly 2016 onward). Tap one for its file page; shorts are left plain when there’s no drawing for them."));
+  return box;
+}
+
 // More logos found on Wikimedia Commons, oldest first.
 function nbaTeamCommonsLogos(history) {
   const logos = (history?.commons || []).filter((logo) => /^https:\/\/(upload|thumb)\.wikimedia\.org\//.test(logo.img || ""));
@@ -680,7 +739,8 @@ function createNbaTeamPage(slug) {
       } else if (name === "history") {
         const [data, team] = await Promise.all([nbaTeamHistory(), api(`/teams/${id}`).catch(() => null)]);
         if (current !== tabRequest || signal.aborted) return;
-        panel.replaceChildren(...[nbaTeamCurrentLogos(team?.team), nbaTeamCommonsLogos(data?.teams?.[slug]), nbaTeamHistoryView(data?.teams?.[slug])].filter(Boolean));
+        panel.replaceChildren(...[nbaTeamCurrentLogos(team?.team), nbaTeamUniformGallery(data?.teams?.[slug]), nbaTeamCommonsLogos(data?.teams?.[slug]),
+          nbaTeamHistoryView(data?.teams?.[slug])].filter(Boolean));
         return;
       } else if (name === "roster" || name === "depth") {
         const data = await api(`/teams/${id}/roster`);

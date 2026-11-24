@@ -64,6 +64,24 @@ class TeamHistoryTests(unittest.TestCase):
         self.assertEqual((logos[0]["from"], logos[0]["to"], logos[0]["license"]), (1975, 1979, "Public domain"))
         self.assertEqual(history.logo_years("Knicks Wordmark Logo 2012-current"), (2012, "present"))
 
+    def test_kit_labels(self):
+        self.assertEqual(history.kit_label("2017-18 CHI association"), ("Association", "2017–18"))
+        self.assertEqual(history.kit_label("chicagobulls city2122"), ("City", "2021–22"))
+        self.assertEqual(history.kit_label("bostonceltics1617a"), ("Away", "2016–17"))
+        self.assertEqual(history.kit_label("'25 Utah Jazz icon"), ("Icon", "2025–26"))
+        self.assertEqual(history.kit_label("gswarriorsh"), ("Home", ""))
+
+    def test_team_uniforms_pair_body_and_shorts(self):
+        def fetch(params):
+            if params.get("list") == "categorymembers":
+                part = "body" if "body" in params["cmtitle"] else "shorts"
+                names = ["chicagobulls association", "chicagobulls city2122", "2017-18 CHI icon"] if part == "body" else ["chicagobulls association", "chicagobulls city2122"]
+                return {"query": {"categorymembers": [{"title": f"File:Kit {part} {name}.png"} for name in names]}}
+            return {"query": {"pages": [{"title": title, "imageinfo": [{"url": "https://upload.wikimedia.org/x/" + title.replace(" ", "_")}]} for title in params["titles"].split("|")]}}
+        kits = history.team_uniforms("Chicago Bulls", ["_chicagobulls_association"], fetch)
+        self.assertEqual([(kit["kind"], kit["season"], kit["current"], "shorts" in kit) for kit in kits],
+                         [("Association", "", True, True), ("City", "2021–22", False, True), ("Icon", "2017–18", False, False)])
+
     def test_every_team_has_an_article(self):
         self.assertEqual(len(history.TEAMS), 30)
 

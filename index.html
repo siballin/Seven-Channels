@@ -3758,6 +3758,16 @@
     .nba-history-image.is-dark { background: #14171d; }
     .nba-history-more { display: grid; gap: 10px; }
     .nba-history-license { opacity: .8; }
+    .nba-kit-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+    .nba-kit-figure { margin: 0; display: grid; justify-items: center; gap: 6px; padding: 10px 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .nba-kit-link { display: block; padding: 6px; border-radius: 8px; background: #f4f5f7; }
+    /* Wikipedia's kit layout is 100×95 px: jersey 38×59 at (31, 0), shorts 100×36 at (0, 59). Drawn here at 1.0×. */
+    .nba-kit { position: relative; display: block; width: 100px; height: 95px; }
+    .nba-kit img { position: absolute; image-rendering: auto; }
+    .nba-kit-body { left: 31px; top: 0; width: 38px; height: 59px; }
+    .nba-kit-shorts { left: 0; top: 59px; width: 100px; height: 36px; }
+    .nba-kit-figure figcaption { text-align: center; font-size: .76rem; color: var(--muted); line-height: 1.35; }
+    .nba-kit-figure figcaption strong { color: var(--ink); }
     .nba-history-more > summary { cursor: pointer; font-weight: 700; color: var(--signal); padding: 6px 0; }
     .nba-history-more[open] { display: grid; }
     .nba-history-figure figcaption { font-size: .76rem; color: var(--muted); line-height: 1.4; }
