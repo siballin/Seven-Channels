@@ -1195,6 +1195,7 @@
     .palette-control { display: grid; gap: 2px; color: var(--muted); font-size: .6rem; line-height: 1.1; }
     .palette-control select { width: 130px; min-height: 30px; padding: 4px 7px; font-size: .72rem; }
     .theme-control { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: .7rem; white-space: nowrap; cursor: pointer; }
+    .theme-mode { width: auto; min-height: 30px; padding: 3px 8px; font-size: .75rem; }
     .theme-switch { position: relative; width: 42px; min-width: 42px; min-height: 26px; height: 26px; padding: 0; border: 0; border-radius: 999px; background: #737d8c; cursor: pointer; transition: background .2s ease; }
     .theme-switch::after { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 25%); content: ""; transition: transform .2s ease; }
     .theme-switch[aria-checked="true"] { background: var(--signal); }
@@ -3867,10 +3868,14 @@
               <p class="youtube-key-status" role="status" aria-live="polite"></p>
             </form>
           </details>
-          <div class="theme-control">
-            <span>Dark</span>
-            <button id="theme-switch" class="theme-switch" type="button" role="switch" aria-checked="true" aria-label="Dark mode"></button>
-          </div>
+          <label class="theme-control">
+            <span>Mode</span>
+            <select id="theme-mode" class="theme-mode" aria-label="Light or dark mode">
+              <option value="auto">Automatic</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
         </div>
           </div>
         </details>
@@ -3977,9 +3982,19 @@
       blush: { darkMain: "#24151c", lightMain: "#f7eef1", accent: "#b23861" }
     };
     const defaultAppearance = {
-      theme: "light", main: "#eceff4", mainDark: "#0f131b", mainLight: "#eceff4",
+      theme: "light", mode: "auto", main: "#eceff4", mainDark: "#0f131b", mainLight: "#eceff4",
       accent: "#3a4fd6", preset: "home", design: 2
     };
+    // "auto" follows the device's light/dark setting; older saved settings without a mode keep the theme they picked.
+    const systemDark = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+    function themeModeOf(value) {
+      if (value?.mode === "auto" || value?.mode === "light" || value?.mode === "dark") return value.mode;
+      return value?.theme === "light" ? "light" : "dark";
+    }
+    function resolvedTheme(mode) {
+      if (mode === "auto") return systemDark?.matches ? "dark" : "light";
+      return mode === "light" ? "light" : "dark";
+    }
     // The 2026 redesign switches everyone to its look once; the theme picker and dark switch still work after that.
     const designVersionKey = "seven-channels.design.v2";
     const appearance = loadAppearance();
@@ -4022,7 +4037,7 @@
     const mainPicker = document.getElementById("main-color");
     const accentPicker = document.getElementById("accent-color");
     const presetPicker = document.getElementById("color-preset");
-    const themeSwitch = document.getElementById("theme-switch");
+    const themeModePicker = document.getElementById("theme-mode");
     const youtubeKeySettings = document.getElementById("youtube-key-settings");
     const youtubeKeyForm = youtubeKeySettings.querySelector("form");
     const youtubeKeyInput = document.getElementById("youtube-api-key");
@@ -4334,7 +4349,8 @@
         const parsed = JSON.parse(saved);
         const preset = Object.hasOwn(colorThemes, parsed?.preset) ? parsed.preset : "custom";
         const validColor = (value) => typeof value === "string" && /^#[\da-f]{6}$/i.test(value);
-        const theme = parsed?.theme === "light" ? "light" : "dark";
+        const mode = themeModeOf(parsed);
+        const theme = resolvedTheme(mode);
         const legacyMain = validColor(parsed?.main) ? parsed.main : defaultAppearance.main;
         const mainDark = validColor(parsed?.mainDark)
           ? parsed.mainDark
@@ -4344,6 +4360,7 @@
           : theme === "light" ? legacyMain : defaultAppearance.mainLight;
         return {
           theme,
+          mode,
           main: theme === "dark" ? mainDark : mainLight,
           mainDark,
           mainLight,
@@ -4361,6 +4378,8 @@
 
     function applyAppearance() {
       const root = document.documentElement;
+      appearance.mode = themeModeOf(appearance);
+      appearance.theme = resolvedTheme(appearance.mode);
       appearance.main = appearance.theme === "dark" ? appearance.mainDark : appearance.mainLight;
       root.dataset.theme = appearance.theme;
       root.style.setProperty("--user-main", appearance.main);
@@ -4390,7 +4409,7 @@
       mainPicker.value = appearance.main;
       accentPicker.value = appearance.accent;
       presetPicker.value = appearance.preset;
-      themeSwitch.setAttribute("aria-checked", String(appearance.theme === "dark"));
+      themeModePicker.value = appearance.mode;
       document.querySelector('meta[name="theme-color"]').content = appearance.main;
     }
 
@@ -4487,10 +4506,14 @@
       applyAppearance();
       saveAppearance();
     });
-    themeSwitch.addEventListener("click", () => {
-      appearance.theme = appearance.theme === "dark" ? "light" : "dark";
+    themeModePicker.addEventListener("change", () => {
+      appearance.mode = themeModePicker.value;
+      appearance.theme = resolvedTheme(appearance.mode);
       applyAppearance();
       saveAppearance();
+    });
+    systemDark?.addEventListener?.("change", () => {
+      if (appearance.mode === "auto") applyAppearance();
     });
 
     function localDateValue(date) {
@@ -7793,7 +7816,8 @@
     function loadAppearanceFromValue(value) {
       const preset = Object.hasOwn(colorThemes, value?.preset) ? value.preset : "custom";
       const validColor = (color) => typeof color === "string" && /^#[\da-f]{6}$/i.test(color);
-      const theme = value?.theme === "light" ? "light" : "dark";
+      const mode = themeModeOf(value);
+      const theme = resolvedTheme(mode);
       const legacyMain = validColor(value?.main) ? value.main : defaultAppearance.main;
       const mainDark = validColor(value?.mainDark)
         ? value.mainDark
@@ -7803,6 +7827,7 @@
         : theme === "light" ? legacyMain : defaultAppearance.mainLight;
       return {
         theme,
+        mode,
         main: theme === "dark" ? mainDark : mainLight,
         mainDark,
         mainLight,
