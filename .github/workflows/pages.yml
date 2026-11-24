@@ -92,6 +92,21 @@ jobs:
       - name: Refresh NBA logo and uniform history from Wikipedia (every 30 days)
         continue-on-error: true
         run: python scripts/build_nba_team_history.py
+      - name: Restore SportsLogos.Net images
+        uses: actions/cache/restore@v4
+        with:
+          path: data/sportslogos
+          key: sportslogos-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: sportslogos-
+      - name: Refresh NBA logo and uniform history from SportsLogos.Net (every 30 days; credited, non-commercial use)
+        continue-on-error: true
+        run: python scripts/build_sportslogos.py
+      - name: Cache SportsLogos.Net images
+        if: hashFiles('data/sportslogos/img/*') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: data/sportslogos
+          key: sportslogos-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Restore last NBA player database
         uses: actions/cache/restore@v4
         with:
