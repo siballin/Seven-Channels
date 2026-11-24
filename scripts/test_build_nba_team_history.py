@@ -19,12 +19,27 @@ class TeamHistoryTests(unittest.TestCase):
             {"h": "Logos and uniforms", "level": 2},
             {"p": "The Bucks' first logo was a deer wearing a sweater, used from 1968 to 1993."},
             {"img": "https://upload.wikimedia.org/wikipedia/en/thumb/a/ab/Bucks_1968.png/300px-Bucks_1968.png", "file": "https://en.wikipedia.org/wiki/File:Bucks_1968.png",
-             "caption": "Logo, 1968–1993", "w": 220, "h": 200},
+             "caption": "Logo, 1968–1993", "width": 220, "height": 200},
             {"h": "Uniforms", "level": 3},
             {"img": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Home.svg/300px-Home.svg.png", "file": "https://en.wikipedia.org/wiki/File:Home.svg",
-             "caption": "Home uniform (2015–present)", "w": 120, "h": 120},
-            {"img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Logo.png/300px-Logo.png", "file": "", "caption": "", "w": 180, "h": 85},
+             "caption": "Home uniform (2015–present)", "width": 120, "height": 120},
+            {"img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Logo.png/300px-Logo.png", "file": "", "caption": "", "width": 180, "height": 85},
         ])
+
+    def test_team_history_keeps_images(self):
+        original = (history.section_html, history.find_section)
+        def fake_section_html(title, index=None):
+            if title.startswith("Logos and uniforms of"):
+                raise LookupError("missing")
+            return HTML, "Milwaukee Bucks"
+        history.section_html, history.find_section = fake_section_html, lambda name: ("30", "Logos and uniforms")
+        try:
+            result = history.team_history("Milwaukee Bucks")
+        finally:
+            history.section_html, history.find_section = original
+        self.assertEqual(sum("img" in block for block in result["blocks"]), 3)
+        self.assertNotEqual(result["blocks"][0].get("h"), "Logos and uniforms")  # the section's own heading is dropped
+        self.assertTrue(result["url"].endswith("#Logos_and_uniforms"))
 
     def test_every_team_has_an_article(self):
         self.assertEqual(len(history.TEAMS), 30)

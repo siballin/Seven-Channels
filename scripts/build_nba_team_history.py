@@ -61,7 +61,7 @@ def clean(text):
 
 
 class SectionParser(HTMLParser):
-    """Wikipedia section HTML → ordered blocks: {"h": text, "level"}, {"p": text}, {"img": src, "caption", "file", "w", "h"}."""
+    """Wikipedia section HTML → ordered blocks: {"h": text, "level"}, {"p": text}, {"img": src, "caption", "file", "width", "height"}."""
 
     VOID = {"img", "br", "hr", "meta", "link", "input", "wbr", "source", "col", "area", "base", "track"}
     SKIP_TAGS = {"style", "script", "sup", "table"}  # footnote markers, navboxes and infobox-style tables
@@ -102,7 +102,7 @@ class SectionParser(HTMLParser):
             src = src.split("?")[0]
             if re.match(r"https://(upload|thumb)\.wikimedia\.org/", src) and width >= 40:
                 big = re.sub(r"/(\d+)px-", lambda m: f"/{max(int(m.group(1)), 300)}px-", src) if "/thumb/" in src else src
-                self.blocks.append({"img": big, "file": self.file_link, "caption": "", "w": width, "h": int(attrs.get("height") or 0)})
+                self.blocks.append({"img": big, "file": self.file_link, "caption": "", "width": width, "height": int(attrs.get("height") or 0)})
             self.file_link = ""
             return
         if self.caption is None and (tag == "figcaption" or "thumbcaption" in classes.split() or "gallerytext" in classes.split()):

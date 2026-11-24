@@ -76,7 +76,7 @@ function nbaTeamHistoryView(history) {
       image.alt = block.caption || "Logo or uniform";
       image.loading = "lazy";
       image.referrerPolicy = "no-referrer";
-      if (block.w && block.h) image.style.aspectRatio = `${block.w} / ${block.h}`;
+      if (block.width && block.height) image.style.aspectRatio = `${block.width} / ${block.height}`;
       image.addEventListener("error", () => figure.remove(), { once: true });
       const wrap = block.file ? element("a", "nba-history-image") : element("span", "nba-history-image");
       if (block.file) {
