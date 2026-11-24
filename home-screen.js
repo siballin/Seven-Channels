@@ -406,3 +406,73 @@ function createHomeChannels(rows) {
   section.append(title, grid);
   return section;
 }
+
+// ---------- Editing a grid of existing widgets (Sports) ----------
+// The grid's tiles carry data-widget (id) and data-name. Order and hidden tiles are saved under `key` on this device.
+
+function widgetLayout(key, known) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(key) || "{}");
+    const order = (Array.isArray(saved.order) ? saved.order : []).filter((id) => known.includes(id));
+    return { order: [...order, ...known.filter((id) => !order.includes(id))], hidden: (Array.isArray(saved.hidden) ? saved.hidden : []).filter((id) => known.includes(id)) };
+  } catch {
+    return { order: [...known], hidden: [] };
+  }
+}
+
+function applyWidgetGrid(grid, key, editing) {
+  const tiles = [...grid.children].filter((tile) => tile.dataset.widget);
+  const byId = new Map(tiles.map((tile) => [tile.dataset.widget, tile]));
+  const layout = widgetLayout(key, tiles.map((tile) => tile.dataset.widget));
+  const save = (next) => {
+    try { localStorage.setItem(key, JSON.stringify(next)); } catch { /* optional */ }
+    applyWidgetGrid(grid, key, true);
+  };
+  grid.querySelector(":scope > .home-tray")?.remove();
+  tiles.forEach((tile) => tile.querySelector(":scope > .home-edit-bar")?.remove());
+  for (const id of layout.order) {
+    const tile = byId.get(id);
+    grid.append(tile);
+    tile.classList.toggle("is-user-hidden", layout.hidden.includes(id));
+  }
+  grid.classList.toggle("is-editing", editing);
+  if (!editing) return;
+  const shown = layout.order.filter((id) => !layout.hidden.includes(id));
+  shown.forEach((id, index) => {
+    const tile = byId.get(id);
+    const name = tile.dataset.name || id;
+    const bar = element("div", "home-edit-bar");
+    const move = (delta, text, label) => {
+      const button = element("button", "secondary", text);
+      button.type = "button";
+      button.setAttribute("aria-label", `${label}: ${name}`);
+      button.disabled = index + delta < 0 || index + delta >= shown.length;
+      button.addEventListener("click", () => {
+        const order = [...layout.order];
+        const from = order.indexOf(id);
+        const to = order.indexOf(shown[index + delta]);
+        [order[from], order[to]] = [order[to], order[from]];
+        save({ ...layout, order });
+        grid.querySelector(`[data-widget="${id}"] .home-edit-bar button[aria-label^="${label}"]`)?.focus();
+      });
+      return button;
+    };
+    const hide = element("button", "secondary", "Hide");
+    hide.type = "button";
+    hide.setAttribute("aria-label", `Hide ${name}`);
+    hide.addEventListener("click", () => save({ ...layout, hidden: [...layout.hidden, id] }));
+    bar.append(element("span", "home-edit-name", name), move(-1, "←", "Move earlier"), move(1, "→", "Move later"), hide);
+    tile.append(bar);
+  });
+  if (layout.hidden.length) {
+    const tray = element("div", "home-tray");
+    tray.append(element("span", "home-widget-note", "Hidden:"));
+    for (const id of layout.hidden) {
+      const add = element("button", "secondary", `+ ${byId.get(id).dataset.name || id}`);
+      add.type = "button";
+      add.addEventListener("click", () => save({ ...layout, hidden: layout.hidden.filter((item) => item !== id) }));
+      tray.append(add);
+    }
+    grid.append(tray);
+  }
+}

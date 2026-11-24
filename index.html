@@ -5981,15 +5981,160 @@
       news.append(element("h3", "", "Sports news"), newsBody);
       leaders.append(element("h3", "", "Game leaders"), leadersBody);
       upcoming.append(element("h3", "", "Upcoming games"), upcomingBody);
-      left.append(teams, standings, injuries);
-      right.append(news, leaders, upcoming, createRedditWidget("sports"));
-      const playerDbLink = element("a", "idol-entry nba-db-entry");
-      playerDbLink.href = "#sports/players";
-      playerDbLink.append(element("strong", "", "NBA player database"), element("span", "", "Every player’s season-by-season stats, all-time leaders and side-by-side comparisons"));
-      main.append(playerDbLink, featured, scoreboard, planner);
-      const sideColumn = element("div", "sports-hub-side-column");
-      sideColumn.append(left, right);
-      hub.append(sideColumn, main, resources);
+      // Redesign: league tabs on top, a grid of widgets you can hide and reorder, then scores & game center and your lists.
+      hub.classList.add("sports-home");
+      const live = element("section", "sports-widget sports-live-tile");
+      live.append(featured);
+      const ratings = element("section", "sports-widget sports-ratings");
+      const ratingsBody = element("div");
+      ratings.append(element("h3", "", "Team ratings"), ratingsBody);
+      const playersTile = element("section", "sports-widget sports-players");
+      const playerForm = element("form", "sports-player-form");
+      const playerLabel = element("label", "", "Find any NBA player, past or present");
+      const playerInput = document.createElement("input");
+      playerInput.type = "search";
+      playerInput.placeholder = "e.g. Kareem Abdul-Jabbar";
+      playerInput.id = "sports-player-search";
+      playerLabel.htmlFor = playerInput.id;
+      const playerGo = element("button", "", "Search");
+      playerGo.type = "submit";
+      playerForm.append(playerLabel, playerInput, playerGo);
+      playerForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        try { sessionStorage.setItem("seven-channels.nba-db-query", playerInput.value.trim()); } catch { /* optional */ }
+        location.hash = "#sports/players";
+      });
+      const allPlayers = element("a", "home-widget-link", "Player database →");
+      allPlayers.href = "#sports/players";
+      playersTile.append(element("h3", "", "NBA player database"), playerForm, element("small", "", "Season-by-season stats, all-time leaders and comparisons"), allPlayers);
+      const picks = element("section", "sports-widget sports-picks");
+      const picksBody = element("div");
+      picks.append(element("h3", "", "Your picks"), picksBody);
+      const archive = element("section", "sports-widget sports-archive");
+      const archiveBody = element("div");
+      archive.append(element("h3", "", "From the archive"), archiveBody);
+      const widgetGrid = element("div", "sports-widgets");
+      widgetGrid.setAttribute("aria-label", "Sports widgets");
+      for (const [tile, id, name, size] of [[live, "live", "Live game", "wide"], [teams, "teams", "My teams"], [ratings, "ratings", "Team ratings"],
+        [standings, "standings", "Standings"], [leaders, "leaders", "Game leaders"], [upcoming, "upcoming", "Upcoming games"], [injuries, "injuries", "Injury report"],
+        [playersTile, "players", "NBA player search"], [picks, "picks", "Your picks"], [archive, "archive", "From the archive"], [news, "news", "Sports news", "wide"]]) {
+        tile.dataset.widget = id;
+        tile.dataset.name = name;
+        if (size) tile.classList.add(`is-${size}`);
+        widgetGrid.append(tile);
+      }
+      const sportsLayoutKey = "seven-channels.sports-widgets.v1";
+      let editingWidgets = false;
+      const top = element("div", "sports-top");
+      const leagueTabs = scoreboard.querySelector(".sports-score-tabs");
+      if (leagueTabs) top.append(leagueTabs);
+      const editWidgets = element("button", "secondary sports-edit", "Edit widgets");
+      editWidgets.type = "button";
+      editWidgets.setAttribute("aria-pressed", "false");
+      editWidgets.addEventListener("click", () => {
+        editingWidgets = !editingWidgets;
+        editWidgets.textContent = editingWidgets ? "Done" : "Edit widgets";
+        editWidgets.className = editingWidgets ? "sports-edit" : "secondary sports-edit";
+        editWidgets.setAttribute("aria-pressed", String(editingWidgets));
+        applyWidgetGrid(widgetGrid, sportsLayoutKey, editingWidgets);
+      });
+      top.append(editWidgets);
+      const scoresTile = element("section", "sports-scores-tile");
+      scoresTile.setAttribute("aria-labelledby", "sports-scores-title");
+      const scoresTitle = element("h2", "sports-section-title", "Scores & game center");
+      scoresTitle.id = "sports-scores-title";
+      scoresTile.append(scoresTitle, scoreboard);
+      hub.append(top, widgetGrid, scoresTile, planner, resources, createRedditWidget("sports"));
+      applyWidgetGrid(widgetGrid, sportsLayoutKey, false);
+
+      // Team ratings (NBA): offense, defense, net and pace for the first NBA team you follow, from ESPN season totals.
+      async function renderRatings() {
+        const team = activeSport === "nba" ? followedNbaTeams.find((item) => (item.sport || "nba") === "nba") : null;
+        ratings.hidden = !team;
+        if (!team) return;
+        ratingsBody.replaceChildren(element("p", "", "Loading…"));
+        try {
+          const [stats, standingsData] = await Promise.all([
+            fetchWidget(`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/${encodeURIComponent(team.id)}/statistics?seasontype=2`),
+            fetchWidget("https://site.api.espn.com/apis/v2/sports/basketball/nba/standings")
+          ]);
+          const values = new Map((stats.results?.stats?.categories || []).flatMap((category) => category.stats || []).map((stat) => [stat.name, Number(stat.value)]));
+          const games = values.get("gamesPlayed");
+          const pace = games > 0 ? (values.get("fieldGoalsAttempted") - values.get("offensiveRebounds") + values.get("turnovers") + 0.44 * values.get("freeThrowsAttempted")) / games : NaN;
+          const entry = (standingsData.children || []).flatMap((group) => group.standings?.entries || []).find((item) => String(item.team?.id) === team.id);
+          const allowed = Number(entry?.stats?.find((stat) => stat.name === "avgPointsAgainst")?.value);
+          if (!(pace > 0)) throw new Error("Team totals unavailable.");
+          const offense = (100 * values.get("points") / games) / pace;
+          const defense = Number.isFinite(allowed) ? (100 * allowed) / pace : NaN;
+          const grid = element("div", "sports-ratings-grid");
+          for (const [label, value, signed] of [["Offense", offense], ["Defense", defense], ["Net", offense - defense, true], ["Pace", pace]]) {
+            const cell = element("div", "");
+            cell.append(element("small", "", label), element("strong", "", Number.isFinite(value) ? `${signed && value > 0 ? "+" : ""}${value.toFixed(1)}` : "—"));
+            grid.append(cell);
+          }
+          const link = element("a", "home-widget-link", `${team.name} team page →`);
+          link.href = typeof nbaTeamSlugs !== "undefined" && nbaTeamSlugs.get(team.id) ? `#sports/nba/teams/${nbaTeamSlugs.get(team.id)}` : "#sports";
+          ratingsBody.replaceChildren(element("small", "", team.name), grid, link);
+        } catch {
+          ratingsBody.replaceChildren(element("p", "", "Ratings are unavailable right now."));
+        }
+      }
+
+      // Your open picks from the Betting channel.
+      function renderPicks() {
+        const open = entries.filter((entry) => entry.channel === "betting" && betResult(entry) === "open");
+        const link = element("a", "home-widget-link", "Betting channel →");
+        link.href = "#betting";
+        if (!open.length) {
+          picksBody.replaceChildren(element("p", "", "No open picks."), link);
+          return;
+        }
+        const list = element("ul", "home-list");
+        open.slice(0, 3).forEach((entry) => list.append(element("li", "", entry.title)));
+        picksBody.replaceChildren(element("strong", "sports-big", `${open.length} open`), list, link);
+      }
+
+      // From the archive: one logo or uniform from your NBA team's history each day (SportsLogos.Net, credited).
+      async function renderArchive() {
+        const team = followedNbaTeams.find((item) => (item.sport || "nba") === "nba");
+        const slug = team && typeof nbaTeamSlugs !== "undefined" ? nbaTeamSlugs.get(team.id) : "";
+        archive.hidden = !slug || typeof nbaSportsLogos !== "function";
+        if (archive.hidden) return;
+        const data = await nbaSportsLogos();
+        const history = data?.teams?.[slug];
+        const items = (history?.sections || []).flatMap((section) => section.items.map((item) => ({ ...item, section: section.name })));
+        if (!items.length) {
+          archive.hidden = true;
+          return;
+        }
+        const day = Math.floor(Date.now() / 86400000);
+        const item = items[day % items.length];
+        const figure = element("a", "sports-archive-item");
+        figure.href = item.view;
+        figure.target = "_blank";
+        figure.rel = "noopener noreferrer";
+        const image = element("img", "");
+        image.src = item.img || item.thumb;
+        image.alt = item.title;
+        image.loading = "lazy";
+        image.addEventListener("error", () => {
+          const fallback = new URL(item.img || "", "https://siballin.github.io/Seven-Channels/").href;
+          if (item.img && image.src !== fallback) image.src = fallback;
+          else image.remove();
+        });
+        const text = element("span", "");
+        text.append(element("strong", "", item.title.replace(/\s*\([^)]*\)\s*$/, "")), element("small", "", [item.section, [item.from, item.to !== item.from ? item.to : ""].filter(Boolean).join("–")].filter(Boolean).join(" · ")));
+        figure.append(image, text);
+        const credit = element("small", "sports-archive-credit");
+        const creditLink = element("a", "", "Image courtesy of SportsLogos.Net");
+        creditLink.href = "https://www.sportslogos.net";
+        creditLink.target = "_blank";
+        creditLink.rel = "noopener";
+        credit.append(creditLink);
+        const all = element("a", "home-widget-link", "Logos & uniforms →");
+        all.href = `#sports/nba/teams/${slug}`;
+        archiveBody.replaceChildren(figure, credit, all);
+      }
       let activeSport = "nba";
       const schedules = new Map();
       const selections = new Map();
@@ -6280,6 +6425,10 @@
       async function loadWidgets() {
         const requestId = ++widgetRequestId;
         const sport = activeSport;
+        playersTile.hidden = sport !== "nba";
+        renderRatings();
+        renderPicks();
+        renderArchive();
         const path = sportsLeague(sport).path;
         const standingsLoading = element("div", "sports-loading");
         standingsLoading.setAttribute("role", "status");
@@ -13269,7 +13418,8 @@
         dashboard.append(leftColumn, middle, right);
         view.replaceChildren(heading, description, withChannelNews("kpop", [dashboard]));
       } else if (channel.id === "sports" && scoreboard) {
-        view.replaceChildren(heading, description, withChannelNews("sports", [createSportsHub(scoreboard, planner, resources)]));
+        // Redesign: the headlines move below the scores.
+        view.replaceChildren(heading, description, createSportsHub(scoreboard, planner, resources), createChannelNews("sports"));
       } else {
         const content = [...(isBetting ? [betImporter, renderBetDashboard()] : []), ...(mediaLookupChannels.has(channel.id) ? [createMediaHub(channel.id, entries)] : []), ...(scoreboard ? [scoreboard] : []), planner];
         const withReddit = redditDefaults[channel.id] ? [withRedditSidebar(channel.id, content)] : content;

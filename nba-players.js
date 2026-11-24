@@ -125,6 +125,14 @@ function nbaDbTable(rows) {
 
 function nbaDbDirectory(container, index) {
   const state = nbaDbState;
+  // A search started from the Sports page's player search widget.
+  try {
+    const query = sessionStorage.getItem("seven-channels.nba-db-query");
+    if (query !== null) {
+      sessionStorage.removeItem("seven-channels.nba-db-query");
+      state.query = query;
+    }
+  } catch { /* optional */ }
   const page = element("section", "nba-db");
   page.setAttribute("aria-labelledby", "nba-db-title");
   const title = element("h2", "", "NBA player database");
