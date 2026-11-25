@@ -47,7 +47,16 @@ def sparql_links(wanted, fetcher=None, log=print):
     query = """SELECT ?espn ?nba ?image ?article WHERE { ?item wdt:P3685 ?espn .
       OPTIONAL { ?item wdt:P3647 ?nba . } OPTIONAL { ?item wdt:P18 ?image . }
       OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . } }"""
-    data = fetch_json(SPARQL, {"query": query, "format": "json"}, fetcher)
+    for attempt in range(4):
+        try:
+            data = fetch_json(SPARQL, {"query": query, "format": "json"}, fetcher, tries=1)
+            break
+        except Exception as error:
+            # The query service sometimes allows one request a minute; wait that out a few times.
+            if getattr(error, "code", None) != 429 or attempt == 3 or fetcher:
+                raise
+            log("  Wikidata query service is rate-limiting; waiting 70s")
+            time.sleep(70)
     links = {}
     for row in (data.get("results") or {}).get("bindings") or []:
         espn_id = (row.get("espn") or {}).get("value", "")
