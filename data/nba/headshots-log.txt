@@ -1,7 +1,5 @@
   retry in 3s after HTTP Error 429: Too Many Requests
   retry in 6s after HTTP Error 429: Too Many Requests
-  retry in 3s after HTTP Error 429: Too Many Requests
-  retry in 6s after HTTP Error 429: Too Many Requests
   retry in 12s after HTTP Error 429: Too Many Requests
 NBA headshot build failed, keeping the previous file: HTTP Error 429: Too Many Requests
 1118 players without an ESPN headshot
