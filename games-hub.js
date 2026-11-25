@@ -654,15 +654,19 @@ function gamesRelativeDate(iso) {
   return days <= 0 ? "Today" : days === 1 ? "Yesterday" : days < 7 ? `${days} days ago` : new Date(time).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-// Gaming news is in the news row at the top of the channel (channel-news.js); free games, trailers and Reddit stay on the right.
+// Gaming news is in the news row at the top of the channel (channel-news.js); new trailers sit on the left,
+// free games and Reddit on the right. Returns { left, right }.
 function gamesSidebar() {
   const side = element("aside", "games-sidebar");
-  side.setAttribute("aria-label", "Free games and trailers");
+  side.setAttribute("aria-label", "Free games and Reddit");
+  const left = element("aside", "games-sidebar games-sidebar-left");
+  left.setAttribute("aria-label", "New trailers");
   const free = element("section", "games-panel games-side-section");
   free.append(element("h3", "", "Free on Epic"));
   const trailers = element("section", "games-panel games-side-section");
   trailers.append(element("h3", "", "New trailers"));
-  side.append(free, trailers);
+  side.append(free);
+  left.append(trailers);
   if (typeof createRedditWidget === "function") side.append(createRedditWidget("games"));
   gamesFetchJson("data/games-sidebar.json").then((data) => {
     const stamp = (block) => {
@@ -717,7 +721,7 @@ function gamesSidebar() {
   }).catch(() => {
     for (const section of [free, trailers]) section.append(element("p", "games-empty", "Couldn’t load this section."));
   });
-  return side;
+  return { left, right: side };
 }
 
 // ---------- Release calendar ----------
@@ -1047,7 +1051,8 @@ function createGamesHub() {
   if (typeof gamesPlayPanel === "function") main.append(gamesPlayPanel(list));
   if (typeof gamesSteamPanel === "function") main.append(gamesSteamPanel());
   main.append(gamesForm(list), gamesLists(list));
-  layout.append(main, gamesSidebar());
+  const sidebars = gamesSidebar();
+  layout.append(sidebars.left, main, sidebars.right);
   root.append(layout);
   return root;
 }
