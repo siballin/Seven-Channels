@@ -196,6 +196,15 @@ def wikipedia_lead_images(titles, fetcher=None, log=print):
     return out
 
 
+def commons_page(name):
+    return f"https://commons.wikimedia.org/wiki/File:{quote(name.replace(' ', '_'))}"
+
+
+def commons_file_url(name):
+    """Commons' own redirect to a 330px thumbnail of the file (330 is one of Wikimedia's standard thumbnail sizes)."""
+    return f"https://commons.wikimedia.org/wiki/Special:FilePath/{quote(name.replace(' ', '_'))}?width=330"
+
+
 def commons_info(files, fetcher=None, log=print):
     """{file name: {"src", "page", "author", "license"}} for Commons files (a 260px-wide thumbnail)."""
     out = {}
@@ -203,7 +212,7 @@ def commons_info(files, fetcher=None, log=print):
     for start in range(0, len(names), 50):
         batch = names[start:start + 50]
         params = {"action": "query", "titles": "|".join(f"File:{name}" for name in batch), "prop": "imageinfo",
-                  "iiprop": "url|extmetadata|mime", "iiurlwidth": "260", "iiextmetadatafilter": "Artist|LicenseShortName", "format": "json"}
+                  "iiprop": "url|extmetadata|mime", "iiurlwidth": "330", "iiextmetadatafilter": "Artist|LicenseShortName", "format": "json"}
         pages = {}
         for _ in range(20):
             data = wm_fetch(COMMONS_API, params, fetcher, log)
@@ -224,7 +233,7 @@ def commons_info(files, fetcher=None, log=print):
                 continue
             out[name] = {
                 "src": src,
-                "page": info.get("descriptionurl") or f"https://commons.wikimedia.org/wiki/File:{quote(name.replace(' ', '_'))}",
+                "page": info.get("descriptionurl") or commons_page(name),
                 "author": plain((meta.get("Artist") or {}).get("value"))[:120],
                 "license": plain((meta.get("LicenseShortName") or {}).get("value"))[:60],
             }
@@ -276,7 +285,17 @@ def build(index, fetcher=None, opener=None, log=print, links_file=None):
                 found += 1
         log(f"  {label}: {found} photos from {len(choices)} players")
 
-    resolve({espn_id: [link["image"]] for espn_id, link in remaining.items() if link.get("image")}, "Wikidata images")
+    images = {espn_id: link["image"] for espn_id, link in remaining.items() if link.get("image")}
+    resolve({espn_id: [name] for espn_id, name in images.items()}, "Wikidata images")
+    # Wikidata only lists files that exist on Commons, so when the API is rate-limiting, link the photo directly;
+    # its Commons page (linked under the photo) names the photographer and license. Later runs fill those in.
+    direct = 0
+    for espn_id, name in images.items():
+        if espn_id not in players and re.search(r"\.(jpe?g|png|webp|gif|tiff?)$", name, re.I):
+            players[espn_id] = {"src": commons_file_url(name), "page": commons_page(name), "author": "", "license": "", "source": "Wikimedia Commons"}
+            direct += 1
+    if direct:
+        log(f"  Wikidata images linked directly (credits pending): {direct}")
     articles = {espn_id: link["article"] for espn_id, link in remaining.items() if espn_id not in players and link.get("article")}
     if articles:
         try:
@@ -323,6 +342,13 @@ def main():
     except Exception as error:
         print(f"NBA headshot build failed, keeping the previous file: {error}", file=sys.stderr)
         return
+    known = {item.get("page"): item for item in (previous or {}).get("players", {}).values() if item.get("page") and (item.get("author") or item.get("license"))}
+    for item in players.values():
+        old = known.get(item.get("page"))
+        if old and not (item.get("author") or item.get("license")):
+            item.update({"author": old.get("author", ""), "license": old.get("license", "")})
+            if old.get("src", "").startswith("https://upload.wikimedia.org/"):
+                item["src"] = old["src"]
     if previous and len(players) < len(previous.get("players") or {}) // 2:
         print(f"Only {len(players)} headshots (had {len(previous['players'])}); keeping the previous file.", file=sys.stderr)
         return

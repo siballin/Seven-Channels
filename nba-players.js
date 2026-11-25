@@ -300,7 +300,9 @@ async function nbaDbPlayerPage(container, id) {
     link.href = photo.page;
     link.target = "_blank";
     link.rel = "noopener noreferrer";
-    credit.append(`Photo: ${[photo.author, photo.license].filter(Boolean).join(" · ") || "unknown"} · `, link);
+    const byline = [photo.author, photo.license].filter(Boolean).join(" · ");
+    if (!byline) link.textContent = "Wikimedia Commons (photographer and license)";
+    credit.append(byline ? `Photo: ${byline} · ` : "Photo: ", link);
     figure.append(nbaDbHeadshot(id, false, player.name, "nba-db-photo-large"), credit);
     hero.append(figure);
   } else {

@@ -137,6 +137,15 @@ class HeadshotTests(unittest.TestCase):
         self.assertEqual(players["3"]["src"], "https://upload.wikimedia.org/Carl Three 1989.jpg")  # surname match, not the signature
         self.assertIn("B", calls)
 
+    def test_wikidata_photo_is_linked_directly_when_commons_is_rate_limited(self):
+        def limited(url, params):
+            if url == hs.SPARQL:
+                return {"results": {"bindings": [{"espn": {"value": "6"}, "image": {"value": "http://commons.wikimedia.org/wiki/Special:FilePath/Cory%20Alexander.jpg"}}]}}
+            raise OSError("429 Too Many Requests")
+        players = hs.build({"players": [{"id": "6", "h": False}]}, limited, opener, log=lambda *args: None)
+        self.assertEqual(players["6"]["src"], "https://commons.wikimedia.org/wiki/Special:FilePath/Cory_Alexander.jpg?width=330")
+        self.assertEqual(players["6"]["page"], "https://commons.wikimedia.org/wiki/File:Cory_Alexander.jpg")
+
     def test_tiny_or_non_image_response_is_not_a_headshot(self):
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "image/png", 500)))
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "text/html", 90000)))
