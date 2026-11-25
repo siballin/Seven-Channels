@@ -1,0 +1,25 @@
+name: Temp - build NBA headshots
+on:
+  push:
+    branches: [claude/dazzling-hamilton-4jcfnt]
+    paths: [.github/workflows/tmp-headshots.yml]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Probe NBA.com CDN for a missing id
+        run: curl -sI https://cdn.nba.com/headshots/nba/latest/260x190/1.png | head -12 || true
+      - name: Build headshots
+        run: python scripts/build_nba_headshots.py --force 2>&1 | tee data/nba/headshots-log.txt
+      - name: Commit result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/nba/headshots.json data/nba/headshots-log.txt
+          git commit -m "Temp: NBA headshots build output" && git push

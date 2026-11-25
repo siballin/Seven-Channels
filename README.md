@@ -111,6 +111,8 @@ Channel 03 covers **F1, NASCAR, IMSA and WEC** (`#motorsports`, `#motorsports/<f
 
 **Data.** `scripts/build_nba_players.py` finds players in ESPN's season stats lists (complete from 1996-97, partial through the 1980s) and fetches each one's bio and full career from ESPN, which can reach back before the lists (Michael Jordan from 1984-85). It writes `data/nba/index.json`, `records.json` and 64 profile shards. Retired players are fetched once and kept; players from the last two seasons refresh weekly in the publish workflow. Players who retired before the 1980s aren't in ESPN's lists; add their ESPN ids to `data/nba/extra-players.json` (`{"players": [{"id": "…", "name": "…"}]}`) to include them if ESPN has their stats. Tests: `python3 scripts/test_build_nba_players.py`.
 
+**Headshots for older players.** ESPN has no photo for many retired players. `scripts/build_nba_headshots.py` uses Wikidata to link each one's ESPN id to an NBA.com id and uses NBA.com's official headshot when there is one; otherwise it uses the player's Wikimedia Commons photo, credited with its author and license on the profile. It writes `data/nba/headshots.json` and refreshes monthly. Tests: `python3 scripts/test_build_nba_headshots.py`.
+
 ## Movies and Anime
 
 Movies and Anime have a hub above your list (`media-hub.js`) with three tabs:

@@ -116,6 +116,9 @@ jobs:
       - name: Refresh NBA player database from ESPN (weekly; retired players are kept)
         continue-on-error: true
         run: python scripts/build_nba_players.py
+      - name: Refresh NBA headshots for players ESPN has none for (NBA.com, then Wikimedia Commons; monthly)
+        continue-on-error: true
+        run: python scripts/build_nba_headshots.py
       - name: Cache NBA player database
         uses: actions/cache/save@v4
         with:

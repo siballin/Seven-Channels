@@ -11,7 +11,12 @@ function nbaDbFetch(path) {
   }
   return nbaDbCache.get(path);
 }
-const nbaDbIndex = () => nbaDbFetch("data/nba/index.json");
+// Photos for players ESPN has none for (mostly retired players): NBA.com headshots or Wikimedia Commons photos.
+let nbaDbAltHeadshots = {};
+const nbaDbIndex = () => Promise.all([
+  nbaDbFetch("data/nba/index.json"),
+  nbaDbFetch("data/nba/headshots.json").then((data) => { nbaDbAltHeadshots = data.players || {}; }, () => {})
+]).then(([index]) => index);
 const nbaDbRecords = () => nbaDbFetch("data/nba/records.json");
 async function nbaDbPlayer(id) {
   const index = await nbaDbIndex();
@@ -50,9 +55,10 @@ function nbaDbHeadshot(id, hasHeadshot, name, className = "nba-db-photo") {
   const initials = (name || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   const fallback = element("span", `${className} nba-db-initials`, initials);
   fallback.setAttribute("aria-hidden", "true");
-  if (!hasHeadshot || !/^\d+$/.test(String(id))) return fallback;
-  const image = element("img", className);
-  image.src = `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${id}.png&w=200&h=146`;
+  const alt = hasHeadshot ? null : nbaDbAltHeadshots[id];
+  if ((!hasHeadshot && !alt) || !/^\d+$/.test(String(id))) return fallback;
+  const image = element("img", alt?.source === "Wikimedia Commons" ? `${className} is-photo` : className);
+  image.src = alt ? alt.src : `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${id}.png&w=200&h=146`;
   image.alt = "";
   image.loading = "lazy";
   image.addEventListener("error", () => image.replaceWith(fallback), { once: true });
@@ -286,7 +292,20 @@ async function nbaDbPlayerPage(container, id) {
   page.append(nbaDbNav(""));
 
   const hero = element("div", "nba-db-hero");
-  hero.append(nbaDbHeadshot(id, Boolean(player.headshot), player.name, "nba-db-photo-large"));
+  const photo = nbaDbAltHeadshots[id];
+  if (!player.headshot && photo?.source === "Wikimedia Commons") {
+    const figure = element("figure", "nba-db-photo-figure");
+    const credit = element("figcaption", "nba-db-photo-credit");
+    const link = element("a", "", "Wikimedia Commons");
+    link.href = photo.page;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    credit.append(`Photo: ${[photo.author, photo.license].filter(Boolean).join(" · ") || "unknown"} · `, link);
+    figure.append(nbaDbHeadshot(id, false, player.name, "nba-db-photo-large"), credit);
+    hero.append(figure);
+  } else {
+    hero.append(nbaDbHeadshot(id, Boolean(player.headshot), player.name, "nba-db-photo-large"));
+  }
   const text = element("div");
   const name = element("h2", "", player.name);
   name.id = "nba-db-player-name";
