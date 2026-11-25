@@ -1,10 +1,12 @@
-  retry in 3s after HTTP Error 429: Aggressively rate-limiting to 1 req / min - this rule was created during active wdqs outage (797a132)
-  retry in 6s after HTTP Error 429: Aggressively rate-limiting to 1 req / min - this rule was created during active wdqs outage (797a132)
-  retry in 12s after HTTP Error 429: Aggressively rate-limiting to 1 req / min - this rule was created during active wdqs outage (797a132)
+  retry in 3s after HTTP Error 429: Too Many Requests
+  retry in 6s after HTTP Error 429: Too Many Requests
   retry in 3s after HTTP Error 429: Too Many Requests
   retry in 6s after HTTP Error 429: Too Many Requests
   retry in 12s after HTTP Error 429: Too Many Requests
 NBA headshot build failed, keeping the previous file: HTTP Error 429: Too Many Requests
 1118 players without an ESPN headshot
+  Wikidata query service is rate-limiting; waiting 70s
+  Wikidata query service is rate-limiting; waiting 70s
+  Wikidata query service is rate-limiting; waiting 70s
   Wikidata query service unavailable (HTTP Error 429: Aggressively rate-limiting to 1 req / min - this rule was created during active wdqs outage (797a132)); using the regular API
   Wikidata properties: ESPN P3685, NBA.com P3647, image P18
