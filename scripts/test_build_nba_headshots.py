@@ -78,7 +78,23 @@ class HeadshotTests(unittest.TestCase):
                 {"espn": {"value": "999"}, "nba": {"value": "1"}},
             ]}}
         links = hs.wikidata_links({"1035"}, sparql, log=lambda *args: None)
-        self.assertEqual(links, {"1035": {"nba": "893", "image": "Michael Jordan in 1987.jpg"}})
+        self.assertEqual(links, {"1035": {"nba": "893", "image": "Michael Jordan in 1987.jpg", "article": ""}})
+
+    def test_wikipedia_lead_image_fills_the_gap(self):
+        def fake(url, params):
+            if url == hs.SPARQL:
+                return {"results": {"bindings": [{"espn": {"value": "42"}, "article": {"value": "https://en.wikipedia.org/wiki/Old_Timer"}}]}}
+            if url == hs.WIKIPEDIA_API:
+                self.assertEqual(params["pilicense"], "free")
+                return {"query": {"pages": {"9": {"title": "Old Timer", "pageimage": "Old_Timer_1975.jpg"}}}}
+            if url == hs.COMMONS_API:
+                return {"query": {"pages": {"1": {"title": "File:Old Timer 1975.jpg", "imageinfo": [{"mime": "image/jpeg",
+                        "thumburl": "https://upload.wikimedia.org/t/260px-Old_Timer_1975.jpg", "descriptionurl": "https://commons.wikimedia.org/wiki/File:Old_Timer_1975.jpg",
+                        "extmetadata": {"LicenseShortName": {"value": "Public domain"}}}]}}}}
+            raise AssertionError(url)
+        players = hs.build({"players": [{"id": "42", "h": False}]}, fake, opener, log=lambda *args: None)
+        self.assertEqual(players["42"]["src"], "https://upload.wikimedia.org/t/260px-Old_Timer_1975.jpg")
+        self.assertEqual(players["42"]["license"], "Public domain")
 
     def test_tiny_or_non_image_response_is_not_a_headshot(self):
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "image/png", 500)))

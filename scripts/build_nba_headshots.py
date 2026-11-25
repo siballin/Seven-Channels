@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_nba_players import OUT, WIKIDATA_API, fetch_json  # noqa: E402
 
 SPARQL = "https://query.wikidata.org/sparql"
+WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 NBA_CDN = "https://cdn.nba.com/headshots/nba/latest/260x190/{}.png"
 USER_AGENT = "SevenChannels/1.0 (personal sports guide; static site builder)"
@@ -43,15 +44,19 @@ def claim_values(entity, prop):
 
 def sparql_links(wanted, fetcher=None, log=print):
     """One Wikidata Query Service request: ESPN id (P3685) -> NBA.com id (P3647) and image (P18)."""
-    query = """SELECT ?espn ?nba ?image WHERE { ?item wdt:P3685 ?espn .
-      OPTIONAL { ?item wdt:P3647 ?nba . } OPTIONAL { ?item wdt:P18 ?image . } }"""
+    query = """SELECT ?espn ?nba ?image ?article WHERE { ?item wdt:P3685 ?espn .
+      OPTIONAL { ?item wdt:P3647 ?nba . } OPTIONAL { ?item wdt:P18 ?image . }
+      OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . } }"""
     data = fetch_json(SPARQL, {"query": query, "format": "json"}, fetcher)
     links = {}
     for row in (data.get("results") or {}).get("bindings") or []:
         espn_id = (row.get("espn") or {}).get("value", "")
         if espn_id not in wanted:
             continue
-        link = links.setdefault(espn_id, {"nba": "", "image": ""})
+        link = links.setdefault(espn_id, {"nba": "", "image": "", "article": ""})
+        article = (row.get("article") or {}).get("value", "")
+        if not link["article"] and article.startswith("https://en.wikipedia.org/wiki/"):
+            link["article"] = unquote(article.rsplit("/wiki/", 1)[1]).replace("_", " ")
         nba = (row.get("nba") or {}).get("value", "")
         if not link["nba"] and re.fullmatch(r"\d+", nba):
             link["nba"] = nba
@@ -136,6 +141,26 @@ def plain(html):
     return re.sub(r"\s+", " ", text).strip()
 
 
+def wikipedia_lead_images(titles, fetcher=None):
+    """{article title: file name} for articles whose lead image is freely licensed (so it is on Commons)."""
+    out = {}
+    names = sorted(set(titles))
+    for start in range(0, len(names), 50):
+        data = fetch_json(WIKIPEDIA_API, {"action": "query", "titles": "|".join(names[start:start + 50]), "prop": "pageimages",
+                                          "piprop": "name", "pilicense": "free", "redirects": "1", "format": "json"}, fetcher)
+        query = data.get("query") or {}
+        back = {}
+        for item in (query.get("normalized") or []) + (query.get("redirects") or []):
+            back[item["to"]] = back.get(item["from"], item["from"])
+        for page in (query.get("pages") or {}).values():
+            if page.get("pageimage"):
+                title = page.get("title", "")
+                out[back.get(title, title)] = page["pageimage"].replace("_", " ")
+        if not fetcher:
+            time.sleep(0.5)
+    return out
+
+
 def commons_info(files, fetcher=None):
     """{file name: {"src", "page", "author", "license"}} for Commons files (a 260px-wide thumbnail)."""
     out = {}
@@ -178,6 +203,16 @@ def build(index, fetcher=None, opener=None, log=print):
             players[espn_id] = {"src": NBA_CDN.format(nba_id), "source": "NBA.com"}
     log(f"  NBA.com: {len(players)} headshots from {len(candidates)} NBA.com ids")
     rest = {espn_id: link["image"] for espn_id, link in links.items() if espn_id not in players and link["image"]}
+    articles = {espn_id: link.get("article", "") for espn_id, link in links.items() if espn_id not in players and espn_id not in rest and link.get("article")}
+    if articles:
+        try:
+            lead = wikipedia_lead_images(articles.values(), fetcher)
+        except Exception as error:
+            log(f"  Wikipedia lead images unavailable ({error})")
+            lead = {}
+        found_lead = {espn_id: lead[title] for espn_id, title in articles.items() if title in lead}
+        log(f"  Wikipedia: {len(found_lead)} free lead images for {len(articles)} more players")
+        rest.update(found_lead)
     info = commons_info(rest.values(), fetcher) if rest else {}
     commons = 0
     for espn_id, name in rest.items():

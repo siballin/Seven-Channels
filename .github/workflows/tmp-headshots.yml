@@ -14,9 +14,10 @@ jobs:
         with:
           python-version: "3.12"
       - name: Probe NBA.com CDN for a missing id
-        run: curl -sI https://cdn.nba.com/headshots/nba/latest/260x190/1.png | head -12 || true
+        run: |
+          for u in https://stats.nba.com/media/players/230x185/893.png https://stats.nba.com/media/players/230x185/77449.png https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/77449.png; do echo "== $u"; curl -sI -m 20 -A "Mozilla/5.0" "$u" | grep -iE "^HTTP|content-length|content-type|etag|edge-cache-tag" || true; done
       - name: Build headshots
-        run: python scripts/build_nba_headshots.py --force 2>&1 | tee data/nba/headshots-log.txt
+        run: rm -f data/nba/headshots.json && python scripts/build_nba_headshots.py --force 2>&1 | tee data/nba/headshots-log.txt
       - name: Commit result
         run: |
           git config user.name "github-actions[bot]"
