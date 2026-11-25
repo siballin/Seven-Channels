@@ -96,6 +96,18 @@ class HeadshotTests(unittest.TestCase):
         self.assertEqual(players["42"]["src"], "https://upload.wikimedia.org/t/260px-Old_Timer_1975.jpg")
         self.assertEqual(players["42"]["license"], "Public domain")
 
+    def test_saved_links_are_used_when_wikidata_fails(self):
+        import tempfile
+        def down(url, params):
+            if url in (hs.SPARQL, hs.WIKIDATA_API):
+                raise OSError("429 Too Many Requests")
+            return fetcher(url, params)
+        with tempfile.TemporaryDirectory() as folder:
+            links = Path(folder) / "links.json"
+            links.write_text('{"1035": {"nba": "893", "image": "", "article": ""}}')
+            players = hs.build({"players": [{"id": "1035", "h": False}]}, down, opener, log=lambda *args: None, links_file=links)
+        self.assertEqual(players["1035"]["source"], "NBA.com")
+
     def test_tiny_or_non_image_response_is_not_a_headshot(self):
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "image/png", 500)))
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "text/html", 90000)))

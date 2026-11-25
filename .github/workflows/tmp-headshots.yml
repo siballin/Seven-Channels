@@ -1,5 +1,6 @@
 name: Temp - build NBA headshots
 on:
+  workflow_dispatch:
   push:
     branches: [claude/dazzling-hamilton-4jcfnt]
     paths: [.github/workflows/tmp-headshots.yml, scripts/build_nba_headshots.py]
@@ -13,14 +14,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Probe NBA.com CDN for a missing id
-        run: |
-          for u in https://stats.nba.com/media/players/230x185/893.png https://stats.nba.com/media/players/230x185/77449.png https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/77449.png; do echo "== $u"; curl -sI -m 20 -A "Mozilla/5.0" "$u" | grep -iE "^HTTP|content-length|content-type|etag|edge-cache-tag" || true; done
       - name: Build headshots
         run: rm -f data/nba/headshots.json && python scripts/build_nba_headshots.py --force 2>&1 | tee data/nba/headshots-log.txt
       - name: Commit result
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add data/nba/headshots-log.txt; git add data/nba/headshots.json || true
+          for f in data/nba/headshots-log.txt data/nba/headshots.json data/nba/headshot-links.json; do [ -f "$f" ] && git add "$f"; done; true
           git commit -m "Temp: NBA headshots build output" && git push

@@ -198,10 +198,24 @@ def commons_info(files, fetcher=None):
     return out
 
 
-def build(index, fetcher=None, opener=None, log=print):
+def build(index, fetcher=None, opener=None, log=print, links_file=None):
     wanted = {row["id"]: row.get("n", "") for row in index.get("players") or [] if not row.get("h")}
     log(f"{len(wanted)} players without an ESPN headshot")
-    links = wikidata_links(set(wanted), fetcher, log)
+    # Wikidata links are saved so a Wikidata outage or rate limit doesn't stop the monthly refresh.
+    try:
+        saved = json.loads(links_file.read_text()) if links_file and links_file.exists() else {}
+    except (OSError, ValueError):
+        saved = {}
+    try:
+        links = wikidata_links(set(wanted), fetcher, log)
+    except Exception as error:
+        if not saved:
+            raise
+        log(f"  Wikidata unavailable ({error}); using the {len(saved)} saved links")
+        links = {key: value for key, value in saved.items() if key in wanted}
+    else:
+        if links_file and len(links) >= len(saved) // 2:
+            links_file.write_text(json.dumps(dict(sorted({**saved, **links}.items(), key=lambda pair: int(pair[0]))), separators=(",", ":")))
     candidates = [(espn_id, link["nba"]) for espn_id, link in links.items() if link["nba"]]
     fallback = fallback_etag(opener)
     with ThreadPoolExecutor(max_workers=1 if opener else 8) as pool:
@@ -252,7 +266,7 @@ def main():
         print(f"No NBA player index ({error}); skipping headshots.", file=sys.stderr)
         return
     try:
-        players = build(index)
+        players = build(index, links_file=OUT / "headshot-links.json")
     except Exception as error:
         print(f"NBA headshot build failed, keeping the previous file: {error}", file=sys.stderr)
         return
