@@ -146,6 +146,49 @@ class HeadshotTests(unittest.TestCase):
         self.assertEqual(players["6"]["src"], "https://commons.wikimedia.org/wiki/Special:FilePath/Cory_Alexander.jpg?width=330")
         self.assertEqual(players["6"]["page"], "https://commons.wikimedia.org/wiki/File:Cory_Alexander.jpg")
 
+    def test_daily_sweep_takes_a_batch_and_remembers_it(self):
+        links = {str(n): {"nba": "", "image": "", "article": f"Player {n}", "category": ""} for n in range(1, 6)}
+        asked = []
+        def fake(url, params):
+            if url == hs.WIKIPEDIA_API:
+                titles = params["titles"].split("|")
+                asked.extend(titles)
+                pages = {str(i): {"title": t, **({"pageimage": "P_2.jpg"} if t == "Player 2" else {})} for i, t in enumerate(titles)}
+                return {"query": {"pages": pages}}
+            if url == hs.COMMONS_API:
+                return {"query": {"pages": {"1": {"title": "File:P 2.jpg", "imageinfo": [{"mime": "image/jpeg", "thumburl": "https://upload.wikimedia.org/p2.jpg",
+                                                                                     "extmetadata": {"LicenseShortName": {"value": "CC BY 2.0"}}}]}}}}
+            raise AssertionError(url)
+        players, wanted = {}, set(links)
+        tried = {"1": "2026-11-20"}  # tried 5 days ago: not due yet
+        hs.sweep(players, wanted, links, tried, "2026-11-25", fake, log=lambda *args: None, batch=2)
+        self.assertEqual(sorted(asked), ["Player 2", "Player 3"])  # never-tried players first, two per run
+        self.assertEqual(players["2"]["src"], "https://upload.wikimedia.org/p2.jpg")
+        self.assertEqual(tried, {"1": "2026-11-20", "3": "2026-11-25"})  # found players leave the list
+        asked.clear()
+        hs.sweep(players, wanted, links, tried, "2026-11-26", fake, log=lambda *args: None, batch=2)
+        self.assertEqual(sorted(asked), ["Player 4", "Player 5"])
+        asked.clear()
+        hs.sweep(players, wanted, links, tried, "2026-11-28", fake, log=lambda *args: None, batch=2)
+        self.assertEqual(asked, ["Player 1"])  # due again after a week
+
+    def test_sweep_fills_pending_credits(self):
+        players = {"6": {"src": hs.commons_file_url("Cory Alexander.jpg"), "page": hs.commons_page("Cory Alexander.jpg"), "author": "", "license": "", "source": "Wikimedia Commons"}}
+        def fake(url, params):
+            self.assertEqual(params["titles"], "File:Cory Alexander.jpg")
+            return {"query": {"pages": {"1": {"title": "File:Cory Alexander.jpg", "imageinfo": [{"mime": "image/jpeg", "thumburl": "https://upload.wikimedia.org/cory.jpg",
+                    "extmetadata": {"Artist": {"value": "Someone"}, "LicenseShortName": {"value": "CC BY-SA 3.0"}}}]}}}}
+        hs.sweep(players, {"6"}, {}, {}, "2026-11-25", fake, log=lambda *args: None)
+        self.assertEqual(players["6"]["author"], "Someone")
+        self.assertEqual(players["6"]["src"], "https://upload.wikimedia.org/cory.jpg")
+
+    def test_thumb_host_is_accepted_and_tracking_query_dropped(self):
+        def fake(url, params):
+            return {"continue": {"iistart": "2020-05-02T02:32:02Z", "continue": "||"}, "query": {"pages": {"1": {"title": "File:Cory Alexander.jpg", "imageinfo": [{"mime": "image/jpeg",
+                    "thumburl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Cory_Alexander.jpg/330px-Cory_Alexander.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo"}]}}}}
+        info = hs.commons_info(["Cory Alexander.jpg"], fake, log=lambda *args: None)
+        self.assertEqual(info["Cory Alexander.jpg"]["src"], "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Cory_Alexander.jpg/330px-Cory_Alexander.jpg")
+
     def test_tiny_or_non_image_response_is_not_a_headshot(self):
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "image/png", 500)))
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "text/html", 90000)))
