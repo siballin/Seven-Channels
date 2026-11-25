@@ -1,0 +1,25 @@
+name: Temp - build NBA headshots
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/dazzling-hamilton-4jcfnt]
+    paths: [.github/workflows/tmp-headshots.yml]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build headshots
+        run: python -u scripts/build_nba_headshots.py --force 2>&1 | tee data/nba/headshots-log.txt
+      - name: Commit result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          for f in data/nba/headshots-log.txt data/nba/headshots.json data/nba/headshot-links.json; do [ -f "$f" ] && git add "$f"; done; true
+          git commit -m "Temp: NBA headshots build output" && git push

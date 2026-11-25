@@ -78,7 +78,7 @@ class HeadshotTests(unittest.TestCase):
                 {"espn": {"value": "999"}, "nba": {"value": "1"}},
             ]}}
         links = hs.wikidata_links({"1035"}, sparql, log=lambda *args: None)
-        self.assertEqual(links, {"1035": {"nba": "893", "image": "Michael Jordan in 1987.jpg", "article": ""}})
+        self.assertEqual(links, {"1035": {"nba": "893", "image": "Michael Jordan in 1987.jpg", "article": "", "category": ""}})
 
     def test_wikipedia_lead_image_fills_the_gap(self):
         def fake(url, params):
@@ -107,6 +107,35 @@ class HeadshotTests(unittest.TestCase):
             links.write_text('{"1035": {"nba": "893", "image": "", "article": ""}}')
             players = hs.build({"players": [{"id": "1035", "h": False}]}, down, opener, log=lambda *args: None, links_file=links)
         self.assertEqual(players["1035"]["source"], "NBA.com")
+
+    def test_commons_continuation_and_category_fallback(self):
+        calls = []
+        def fake(url, params):
+            if url == hs.SPARQL:
+                return {"results": {"bindings": [
+                    {"espn": {"value": "1"}, "image": {"value": "http://commons.wikimedia.org/wiki/Special:FilePath/A%20One.jpg"}},
+                    {"espn": {"value": "2"}, "image": {"value": "http://commons.wikimedia.org/wiki/Special:FilePath/B%20Two.jpg"}},
+                    {"espn": {"value": "3"}, "category": {"value": "Carl Three"}}]}}
+            if url == hs.COMMONS_API and params.get("list") == "categorymembers":
+                self.assertEqual(params["cmtitle"], "Category:Carl Three")
+                return {"query": {"categorymembers": [{"title": "File:Carl Three signature.png"}, {"title": "File:Team photo 1990.jpg"}, {"title": "File:Carl Three 1989.jpg"}]}}
+            if url == hs.COMMONS_API:
+                calls.append(params.get("iicontinue"))
+                def page(name):
+                    return {"title": f"File:{name}", "imageinfo": [{"mime": "image/jpeg", "thumburl": f"https://upload.wikimedia.org/{name}", "extmetadata": {}}]}
+                titles = params["titles"].split("|")
+                if "File:Carl Three 1989.jpg" in titles:
+                    return {"query": {"pages": {"9": page("Carl Three 1989.jpg")}}}
+                if not params.get("iicontinue"):  # first answer covers one file, the rest comes after "continue"
+                    return {"continue": {"iicontinue": "B", "continue": "||"}, "query": {"pages": {"1": page("A One.jpg"), "2": {"title": "File:B Two.jpg"}}}}
+                return {"query": {"pages": {"2": page("B Two.jpg")}}}
+            raise AssertionError((url, params))
+        index = {"players": [{"id": "1", "h": False}, {"id": "2", "h": False}, {"id": "3", "h": False}]}
+        players = hs.build(index, fake, opener, log=lambda *args: None)
+        self.assertEqual(sorted(players), ["1", "2", "3"])
+        self.assertEqual(players["2"]["src"], "https://upload.wikimedia.org/B Two.jpg")
+        self.assertEqual(players["3"]["src"], "https://upload.wikimedia.org/Carl Three 1989.jpg")  # surname match, not the signature
+        self.assertIn("B", calls)
 
     def test_tiny_or_non_image_response_is_not_a_headshot(self):
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "image/png", 500)))

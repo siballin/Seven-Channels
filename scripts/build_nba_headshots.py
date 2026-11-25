@@ -44,8 +44,8 @@ def claim_values(entity, prop):
 
 def sparql_links(wanted, fetcher=None, log=print):
     """One Wikidata Query Service request: ESPN id (P3685) -> NBA.com id (P3647) and image (P18)."""
-    query = """SELECT ?espn ?nba ?image ?article WHERE { ?item wdt:P3685 ?espn .
-      OPTIONAL { ?item wdt:P3647 ?nba . } OPTIONAL { ?item wdt:P18 ?image . }
+    query = """SELECT ?espn ?nba ?image ?article ?category WHERE { ?item wdt:P3685 ?espn .
+      OPTIONAL { ?item wdt:P3647 ?nba . } OPTIONAL { ?item wdt:P18 ?image . } OPTIONAL { ?item wdt:P373 ?category . }
       OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . } }"""
     for attempt in range(4):
         try:
@@ -62,7 +62,10 @@ def sparql_links(wanted, fetcher=None, log=print):
         espn_id = (row.get("espn") or {}).get("value", "")
         if espn_id not in wanted:
             continue
-        link = links.setdefault(espn_id, {"nba": "", "image": "", "article": ""})
+        link = links.setdefault(espn_id, {"nba": "", "image": "", "article": "", "category": ""})
+        category = (row.get("category") or {}).get("value", "")
+        if not link["category"] and category:
+            link["category"] = category
         article = (row.get("article") or {}).get("value", "")
         if not link["article"] and article.startswith("https://en.wikipedia.org/wiki/"):
             link["article"] = unquote(article.rsplit("/wiki/", 1)[1]).replace("_", " ")
@@ -150,13 +153,38 @@ def plain(html):
     return re.sub(r"\s+", " ", text).strip()
 
 
-def wikipedia_lead_images(titles, fetcher=None):
+def wm_fetch(url, params, fetcher=None, log=print):
+    """Wikipedia/Commons request, paced, waiting out rate limits (429) with growing pauses."""
+    if fetcher:
+        return fetch_json(url, params, fetcher)
+    for wait in (20, 40, 80, 160, None):
+        time.sleep(1)
+        try:
+            return fetch_json(url, params, tries=2)
+        except Exception as error:
+            if getattr(error, "code", None) != 429 or wait is None:
+                raise
+            log(f"  {url.split('/')[2]} is rate-limiting; waiting {wait}s")
+            time.sleep(wait)
+
+
+def commons_category_files(category, fetcher=None, log=print):
+    """Photo file names in a player's Commons category (P373), best guesses first."""
+    data = wm_fetch(COMMONS_API, {"action": "query", "list": "categorymembers", "cmtitle": f"Category:{category}", "cmtype": "file",
+                                  "cmlimit": "30", "format": "json"}, fetcher, log)
+    names = [item["title"].split(":", 1)[-1] for item in (data.get("query") or {}).get("categorymembers") or []]
+    photos = [name for name in names if re.search(r"\.(jpe?g|png|webp)$", name, re.I) and not re.search(r"signature|autograph|logo|card|grave|jersey|\bmap\b", name, re.I)]
+    surname = category.split("(")[0].split()[-1].lower() if category.split() else ""
+    return sorted(photos, key=lambda name: (surname not in name.lower(), len(name)))[:3]
+
+
+def wikipedia_lead_images(titles, fetcher=None, log=print):
     """{article title: file name} for articles whose lead image is freely licensed (so it is on Commons)."""
     out = {}
     names = sorted(set(titles))
     for start in range(0, len(names), 50):
-        data = fetch_json(WIKIPEDIA_API, {"action": "query", "titles": "|".join(names[start:start + 50]), "prop": "pageimages",
-                                          "piprop": "name", "pilicense": "free", "redirects": "1", "format": "json"}, fetcher)
+        data = wm_fetch(WIKIPEDIA_API, {"action": "query", "titles": "|".join(names[start:start + 50]), "prop": "pageimages",
+                                        "piprop": "name", "pilicense": "free", "pilimit": "50", "redirects": "1", "format": "json"}, fetcher, log)
         query = data.get("query") or {}
         back = {}
         for item in (query.get("normalized") or []) + (query.get("redirects") or []):
@@ -165,20 +193,27 @@ def wikipedia_lead_images(titles, fetcher=None):
             if page.get("pageimage"):
                 title = page.get("title", "")
                 out[back.get(title, title)] = page["pageimage"].replace("_", " ")
-        if not fetcher:
-            time.sleep(0.5)
     return out
 
 
-def commons_info(files, fetcher=None):
+def commons_info(files, fetcher=None, log=print):
     """{file name: {"src", "page", "author", "license"}} for Commons files (a 260px-wide thumbnail)."""
     out = {}
-    names = sorted(set(files))
+    names = sorted({name.replace("_", " ") for name in files})
     for start in range(0, len(names), 50):
         batch = names[start:start + 50]
-        data = fetch_json(COMMONS_API, {"action": "query", "titles": "|".join(f"File:{name}" for name in batch), "prop": "imageinfo",
-                                        "iiprop": "url|extmetadata|mime", "iiurlwidth": "260", "format": "json"}, fetcher)
-        for page in ((data.get("query") or {}).get("pages") or {}).values():
+        params = {"action": "query", "titles": "|".join(f"File:{name}" for name in batch), "prop": "imageinfo",
+                  "iiprop": "url|extmetadata|mime", "iiurlwidth": "260", "iiextmetadatafilter": "Artist|LicenseShortName", "format": "json"}
+        pages = {}
+        for _ in range(20):
+            data = wm_fetch(COMMONS_API, params, fetcher, log)
+            for key, page in ((data.get("query") or {}).get("pages") or {}).items():
+                if page.get("imageinfo") or key not in pages:
+                    pages[key] = page
+            if "continue" not in data:
+                break
+            params = {**params, **data["continue"]}
+        for page in pages.values():
             info = (page.get("imageinfo") or [None])[0]
             if not info or not str(info.get("mime", "")).startswith("image/"):
                 continue
@@ -193,8 +228,6 @@ def commons_info(files, fetcher=None):
                 "author": plain((meta.get("Artist") or {}).get("value"))[:120],
                 "license": plain((meta.get("LicenseShortName") or {}).get("value"))[:60],
             }
-        if not fetcher:
-            time.sleep(0.5)
     return out
 
 
@@ -225,25 +258,45 @@ def build(index, fetcher=None, opener=None, log=print, links_file=None):
         if exists.get(espn_id):
             players[espn_id] = {"src": NBA_CDN.format(nba_id), "source": "NBA.com"}
     log(f"  NBA.com: {len(players)} headshots from {len(candidates)} NBA.com ids")
-    rest = {espn_id: link["image"] for espn_id, link in links.items() if espn_id not in players and link["image"]}
-    articles = {espn_id: link.get("article", "") for espn_id, link in links.items() if espn_id not in players and espn_id not in rest and link.get("article")}
+    # Free photos, in order: the Wikidata image (P18), the English Wikipedia article's free lead image,
+    # then photos in the player's Commons category. Each step only looks at players still without one.
+    remaining = {espn_id: link for espn_id, link in links.items() if espn_id not in players}
+
+    def resolve(choices, label):
+        info = {}
+        try:
+            info = commons_info([name for names in choices.values() for name in names], fetcher, log) if choices else {}
+        except Exception as error:
+            log(f"  Wikimedia Commons unavailable for {label} ({error})")
+        found = 0
+        for espn_id, names in choices.items():
+            item = next((info[name.replace("_", " ")] for name in names if name.replace("_", " ") in info), None)
+            if item and espn_id not in players:
+                players[espn_id] = {**item, "source": "Wikimedia Commons"}
+                found += 1
+        log(f"  {label}: {found} photos from {len(choices)} players")
+
+    resolve({espn_id: [link["image"]] for espn_id, link in remaining.items() if link.get("image")}, "Wikidata images")
+    articles = {espn_id: link["article"] for espn_id, link in remaining.items() if espn_id not in players and link.get("article")}
     if articles:
         try:
-            lead = wikipedia_lead_images(articles.values(), fetcher)
+            lead = wikipedia_lead_images(articles.values(), fetcher, log)
         except Exception as error:
             log(f"  Wikipedia lead images unavailable ({error})")
             lead = {}
-        found_lead = {espn_id: lead[title] for espn_id, title in articles.items() if title in lead}
-        log(f"  Wikipedia: {len(found_lead)} free lead images for {len(articles)} more players")
-        rest.update(found_lead)
-    info = commons_info(rest.values(), fetcher) if rest else {}
-    commons = 0
-    for espn_id, name in rest.items():
-        item = info.get(name.replace("_", " "))
-        if item:
-            players[espn_id] = {**item, "source": "Wikimedia Commons"}
-            commons += 1
-    log(f"  Wikimedia Commons: {commons} photos; {len(wanted) - len(players)} players still without a photo")
+        resolve({espn_id: [lead[title]] for espn_id, title in articles.items() if title in lead}, "Wikipedia lead images")
+    categories = {espn_id: link["category"] for espn_id, link in remaining.items() if espn_id not in players and link.get("category")}
+    choices = {}
+    for espn_id, category in categories.items():
+        try:
+            files = commons_category_files(category, fetcher, log)
+        except Exception as error:
+            log(f"  Commons categories unavailable ({error})")
+            break
+        if files:
+            choices[espn_id] = files
+    resolve(choices, "Commons categories")
+    log(f"  {len(players)} photos in all; {len(wanted) - len(players)} players still without a photo")
     return players
 
 
