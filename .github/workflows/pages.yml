@@ -20,7 +20,7 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out site
@@ -116,6 +116,9 @@ jobs:
       - name: Refresh NBA player database from ESPN (weekly; retired players are kept)
         continue-on-error: true
         run: python scripts/build_nba_players.py
+      - name: Refresh NBA headshots for players ESPN has none for (NBA.com, then Wikimedia Commons; monthly)
+        continue-on-error: true
+        run: python scripts/build_nba_headshots.py
       - name: Cache NBA player database
         uses: actions/cache/save@v4
         with:
@@ -213,6 +216,15 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+      # GitHub sometimes can't see the just-uploaded files for a few seconds ("No artifacts named github-pages"), so wait and try once more.
       - name: Deploy site
         id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: Wait before retrying the deploy
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 30
+      - name: Deploy site (retry)
+        id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v4

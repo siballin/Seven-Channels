@@ -327,6 +327,10 @@
     .nba-db-teams { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
     .nba-db-hero { display: grid; grid-template-columns: minmax(150px, 260px) 1fr; gap: 20px; align-items: start; }
     .nba-db-photo-large { width: 100%; aspect-ratio: 1.37; object-fit: cover; border-radius: 14px; background: color-mix(in srgb, var(--ink) 6%, transparent); font-size: 2.4rem; }
+    .nba-db-photo-large.is-photo, .nba-db-thumb.is-photo { object-position: 50% 20%; }
+    .nba-db-photo-figure { margin: 0; display: grid; gap: 4px; }
+    .nba-db-photo-credit { font-size: .68rem; color: var(--muted); line-height: 1.3; }
+    .nba-db-photo-credit a { color: inherit; }
     .nba-db-hero h2 { font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.05; }
     .nba-db-subtitle { margin: 6px 0 10px; color: var(--muted); }
     .nba-db-facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; }
@@ -368,7 +372,7 @@
     @media (max-width: 900px) { .nba-db-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nba-db-controls .nba-db-search { grid-column: 1 / -1; } }
     @media (max-width: 560px) {
       .nba-db-hero { grid-template-columns: 1fr; }
-      .nba-db-photo-large { max-width: 260px; }
+      .nba-db-photo-large, .nba-db-photo-figure { max-width: 260px; }
       .nba-db-nav .nba-db-back { margin-left: 0; }
     }
     .soccer-tabs { display: flex; gap: 6px; margin: 4px 0 10px; flex-wrap: wrap; }
@@ -1987,9 +1991,13 @@
     .games-panel { min-width: 0; padding: 14px; border: 1px solid var(--glass-edge); border-radius: var(--glass-radius); background: var(--glass-sheen), var(--glass-base); box-shadow: var(--glass-inset), var(--glass-shadow); }
     .games-panel h3 { margin: 0 0 10px; font: 600 clamp(.9375rem, 1.4vw, 1.05rem)/1.35 var(--font-heading); }
     .games-panel h3:focus { outline: none; }
-    .games-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 310px); grid-template-areas: "main side"; gap: 16px; align-items: start; }
+    .games-layout { display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(250px, 310px); grid-template-areas: "left main side"; gap: 16px; align-items: start; }
     .games-main { grid-area: main; }
     .games-sidebar { grid-area: side; }
+    .games-sidebar-left { grid-area: left; }
+    @media (max-width: 1250px) {
+      .games-layout { grid-template-columns: minmax(230px, 290px) minmax(0, 1fr); grid-template-areas: "left main" "side main"; grid-template-rows: auto 1fr; }
+    }
     .games-main, .games-sidebar { display: grid; gap: 14px; min-width: 0; }
 
     .games-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
@@ -2070,7 +2078,7 @@
     @media (max-width: 1100px) { .games-lists { grid-template-columns: minmax(0, 1fr); } }
     @media (max-width: 900px) {
       .games-layout, .games-releases { grid-template-columns: minmax(0, 1fr); }
-      .games-layout { grid-template-areas: "main" "side"; }
+      .games-layout { grid-template-areas: "main" "left" "side"; grid-template-rows: none; }
     }
     @media (max-width: 520px) { .games-calendar-filters { grid-template-columns: minmax(0, 1fr); } }
     /* Election maps */
