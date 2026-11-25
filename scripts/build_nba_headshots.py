@@ -153,28 +153,17 @@ def plain(html):
     return re.sub(r"\s+", " ", text).strip()
 
 
-class OutOfTime(Exception):
-    pass
-
-
-DEADLINE = [None]  # time.monotonic() value after which Wikimedia requests stop (the daily sweep's budget)
-
-
 def wm_fetch(url, params, fetcher=None, log=print):
-    """Wikipedia/Commons request, paced, waiting out rate limits (429) with growing pauses, within the time budget."""
+    """Wikipedia/Commons request, paced, waiting out rate limits (429) with growing pauses."""
     if fetcher:
         return fetch_json(url, params, fetcher)
     for wait in (20, 40, 80, 160, None):
-        if DEADLINE[0] and time.monotonic() > DEADLINE[0]:
-            raise OutOfTime("time budget used up")
         time.sleep(1)
         try:
             return fetch_json(url, params, tries=2)
         except Exception as error:
             if getattr(error, "code", None) != 429 or wait is None:
                 raise
-            if DEADLINE[0] and time.monotonic() + wait > DEADLINE[0]:
-                raise OutOfTime("rate-limited and out of time") from error
             log(f"  {url.split('/')[2]} is rate-limiting; waiting {wait}s")
             time.sleep(wait)
 
@@ -253,9 +242,6 @@ def commons_info(files, fetcher=None, log=print):
 
 
 IMAGE_FILE = re.compile(r"\.(jpe?g|png|webp|gif|tiff?)$", re.I)
-SWEEP_BATCH = 60          # still-missing players tried per run with the slow sources
-SWEEP_MINUTES = 8         # time budget for those requests
-RETRY_DAYS = 7            # a player tried without luck waits this long before the next try
 
 
 def load_links(wanted, fetcher, log, links_file):
@@ -295,8 +281,7 @@ def resolve(players, choices, label, fetcher=None, log=print):
 
 def build(index, fetcher=None, opener=None, log=print, links_file=None, slow=True):
     """The full refresh: NBA.com headshots and Wikidata images for every player ESPN has no photo for.
-    With slow=True (tests, --force) it also tries Wikipedia lead images and Commons categories for everyone;
-    the daily sweep does those a batch at a time instead."""
+    With slow=True (tests, --force) it also tries Wikipedia lead images and Commons categories for everyone."""
     wanted = {row["id"]: row.get("n", "") for row in index.get("players") or [] if not row.get("h")}
     log(f"{len(wanted)} players without an ESPN headshot")
     links = load_links(wanted, fetcher, log, links_file)
@@ -314,7 +299,7 @@ def build(index, fetcher=None, opener=None, log=print, links_file=None, slow=Tru
     images = {espn_id: link["image"] for espn_id, link in links.items() if espn_id not in players and link.get("image")}
     resolve(players, {espn_id: [name] for espn_id, name in images.items()}, "Wikidata images", fetcher, log)
     # Wikidata only lists files that exist on Commons, so when the API is rate-limiting, link the photo directly;
-    # its Commons page (linked under the photo) names the photographer and license. The sweep fills those in.
+    # its Commons page (linked under the photo) names the photographer and license. Later refreshes fill those in.
     direct = 0
     for espn_id, name in images.items():
         if espn_id not in players and IMAGE_FILE.search(name):
@@ -355,49 +340,6 @@ def try_free_photos(players, ids, links, fetcher=None, log=print):
     return tried
 
 
-def fill_credits(players, limit, fetcher=None, log=print):
-    """Photographer and license for directly linked Commons photos (also swaps in the upload.wikimedia.org thumbnail)."""
-    pending = {espn_id: unquote(item["page"].split("/File:", 1)[1]).replace("_", " ") for espn_id, item in players.items()
-               if item.get("source") == "Wikimedia Commons" and not (item.get("author") or item.get("license")) and "/File:" in item.get("page", "")}
-    pending = dict(list(pending.items())[:limit])
-    if not pending:
-        return 0
-    try:
-        info = commons_info(pending.values(), fetcher, log)
-    except Exception as error:
-        log(f"  Credits unavailable ({error})")
-        return 0
-    filled = 0
-    for espn_id, name in pending.items():
-        item = info.get(name)
-        if item and (item["author"] or item["license"]):
-            players[espn_id].update(item)
-            filled += 1
-    log(f"  Credits filled for {filled} of {len(pending)} photos")
-    return filled
-
-
-def sweep(players, wanted, links, tried, today, fetcher=None, log=print, batch=SWEEP_BATCH):
-    """The daily step: try a batch of still-missing players (never-tried first, then the longest ago) with the
-    slow sources, and fill in pending credits. Progress is kept in `tried` ({ESPN id: date}) between runs."""
-    def due(espn_id):
-        last = tried.get(espn_id)
-        return not last or (datetime.fromisoformat(today) - datetime.fromisoformat(last)).days >= RETRY_DAYS
-    missing = sorted((espn_id for espn_id in wanted if espn_id not in players and espn_id in links and due(espn_id)),
-                     key=lambda espn_id: (tried.get(espn_id, ""), int(espn_id)))
-    todo = missing[:batch]
-    before = len(players)
-    log(f"Daily sweep: {len(todo)} of {len(missing)} due players")
-    for espn_id in try_free_photos(players, todo, links, fetcher, log):
-        tried[espn_id] = today
-    for espn_id in list(tried):
-        if espn_id in players or espn_id not in wanted:
-            del tried[espn_id]
-    fill_credits(players, batch, fetcher, log)
-    log(f"  Sweep found {len(players) - before} new photos")
-    return len(players) - before
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--force", action="store_true", help="full refresh now, trying every source for every player")
@@ -422,7 +364,7 @@ def main():
         full_age = None
     full_at = previous.get("fullAt") or previous.get("generatedAt")
     if args.force or full_age is None or full_age >= REFRESH_DAYS:
-        # Monthly: rebuild from NBA.com and Wikidata; keep photos earlier sweeps found for players the rebuild didn't cover.
+        # Monthly: rebuild from NBA.com and Wikidata; keep photos earlier refreshes found for players this one didn't cover.
         try:
             fresh = build(index, links_file=links_file, slow=args.force)
         except Exception as error:
@@ -436,22 +378,11 @@ def main():
                     item.update({key: old[key] for key in ("src", "author", "license") if old.get(key)})
             players = {**{key: value for key, value in players.items() if value.get("source") != "NBA.com"}, **fresh}
             full_at = now.isoformat(timespec="seconds")
-    try:
-        links = json.loads(links_file.read_text())
-    except (OSError, ValueError):
-        links = {}
-    tried = dict((previous.get("sweep") or {}).get("tried") or {})
-    if not args.force and links:
-        DEADLINE[0] = time.monotonic() + SWEEP_MINUTES * 60
-        try:
-            sweep(players, wanted, links, tried, now.date().isoformat())
-        except Exception as error:
-            print(f"Daily headshot sweep stopped: {error}", file=sys.stderr)
-        finally:
-            DEADLINE[0] = None
+    else:
+        print(f"NBA headshots were refreshed {full_age:.1f} days ago; skipping.")
+        return
     target.write_text(json.dumps({"generatedAt": now.isoformat(timespec="seconds"), "fullAt": full_at,
-                                  "players": dict(sorted(players.items(), key=lambda pair: int(pair[0]))),
-                                  "sweep": {"tried": dict(sorted(tried.items(), key=lambda pair: int(pair[0])))}}, separators=(",", ":")))
+                                  "players": dict(sorted(players.items(), key=lambda pair: int(pair[0])))}, separators=(",", ":")))
     print(f"Wrote {len(players)} headshots; {len(wanted) - len(players)} players still without a photo.")
 
 
