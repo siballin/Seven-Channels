@@ -1,0 +1,5 @@
+1118 players without an ESPN headshot
+  Wikidata query service: 1113 of 1118 wanted players linked
+  NBA.com: 1110 headshots from 1112 NBA.com ids
+  Wikimedia Commons: 0 photos; 8 players still without a photo
+Wrote 1110 headshots.
