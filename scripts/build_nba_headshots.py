@@ -103,16 +103,32 @@ def wikidata_links(wanted, fetcher=None, log=print):
     return links
 
 
-def nba_headshot_exists(nba_id, opener=None):
-    """True when NBA.com serves a real headshot (a PNG) for this player id."""
-    request = Request(NBA_CDN.format(nba_id), method="HEAD", headers={"User-Agent": USER_AGENT})
+def head(url, opener=None):
+    request = Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})
+    with (opener or urlopen)(request, timeout=20) as response:
+        return response.status, response.headers
+
+
+def fallback_etag(opener=None):
+    """NBA.com answers 200 for every id, serving a generic silhouette (fallback.png) when it has no photo."""
     try:
-        with (opener or urlopen)(request, timeout=20) as response:
-            kind = response.headers.get("Content-Type", "")
-            size = int(response.headers.get("Content-Length") or 0)
-            return response.status == 200 and kind.startswith("image/") and size > 2000
+        return head(NBA_CDN.format("fallback"), opener)[1].get("ETag", "") or ""
+    except Exception:
+        return ""
+
+
+def nba_headshot_exists(nba_id, opener=None, fallback=""):
+    """True when NBA.com serves a real headshot for this player id, not its silhouette."""
+    try:
+        status, headers = head(NBA_CDN.format(nba_id), opener)
     except Exception:
         return False
+    if "fallback.png" in (headers.get("Edge-Cache-Tag") or ""):
+        return False
+    if fallback and headers.get("ETag") == fallback:
+        return False
+    kind = headers.get("Content-Type") or ""
+    return status == 200 and kind.startswith("image/") and int(headers.get("Content-Length") or 0) > 2000
 
 
 def plain(html):
@@ -153,8 +169,9 @@ def build(index, fetcher=None, opener=None, log=print):
     log(f"{len(wanted)} players without an ESPN headshot")
     links = wikidata_links(set(wanted), fetcher, log)
     candidates = [(espn_id, link["nba"]) for espn_id, link in links.items() if link["nba"]]
+    fallback = fallback_etag(opener)
     with ThreadPoolExecutor(max_workers=1 if opener else 8) as pool:
-        exists = dict(zip([espn_id for espn_id, _ in candidates], pool.map(lambda pair: nba_headshot_exists(pair[1], opener), candidates)))
+        exists = dict(zip([espn_id for espn_id, _ in candidates], pool.map(lambda pair: nba_headshot_exists(pair[1], opener, fallback), candidates)))
     players = {}
     for espn_id, nba_id in candidates:
         if exists.get(espn_id):

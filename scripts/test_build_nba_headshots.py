@@ -41,8 +41,8 @@ def fetcher(url, params):
 
 
 class Response:
-    def __init__(self, status, kind, size):
-        self.status, self.headers = status, {"Content-Type": kind, "Content-Length": str(size)}
+    def __init__(self, status, kind, size, etag="real", tag=""):
+        self.status, self.headers = status, {"Content-Type": kind, "Content-Length": str(size), "ETag": etag, "Edge-Cache-Tag": tag}
     def __enter__(self):
         return self
     def __exit__(self, *args):
@@ -52,7 +52,9 @@ class Response:
 def opener(request, timeout=None):
     if request.full_url.endswith("/893.png"):
         return Response(200, "image/png", 90000)
-    raise OSError("403 Forbidden")
+    if request.full_url.endswith("/fallback.png"):
+        return Response(200, "image/png", 4937, etag="silhouette")
+    return Response(200, "image/png", 4937, etag="silhouette", tag="nba-headshots,x/252.png,x/fallback.png")
 
 
 class HeadshotTests(unittest.TestCase):
@@ -82,6 +84,9 @@ class HeadshotTests(unittest.TestCase):
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "image/png", 500)))
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "text/html", 90000)))
         self.assertTrue(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "image/png", 90000)))
+        # NBA.com's silhouette for ids it has no photo for, recognised by its cache tag or its ETag
+        self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "image/png", 9000, tag="a/fallback.png")))
+        self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "image/png", 9000, etag="sil"), "sil"))
 
 
 if __name__ == "__main__":
