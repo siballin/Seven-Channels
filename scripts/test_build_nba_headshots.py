@@ -67,6 +67,17 @@ class HeadshotTests(unittest.TestCase):
         self.assertNotIn("77", players)
         self.assertNotIn("1966", players)
 
+    def test_query_service_links(self):
+        def sparql(url, params):
+            self.assertEqual(url, hs.SPARQL)
+            return {"results": {"bindings": [
+                {"espn": {"value": "1035"}, "nba": {"value": "893"}, "image": {"value": "http://commons.wikimedia.org/wiki/Special:FilePath/Michael%20Jordan%20in%201987.jpg"}},
+                {"espn": {"value": "1035"}, "nba": {"value": "893"}, "image": {"value": "http://commons.wikimedia.org/wiki/Special:FilePath/Second.jpg"}},
+                {"espn": {"value": "999"}, "nba": {"value": "1"}},
+            ]}}
+        links = hs.wikidata_links({"1035"}, sparql, log=lambda *args: None)
+        self.assertEqual(links, {"1035": {"nba": "893", "image": "Michael Jordan in 1987.jpg"}})
+
     def test_tiny_or_non_image_response_is_not_a_headshot(self):
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "image/png", 500)))
         self.assertFalse(hs.nba_headshot_exists("1", lambda request, timeout=None: Response(200, "text/html", 90000)))

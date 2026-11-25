@@ -14,12 +14,13 @@ from pathlib import Path
 import re
 import sys
 import time
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_nba_players import OUT, WIKIDATA_API, fetch_json  # noqa: E402
 
+SPARQL = "https://query.wikidata.org/sparql"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 NBA_CDN = "https://cdn.nba.com/headshots/nba/latest/260x190/{}.png"
 USER_AGENT = "SevenChannels/1.0 (personal sports guide; static site builder)"
@@ -40,8 +41,36 @@ def claim_values(entity, prop):
     return out
 
 
+def sparql_links(wanted, fetcher=None, log=print):
+    """One Wikidata Query Service request: ESPN id (P3685) -> NBA.com id (P3647) and image (P18)."""
+    query = """SELECT ?espn ?nba ?image WHERE { ?item wdt:P3685 ?espn .
+      OPTIONAL { ?item wdt:P3647 ?nba . } OPTIONAL { ?item wdt:P18 ?image . } }"""
+    data = fetch_json(SPARQL, {"query": query, "format": "json"}, fetcher)
+    links = {}
+    for row in (data.get("results") or {}).get("bindings") or []:
+        espn_id = (row.get("espn") or {}).get("value", "")
+        if espn_id not in wanted:
+            continue
+        link = links.setdefault(espn_id, {"nba": "", "image": ""})
+        nba = (row.get("nba") or {}).get("value", "")
+        if not link["nba"] and re.fullmatch(r"\d+", nba):
+            link["nba"] = nba
+        image = (row.get("image") or {}).get("value", "")
+        if not link["image"] and "/Special:FilePath/" in image:
+            link["image"] = unquote(image.rsplit("/Special:FilePath/", 1)[1]).replace("_", " ")
+    log(f"  Wikidata query service: {len(links)} of {len(wanted)} wanted players linked")
+    return links
+
+
 def wikidata_links(wanted, fetcher=None, log=print):
-    """{ESPN id: {"nba": NBA.com id, "image": Commons file name}} for the wanted ESPN ids."""
+    """{ESPN id: {"nba": NBA.com id, "image": Commons file name}} for the wanted ESPN ids.
+    Tries the query service (one request), then the regular API (search + entity data), which rate-limits harder."""
+    try:
+        links = sparql_links(wanted, fetcher, log)
+        if links:
+            return links
+    except Exception as error:
+        log(f"  Wikidata query service unavailable ({error}); using the regular API")
     espn_prop = find_property(r"ESPN.*NBA.*player", "ESPN NBA player ID", fetcher)
     nba_prop = find_property(r"^NBA\.com player ID", "NBA.com player ID", fetcher)
     if not espn_prop:
@@ -57,7 +86,7 @@ def wikidata_links(wanted, fetcher=None, log=print):
             break
         offset = int(data["continue"].get("sroffset", offset + 500))
         if not fetcher:
-            time.sleep(0.5)
+            time.sleep(2)
     links = {}
     for start in range(0, len(titles), 50):
         data = fetch_json(WIKIDATA_API, {"action": "wbgetentities", "ids": "|".join(titles[start:start + 50]), "props": "claims",
